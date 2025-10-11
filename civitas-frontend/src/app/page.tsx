@@ -1,103 +1,99 @@
-import Image from "next/image";
+"use client";
+import React, { useState } from "react";
+import Table from "../components/Table/table";
+import SearchBar from "../components/Table/searchbar";
 
-export default function Home() {
+type User = {
+  id: number;
+  nome: string;
+  cpf: string;
+  matricula: string;
+  cidade: string;
+  estado: string;
+  tipo: "Administrador" | "Cidadão" | "Funcionário";
+};
+
+const HomePage = () => {
+ 
+  const usuarios: User[] = [
+    {
+      id: 1,
+      nome: "Ana Silva",
+      cpf: "123.456.789-00",
+      matricula: "ADM001",
+      cidade: "São Paulo",
+      estado: "SP",
+      tipo: "Administrador",
+    },
+    {
+      id: 2,
+      nome: "João Santos",
+      cpf: "987.654.321-11",
+      matricula: "CID002",
+      cidade: "Belo Horizonte",
+      estado: "MG",
+      tipo: "Cidadão",
+    },
+    {
+      id: 3,
+      nome: "Maria Oliveira",
+      cpf: "456.789.123-22",
+      matricula: "FUN003",
+      cidade: "Rio de Janeiro",
+      estado: "RJ",
+      tipo: "Funcionário",
+    },
+    {
+      id: 4,
+      nome: "Pedro Lima",
+      cpf: "555.666.777-88",
+      matricula: "FUN004",
+      cidade: "São Paulo",
+      estado: "SP",
+      tipo: "Funcionário",
+    },
+  ];
+
+  // ✅ Estado apenas para exibir resultados
+  const [filteredData, setFilteredData] = useState<User[]>(usuarios);
+
+  // ✅ Função de busca que SEMPRE filtra a partir do array original
+  const handleSearch = (filters: {
+    nome: string;
+    cpf: string;
+    cidade: string;
+    estado: string;
+    tipo: string;
+  }) => {
+    const { nome, cpf, cidade, estado, tipo } = filters;
+    
+    const filtered = usuarios.filter((u) => {
+      const nomeMatch = u.nome.toLowerCase().includes(nome.toLowerCase());
+      const cpfMatch = u.cpf.includes(cpf);
+      const cidadeMatch = u.cidade.toLowerCase().includes(cidade.toLowerCase());
+      const estadoMatch = u.estado.toLowerCase().includes(estado.toLowerCase());
+      const tipoMatch = tipo ? u.tipo === tipo : true;
+      return nomeMatch && cpfMatch && cidadeMatch && estadoMatch && tipoMatch;
+    });
+    
+    setFilteredData(filtered);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="p-6 bg-gray-100 min-h-screen">
+      {/* Título e breadcrumb */}
+      <div className="mb-6">
+        <h1 className="text-4xl font-bold text-[#004D4D]">Listagem de Cadastros</h1>
+        <p className="text-sm text-gray-500 mt-1">Home &lt; Cadastros &lt; Listagem</p>
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      {/* Barra de busca */}
+      <SearchBar onSearch={handleSearch} />
+
+      {/* Tabela de resultados */}
+      <Table data={filteredData} />
+    </main>
   );
-}
+};
+
+export default HomePage;
