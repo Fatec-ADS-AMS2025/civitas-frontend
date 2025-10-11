@@ -28,15 +28,20 @@ const IconPersonApron = () => <span className="material-symbols-outlined">person
 const IconHomeWork = () => <span className="material-symbols-outlined">home_work</span>;
 const IconAssignment = () => <span className="material-symbols-outlined">assignment</span>;
 const IconProfile = () => <span className="material-symbols-outlined">person</span>;
+const IconGroup = () => <span className="material-symbols-outlined">group</span>
+const IconBalance = () => <span className="material-symbols-outlined">account_balance</span>
+const IconFlowChart = () => <span className="material-symbols-outlined">flowchart</span>
+const IconBox = () => <span className="material-symbols-outlined">box</span>
+const IconSell = () => <span className="material-symbols-outlined">sell</span>
 
 const defaultItems: SidebarItem[] = [
     { key: "home", label: "Home", icon: <IconHome />, href: "/" },
-    { key: "secretaria", label: "Secretaria", icon: <IconPerson />, href: "/secretaria" },
-    { key: "instituicao", label: "Instituição", icon: <IconStylus />, href: "/instituicao" },
-    { key: "fornecedor", label: "Fornecedor", icon: <IconApartment />, href: "/fornecedor" },
-    { key: "orcamento", label: "Orçamento", icon: <IconCorporate />, href: "/orcamento" },
-    { key: "despesas", label: "Despesas", icon: <IconMoney />, href: "/despesas" },
-    { key: "usuarios", label: "Usuários", icon: <IconRequestQuote />, href: "/usuarios" },
+    { key: "secretaria", label: "Secretaria", icon: <IconBalance />, href: "/secretaria" },
+    { key: "instituicao", label: "Instituição", icon: <IconFlowChart />, href: "/instituicao" },
+    { key: "fornecedor", label: "Fornecedor", icon: <IconBox />, href: "/fornecedor" },
+    { key: "orcamento", label: "Orçamento", icon: <IconRequestQuote />, href: "/orcamento" },
+    { key: "despesas", label: "Despesas", icon: <IconSell />, href: "/despesas" },
+    { key: "usuarios", label: "Usuários", icon: <IconGroup />, href: "/usuarios" },
 ];
 
 export default function Sidebar({ items = defaultItems, activeKey }: SidebarProps) {
@@ -65,12 +70,13 @@ export default function Sidebar({ items = defaultItems, activeKey }: SidebarProp
                 tabIndex={0}
                 onFocus={() => setKeyboardExpanded(true)}
                 onBlur={() => setKeyboardExpanded(false)}
-                className="group hidden sm:flex flex-col justify-between items-stretch bg-[#004C57] text-teal-100 rounded-2xl overflow-hidden select-none transition-all duration-200 ease-out w-14 hover:w-64 focus-within:w-64 h-screen fixed left-4 top-4 bottom-4"
+                className="group hidden sm:flex flex-col justify-between items-stretch bg-[#004C57] text-teal-100 rounded-2xl overflow-hidden select-none transition-all 
+                duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-screen fixed left-4 top-4 bottom-4"
                 style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
             >
                 <div className="pt-6 pb-4 px-3 flex flex-col gap-6">
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-md bg-transparent overflow-hidden">
+                        <div className="flex items-center justify-center w-12 h-10 rounded-md bg-transparent overflow-hidden flex-shrink-0">
                             <img
                                 src="/logo.png"
                                 alt="Logo Civitas"
@@ -89,7 +95,8 @@ export default function Sidebar({ items = defaultItems, activeKey }: SidebarProp
                                 <button
                                     key={it.key}
                                     onClick={() => handleNavigate(it)}
-                                    className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left hover:bg-[#0f6b6b] focus:bg-[#0f6b6b] transition-colors duration-150 outline-none ${isActive ? "bg-[#0f6b6b]" : ""
+                                    className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left hover:bg-[#0f6b6b] focus:bg-[#0f6b6b] transition-colors 
+                                        duration-150 outline-none ${isActive ? "bg-[#0f6b6b]" : ""
                                         }`}
                                 >
                                     <div className="text-teal-100 flex-none">{it.icon}</div>
@@ -125,12 +132,12 @@ export default function Sidebar({ items = defaultItems, activeKey }: SidebarProp
                         onClick={() => handleNavigate(it)}
                         className="flex flex-col items-center gap-1 text-xs w-full"
                     >
-                        <div className="w-6 h-6">{it.icon}</div>
+                        <div className="w-6 h-6 flex items-center justify-center">{it.icon}</div>
                         <div className="truncate text-[11px]">{it.label}</div>
                     </button>
                 ))}
                 <button className="flex flex-col items-center gap-1 text-xs w-full" onClick={() => router.push("/perfil")} aria-label="Perfil">
-                    <div className="w-6 h-6">
+                    <div className="w-6 h-6 flex items-center justify-center">
                         <IconProfile />
                     </div>
                     <div className="truncate text-[11px]">Perfil</div>
