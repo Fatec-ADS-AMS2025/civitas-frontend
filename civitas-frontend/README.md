@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Padronização: 
+Aqui será apresentado algumas das padronizações que devem ser seguidas.
 
-## Getting Started
+---
 
-First, run the development server:
+## 🧭 Guia de Padronização de Nomes - Next.js
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Este documento define as regras de **nomenclatura e organização de arquivos** para manter o código limpo, previsível e fácil de manter em projetos **Next.js**.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 📁 1. Pastas e Arquivos
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Todos os nomes de **pastas e arquivos** devem ser escritos em **minúsculas**, utilizando **hífens (`-`)** para separar palavras.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### ✅ Exemplo Correto:
 
-## Learn More
+/app
+/user-profile
+page.tsx
+/dashboard
+/vehicle-list
+page.tsx
 
-To learn more about Next.js, take a look at the following resources:
+### ❌ Exemplo Incorreto:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+/UserProfile/page.tsx
+/User_Profile/page.tsx
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+> **Motivo:** manter compatibilidade entre sistemas operacionais e seguir o padrão usado pelo próprio Next.js.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚛️ 2. Componentes React
+
+Os **componentes React** devem seguir o padrão **PascalCase**, ou seja, cada palavra começa com letra maiúscula e não há separadores.
+
+### ✅ Exemplo:
+```tsx
+export function UserProfileCard() {
+  return <div>Perfil</div>;
+}
