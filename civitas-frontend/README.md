@@ -1,41 +1,49 @@
-# Padronização: 
-Aqui será apresentado algumas das padronizações que devem ser seguidas.
+# 📚 Documentação do Checkbox
 
----
+## Uso Básico
 
-## 🧭 Guia de Padronização de Nomes - Next.js
-
-Este documento define as regras de **nomenclatura e organização de arquivos** para manter o código limpo, previsível e fácil de manter em projetos **Next.js**.
-
-### 📁 1. Pastas e Arquivos
-
-Todos os nomes de **pastas e arquivos** devem ser escritos em **minúsculas**, utilizando **hífens (`-`)** para separar palavras.
-
-#### ✅ Exemplo Correto:
-
-/app
-/user-profile
-page.tsx
-/dashboard
-/vehicle-list
-page.tsx
-
-### ❌ Exemplo Incorreto:
-
-/UserProfile/page.tsx
-/User_Profile/page.tsx
-
-
-> **Motivo:** manter compatibilidade entre sistemas operacionais e seguir o padrão usado pelo próprio Next.js.
-
----
-
-## ⚛️ 2. Componentes React
-
-Os **componentes React** devem seguir o padrão **PascalCase**, ou seja, cada palavra começa com letra maiúscula e não há separadores.
-
-### ✅ Exemplo:
 ```tsx
-export function UserProfileCard() {
-  return <div>Perfil</div>;
-}
+import { Checkbox } from '@/components/checkbox';
+
+// Checkbox simples
+<Checkbox label="Lembrar-me" />
+
+// Checkbox controlado
+<Checkbox 
+  label="Aceitar termos"
+  checked={accepted}
+  onChange={(e) => setAccepted(e.target.checked)}
+/>
+
+// Estado intermediário
+<Checkbox 
+  label="Selecionar Todos"
+  indeterminate={someChecked}
+  onChange={handleSelectAll}
+/>
+```
+
+## Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `label` | `string` | - | Texto do label |
+| `checked` | `boolean` | - | Estado controlado |
+| `indeterminate` | `boolean` | `false` | Estado intermediário |
+| `disabled` | `boolean` | `false` | Desabilita o checkbox |
+| `onChange` | `(e) => void` | - | Callback de mudança |
+
+## Grupo de Checkboxes
+
+```tsx
+import { CheckboxGroup } from '@/components/checkbox';
+
+<CheckboxGroup
+  options={[
+    { value: 'opt1', label: 'Opção 1' },
+    { value: 'opt2', label: 'Opção 2', disabled: true },
+  ]}
+  value={selected}
+  onChange={setSelected}
+/>
+```

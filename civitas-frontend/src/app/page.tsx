@@ -1,103 +1,189 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { Checkbox, CheckboxGroup } from '@/components/checkbox';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [checked, setChecked] = useState(false);
+  const [indeterminate, setIndeterminate] = useState(true);
+  const [groupSelected, setGroupSelected] = useState<string[]>(['option1']);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Simular estado intermediário para o exemplo "Selecionar Tudo"
+  const [subItems, setSubItems] = useState({
+    item1: false,
+    item2: false,
+    item3: false,
+  });
+
+  const allChecked = Object.values(subItems).every(Boolean);
+  const someChecked = Object.values(subItems).some(Boolean) && !allChecked;
+
+  const handleParentChange = (isChecked: boolean) => {
+    setSubItems({
+      item1: isChecked,
+      item2: isChecked,
+      item3: isChecked,
+    });
+  };
+
+  const handleSubItemChange = (key: keyof typeof subItems, value: boolean) => {
+    setSubItems((prev) => ({ ...prev, [key]: value }));
+  };
+
+  return (
+    <main className="min-h-screen p-8 bg-gray-100">
+      <div className="max-w-4xl mx-auto space-y-12">
+        {/* Bloco de teste visual rápido */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h3 className="text-xl font-semibold mb-4">Teste Visual Rápido</h3>
+          <div className="flex gap-8">
+            <div>
+              <p className="text-sm mb-2">Desmarcado:</p>
+              <Checkbox label="Desmarcado" checked={false} onChange={() => {}} />
+            </div>
+            <div>
+              <p className="text-sm mb-2">Marcado:</p>
+              <Checkbox label="Marcado" checked={true} onChange={() => {}} />
+            </div>
+            <div>
+              <p className="text-sm mb-2">Intermediário:</p>
+              <Checkbox label="Intermediário" indeterminate={true} />
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* Exemplos gerais */}
+        <section>
+          <h2 className="text-3xl font-bold mb-6 text-gray-800">
+            Exemplos de Checkbox
+          </h2>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+            {/* Exemplo básico */}
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Checkbox Básico
+              </h3>
+              <Checkbox label="Lembrar-me" />
+            </div>
+
+            {/* Checkbox controlado */}
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Checkbox Controlado
+              </h3>
+              <Checkbox
+                label="Lembrar-me"
+                checked={checked}
+                onChange={(e) => setChecked(e.target.checked)}
+              />
+              <p className="mt-2 text-sm text-gray-600">
+                Estado atual: {checked ? 'Marcado' : 'Desmarcado'}
+              </p>
+            </div>
+
+            {/* Estado Intermediário manual */}
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Estado Intermediário (Indeterminate)
+              </h3>
+              <Checkbox
+                label="Estado Intermediário Manual"
+                indeterminate={indeterminate}
+                onChange={() => setIndeterminate(!indeterminate)}
+              />
+              <button
+                onClick={() => setIndeterminate(!indeterminate)}
+                className="mt-2 px-4 py-2 bg-teal-700 text-white rounded hover:bg-teal-800 text-sm"
+              >
+                Alternar Estado
+              </button>
+            </div>
+
+            {/* Exemplo prático: Selecionar Tudo */}
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Exemplo Prático: Selecionar Tudo
+              </h3>
+              <div className="space-y-3">
+                <Checkbox
+                  label="Selecionar Todos"
+                  checked={allChecked}
+                  indeterminate={someChecked}
+                  onChange={(e) => handleParentChange(e.target.checked)}
+                />
+                <div className="ml-8 space-y-2">
+                  <Checkbox
+                    label="Item 1"
+                    checked={subItems.item1}
+                    onChange={(e) => handleSubItemChange('item1', e.target.checked)}
+                  />
+                  <Checkbox
+                    label="Item 2"
+                    checked={subItems.item2}
+                    onChange={(e) => handleSubItemChange('item2', e.target.checked)}
+                  />
+                  <Checkbox
+                    label="Item 3"
+                    checked={subItems.item3}
+                    onChange={(e) => handleSubItemChange('item3', e.target.checked)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Checkboxes desabilitados */}
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Checkbox Desabilitado
+              </h3>
+              <div className="space-y-3">
+                <Checkbox label="Desabilitado (desmarcado)" disabled />
+                <Checkbox
+                  label="Desabilitado (marcado)"
+                  disabled
+                  defaultChecked
+                />
+                <Checkbox
+                  label="Desabilitado (intermediário)"
+                  disabled
+                  indeterminate
+                />
+              </div>
+            </div>
+
+            {/* Checkbox sem label */}
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Checkbox sem Label
+              </h3>
+              <Checkbox />
+            </div>
+          </div>
+        </section>
+
+        {/* Grupo de checkboxes */}
+        <section>
+          <h2 className="text-3xl font-bold mb-6 text-gray-800">
+            Grupo de Checkboxes
+          </h2>
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <CheckboxGroup
+              options={[
+                { value: 'option1', label: 'Opção 1' },
+                { value: 'option2', label: 'Opção 2' },
+                { value: 'option3', label: 'Opção 3' },
+                { value: 'option4', label: 'Opção 4 (Desabilitada)', disabled: true },
+              ]}
+              value={groupSelected}
+              onChange={setGroupSelected}
+            />
+            <p className="mt-4 text-sm text-gray-600">
+              Selecionados: {groupSelected.join(', ') || 'Nenhum'}
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }

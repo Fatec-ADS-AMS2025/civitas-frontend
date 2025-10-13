@@ -1,9 +1,10 @@
-import React, { InputHTMLAttributes } from 'react';
+import React, { InputHTMLAttributes, useEffect, useRef, useId } from 'react';
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
   labelClassName?: string;
   checkboxClassName?: string;
+  indeterminate?: boolean;
 }
 
 export function Checkbox({
@@ -15,27 +16,38 @@ export function Checkbox({
   checked,
   defaultChecked,
   className = '',
+  indeterminate = false,
   ...props
 }: CheckboxProps) {
-  const checkboxId = id || `checkbox-${Math.random().toString(36).substring(2, 9)}`;
+  const checkboxId = id || useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Gerenciar estado intermediário
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.indeterminate = indeterminate;
+    }
+  }, [indeterminate]);
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <div className="relative inline-flex items-center">
         <input
+          ref={inputRef}
           type="checkbox"
           id={checkboxId}
           disabled={disabled}
           checked={checked}
           defaultChecked={defaultChecked}
           className="peer sr-only"
+          aria-checked={indeterminate ? 'mixed' : checked}
           {...props}
         />
         <label
           htmlFor={checkboxId}
           className={`
             flex items-center justify-center
-            w-10 h-10 
+            w-8 h-8 sm:w-10 sm:h-10
             rounded-lg
             border-2 border-gray-800
             bg-gray-200
@@ -45,22 +57,42 @@ export function Checkbox({
             peer-checked:bg-teal-700 peer-checked:border-teal-700
             peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
             peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-teal-700
+            ${indeterminate ? 'bg-teal-700 border-teal-700' : ''}
             ${checkboxClassName}
           `}
           aria-label={label || 'Checkbox'}
         >
-          <svg
-            className="w-6 h-6 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+
+          {/* Ícone de Check (quando marcado e NÃO intermediário) */}
+          {!indeterminate && (
+            <svg
+              className="w-6 h-6 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 12.5 9.2 16.2 18.5 7.5" />
+            </svg>
+          )}
+
+          {/* Ícone de Traço (estado intermediário) */}
+          {indeterminate && (
+            <svg
+              className="w-6 h-6 sm:w-7 sm:h-7 text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="4"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <line x1="6" y1="12" x2="18" y2="12" />
+            </svg>
+          )}
         </label>
       </div>
       
@@ -68,7 +100,7 @@ export function Checkbox({
         <label
           htmlFor={checkboxId}
           className={`
-            text-2xl font-normal text-gray-800
+            text-lg sm:text-2xl font-normal text-gray-800
             cursor-pointer
             select-none
             ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
@@ -81,8 +113,6 @@ export function Checkbox({
     </div>
   );
 }
-
-// Variações do componente
 
 interface CheckboxGroupProps {
   options: { value: string; label: string; disabled?: boolean }[];
