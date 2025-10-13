@@ -34,5 +34,7 @@ body {
   justify-content: center;
   vertical-align: middle;
   color: inherit;
+  text-underline-offset: 4;
+  text-underline-position: below;
 }
 
