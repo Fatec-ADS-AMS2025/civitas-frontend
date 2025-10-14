@@ -167,10 +167,11 @@ export default function Sidebar({
                     {it.icon}
                   </div>
 
-
                   <div
                     className={`flex-1 text-base truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200 
-                        ${isActive ? "text-white opacity-100" : "font-semibold"
+                        ${isActive 
+                          ? "text-white opacity-100" 
+                          : "font-semibold"
                       }`}>
                     {it.label}
                   </div>
