@@ -105,17 +105,17 @@ export default function Sidebar({
   const router = useRouter();
 
   function handleNavigate(item: SidebarItem) {
-    // se item.onClick existir, execute (é client-side)
+    //se item.onClick existir, execute
     if (item.onClick) {
       item.onClick();
       return;
     }
-    // se houver href, use router para navegar
+    //se houver href, use router para navegar
     if (item.href) {
       router.push(item.href);
       return;
     }
-    // caso contrário, você pode mapear pela key
+    //caso contrário, mapeia pela key
     router.push(`/${item.key}`);
   }
 
@@ -127,9 +127,10 @@ export default function Sidebar({
         onFocus={() => setKeyboardExpanded(true)}
         onBlur={() => setKeyboardExpanded(false)}
         className="group hidden sm:flex flex-col justify-between items-stretch bg-[#004C57] text-[#CAE9E9] rounded-2xl overflow-hidden select-none transition-all 
-                duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-screen fixed left-4 top-4 bottom-4"
+                duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-[calc(100vh-2rem)] fixed left-4 top-4"
         style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
       >
+
         <div className="pt-6 pb-4 px-3 flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-12 h-10 rounded-md bg-transparent overflow-hidden flex-shrink-0">
@@ -153,19 +154,24 @@ export default function Sidebar({
                   onClick={() => handleNavigate(it)}
                   className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 outline-none
                     ${isActive
-                            ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white" //ativo
-                            : " text-[#CAE9E9]" // não ativo
+                      ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white" //ativo
+                      : " text-[#CAE9E9]" // não ativo
                     }`}>
 
                   <div
-                    className={`${isActive ? "text-white" : "text-[#CAE9E9]"} flex-none`}>
+                    className={`${isActive
+                      ? "text-white border-b-2 border-white pb-[2px]"
+                      : "text-[#CAE9E9]"
+                      } flex-none`}
+                  >
                     {it.icon}
                   </div>
+
 
                   <div
                     className={`flex-1 text-base truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200 
                         ${isActive ? "text-white opacity-100" : "font-semibold"
-                    }`}>
+                      }`}>
                     {it.label}
                   </div>
                 </button>
@@ -190,7 +196,7 @@ export default function Sidebar({
       </aside>
 
       {/* mobile bottom bar */}
-      <nav className="sm:hidden fixed bottom-4 left-4 right-4 bg-[#0c4c4c] rounded-2xl flex items-center justify-between px-4 py-2 text-teal-100 shadow-lg">
+      <nav className="sm:hidden fixed bottom-4 left-4 right-4 bg-[#004C57] rounded-2xl flex items-center justify-between px-4 py-2 text-teal-100 shadow-lg">
         {items.slice(0, 5).map((it) => (
           <button
             key={it.key}
