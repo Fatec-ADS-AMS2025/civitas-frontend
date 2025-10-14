@@ -42,10 +42,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="bg-[#2B2B2B] rounded-2xl p-5 shadow-lg w-full flex flex-col gap-4">
+    <div className="bg-[#393939] rounded-2xl p-5 shadow-lg w-full flex flex-col gap-4">
       {/* Cabeçalho */}
       <div>
-        <p className="font-semibold text-white text-base">Busca:</p>
+        <p className="text-white text-base">Busca:</p>
         <p className="text-sm text-gray-400 -mt-1">Aqui você busca e filtra</p>
       </div>
 
@@ -69,7 +69,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
         <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
           <button
             onClick={() => alert("Levar para a tela de cadastro")}
-            className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            className="bg-[#58AFAE] hover:bg-[#58AFAE]/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-white text-base">add</span>
             Cadastrar

@@ -21,11 +21,11 @@ const Table: React.FC<TableProps> = ({ data }) => {
   const getBadgeColor = (tipo: string) => {
     switch (tipo) {
       case "Administrador":
-        return "bg-blue-500 text-white";
+        return "bg-[#51A5D6] text-black";
       case "Cidadão":
-        return "bg-yellow-400 text-black";
+        return "bg-[#FFCB73] text-black";
       case "Funcionário":
-        return "bg-green-500 text-white";
+        return "bg-[#B1D4A3] text-black";
       default:
         return "bg-gray-300 text-black";
     }
@@ -42,12 +42,12 @@ const Table: React.FC<TableProps> = ({ data }) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-md overflow-hidden">
+    <div className="w-full bg-white rounded-xl shadow-md overflow-hidden mt-5">
       {/* Tabela - Desktop */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border-collapse text-black">
           <thead>
-            <tr className="bg-teal-600 text-white">
+            <tr className="bg-[#58AFAE] text-black">
               <th className="p-3">ID</th>
               <th className="p-3">Nome</th>
               <th className="p-3">CPF</th>
@@ -72,7 +72,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
                 <td className="p-3 text-black">{user.estado}</td>
                 <td className="p-3">
                   <span
-                    className={`px-2 py-1 rounded-lg text-sm font-semibold ${getBadgeColor(
+                    className={`px-2 py-1 rounded-lg text-sm  ${getBadgeColor(
                       user.tipo
                     )}`}
                   >

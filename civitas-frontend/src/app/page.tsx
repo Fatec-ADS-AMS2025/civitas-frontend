@@ -14,7 +14,6 @@ type User = {
 };
 
 const HomePage = () => {
- 
   const usuarios: User[] = [
     {
       id: 1,
@@ -54,10 +53,13 @@ const HomePage = () => {
     },
   ];
 
-  // ✅ Estado apenas para exibir resultados
   const [filteredData, setFilteredData] = useState<User[]>(usuarios);
 
-  // ✅ Função de busca que SEMPRE filtra a partir do array original
+  const normalizeString = (str: string) =>
+    str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+  const cleanCPF = (cpf: string) => cpf.replace(/\D/g, "");
+
   const handleSearch = (filters: {
     nome: string;
     cpf: string;
@@ -66,31 +68,28 @@ const HomePage = () => {
     tipo: string;
   }) => {
     const { nome, cpf, cidade, estado, tipo } = filters;
-    
+
     const filtered = usuarios.filter((u) => {
-      const nomeMatch = u.nome.toLowerCase().includes(nome.toLowerCase());
-      const cpfMatch = u.cpf.includes(cpf);
-      const cidadeMatch = u.cidade.toLowerCase().includes(cidade.toLowerCase());
-      const estadoMatch = u.estado.toLowerCase().includes(estado.toLowerCase());
+      const nomeMatch = normalizeString(u.nome).includes(normalizeString(nome));
+      const cpfMatch = cleanCPF(u.cpf).includes(cleanCPF(cpf));
+      const cidadeMatch = normalizeString(u.cidade).includes(normalizeString(cidade));
+      const estadoMatch = normalizeString(u.estado).includes(normalizeString(estado));
       const tipoMatch = tipo ? u.tipo === tipo : true;
       return nomeMatch && cpfMatch && cidadeMatch && estadoMatch && tipoMatch;
     });
-    
+
     setFilteredData(filtered);
   };
 
   return (
     <main className="p-6 bg-gray-100 min-h-screen">
-      {/* Título e breadcrumb */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-[#004D4D]">Listagem de Cadastros</h1>
         <p className="text-sm text-gray-500 mt-1">Home &lt; Cadastros &lt; Listagem</p>
       </div>
 
-      {/* Barra de busca */}
       <SearchBar onSearch={handleSearch} />
 
-      {/* Tabela de resultados */}
       <Table data={filteredData} />
     </main>
   );
