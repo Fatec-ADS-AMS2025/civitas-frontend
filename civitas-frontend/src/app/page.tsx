@@ -3,7 +3,6 @@ import React from "react";
 import Sidebar from "@/components/Sidebar/sidebar"; // ajuste o caminho se necessário
 import Image from "next/image";
 
-export default function Home() {
   return (
     <div className="min-h-screen flex">
       {/* Sidebar fixa */}
@@ -24,4 +23,6 @@ export default function Home() {
       </main>
     </div>
   );
-}
+};
+
+export default HomePage;
