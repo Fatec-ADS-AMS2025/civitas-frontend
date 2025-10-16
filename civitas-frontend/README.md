@@ -2,48 +2,57 @@
 
 ## Uso Básico
 
+### Checkbox Simples
 ```tsx
 import { Checkbox } from '@/components/checkbox';
 
-// Checkbox simples
 <Checkbox label="Lembrar-me" />
 
-// Checkbox controlado
-<Checkbox 
-  label="Aceitar termos"
-  checked={accepted}
-  onChange={(e) => setAccepted(e.target.checked)}
-/>
+/* Checkbox Controlado */
+import { useState } from 'react';
+import { Checkbox } from '@/components/checkbox';
 
-// Estado intermediário
+export default function Example() {
+  const [accepted, setAccepted] = useState(false);
+
+  return (
+    <Checkbox 
+      label="Aceitar termos"
+      checked={accepted}
+      onChange={(e) => setAccepted(e.target.checked)}
+    />
+  );
+}
+
+/*Estado Intermediário*/
+const [allChecked, setAllChecked] = useState(false);
+const [someChecked, setSomeChecked] = useState(true);
+
 <Checkbox 
   label="Selecionar Todos"
+  checked={allChecked}
   indeterminate={someChecked}
-  onChange={handleSelectAll}
+  onChange={(e) => setAllChecked(e.target.checked)}
 />
-```
 
-## Props
-
-| Prop | Tipo | Padrão | Descrição |
-|------|------|--------|-----------|
-| `label` | `string` | - | Texto do label |
-| `checked` | `boolean` | - | Estado controlado |
-| `indeterminate` | `boolean` | `false` | Estado intermediário |
-| `disabled` | `boolean` | `false` | Desabilita o checkbox |
-| `onChange` | `(e) => void` | - | Callback de mudança |
-
-## Grupo de Checkboxes
-
-```tsx
+/*Grupo de Checkboxes*/
 import { CheckboxGroup } from '@/components/checkbox';
+import { useState } from 'react';
 
-<CheckboxGroup
-  options={[
-    { value: 'opt1', label: 'Opção 1' },
-    { value: 'opt2', label: 'Opção 2', disabled: true },
-  ]}
-  value={selected}
-  onChange={setSelected}
-/>
-```
+export default function Example() {
+  const [selected, setSelected] = useState<string[]>(['option1']);
+
+  return (
+    <CheckboxGroup
+      options={[
+        { value: 'option1', label: 'Opção 1' },
+        { value: 'option2', label: 'Opção 2' },
+        { value: 'option3', label: 'Opção 3' },
+        { value: 'option4', label: 'Opção 4 (Desabilitada)', disabled: true },
+      ]}
+      value={selected}
+      onChange={setSelected}
+      name="example"
+    />
+  );
+}
