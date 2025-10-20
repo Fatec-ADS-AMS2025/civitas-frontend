@@ -31,22 +31,21 @@ export const Input: React.FC<InputProps> = ({
         className={`
           w-full 
           px-4 py-3
-          border border-gray-300 
+          border-2 border-transparent
           rounded-full
-          bg-white
-          text-gray-800
+          bg-gray-100
+          text-gray-700
           placeholder:text-gray-400
           focus:outline-none 
-          focus:ring-2 
-          focus:ring-teal-500 
-          focus:border-teal-500
-          disabled:bg-gray-100
+          focus:bg-white
+          focus:border-teal-600
+          disabled:bg-gray-200
           disabled:text-gray-400
           disabled:cursor-not-allowed
-          disabled:border-gray-200
+          disabled:placeholder:text-gray-300
           transition-all duration-200
-          hover:border-gray-400
-          ${error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}
+          hover:bg-white
+          ${error ? 'border-red-500 bg-red-50 focus:border-red-500 focus:bg-red-50' : ''}
           ${className}
         `.trim().replace(/\s+/g, ' ')}
         {...props}

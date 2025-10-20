@@ -3,13 +3,20 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  
+  /* Civitas Color Palette - Based on Design System */
+  --civitas-teal-light: #58AFAE;
+  --civitas-teal-medium: #CAE9E9;
+  --civitas-teal-dark: #004C57;
+  --civitas-orange: #FF6324;
+  --civitas-orange-light: #FF8729;
+  --civitas-yellow: #FFD121;
+  --civitas-gray-light: #FFFFFF;
+  --civitas-gray-medium: #C7C7C7;
+  --civitas-gray-dark: #393939;
+  --civitas-black: #000000;
+  --civitas-gold: #FFA400;
+  --civitas-coral: #FF8178;
 }
 
 @media (prefers-color-scheme: dark) {

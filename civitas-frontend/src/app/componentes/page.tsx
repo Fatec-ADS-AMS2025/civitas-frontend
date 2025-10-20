@@ -35,8 +35,20 @@ export default function PageComponentes() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Header Civitas */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="w-8 h-8 bg-teal-600 rounded mr-2 flex items-center justify-center">
+              <span className="text-white text-sm font-bold">🏛️</span>
+            </div>
+            <span className="text-teal-600 font-semibold text-xl">Civitas</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">Componente Input</h1>
+          <p className="text-sm text-gray-600">Seguindo o Design System Civitas</p>
+        </div>
+        
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <div className="space-y-4">
             {/* Input de Email */}
