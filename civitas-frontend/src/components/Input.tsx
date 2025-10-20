@@ -31,20 +31,17 @@ export const Input: React.FC<InputProps> = ({
         className={`
           w-full 
           px-4 py-3
-          border-2 border-transparent
+          border-2 border-teal-600
           rounded-full
-          bg-gray-100
+          bg-white
           text-gray-700
-          placeholder:text-gray-400
+      
           focus:outline-none 
-          focus:bg-white
-          focus:border-teal-600
           disabled:bg-gray-200
           disabled:text-gray-400
           disabled:cursor-not-allowed
           disabled:placeholder:text-gray-300
           transition-all duration-200
-          hover:bg-white
           ${error ? 'border-red-500 bg-red-50 focus:border-red-500 focus:bg-red-50' : ''}
           ${className}
         `.trim().replace(/\s+/g, ' ')}
