@@ -1,41 +1,58 @@
-# Padronização: 
-Aqui será apresentado algumas das padronizações que devem ser seguidas.
+# 📚 Documentação do Checkbox
 
----
+## Uso Básico
 
-## 🧭 Guia de Padronização de Nomes - Next.js
-
-Este documento define as regras de **nomenclatura e organização de arquivos** para manter o código limpo, previsível e fácil de manter em projetos **Next.js**.
-
-### 📁 1. Pastas e Arquivos
-
-Todos os nomes de **pastas e arquivos** devem ser escritos em **minúsculas**, utilizando **hífens (`-`)** para separar palavras.
-
-#### ✅ Exemplo Correto:
-
-/app
-/user-profile
-page.tsx
-/dashboard
-/vehicle-list
-page.tsx
-
-### ❌ Exemplo Incorreto:
-
-/UserProfile/page.tsx
-/User_Profile/page.tsx
-
-
-> **Motivo:** manter compatibilidade entre sistemas operacionais e seguir o padrão usado pelo próprio Next.js.
-
----
-
-## ⚛️ 2. Componentes React
-
-Os **componentes React** devem seguir o padrão **PascalCase**, ou seja, cada palavra começa com letra maiúscula e não há separadores.
-
-### ✅ Exemplo:
+### Checkbox Simples
 ```tsx
-export function UserProfileCard() {
-  return <div>Perfil</div>;
+import { Checkbox } from '@/components/checkbox';
+
+<Checkbox label="Lembrar-me" />
+
+/* Checkbox Controlado */
+import { useState } from 'react';
+import { Checkbox } from '@/components/checkbox';
+
+export default function Example() {
+  const [accepted, setAccepted] = useState(false);
+
+  return (
+    <Checkbox 
+      label="Aceitar termos"
+      checked={accepted}
+      onChange={(e) => setAccepted(e.target.checked)}
+    />
+  );
+}
+
+/*Estado Intermediário*/
+const [allChecked, setAllChecked] = useState(false);
+const [someChecked, setSomeChecked] = useState(true);
+
+<Checkbox 
+  label="Selecionar Todos"
+  checked={allChecked}
+  indeterminate={someChecked}
+  onChange={(e) => setAllChecked(e.target.checked)}
+/>
+
+/*Grupo de Checkboxes*/
+import { CheckboxGroup } from '@/components/checkbox';
+import { useState } from 'react';
+
+export default function Example() {
+  const [selected, setSelected] = useState<string[]>(['option1']);
+
+  return (
+    <CheckboxGroup
+      options={[
+        { value: 'option1', label: 'Opção 1' },
+        { value: 'option2', label: 'Opção 2' },
+        { value: 'option3', label: 'Opção 3' },
+        { value: 'option4', label: 'Opção 4 (Desabilitada)', disabled: true },
+      ]}
+      value={selected}
+      onChange={setSelected}
+      name="example"
+    />
+  );
 }

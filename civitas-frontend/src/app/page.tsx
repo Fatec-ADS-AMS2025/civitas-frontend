@@ -1,8 +1,9 @@
-// src/app/page.tsx
+
 import React from "react";
 import Sidebar from "@/components/Sidebar/sidebar"; // ajuste o caminho se necessário
 import Image from "next/image";
 
+const HomePage = () => {
   return (
     <div className="min-h-screen flex">
       {/* Sidebar fixa */}
@@ -24,5 +25,4 @@ import Image from "next/image";
     </div>
   );
 };
-
 export default HomePage;
