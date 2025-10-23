@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+// Define explicitamente a raiz do Turbopack para evitar o aviso de múltiplos lockfiles
+const nextConfig = {
+  turbopack: {
+    // Usa a pasta atual (onde este arquivo está) como raiz do workspace
+    root: __dirname,
+  },
+} satisfies NextConfig;
 
 export default nextConfig;
