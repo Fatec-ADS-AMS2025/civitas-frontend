@@ -31,11 +31,10 @@ export const Input: React.FC<InputProps> = ({
         className={`
           w-full 
           px-4 py-3
-          border-2 border-teal-600
+          border-2 border-primary-1
           rounded-full
           bg-white
           text-gray-700
-      
           focus:outline-none 
           disabled:bg-gray-200
           disabled:text-gray-400

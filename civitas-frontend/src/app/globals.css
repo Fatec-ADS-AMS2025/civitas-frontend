@@ -5,25 +5,35 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --primary-1: #58AFAE;
+  --secundary-1: #004C57;
+  --tertialy-1: #CAE9E9;
+
+  --primary-2: #FF6324;
+  --secundary-2: #FF8729;
+  --tertialy-2: #FFD121;  
 }
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-primary-1: var(--primary-1);
+  --color-secundary-1: var(--secundary-1);
+  --color-tertialy-1: var(--tertialy-1);
+  
+  --color-primary-2: var(--primary-2);
+  --color-secundary-2: var(--secundary-2);
+  --color-tertialy-2: var(--tertialy-2);
+
   --font-sans: "Inter", sans-serif;
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .material-symbols-outlined {

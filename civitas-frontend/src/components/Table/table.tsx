@@ -47,7 +47,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse text-black">
           <thead>
-            <tr className="bg-[#58AFAE] text-black">
+            <tr className="bg-primary-1 text-black">
               <th className="p-3">ID</th>
               <th className="p-3">Nome</th>
               <th className="p-3">CPF</th>
@@ -121,7 +121,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
         {data.map((user) => (
           <div key={user.id} className="p-4 flex flex-col gap-2">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-[#004D4D]">
+              <h3 className="text-lg font-semibold text-secondary-1">
                 {user.nome}
               </h3>
               <span
@@ -179,7 +179,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
               <span className="material-symbols-outlined">close</span>
             </button>
 
-            <h2 className="text-2xl font-bold text-[#004D4D] mb-2">
+            <h2 className="text-2xl font-bold text-secondary-1 mb-2">
               {modalAction} Usuário
             </h2>
 
@@ -187,7 +187,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
 
             <button
               onClick={closeModal}
-              className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2 rounded-full font-semibold transition"
+              className="bg-primary-1 hover:bg-secondary-1/80 text-white px-5 py-2 rounded-full font-semibold transition"
             >
               Fechar
             </button>

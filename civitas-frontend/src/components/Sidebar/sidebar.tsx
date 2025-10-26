@@ -63,37 +63,37 @@ const IconBox = () => <span className="material-symbols-outlined">box</span>;
 const IconSell = () => <span className="material-symbols-outlined">sell</span>;
 
 const defaultItems: SidebarItem[] = [
-  { key: "home", label: "Home", icon: <IconHome />, href: "/" },
+  { key: "home", label: "Home", icon: <IconHome />, href: "/dashboard" },
   {
     key: "secretaria",
     label: "Secretaria",
     icon: <IconBalance />,
-    href: "/secretaria",
+    href: "/dashboard/secretaria",
   },
   {
     key: "instituicao",
     label: "Instituição",
     icon: <IconFlowChart />,
-    href: "/instituicao",
+    href: "/dashboard/instituicao",
   },
   {
     key: "fornecedor",
     label: "Fornecedor",
     icon: <IconBox />,
-    href: "/fornecedor",
+    href: "/dashboard/fornecedor",
   },
   {
     key: "orcamento",
     label: "Orçamento",
     icon: <IconRequestQuote />,
-    href: "/orcamento",
+    href: "/dashboard/orcamento",
   },
   { key: "despesas", label: "Despesas", icon: <IconSell />, href: "/despesas" },
   {
     key: "usuarios",
     label: "Usuários",
     icon: <IconGroup />,
-    href: "/usuarios",
+    href: "/dashboard/usuarios",
   },
 ];
 
@@ -126,7 +126,7 @@ export default function Sidebar({
         tabIndex={0}
         onFocus={() => setKeyboardExpanded(true)}
         onBlur={() => setKeyboardExpanded(false)}
-        className="group hidden sm:flex flex-col justify-between items-stretch bg-[#004C57] text-[#CAE9E9] rounded-2xl overflow-hidden select-none transition-all 
+        className="group hidden sm:flex flex-col justify-between items-stretch bg-secundary-1 text-tertialy-1 rounded-2xl overflow-hidden select-none transition-all 
                 duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-[calc(100vh-2rem)] fixed left-4 top-4"
         style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
       >
@@ -140,7 +140,7 @@ export default function Sidebar({
                 className="object-contain w-full h-full"
               />
             </div>
-            <div className="ml-1 text-2xl font-semibold text-[#CAE9E9] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="ml-1 text-2xl font-semibold text-tertialy-1  opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               Civitas
             </div>
           </div>
@@ -152,16 +152,16 @@ export default function Sidebar({
                 <button
                   key={it.key}
                   onClick={() => handleNavigate(it)}
-                  className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 outline-none
+                  className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 outline-none cursor-pointer 
                     ${isActive
                       ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white" //ativo
-                      : " text-[#CAE9E9]" // não ativo
+                      : " text-tertialy-1" // não ativo
                     }`}>
 
                   <div
                     className={`${isActive
                       ? "text-white border-b-2 border-white pb-[2px]"
-                      : "text-[#CAE9E9]"
+                      : "text-tertialy-1"
                       } flex-none`}
                   >
                     {it.icon}
@@ -183,10 +183,10 @@ export default function Sidebar({
 
         <div className="px-3 py-6">
           <button
-            className="flex items-center gap-3 w-full rounded-2xl px-3 py-2 bg-[#CAE9E9] text-[#004C57] font-semibold shadow-inner hover:shadow-md transition-shadow duration-150"
+            className="flex items-center gap-3 w-full rounded-2xl px-3 py-2 bg-tertialy-1 text-secundary-1 font-semibold shadow-inner hover:shadow-md transition-shadow duration-150 cursor-pointer"
             onClick={() => router.push("/perfil")}
           >
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#004C57]">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-secundary-1">
               <IconProfile />
             </div>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -197,13 +197,13 @@ export default function Sidebar({
       </aside>
 
       {/* mobile bottom bar */}
-      <nav className="sm:hidden fixed bottom-4 left-4 right-4 bg-[#004C57] rounded-2xl flex items-center justify-between px-4 py-2 text-teal-100 shadow-lg">
+      <nav className="sm:hidden fixed bottom-4 left-4 right-4 bg-secundary-1 rounded-2xl flex items-center justify-between px-4 py-2 text-teal-100 shadow-lg">
         {items.slice(0, 5).map((it) => (
           <button
             key={it.key}
             aria-label={it.label}
             onClick={() => handleNavigate(it)}
-            className="flex flex-col items-center gap-1 text-xs w-full"
+            className="flex flex-col items-center gap-1 text-xs w-full cursor-pointer"
           >
             <div className="w-6 h-6 flex items-center justify-center">
               {it.icon}
@@ -212,7 +212,7 @@ export default function Sidebar({
           </button>
         ))}
         <button
-          className="flex flex-col items-center gap-1 text-xs w-full"
+          className="flex flex-col items-center gap-1 text-xs w-full cursor-pointer"
           onClick={() => router.push("/perfil")}
           aria-label="Perfil"
         >
