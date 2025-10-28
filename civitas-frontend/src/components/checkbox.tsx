@@ -6,7 +6,7 @@ interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'typ
   indeterminate?: boolean;
 }
 
-export function Checkbox({
+function Checkbox({
   label,
   value,
   id,
@@ -46,7 +46,7 @@ export function Checkbox({
         disabled={disabled}
         checked={currentChecked}
         onChange={handleChange}
-        className="w-5 h-5 cursor-pointer accent-[#004C57] border-2 border-[#004C57] rounded focus:ring-2 focus:ring-[#58AFAE] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-5 h-5 cursor-pointer accent-primary-1 border-2 border-primary-1 rounded focus:ring-2 focus:ring-secondary-1 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         aria-checked={indeterminate ? 'mixed' : currentChecked}
         {...props}
       />
@@ -64,55 +64,4 @@ export function Checkbox({
   );
 }
 
-interface CheckboxGroupOption {
-  value: string;
-  label: string;
-  disabled?: boolean;
-}
-
-interface CheckboxGroupProps {
-  options: CheckboxGroupOption[];
-  value?: string[];
-  onChange?: (selected: string[]) => void;
-  className?: string;
-  name?: string;
-}
-
-export function CheckboxGroup({
-  options,
-  value,
-  onChange,
-  className = '',
-  name,
-}: CheckboxGroupProps) {
-  const [selected, setSelected] = useState<string[]>(value || []);
-
-  useEffect(() => {
-    if (value) setSelected(value);
-  }, [value]);
-
-  const handleChange = (optionValue: string, checked: boolean) => {
-    const newSelected = checked
-      ? [...selected, optionValue]
-      : selected.filter((v) => v !== optionValue);
-    if (!value) setSelected(newSelected);
-    onChange?.(newSelected);
-  };
-
-  return (
-    <div className={`flex flex-col gap-3 ${className}`}>
-      {options.map((option) => (
-        <Checkbox
-          key={option.value}
-          id={`${name}-${option.value}`}
-          label={option.label}
-          value={option.value}
-          disabled={option.disabled}
-          checked={selected.includes(option.value)}
-          onChange={(e) => handleChange(option.value, e.target.checked)}
-          name={name}
-        />
-      ))}
-    </div>
-  );
-}
+export default Checkbox;
