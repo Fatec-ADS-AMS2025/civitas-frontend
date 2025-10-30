@@ -17,8 +17,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-200 flex flex-col">
-      <div className="flex flex-1">
+    <div className="min-h-screen w-full bg-gray-100">
+      <div className="container mx-auto max-w-screen-xl px-4 flex flex-1">
         {/* Left Section - Illustration */}
         <div className="hidden lg:flex w-1/2 bg-white items-center justify-center p-8 rounded-3xl m-8">
           <div className="w-full flex flex-col items-center">
@@ -53,26 +53,22 @@ export default function LoginPage() {
             {/* Form */}
             <form onSubmit={handleLogin} className="space-y-5">
               {/* Email Input */}
-              <div suppressHydrationWarning>
-                <Input
-                  type="email"
-                  placeholder="Digite o seu E-mail"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
+              <Input
+                type="email"
+                placeholder="Digite o seu E-mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
 
               {/* Password Input */}
-              <div suppressHydrationWarning>
-                <Input
-                  type="password"
-                  placeholder="Digite a sua Senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
+              <Input
+                type="password"
+                placeholder="Digite a sua Senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
 
               {/* Remember Me and Forgot Password */}
               <div className="flex items-center justify-between mt-6">
