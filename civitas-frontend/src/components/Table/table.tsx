@@ -18,6 +18,9 @@ const Table: React.FC<TableProps> = ({ data }) => {
   const [modalAction, setModalAction] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+  // 🔹 Limita o número de usuários exibidos
+  const displayedUsers = data.slice(0, 10);
+
   const getBadgeColor = (tipo: string) => {
     switch (tipo) {
       case "Administrador":
@@ -44,81 +47,84 @@ const Table: React.FC<TableProps> = ({ data }) => {
   return (
     <div className="w-full bg-white rounded-xl shadow-md overflow-hidden mt-5">
       {/* Tabela - Desktop */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left border-collapse text-black">
-          <thead>
-            <tr className="bg-primary-1 text-black">
-              <th className="p-3">ID</th>
-              <th className="p-3">Nome</th>
-              <th className="p-3">CPF</th>
-              <th className="p-3">Matrícula</th>
-              <th className="p-3">Cidade</th>
-              <th className="p-3">Estado</th>
-              <th className="p-3">Tipo</th>
-              <th className="p-3">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((user) => (
-              <tr
-                key={user.id}
-                className="border-b last:border-none hover:bg-gray-100 transition"
-              >
-                <td className="p-3 text-black">{user.id}</td>
-                <td className="p-3 text-black">{user.nome}</td>
-                <td className="p-3 text-black">{user.cpf}</td>
-                <td className="p-3 text-black">{user.matricula}</td>
-                <td className="p-3 text-black">{user.cidade}</td>
-                <td className="p-3 text-black">{user.estado}</td>
-                <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded-lg text-sm  ${getBadgeColor(
-                      user.tipo
-                    )}`}
-                  >
-                    {user.tipo}
-                  </span>
-                </td>
-                <td className="p-3 flex gap-2">
-                  <button
-                    title="Ver"
-                    onClick={() => openModal("Ver", user)}
-                    className="hover:scale-110 transition"
-                  >
-                    <span className="material-symbols-outlined text-black">
-                      visibility
-                    </span>
-                  </button>
-
-                  <button
-                    title="Editar"
-                    onClick={() => openModal("Editar", user)}
-                    className="hover:scale-110 transition"
-                  >
-                    <span className="material-symbols-outlined text-black">
-                      edit_square
-                    </span>
-                  </button>
-
-                  <button
-                    title="Excluir"
-                    onClick={() => openModal("Excluir", user)}
-                    className="hover:scale-110 transition"
-                  >
-                    <span className="material-symbols-outlined text-black">
-                      delete
-                    </span>
-                  </button>
-                </td>
+      <div className="hidden md:block">
+        {/* 🔹 Container com scroll interno */}
+        <div className="max-h-[250px] overflow-y-auto relative">
+          <table className="w-full text-left border-collapse text-black">
+            <thead className="bg-primary-1 text-black sticky top-0 z-10">
+              <tr>
+                <th className="p-3">ID</th>
+                <th className="p-3">Nome</th>
+                <th className="p-3">CPF</th>
+                <th className="p-3">Matrícula</th>
+                <th className="p-3">Cidade</th>
+                <th className="p-3">Estado</th>
+                <th className="p-3">Tipo</th>
+                <th className="p-3">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {displayedUsers.map((user) => (
+                <tr
+                  key={user.id}
+                  className="border-b last:border-none hover:bg-gray-100 transition"
+                >
+                  <td className="p-3 text-black">{user.id}</td>
+                  <td className="p-3 text-black">{user.nome}</td>
+                  <td className="p-3 text-black">{user.cpf}</td>
+                  <td className="p-3 text-black">{user.matricula}</td>
+                  <td className="p-3 text-black">{user.cidade}</td>
+                  <td className="p-3 text-black">{user.estado}</td>
+                  <td className="p-3">
+                    <span
+                      className={`px-2 py-1 rounded-lg text-sm ${getBadgeColor(
+                        user.tipo
+                      )}`}
+                    >
+                      {user.tipo}
+                    </span>
+                  </td>
+                  <td className="p-3 flex gap-2">
+                    <button
+                      title="Ver"
+                      onClick={() => openModal("Ver", user)}
+                      className="hover:scale-110 transition"
+                    >
+                      <span className="material-symbols-outlined text-black">
+                        visibility
+                      </span>
+                    </button>
+
+                    <button
+                      title="Editar"
+                      onClick={() => openModal("Editar", user)}
+                      className="hover:scale-110 transition"
+                    >
+                      <span className="material-symbols-outlined text-black">
+                        edit_square
+                      </span>
+                    </button>
+
+                    <button
+                      title="Excluir"
+                      onClick={() => openModal("Excluir", user)}
+                      className="hover:scale-110 transition"
+                    >
+                      <span className="material-symbols-outlined text-black">
+                        delete
+                      </span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Cards - Mobile */}
       <div className="md:hidden flex flex-col divide-y">
-        {data.map((user) => (
+        {displayedUsers.map((user) => (
           <div key={user.id} className="p-4 flex flex-col gap-2">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-secondary-1">
