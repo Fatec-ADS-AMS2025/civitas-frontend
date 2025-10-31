@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import Checkbox from '@/components/checkbox'
@@ -11,9 +12,68 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
 
-  const handleLogin = (e) => {
+  // Estados para validação, erro geral e carregamento + router
+  const [errors, setErrors] = useState({ email: '', password: '' })
+  const [generalError, setGeneralError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+
+  const handleLogin = async (e) => {
     e.preventDefault()
-    console.log('Login:', { email, password, rememberMe })
+    setGeneralError('')
+    const newErrors = { email: '', password: '' }
+
+    if (!email.trim()) newErrors.email = 'E-mail é obrigatório.'
+    if (!password.trim()) newErrors.password = 'Senha é obrigatória.'
+
+    setErrors(newErrors)
+    if (newErrors.email || newErrors.password) return
+
+    // Fallback seguro para URL da API
+    const baseUrlEnv = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')
+    const baseUrl =
+      baseUrlEnv || (typeof window !== 'undefined' ? window.location.origin : '')
+
+    if (!baseUrl) {
+      setGeneralError('Configuração da API ausente. Defina NEXT_PUBLIC_API_URL.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const url = `${baseUrl}/auth/login`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password, rememberMe }),
+      })
+
+      if (!res.ok) {
+        let message = 'Credenciais inválidas. Verifique e tente novamente.'
+        try {
+          const data = await res.json()
+          if (data?.message) message = data.message
+        } catch {}
+        setGeneralError(message)
+        return
+      }
+
+      // Caso o back retorne um destino, respeita; senão vai para /dashboard
+      let redirectTo = '/dashboard'
+      try {
+        const data = await res.json()
+        if (data?.redirectTo) redirectTo = data.redirectTo
+      } catch {}
+      router.push(redirectTo)
+    } catch {
+      setGeneralError('Não foi possível conectar ao servidor. Tente novamente.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -51,24 +111,61 @@ export default function LoginPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleLogin} className="space-y-5">
+            <form onSubmit={handleLogin} noValidate className="space-y-5">
+              {/* Mensagem de erro geral */}
+              {generalError && (
+                <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-sm">
+                  {generalError}
+                </div>
+              )}
+
               {/* Email Input */}
-              <Input
-                type="email"
-                placeholder="Digite o seu E-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  E-mail
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Digite o seu E-mail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                  autoComplete="email"
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
+                />
+                {errors.email && (
+                  <p id="email-error" className="mt-2 text-xs text-red-600">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
 
               {/* Password Input */}
-              <Input
-                type="password"
-                placeholder="Digite a sua Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Senha
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Digite a sua Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  autoComplete="current-password"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                />
+                {errors.password && (
+                  <p id="password-error" className="mt-2 text-xs text-red-600">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
 
               {/* Remember Me and Forgot Password */}
               <div className="flex items-center justify-between mt-6">
@@ -77,6 +174,7 @@ export default function LoginPage() {
                   label="Lembrar-me"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
+                  disabled={loading} // desabilita durante requisição
                 />
                 <Link href="/forgot-password" className="text-gray-700 text-sm font-medium underline hover:text-teal-700">
                   Esqueci a senha
@@ -86,9 +184,11 @@ export default function LoginPage() {
               {/* Login Button */}
               <button
                 type="submit"
-                className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-4 rounded-full transition duration-200 mt-8 text-base"
+                disabled={loading}
+                aria-busy={loading}
+                className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-4 rounded-full transition duration-200 mt-8 text-base disabled:opacity-60 disabled:cursor-not-allowed relative"
               >
-                Acessar Conta
+                {loading ? 'Entrando...' : 'Acessar Conta'}
               </button>
             </form>
 
