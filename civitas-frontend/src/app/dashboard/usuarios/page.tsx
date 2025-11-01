@@ -106,15 +106,6 @@ const usuarios: User[] = [
     estado: "DF",
     tipo: "Administrador",
   },
-  {
-    id: 11,
-    nome: "Patrícia Souza",
-    cpf: "777.999.000-11",
-    matricula: "CID011",
-    cidade: "Manaus",
-    estado: "AM",
-    tipo: "Cidadão",
-  },
 ];
  
  

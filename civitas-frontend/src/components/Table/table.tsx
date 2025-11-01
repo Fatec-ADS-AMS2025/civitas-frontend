@@ -48,8 +48,8 @@ const Table: React.FC<TableProps> = ({ data }) => {
     <div className="w-full bg-white rounded-xl shadow-md overflow-hidden mt-5">
       {/* Tabela - Desktop */}
       <div className="hidden md:block">
-        {/* 🔹 Container com scroll interno */}
-        <div className="max-h-[250px] overflow-y-auto relative">
+ 
+        <div className="max-h-[400px] overflow-y-auto relative">
           <table className="w-full text-left border-collapse text-black">
             <thead className="bg-primary-1 text-black sticky top-0 z-10">
               <tr>

@@ -137,7 +137,7 @@ export default function Sidebar({
               <img
                 src="/logo.png"
                 alt="Logo Civitas"
-                className="object-contain w-full h-full"
+                className="object-contain size-full"
               />
             </div>
             <div className="ml-1 text-2xl font-semibold text-tertialy-1  opacity-0 group-hover:opacity-100 transition-opacity duration-200">
