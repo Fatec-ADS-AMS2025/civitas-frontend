@@ -102,7 +102,7 @@ export default function Dashboard() {
       >
         <div className="relative z-10">
           <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold leading-tight">Valor Disponível</h3>
-          <p className="text-xs sm:text-sm mb-2 opacity-80">Atualmente:</p>
+          <p className="text-xs sm:text-sm mb-2 opacity-80"> Atualmente:</p>
           <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold flex flex-wrap gap-1 sm:gap-2 leading-tight">* * * * * *</div>
         </div>
 
