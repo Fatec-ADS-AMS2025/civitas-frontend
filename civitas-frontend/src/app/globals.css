@@ -36,6 +36,10 @@ body {
   font-family: var(--font-sans);
 }
 
+html, body {
+  overflow-x: hidden; /* prevents white strip caused by 100vw/w-screen overflow */
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   font-size: 22px;
