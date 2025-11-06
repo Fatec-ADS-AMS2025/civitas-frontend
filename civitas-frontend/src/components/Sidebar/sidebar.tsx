@@ -86,7 +86,7 @@ const defaultItems: SidebarItem[] = [
     key: "orcamento",
     label: "Orçamento",
     icon: <IconRequestQuote />,
-    href: "/dashboard/orcamento",
+    href: "/dashboard/orcamentos",
   },
   { key: "despesas", label: "Despesas", icon: <IconSell />, href: "/despesas" },
   {

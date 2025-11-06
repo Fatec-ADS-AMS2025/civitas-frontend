@@ -140,7 +140,7 @@ setFilteredData(filtered);
 };
  
 return (
-<main className="p-6 bg-gray-100 min-h-screen">
+<main className="p-6 bg-transparent min-h-screen">
 <div className="mb-6">
 <h1 className="text-4xl font-bold text-[#004D4D]">Listagem de Cadastros</h1>
 <p className="text-sm text-gray-500 mt-1">Home &lt; Cadastros &lt; Listagem</p>
