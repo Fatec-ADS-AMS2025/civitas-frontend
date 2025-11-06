@@ -1,14 +1,13 @@
 "use client"
+
 import React, { useState, useEffect } from 'react'
 
 export default function Dashboard() {
-  const [fontSize, setFontSize] = useState(16) // Tamanho base da fonte em pixels
+  const [fontSize, setFontSize] = useState(16)
   const [highContrast, setHighContrast] = useState(false)
 
-  // Aplicar as mudanças no documento
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontSize}px`
-    
     if (highContrast) {
       document.documentElement.classList.add('high-contrast')
     } else {
@@ -16,71 +15,36 @@ export default function Dashboard() {
     }
   }, [fontSize, highContrast])
 
-  // Função para aumentar fonte (A+)
-  const increaseFontSize = () => {
-    setFontSize(prev => Math.min(prev + 2, 24)) // Máximo 24px
-  }
+  const increaseFontSize = () => setFontSize(prev => Math.min(prev + 2, 24))
+  const resetFontSize = () => setFontSize(16)
+  const decreaseFontSize = () => setFontSize(prev => Math.max(prev - 2, 12))
+  const toggleHighContrast = () => setHighContrast(prev => !prev)
 
-  // Função para resetar fonte (Aa)
-  const resetFontSize = () => {
-    setFontSize(16) // Volta ao padrão
-  }
-
-  // Função para diminuir fonte (A-)
-  const decreaseFontSize = () => {
-    setFontSize(prev => Math.max(prev - 2, 12)) // Mínimo 12px
-  }
-
-  // Função para alternar alto contraste
-  const toggleHighContrast = () => {
-    setHighContrast(prev => !prev)
-  }
   return (
-    <div className="min-h-screen bg-transparent font-sans">
+    <div className="min-h-screen bg-transparent font-sans px-6 sm:px-10 lg:px-20 py-6 sm:py-10 lg:py-2">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-8 py-3 sm:py-4 md:py-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
           <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-tight">Bem-Vindo {"{user}"}</h1>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">Vamos ao gerenciamento?</p>
+            <h1 className="text-[48px] font-semibold leading-tight text-[#004C57]">
+              Bem-Vindo {"{user}"}
+            </h1>
+
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
+              Vamos ao gerenciamento?
+            </p>
           </div>
+
+          {/* Botões de acessibilidade */}
           <div className="bg-orange-400 text-black px-3 sm:px-4 py-4 sm:py-6 rounded-full flex flex-col items-center justify-center font-bold relative w-12 sm:w-16 h-28 sm:h-36 self-center sm:self-auto">
-            {/* Botão Aumentar Fonte */}
-            <button 
-              onClick={increaseFontSize}
-              className="text-sm sm:text-lg leading-tight mb-1 hover:scale-110 active:scale-95 transition-transform cursor-pointer touch-manipulation"
-              title="Aumentar tamanho da fonte"
-              aria-label="Aumentar tamanho da fonte"
-            >
-              A+
-            </button>
-            
-            {/* Botão Resetar Fonte */}
-            <button 
-              onClick={resetFontSize}
-              className="text-sm sm:text-lg leading-tight mb-1 hover:scale-110 active:scale-95 transition-transform cursor-pointer touch-manipulation"
-              title="Tamanho normal da fonte"
-              aria-label="Tamanho normal da fonte"
-            >
-              Aa
-            </button>
-            
-            {/* Botão Diminuir Fonte */}
-            <button 
-              onClick={decreaseFontSize}
-              className="text-sm sm:text-lg leading-tight mb-2 sm:mb-3 hover:scale-110 active:scale-95 transition-transform cursor-pointer touch-manipulation"
-              title="Diminuir tamanho da fonte"
-              aria-label="Diminuir tamanho da fonte"
-            >
-              A-
-            </button>
-            
-            {/* Botão Alto Contraste */}
-            <button 
+            <button onClick={increaseFontSize} className="text-sm sm:text-lg leading-tight mb-1 hover:scale-110 active:scale-95 transition-transform">A+</button>
+            <button onClick={resetFontSize} className="text-sm sm:text-lg leading-tight mb-1 hover:scale-110 active:scale-95 transition-transform">Aa</button>
+            <button onClick={decreaseFontSize} className="text-sm sm:text-lg leading-tight mb-2 sm:mb-3 hover:scale-110 active:scale-95 transition-transform">A-</button>
+
+            <button
               onClick={toggleHighContrast}
-              className="absolute bottom-2 sm:bottom-3 w-4 sm:w-5 h-4 sm:h-5 rounded-full overflow-hidden border border-black hover:scale-110 active:scale-95 transition-transform cursor-pointer touch-manipulation"
+              className="absolute bottom-2 sm:bottom-3 w-4 sm:w-5 h-4 sm:h-5 rounded-full overflow-hidden border border-black hover:scale-110 active:scale-95 transition-transform"
               title={highContrast ? "Desativar alto contraste" : "Ativar alto contraste"}
-              aria-label={highContrast ? "Desativar alto contraste" : "Ativar alto contraste"}
             >
               <div className="w-full h-full flex">
                 <div className={`w-1/2 h-full transition-colors ${highContrast ? 'bg-white' : 'bg-black'}`}></div>
@@ -93,59 +57,57 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 md:py-6">
+
         {/* Top Cards */}
-       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 w-full mb-4 sm:mb-6">
-      
-      {/* Valor Disponível */}
-      <div className="relative p-4 sm:p-6 rounded-2xl sm:rounded-3xl text-[#004C57] overflow-hidden min-h-[120px] sm:min-h-[140px]"
-        style={{ background: "linear-gradient(180deg, #008A9A 0%, #A2F2FF 100%)" }}
-      >
-        <div className="relative z-10">
-          <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold leading-tight">Valor Disponível</h3>
-          <p className="text-xs sm:text-sm mb-2 opacity-80"> Atualmente:</p>
-          <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold flex flex-wrap gap-1 sm:gap-2 leading-tight">* * * * * *</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-8">
+          {/* Valor Disponível */}
+          <div
+            className="relative p-6 rounded-3xl text-[#003840] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm"
+            style={{ background: "linear-gradient(180deg, #007E91 0%, #A3F3FF 100%)" }}
+          >
+            <div className="relative z-10">
+              <h3 className="text-xl font-semibold leading-tight">Valor Disponível</h3>
+              <p className="text-sm opacity-90 mb-3">Atualmente:</p>
+              <div className="text-6xl font-bold tracking-widest relative top-[25px]">* * * * * *</div>
+            </div>
+            <img
+              src="/home.png"
+              alt="Ícone banco"
+              className="absolute bottom-11 right-2 w-36 rotate-[8deg] opacity-70 grayscale contrast-75 mix-blend-multiply rotate-[360deg]"
+            />
+
+          </div>
+
+          {/* Balança */}
+          <div
+            className="relative p-6 rounded-3xl text-[#E4E4E4] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm"
+            style={{ background: "linear-gradient(180deg, #000000 0%, #454545 100%)" }}
+          >
+            <div className="relative z-10">
+              <h3 className="text-xl font-semibold leading-tight">Balança</h3>
+              <p className="text-sm opacity-80 mb-3">Valor disponível - Gastos totais:</p>
+              <div className="text-6xl font-bold tracking-widest relative top-[25px]">* * * * * *</div>
+            </div>
+            <img src="/balance.png" alt="Ícone balança"
+              className="absolute bottom-8 right-2 w-36 rotate-[8deg] opacity-48 grayscale contrast-50 brightness-90 mix-blend-luminosity"
+            />
+          </div>
+
+          {/* Gastos Totais */}
+          <div
+            className="relative p-6 rounded-3xl text-[#602B00] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm"
+            style={{ background: "linear-gradient(180deg, #FF8729 0%, #e3b17eff 100%)" }}
+          >
+            <div className="relative z-10">
+              <h3 className="text-xl font-semibold leading-tight">Gastos Totais</h3>
+              <p className="text-sm opacity-90 mb-3">nos últimos 30 dias:</p>
+              <div className="text-6xl font-bold tracking-widest relative top-[25px]">* * * * * *</div>
+            </div>
+            <img src="/dinheiro.png" alt="Ícone dinheiro"
+              className="absolute bottom-11 right-2 w-36 rotate-[8deg] opacity-70 grayscale contrast-75 mix-blend-multiply rotate-[360deg]" />          </div>
         </div>
 
-        {/* Icon */}
-        <span className="material-symbols-outlined material-icon-filled absolute -top-1 sm:-top-2 -right-1 sm:-right-2 rotate-[330deg] opacity-15 sm:opacity-20 text-[80px] sm:text-[120px] lg:text-[150px]">
-          account_balance
-        </span>
-      </div>
-
-      {/* Balança */}
-      <div className="relative p-4 sm:p-6 rounded-2xl sm:rounded-3xl text-[#D1D1D1] overflow-hidden min-h-[120px] sm:min-h-[140px] sm:col-span-2 lg:col-span-1"
-        style={{ background: "linear-gradient(180deg, #000000 0%, #4A4A4A 100%)" }}
-      >
-        <div className="relative z-10">
-          <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold leading-tight">Balança</h3>
-          <p className="text-xs sm:text-sm mb-2 opacity-80">Valor disponível - Gastos totais</p>
-          <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold flex flex-wrap gap-1 sm:gap-2 leading-tight">* * * * * *</div>
-        </div>
-
-        {/* Icon */}
-        <span className="material-symbols-outlined material-icon-filled absolute -top-2 sm:-top-4 -right-2 sm:-right-4 rotate-[330deg] opacity-10 sm:opacity-15 text-[100px] sm:text-[140px] lg:text-[170px]">
-          monitoring
-        </span>
-      </div>
-
-      {/* Gastos Totais */}
-      <div className="relative p-4 sm:p-6 rounded-2xl sm:rounded-3xl text-[#8B3C00] overflow-hidden min-h-[120px] sm:min-h-[140px] sm:col-span-2 lg:col-span-1"
-        style={{ background: "linear-gradient(180deg, #FF8C26 0%, #FFB871 100%)" }}
-      >
-        <div className="relative z-10">
-          <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold leading-tight">Gastos Totais</h3>
-          <p className="text-xs sm:text-sm mb-2 opacity-80">nos últimos 30 dias</p>
-          <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold flex flex-wrap gap-1 sm:gap-2 leading-tight">* * * * * *</div>
-        </div>
-
-        {/* Icon */}
-        <span className="material-symbols-outlined material-icon-filled absolute -top-1 sm:-top-2 -right-1 sm:-right-2 rotate-[330deg] opacity-15 sm:opacity-20 text-[80px] sm:text-[120px] lg:text-[150px]">
-          payments
-        </span>
-      </div>
-    </div>
-
-        {/* Countdown */}
+         {/* Countdown */}
         <div className="text-center mb-4 sm:mb-6 lg:mb-8">
           <p className="text-gray-700 font-bold text-sm sm:text-base px-2">14 dias até a reposição da verba.</p>
         </div>
@@ -315,3 +277,4 @@ export default function Dashboard() {
     </div>
   )
 }
+
