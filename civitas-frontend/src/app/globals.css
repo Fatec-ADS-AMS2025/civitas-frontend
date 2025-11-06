@@ -12,7 +12,16 @@
 
   --primary-2: #FF6324;
   --secundary-2: #FF8729;
-  --tertialy-2: #FFD121;  
+  --tertialy-2: #FFD121;
+
+  /* Cores exatas do Civitas */
+  --civitas-teal-dark: #004C57;
+  --civitas-teal-medium: #007E90;
+  --civitas-teal-light: #A3F3FF;
+  --civitas-orange-dark: #FF8729;
+  --civitas-orange-light: #FFA660;
+  --civitas-gray-dark: #000000;
+  --civitas-gray-light: #444444;
 }
 @theme inline {
   --color-background: var(--background);
@@ -51,5 +60,102 @@ html, body {
   color: inherit;
   text-underline-offset: 4;
   text-underline-position: below;
+}
+
+/* Classes específicas do Civitas */
+.civitas-valor-disponivel {
+  background: linear-gradient(180deg, #007E90 0%, #A3F3FF 100%);
+  border-radius: 25px;
+}
+
+.civitas-balanca {
+  background: linear-gradient(180deg, #000000 0%, #444444 100%);
+  border-radius: 25px;
+}
+
+.civitas-gastos-totais {
+  background: linear-gradient(180deg, #FF8729 0%, #FFA660 100%);
+  border-radius: 25px;
+}
+
+.civitas-text-dark {
+  color: #004C57;
+}
+
+.civitas-text-light {
+  color: #D7D7D7;
+}
+
+.civitas-text-orange {
+  color: #793500;
+}
+
+/* Material Icons customizados */
+.material-icon-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+}
+
+/* Estilos de Alto Contraste */
+.high-contrast {
+  filter: contrast(150%) brightness(120%);
+}
+
+.high-contrast * {
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+.high-contrast .bg-white {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.high-contrast .bg-gray-100 {
+  background-color: #ffffff !important;
+}
+
+.high-contrast .text-gray-600,
+.high-contrast .text-gray-500,
+.high-contrast .text-gray-400 {
+  color: #000000 !important;
+}
+
+.high-contrast .civitas-valor-disponivel,
+.high-contrast .civitas-balanca,
+.high-contrast .civitas-gastos-totais {
+  border: 3px solid #000000 !important;
+}
+
+/* Melhorias de responsividade */
+@media (max-width: 640px) {
+  /* Scrollbar mais fina em mobile */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+  }
+  
+  /* Melhor touch targets em mobile */
+  button, .cursor-pointer {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Suavização de scroll em toda a aplicação */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Otimização de touch para dispositivos móveis */
+.touch-manipulation {
+  touch-action: manipulation;
 }
 
