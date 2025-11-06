@@ -137,7 +137,7 @@ export default function Sidebar({
               <img
                 src="/logo.png"
                 alt="Logo Civitas"
-                className="object-contain w-full h-full"
+                className="object-contain size-full"
               />
             </div>
             <div className="ml-1 text-2xl font-semibold text-tertialy-1  opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -145,7 +145,7 @@ export default function Sidebar({
             </div>
           </div>
 
-          <nav className="flex flex-col gap-3 mt-4">
+          <nav className="flex flex-col gap-3">
             {items.map((it) => {
               const isActive = activeKey === it.key;
               return (
