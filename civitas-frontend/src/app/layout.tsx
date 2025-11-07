@@ -14,14 +14,15 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
-        {/* ✅ Links corretos para Material Symbols */}
+        {/* ✅ Adicione este link para os ícones do Google Fonts */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
           rel="stylesheet"
         />
-     
       </head>
-      <body className="antialiased">
+      <body
+        className={`antialiased`}
+      >
         {children}
       </body>
     </html>

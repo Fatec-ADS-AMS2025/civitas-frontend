@@ -127,7 +127,7 @@ export default function Sidebar({
         onFocus={() => setKeyboardExpanded(true)}
         onBlur={() => setKeyboardExpanded(false)}
         className="group hidden sm:flex flex-col justify-between items-stretch bg-secundary-1 text-tertialy-1 rounded-2xl overflow-hidden select-none transition-all 
-                duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-[calc(100vh-2rem)] fixed left-4 top-4 z-50"
+                duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4"
         style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
       >
 
