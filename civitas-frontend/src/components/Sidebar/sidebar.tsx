@@ -74,7 +74,7 @@ const defaultItems: SidebarItem[] = [
     key: "instituicao",
     label: "Instituição",
     icon: <IconFlowChart />,
-    href: "/dashboard/instituicao",
+    href: "/dashboard/instituicoes",
   },
   {
     key: "fornecedor",
@@ -123,13 +123,11 @@ export default function Sidebar({
     <>
       <aside
         aria-label="Sidebar"
-        tabIndex={0}
-        onFocus={() => setKeyboardExpanded(true)}
-        onBlur={() => setKeyboardExpanded(false)}
         className="group hidden sm:flex flex-col justify-between items-stretch bg-secundary-1 text-tertialy-1 rounded-2xl overflow-hidden select-none transition-all 
-                duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4"
+          duration-200 ease-out w-18 hover:w-64 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4"
         style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
       >
+
 
         <div className="pt-6 pb-4 px-3 flex flex-col gap-6">
           <div className="flex items-center gap-3">
@@ -169,9 +167,9 @@ export default function Sidebar({
 
                   <div
                     className={`flex-1 text-base truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200 
-                        ${isActive 
-                          ? "text-white opacity-100" 
-                          : "font-semibold"
+                        ${isActive
+                        ? "text-white opacity-100"
+                        : "font-semibold"
                       }`}>
                     {it.label}
                   </div>
