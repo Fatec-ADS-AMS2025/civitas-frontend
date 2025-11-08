@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 export default function Dashboard() {
   const [fontSize, setFontSize] = useState(16)
@@ -137,9 +138,11 @@ export default function Dashboard() {
               </div>
               <span className="text-gray-400 self-start sm:self-center">...</span>
             </div>
-            <button className="w-full bg-[#C5C5C5] text-gray-800 rounded-full py-2.5 sm:py-3 px-4 sm:px-6 font-medium hover:bg-[#B5B5B5] active:bg-[#B5B5B5] transition-colors text-sm sm:text-base touch-manipulation">
-              {"{Nome da Instituição}"}
-            </button>
+            <Link href="/dashboard/instituicoes">
+              <button className="w-full bg-[#C5C5C5] text-gray-800 rounded-full py-2.5 sm:py-3 px-4 sm:px-6 font-medium hover:bg-[#B5B5B5] active:bg-[#B5B5B5] transition-colors text-sm sm:text-base touch-manipulation">
+                Ver todas as instituições
+              </button>
+            </Link>
           </div>
         </div>
 

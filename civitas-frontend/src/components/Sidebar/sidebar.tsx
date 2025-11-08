@@ -61,6 +61,8 @@ const IconFlowChart = () => (
 );
 const IconBox = () => <span className="material-symbols-outlined">box</span>;
 const IconSell = () => <span className="material-symbols-outlined">sell</span>;
+const IconMenu = () => <span className="material-symbols-outlined">menu</span>;
+const IconClose = () => <span className="material-symbols-outlined">close</span>;
 
 const defaultItems: SidebarItem[] = [
   { key: "home", label: "Home", icon: <IconHome />, href: "/dashboard" },
@@ -74,7 +76,7 @@ const defaultItems: SidebarItem[] = [
     key: "instituicao",
     label: "Instituição",
     icon: <IconFlowChart />,
-    href: "/dashboard/instituicao",
+    href: "/dashboard/instituicoes",
   },
   {
     key: "fornecedor",
@@ -121,16 +123,15 @@ export default function Sidebar({
 
   return (
     <>
+      {/* Desktop Sidebar - Vertical Left */}
       <aside
         aria-label="Sidebar"
         tabIndex={0}
         onFocus={() => setKeyboardExpanded(true)}
         onBlur={() => setKeyboardExpanded(false)}
         className="group hidden sm:flex flex-col justify-between items-stretch bg-secundary-1 text-tertialy-1 rounded-2xl overflow-hidden select-none transition-all 
-                duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4"
-        style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
+                duration-200 ease-out w-18 hover:w-64 focus-within:w-64 h-[calc(100vh-2rem)] z-50 fixed left-4 top-4 shadow-2xl"
       >
-
         <div className="pt-6 pb-4 px-3 flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-12 h-10 rounded-md bg-transparent overflow-hidden flex-shrink-0">
@@ -140,7 +141,7 @@ export default function Sidebar({
                 className="object-contain size-full"
               />
             </div>
-            <div className="ml-1 text-2xl font-semibold text-tertialy-1  opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="ml-1 text-2xl font-semibold text-tertialy-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               Civitas
             </div>
           </div>
@@ -154,10 +155,9 @@ export default function Sidebar({
                   onClick={() => handleNavigate(it)}
                   className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 outline-none cursor-pointer 
                     ${isActive
-                      ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white" //ativo
-                      : " text-tertialy-1" // não ativo
+                      ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white"
+                      : " text-tertialy-1"
                     }`}>
-
                   <div
                     className={`${isActive
                       ? "text-white border-b-2 border-white pb-[2px]"
@@ -166,7 +166,6 @@ export default function Sidebar({
                   >
                     {it.icon}
                   </div>
-
                   <div
                     className={`flex-1 text-base truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200 
                         ${isActive 
@@ -196,31 +195,82 @@ export default function Sidebar({
         </div>
       </aside>
 
-      {/* mobile bottom bar */}
-      <nav className="sm:hidden fixed bottom-4 left-4 right-4 bg-secundary-1 rounded-2xl flex items-center justify-between px-4 py-2 text-teal-100 shadow-lg">
-        {items.slice(0, 5).map((it) => (
-          <button
-            key={it.key}
-            aria-label={it.label}
-            onClick={() => handleNavigate(it)}
-            className="flex flex-col items-center gap-1 text-xs w-full cursor-pointer"
-          >
-            <div className="w-6 h-6 flex items-center justify-center">
-              {it.icon}
+      {/* Mobile Top Navigation */}
+      <nav className="sm:hidden fixed top-0 left-0 right-0 bg-secundary-1 text-tertialy-1 z-50 shadow-lg">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-8 rounded-md bg-transparent overflow-hidden flex-shrink-0">
+              <img
+                src="/logo.png"
+                alt="Logo Civitas"
+                className="object-contain size-full"
+              />
             </div>
-            <div className="truncate text-[11px]">{it.label}</div>
-          </button>
-        ))}
-        <button
-          className="flex flex-col items-center gap-1 text-xs w-full cursor-pointer"
-          onClick={() => router.push("/perfil")}
-          aria-label="Perfil"
-        >
-          <div className="w-6 h-6 flex items-center justify-center">
-            <IconProfile />
+            <div className="text-lg font-semibold text-tertialy-1">
+              Civitas
+            </div>
           </div>
-          <div className="truncate text-[11px]">Perfil</div>
-        </button>
+
+          {/* Menu Button */}
+          <button
+            onClick={() => setKeyboardExpanded(!keyboardExpanded)}
+            className="p-2 rounded-md hover:bg-secundary-1/80 transition-colors"
+            aria-label="Toggle menu"
+          >
+            <span className="material-symbols-outlined">
+              {keyboardExpanded ? 'close' : 'menu'}
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile Menu Dropdown */}
+        {keyboardExpanded && (
+          <div className="border-t border-tertialy-1/20">
+            <div className="px-4 py-2 space-y-1">
+              {items.map((it) => {
+                const isActive = activeKey === it.key;
+                return (
+                  <button
+                    key={it.key}
+                    onClick={() => {
+                      handleNavigate(it);
+                      setKeyboardExpanded(false);
+                    }}
+                    className={`flex items-center gap-3 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 
+                      ${isActive
+                        ? "bg-tertialy-1/20 text-white font-semibold"
+                        : "text-tertialy-1 hover:bg-tertialy-1/10"
+                      }`}
+                  >
+                    <div className="flex-none">
+                      {it.icon}
+                    </div>
+                    <div className="flex-1 text-sm">
+                      {it.label}
+                    </div>
+                  </button>
+                );
+              })}
+              
+              {/* Profile Button */}
+              <button
+                onClick={() => {
+                  router.push("/perfil");
+                  setKeyboardExpanded(false);
+                }}
+                className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 text-tertialy-1 hover:bg-tertialy-1/10"
+              >
+                <div className="flex-none">
+                  <IconProfile />
+                </div>
+                <div className="flex-1 text-sm">
+                  Perfil
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
     </>
   );
