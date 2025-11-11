@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import React, { useState } from 'react'
+import Button from '@/components/button'
 
 interface Instituicao {
   id: number
@@ -75,6 +76,8 @@ export default function InstituicoesPage() {
     situacao: ''
   })
 
+  const [instituicoesFiltradas, setInstituicoesFiltradas] = useState<Instituicao[]>(mockInstituicoes)
+
   const handleFiltroChange = (campo: string, valor: string) => {
     setFiltros(prev => ({ ...prev, [campo]: valor }))
   }
@@ -87,10 +90,20 @@ export default function InstituicoesPage() {
       estado: '',
       situacao: ''
     })
+    setInstituicoesFiltradas(mockInstituicoes)
   }
 
   const filtrarInstituicoes = () => {
-    console.log('Aplicando filtros:', filtros)
+    let resultado = mockInstituicoes.filter(instituicao => {
+      return (
+        (filtros.nome === '' || instituicao.nome.toLowerCase().includes(filtros.nome.toLowerCase())) &&
+        (filtros.cnpj === '' || instituicao.cnpj.includes(filtros.cnpj)) &&
+        (filtros.cidade === '' || instituicao.cidade.toLowerCase().includes(filtros.cidade.toLowerCase())) &&
+        (filtros.estado === '' || instituicao.estado === filtros.estado) &&
+        (filtros.situacao === '' || instituicao.situacao === filtros.situacao)
+      )
+    })
+    setInstituicoesFiltradas(resultado)
   }
 
   const handleAcao = (acao: string, id: number) => {
@@ -119,64 +132,50 @@ export default function InstituicoesPage() {
         <p className="text-gray-300 text-sm mb-6">Aqui você busca e filtra</p>
 
         {/* Filtros */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-6">
           <input
             type="text"
             placeholder="Nome"
             value={filtros.nome}
             onChange={(e) => handleFiltroChange('nome', e.target.value)}
-            className="px-4 py-2 rounded-full border-[3px] border-[#0D5660] focus:ring-2 focus:ring-[#0D5660] outline-none text-gray-700 bg-white w-full text-sm"
+            className="px-5 py-3 rounded-full border-[3px] border-[#0D5660] focus:ring-2 focus:ring-[#0D5660] outline-none text-gray-700 bg-white text-sm flex-1 min-w-[200px]"
           />
           <input
             type="text"
             placeholder="CNPJ"
             value={filtros.cnpj}
             onChange={(e) => handleFiltroChange('cnpj', e.target.value)}
-            className="px-4 py-2 rounded-full border-[3px] border-[#0D5660] focus:ring-2 focus:ring-[#0D5660] outline-none text-gray-700 bg-white w-full text-sm"
+            className="px-5 py-3 rounded-full border-[3px] border-[#0D5660] focus:ring-2 focus:ring-[#0D5660] outline-none text-gray-700 bg-white text-sm flex-1 min-w-[200px]"
           />
-          <input
-            type="text"
-            placeholder="Cidade"
-            value={filtros.cidade}
-            onChange={(e) => handleFiltroChange('cidade', e.target.value)}
-            className="px-4 py-2 rounded-full border-[3px] border-[#0D5660] focus:ring-2 focus:ring-[#0D5660] outline-none text-gray-700 bg-white w-full text-sm"
-          />
-          <select
-            value={filtros.estado}
-            onChange={(e) => handleFiltroChange('estado', e.target.value)}
-            className="px-4 py-2 rounded-full border-[3px] border-[#0D5660] focus:ring-2 focus:ring-[#0D5660] outline-none text-gray-500 bg-white w-full text-sm"
-            title="Filtrar por estado"
-          >
-            <option value="">Todos Estados</option>
-            <option value="SP">SP</option>
-            <option value="RJ">RJ</option>
-            <option value="MG">MG</option>
-          </select>
-          <select
-            value={filtros.situacao}
-            onChange={(e) => handleFiltroChange('situacao', e.target.value)}
-            className="px-12 py-2 rounded-full border-[2px] border-[#0D5660] focus:ring-2 focus:ring-[#0D5660] outline-none text-gray-500 bg-white w-full text-sm"
-            title="Filtrar por situação"
-          >
-            <option value="">Todas Situações</option>
-            <option value="Ativa">Ativa</option>
-            <option value="Inativa">Inativa</option>
-          </select>
 
-          <button
+          <Button
             onClick={() => handleAcao('cadastrar', 0)}
-            className="flex items-center justify-center bg-[#58AFAE] text-white px-6 py-3.5 rounded-full hover:opacity-90 transition-all w-full text-base font-semibold border-[1px] border-[#FFFFFF]"
+            variant="primary"
+            style={{
+              backgroundColor: '#58AFAE',
+              border: '1px solid white',
+              padding: '14px 24px',
+              borderRadius: '9999px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              minWidth: '150px'
+            }}
+            className="hover:opacity-90 transition-all"
           >
             <span className="mr-2 text-lg">+</span>
             Cadastrar
-          </button>
+          </Button>
         </div>
 
         {/* Botões de Ação */}
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={filtrarInstituicoes}
-            className="flex items-center justify-center bg-transparent text-white px-18 py-2 rounded-full border border-white hover:opacity-90 transition-all w-full sm:w-auto text-sm"
+            className="flex items-center justify-center bg-transparent text-white px-20 py-2.5 rounded-full border border-white hover:opacity-90 transition-all w-full sm:w-auto text-sm"
           >
             <span className="material-symbols-outlined mr-2 text-sm">filter_alt</span>
             Filtrar
@@ -184,7 +183,7 @@ export default function InstituicoesPage() {
 
           <button
             onClick={limparFiltros}
-            className="bg-[#E74C3C] text-white px-20 py-3.5 rounded-full hover:opacity-90 transition-all w-full sm:w-auto text-base font-semibold"
+            className="bg-[#E74C3C] text-white px-22 py-3.5 rounded-full hover:opacity-90 transition-all w-full sm:w-auto text-base font-semibold"
           >
             Limpar
           </button>
@@ -203,42 +202,50 @@ export default function InstituicoesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {mockInstituicoes.map((i) => (
-                <tr key={i.id} className="hover:bg-gray-50">
-                  <td className="px-3 py-3">{i.id}</td>
-                  <td className="px-3 py-3">
-                    <span
-                      className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                        i.situacao === 'Ativa'
-                          ? 'bg-[#4A9D9D] text-white'
-                          : 'bg-[#E74C3C] text-white'
-                      }`}
-                    >
-                      {i.situacao}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3">{i.nome}</td>
-                  <td className="px-3 py-3">{i.razaoSocial}</td>
-                  <td className="px-3 py-3">{i.cnpj}</td>
-                  <td className="px-3 py-3">{i.cep}</td>
-                  <td className="px-3 py-3">{i.logradouro}</td>
-                  <td className="px-3 py-3">{i.numero}</td>
-                  <td className="px-3 py-3">{i.bairro}</td>
-                  <td className="px-3 py-3">{i.cidade}</td>
-                  <td className="px-3 py-3">{i.estado}</td>
-                  <td className="px-3 py-3">{i.telefone}</td>
-                  <td className="px-3 py-3">{i.email}</td>
-                  <td className="px-3 py-3">
-                    <div className="flex space-x-1">
-                      <button className="p-1 hover:bg-gray-100 rounded"><span className="material-symbols-outlined text-sm">visibility</span></button>
-                      <button className="p-1 hover:bg-gray-100 rounded"><span className="material-symbols-outlined text-sm">edit_square</span></button>
-                      <button className="p-1 hover:bg-[#E74C3C]/20 rounded ">
-                        <span className="material-symbols-outlined text-sm">delete</span>
-                      </button>
-                    </div>
+              {instituicoesFiltradas.length > 0 ? (
+                instituicoesFiltradas.map((i) => (
+                  <tr key={i.id} className="hover:bg-gray-50">
+                    <td className="px-3 py-3">{i.id}</td>
+                    <td className="px-3 py-3">
+                      <span
+                        className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                          i.situacao === 'Ativa'
+                            ? 'bg-[#4A9D9D] text-white'
+                            : 'bg-[#E74C3C] text-white'
+                        }`}
+                      >
+                        {i.situacao}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3">{i.nome}</td>
+                    <td className="px-3 py-3">{i.razaoSocial}</td>
+                    <td className="px-3 py-3">{i.cnpj}</td>
+                    <td className="px-3 py-3">{i.cep}</td>
+                    <td className="px-3 py-3">{i.logradouro}</td>
+                    <td className="px-3 py-3">{i.numero}</td>
+                    <td className="px-3 py-3">{i.bairro}</td>
+                    <td className="px-3 py-3">{i.cidade}</td>
+                    <td className="px-3 py-3">{i.estado}</td>
+                    <td className="px-3 py-3">{i.telefone}</td>
+                    <td className="px-3 py-3">{i.email}</td>
+                    <td className="px-3 py-3">
+                      <div className="flex space-x-1">
+                        <button className="p-1 hover:bg-gray-100 rounded"><span className="material-symbols-outlined text-sm">visibility</span></button>
+                        <button className="p-1 hover:bg-gray-100 rounded"><span className="material-symbols-outlined text-sm">edit_square</span></button>
+                        <button className="p-1 hover:bg-[#E74C3C]/20 rounded ">
+                          <span className="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={14} className="px-3 py-8 text-center text-gray-500">
+                    Nenhuma instituição encontrada com os filtros aplicados.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
