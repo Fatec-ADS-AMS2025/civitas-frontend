@@ -68,7 +68,7 @@ const defaultItems: SidebarItem[] = [
     key: "secretaria",
     label: "Secretaria",
     icon: <IconBalance />,
-    href: "/dashboard/secretarias",
+    href: "/dashboard/secretaria",
   },
   {
     key: "instituicao",

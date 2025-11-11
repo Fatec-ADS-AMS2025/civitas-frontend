@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import SearchBar from "@/components/Table/searchbar";
+import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 
 type User = {
@@ -13,8 +13,64 @@ type User = {
   tipo: "Administrador" | "Cidadão" | "Funcionário";
 };
 
+const columns = [
+  { id: "nome", label: "Nome" },
+  { id: "cpf", label: "CPF" },
+  { id: "matricula", label: "Matrícula" },
+  { id: "cidade", label: "Cidade" },
+  { id: "estado", label: "Estado" },
+  { id: "tipo", label: "Tipo" },
+];
+
+const camposConst: FieldConfig[] = [
+  { key: "nome", placeholder: "Nome", local: "principal" },
+  { key: "cpf", placeholder: "CPF", local: "principal" },
+  { key: "matricula", placeholder: "Matrícula", local: "filtro" },
+  { key: "cidade", placeholder: "Cidade", local: "filtro" },
+  { key: "estado", placeholder: "Estado", local: "filtro" },
+  {
+    key: "tipo",
+    placeholder: "Tipo",
+    local: "filtro",
+    type: "select",
+    options: [
+      { value: "Administrador", label: "Administrador" },
+      { value: "Cidadão", label: "Cidadão" },
+      { value: "Funcionário", label: "Funcionário" },
+    ],
+  },
+];
+
 const HomePage = () => {
+
   const usuarios: User[] = [
+    {
+      id: 1,
+      nome: "Ana Silva",
+      cpf: "123.456.789-00",
+      matricula: "ADM001",
+      cidade: "São Paulo",
+      estado: "SP",
+      tipo: "Administrador",
+    },
+    {
+      id: 1,
+      nome: "Ana Silva",
+      cpf: "123.456.789-00",
+      matricula: "ADM001",
+      cidade: "São Paulo",
+      estado: "SP",
+      tipo: "Administrador",
+    },
+    {
+      id: 1,
+      nome: "Ana Silva",
+      cpf: "123.456.789-00",
+      matricula: "ADM001",
+      cidade: "São Paulo",
+      estado: "SP",
+      tipo: "Administrador",
+    },
     {
       id: 1,
       nome: "Ana Silva",
@@ -108,58 +164,16 @@ const HomePage = () => {
   ];
 
   const [filteredData, setFilteredData] = useState<User[]>(usuarios);
-
-  const normalizeString = (str: string) =>
-    str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
-
-  const cleanCPF = (cpf: string) => cpf.replace(/\D/g, "");
-
-  const handleSearch = (filters: {
-    nome: string;
-    cpf: string;
-    cidade: string;
-    estado: string;
-    tipo: string;
-  }) => {
-    const { nome, cpf, cidade, estado, tipo } = filters;
-
-    const filtered = usuarios.filter((u) => {
-      const nomeMatch = normalizeString(u.nome).includes(normalizeString(nome));
-      const cpfMatch = cleanCPF(u.cpf).includes(cleanCPF(cpf));
-      const cidadeMatch = normalizeString(u.cidade).includes(
-        normalizeString(cidade)
-      );
-      const estadoMatch = normalizeString(u.estado).includes(
-        normalizeString(estado)
-      );
-      const tipoMatch = tipo ? u.tipo === tipo : true;
-      return nomeMatch && cpfMatch && cidadeMatch && estadoMatch && tipoMatch;
-    });
-
-    setFilteredData(filtered);
-  };
+  const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
 
   return (
-    <main className="p-6 bg-transparent min-h-screen">
-      <div className="mb-6">
-        <h1 className="text-4xl font-bold text-[#004D4D]">
-          Listagem de Cadastros
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Home &lt; Cadastros &lt; Listagem
-        </p>
-      </div>
-
+    <>
       {/* Barra de busca */}
-      <SearchBar onSearch={handleSearch} />
+      <SearchBar dados={usuarios} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
 
       {/* Tabela de resultados */}
-      <Table data={filteredData} />
-    </main>
+      <Table data={filteredData} columns={columns} />
+    </>
   );
 };
 
