@@ -4,13 +4,23 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 
 type User = {
-  id: number;
+  id: number | undefined;
   nome: string;
   cpf: string;
   matricula: string;
   cidade: string;
   estado: string;
   tipo: "Administrador" | "Cidadão" | "Funcionário";
+};
+
+const novoUsuario: User = {
+  id: undefined,
+  nome: "",
+  cpf: "",
+  matricula: "",
+  cidade: "",
+  estado: "",
+  tipo: "Cidadão",
 };
 
 const columns = [
@@ -169,7 +179,7 @@ const HomePage = () => {
   return (
     <>
       {/* Barra de busca */}
-      <SearchBar dados={usuarios} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
+      <SearchBar model={novoUsuario} dados={usuarios} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
 
       {/* Tabela de resultados */}
       <Table data={filteredData} columns={columns} />

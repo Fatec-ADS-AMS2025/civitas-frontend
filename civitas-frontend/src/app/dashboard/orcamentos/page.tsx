@@ -4,9 +4,15 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 
 type Orcamento = {
-  id: number;
-  ano: number;
-  valor: string;
+  id: number | undefined;
+  ano: number | undefined;
+  valor: string | undefined;
+};
+
+const novaOrcamento: Orcamento = {
+  id: undefined,
+  ano: undefined,
+  valor: undefined,
 };
 
 const columns = [
@@ -55,7 +61,7 @@ const OrcamentosPage = () => {
   return (
     <>
       {/* Barra de busca */}
-      <SearchBar dados={orcamentos} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
+      <SearchBar model={novaOrcamento} dados={orcamentos} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
 
       {/* Tabela de resultados */}
       <Table data={filteredData} columns={columns} />

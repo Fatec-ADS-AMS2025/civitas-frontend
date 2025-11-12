@@ -19,6 +19,22 @@ type Instituicao = {
   situacao: "Ativa" | "Inativa";
 };
 
+const novaInstituicao: Instituicao = {
+  id: 0,
+  nome: "",
+  razao: "",
+  cnpj: "",
+  cep: "",
+  logradouro: "",
+  num: "",
+  bairro: "",
+  cidade: "",
+  estado: "",
+  telefone: "",
+  email: "",
+  situacao: "Ativa",
+};
+
 const columns = [
   { id: "nome", label: "Nome" },
   { id: "razao", label: "Razão Social" },
@@ -223,7 +239,7 @@ const Page = () => {
   return (
     <>
       {/* Barra de busca */}
-      <SearchBar dados={instituicoes} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
+      <SearchBar model={novaInstituicao} dados={instituicoes} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
 
       {/* Tabela de resultados */}
       <Table data={filteredData} columns={columns} />

@@ -11,8 +11,8 @@ type ModalProps = {
 export default function Modal({ value, setValue, children }: ModalProps) {
   if (!value) return null;
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded shadow-lg relative min-w-[300px] text-gray-900">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 z-[9998] p-[300px]">
+      <div className="bg-white p-6 rounded-xl shadow-lg relative min-w-[300px] text-gray-900 max-w-screen max-h-screen h-fit w-fit overflow-auto">
         <button
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
           onClick={() => setValue(false)}

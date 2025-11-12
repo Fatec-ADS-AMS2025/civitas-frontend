@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import Modal from "../modal";
+import Form from "../Form/form";
+import { usePathname } from 'next/navigation'
 
 type FieldConfig = {
   key: string;
@@ -17,6 +20,7 @@ type SearchBarProps = {
   setDados: React.Dispatch<React.SetStateAction<any>>;
   onCadastrar?: () => void;
   showCadastrarButton?: boolean;
+  model: object | string[];
 };
 
 const SearchBar = ({
@@ -24,13 +28,28 @@ const SearchBar = ({
   setCampos,
   dados,
   setDados,
-  onCadastrar,
+  model,
   showCadastrarButton = true,
 }: SearchBarProps) => {
   const [backupDados] = useState(dados);
   const [backupCampos] = useState(campos);
+  const [modalOpen, setModalOpen] = useState<boolean | null>(null);
+
+  const pathname = usePathname() || "";
+  const paths = pathname.split("/").filter(Boolean);
+  const nomePagina = paths[paths.length - 1];
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Função para normalizar texto: remove pontuação, caracteres especiais e converte para minúsculas
+  const normalizeText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize("NFD") // Decompõe caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+      .replace(/[^a-z0-9\s]/g, "") // Remove pontuação e caracteres especiais
+      .trim();
+  };
 
   const handleChange = (key: string, value: string) => {
     campos = campos.map(c =>
@@ -39,12 +58,12 @@ const SearchBar = ({
     setCampos(campos);
     let dadosFiltrados = dados;
     campos.forEach(element => {
-      const fieldValue = element.value?.toString().toLowerCase() || "";
-      if( fieldValue === "") return;
+      const fieldValue = normalizeText(element.value?.toString() || "");
+      if (fieldValue === "") return;
       dadosFiltrados = dadosFiltrados.filter((item: any) => {
-        const itemFieldValue = item[element.key]?.toString().toLowerCase() || "";
+        const itemFieldValue = normalizeText(item[element.key]?.toString() || "");
         return itemFieldValue.includes(fieldValue);
-      });      
+      });
     });
     setDados(dadosFiltrados);
   };
@@ -88,7 +107,7 @@ const SearchBar = ({
   };
 
   return (
-    <div className="bg-[#393939] rounded-2xl p-5 shadow-lg w-full flex flex-col gap-4">
+    <div className="bg-[#393939] rounded-xl p-5 shadow-lg w-full flex flex-col gap-4 skeleton">
       {/* Cabeçalho */}
       <div>
         <p className="text-white text-base">Busca:</p>
@@ -102,7 +121,7 @@ const SearchBar = ({
         <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
           {showCadastrarButton && (
             <button
-              onClick={onCadastrar}
+              onClick={() => setModalOpen(true)}
               className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
             >
               <span className="material-symbols-outlined text-white text-base">add</span>
@@ -133,6 +152,11 @@ const SearchBar = ({
             Limpar
           </button>
         </div>
+      )}
+      {modalOpen && (
+        <Modal setValue={() => setModalOpen(false)} value={modalOpen}>
+          <Form object={model} name={nomePagina} onCancel={() => setModalOpen(false)} onConfirm={() => { }} />
+        </Modal>
       )}
     </div>
   );

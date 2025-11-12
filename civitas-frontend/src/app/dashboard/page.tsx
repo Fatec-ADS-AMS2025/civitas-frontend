@@ -6,14 +6,14 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen font-sans">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-8 py-3 sm:py-4 md:py-6">
+      <div className="bg-white border-gray-200 pb-10">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
           <div className="flex-1">
-            <h1 className="text-[48px] font-semibold leading-tight text-[#004C57]">
+            <h1 className="text-[48px] font-semibold leading-tight text-[#004C57] skeleton">
               Bem-Vindo {"{user}"}
             </h1>
 
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">
+            <p className="text-gray-600 mt-1 text-sm sm:text-base skeleton">
               Vamos ao gerenciamento?
             </p>
           </div>
@@ -21,13 +21,13 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="px-3 sm:px-4 md:px-8 py-3 sm:py-4 md:py-6">
+      <div>
 
         {/* Top Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-8">
           {/* Valor Disponível */}
           <div
-            className="relative p-6 rounded-3xl text-[#003840] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md"
+            className="relative p-6 rounded-3xl text-[#003840] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton"
             style={{ background: "linear-gradient(180deg, #007E91 0%, #A3F3FF 100%)" }}
           >
             <div className="relative z-10">
@@ -45,7 +45,7 @@ export default function Dashboard() {
 
           {/* Balança */}
           <div
-            className="relative p-6 rounded-3xl text-[#E4E4E4] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md"
+            className="relative p-6 rounded-3xl text-[#E4E4E4] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton"
             style={{ background: "linear-gradient(180deg, #000000 0%, #454545 100%)" }}
           >
             <div className="relative z-10">
@@ -60,7 +60,7 @@ export default function Dashboard() {
 
           {/* Gastos Totais */}
           <div
-            className="relative p-6 rounded-3xl text-[#602B00] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md"
+            className="relative p-6 rounded-3xl text-[#602B00] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton"
             style={{ background: "linear-gradient(180deg, #FF8729 0%, #e3b17eff 100%)" }}
           >
             <div className="relative z-10">
@@ -73,14 +73,14 @@ export default function Dashboard() {
         </div>
 
          {/* Countdown */}
-        <div className="text-center mb-4 sm:mb-6 lg:mb-8">
+        <div className="text-center mb-4 sm:mb-6 lg:mb-8 skeleton">
           <p className="text-gray-700 font-bold text-sm sm:text-base px-2">14 dias até a reposição da verba.</p>
         </div>
 
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           {/* Gastos Previstos */}
-          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Gastos previstos para esse mês:</h3>
@@ -94,7 +94,7 @@ export default function Dashboard() {
           </div>
 
           {/* Instituições Desbalanceadas */}
-          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Instituições desbalanceadas</h3>
@@ -111,7 +111,7 @@ export default function Dashboard() {
         {/* Chart and Last Expenses */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           {/* Gráfico */}
-          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Gráfico</h3>
               <span className="text-gray-400">...</span>
@@ -181,7 +181,7 @@ export default function Dashboard() {
           </div>
 
           {/* Últimos Gastos */}
-          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Últimos Gastos:</h3>
