@@ -1,44 +1,90 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-type SearchBarProps = {
-  onSearch: (filters: {
-    nome: string;
-    cpf: string;
-    cidade: string;
-    estado: string;
-    tipo: string;
-  }) => void;
+type FieldConfig = {
+  key: string;
+  placeholder: string;
+  local: "principal" | "filtro";
+  value?: string;
+  type?: "text" | "select";
+  options?: { value: string; label: string }[];
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [filters, setFilters] = useState({
-    nome: "",
-    cpf: "",
-    cidade: "",
-    estado: "",
-    tipo: "",
-  });
+type SearchBarProps = {
+  campos: FieldConfig[];
+  setCampos: React.Dispatch<React.SetStateAction<FieldConfig[]>>;
+  camposFiltro?: FieldConfig[];
+  dados: any;
+  setDados: React.Dispatch<React.SetStateAction<any>>;
+  onCadastrar?: () => void;
+  showCadastrarButton?: boolean;
+};
+
+const SearchBar = ({
+  campos,
+  setCampos,
+  dados,
+  setDados,
+  onCadastrar,
+  showCadastrarButton = true,
+}: SearchBarProps) => {
+  const [backupDados] = useState(dados);
+  const [backupCampos] = useState(campos);
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  useEffect(() => {
-    onSearch(filters);
-  }, [filters]);
-
   const handleChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    campos = campos.map(c =>
+      c.key === key ? { ...c, value } : c
+    );
+    setCampos(campos);
+    let dadosFiltrados = dados;
+    campos.forEach(element => {
+      const fieldValue = element.value?.toString().toLowerCase() || "";
+      if( fieldValue === "") return;
+      dadosFiltrados = dadosFiltrados.filter((item: any) => {
+        const itemFieldValue = item[element.key]?.toString().toLowerCase() || "";
+        return itemFieldValue.includes(fieldValue);
+      });      
+    });
+    setDados(dadosFiltrados);
   };
 
   const toggleAdvanced = () => setShowAdvanced((prev) => !prev);
 
   const clearFilters = () => {
-    setFilters({
-      nome: "",
-      cpf: "",
-      cidade: "",
-      estado: "",
-      tipo: "",
-    });
+    setDados(backupDados);
+    setCampos(backupCampos);
+  };
+
+  const renderField = (field: FieldConfig) => {
+    if (field.type === "select" && field.options) {
+      return (
+        <select
+          key={field.key}
+          value={dados[field.key] || ""}
+          onChange={(e) => handleChange(field.key, e.target.value)}
+          className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black"
+        >
+          <option value="">{field.placeholder}</option>
+          {field.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    return (
+      <input
+        key={field.key}
+        type="text"
+        value={campos.find(c => c.key === field.key)?.value || ""}
+        placeholder={field.placeholder}
+        onChange={(e) => handleChange(field.key, e.target.value)}
+        className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+      />
+    );
   };
 
   return (
@@ -51,68 +97,35 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
 
       {/* Linha principal */}
       <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
-        <input
-          type="text"
-          placeholder="Nome"
-          value={filters.nome}
-          onChange={(e) => handleChange("nome", e.target.value)}
-          className="rounded-full px-4 py-2 text-sm max-w-md md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
-        />
-        <input
-          type="text"
-          placeholder="CPF"
-          value={filters.cpf}
-          onChange={(e) => handleChange("cpf", e.target.value)}
-          className="rounded-full px-4 py-2 text-sm max-w-sm md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
-        />
+        {(campos.filter(e => e.local === "principal")).map((field) => renderField(field))}
 
         <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
-          <button
-            onClick={() => alert("Levar para a tela de cadastro")}
-            className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
-          >
-            <span className="material-symbols-outlined text-white text-base">add</span>
-            Cadastrar
-          </button>
+          {showCadastrarButton && (
+            <button
+              onClick={onCadastrar}
+              className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            >
+              <span className="material-symbols-outlined text-white text-base">add</span>
+              Cadastrar
+            </button>
+          )}
 
-          <button
-            onClick={toggleAdvanced}
-            className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
-          >
-            <span className="material-symbols-outlined text-white text-base">filter_alt</span>
-            {showAdvanced ? "Ocultar" : "Filtrar"}
-          </button>
+          {(campos.filter(e => e.local === "filtro")).length > 0 && (
+            <button
+              onClick={toggleAdvanced}
+              className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            >
+              <span className="material-symbols-outlined text-white text-base">filter_alt</span>
+              {showAdvanced ? "Ocultar" : "Filtrar"}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Filtros avançados */}
-      {showAdvanced && (
+      {showAdvanced && (campos.filter(e => e.local === "filtro")).length > 0 && (
         <div className="flex flex-col md:flex-row md:items-center gap-3 border-t border-gray-600 pt-4 animate-fadeIn">
-          <input
-            type="text"
-            placeholder="Cidade"
-            value={filters.cidade}
-            onChange={(e) => handleChange("cidade", e.target.value)}
-            className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
-          />
-          <input
-            type="text"
-            placeholder="Estado"
-            value={filters.estado}
-            onChange={(e) => handleChange("estado", e.target.value)}
-            className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
-          />
-          <select
-            value={filters.tipo}
-            onChange={(e) => handleChange("tipo", e.target.value)}
-            className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black"
-          >
-            <option value="">Tipo</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Cidadão">Cidadão</option>
-            <option value="Funcionário">Funcionário</option>
-          </select>
-
+          {campos.filter(e => e.local === "filtro").map((field) => renderField(field))}
           <button
             onClick={clearFilters}
             className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full transition w-full md:w-auto"
@@ -125,4 +138,4 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   );
 };
 
-export default SearchBar;
+export { SearchBar, type FieldConfig };

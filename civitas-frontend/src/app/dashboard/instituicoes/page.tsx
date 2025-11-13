@@ -1,8 +1,7 @@
 "use client";
-
 import React, { useState } from "react";
-import SearchBar from "@/components/Table/searchbar_Inst";
-import Table from "@/components/Table/table_Inst";
+import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
+import Table from "@/components/Table/table";
 
 type Instituicao = {
   id: number;
@@ -19,6 +18,34 @@ type Instituicao = {
   email: string;
   situacao: "Ativa" | "Inativa";
 };
+
+const columns = [
+  { id: "nome", label: "Nome" },
+  { id: "razao", label: "Razão Social" },
+  { id: "cnpj", label: "CNPJ" },
+  { id: "cidade", label: "Cidade" },
+  { id: "estado", label: "Estado" },
+  { id: "telefone", label: "Telefone" },
+  { id: "email", label: "E-mail" },
+  { id: "situacao", label: "Situação" },
+];
+
+const camposConst: FieldConfig[] = [
+  { key: "nome", placeholder: "Nome", local: "principal" },
+  { key: "cnpj", placeholder: "CNPJ", local: "principal" },
+  { key: "cidade", placeholder: "Cidade", local: "filtro" },
+  { key: "estado", placeholder: "Estado", local: "filtro" },
+  {
+    key: "situacao",
+    placeholder: "Situação",
+    local: "filtro",
+    type: "select",
+    options: [
+      { value: "Ativa", label: "Ativa" },
+      { value: "Inativa", label: "Inativa" },
+    ],
+  },
+];
 
 const Page = () => {
 
@@ -190,66 +217,17 @@ const Page = () => {
     }
   ];
 
-  const [filteredData, setFilteredData] =
-    useState<Instituicao[]>(instituicoes);
-
-
-  const normalize = (str: string) =>
-    str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
-  const cleanCNPJ = (cnpj: string) => cnpj.replace(/\D/g, "");
-
-  const handleSearch = (filters: any) => {
-
-    const filtered = instituicoes.filter((inst) => {
-
-      const nomeMatch =
-        normalize(inst.nome).includes(normalize(filters.nome));
-
-      const cnpjMatch =
-        cleanCNPJ(inst.cnpj).includes(cleanCNPJ(filters.cnpj));
-
-      const cidadeMatch =
-        normalize(inst.cidade).includes(normalize(filters.cidade));
-
-      const estadoMatch =
-        normalize(inst.estado).includes(normalize(filters.estado));
-
-      const situacaoMatch =
-        filters.situacao ? inst.situacao === filters.situacao : true;
-
-      return (
-        nomeMatch &&
-        cnpjMatch &&
-        cidadeMatch &&
-        estadoMatch &&
-        situacaoMatch
-      );
-    });
-
-    setFilteredData(filtered);
-  };
+  const [filteredData, setFilteredData] = useState<Instituicao[]>(instituicoes);
+  const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
 
   return (
-    <main className="p-6 bg-gray-100 min-h-screen">
+    <>
+      {/* Barra de busca */}
+      <SearchBar dados={instituicoes} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
 
-      {/* Título */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-bold text-[#004D4D]">
-          Listagem de Instituições
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Home &lt; Instituições &lt; Listagem
-        </p>
-      </div>
-
-      {/* SearchBar */}
-      <SearchBar onSearch={handleSearch} />
-
-      {/* Tabela */}
-      <Table data={filteredData} />
-
-    </main>
+      {/* Tabela de resultados */}
+      <Table data={filteredData} columns={columns} />
+    </>
   );
 };
 
