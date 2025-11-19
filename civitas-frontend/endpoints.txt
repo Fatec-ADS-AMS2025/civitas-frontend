@@ -1,0 +1,74 @@
+•	GET    /api/usuario
+•	GET    /api/usuario/GetUsuarioByCpf?cpf={cpf}
+•	GET    /api/usuario/GetUsuarioById?id={id}
+•	POST   /api/usuario               (body: UsuarioDTO)
+•	PUT    /api/usuario/{id}          (body: UsuarioDTO)
+•	DELETE /api/usuario?id={id}       (id via query)
+•	PATCH  /api/usuario/{id}/alterar-situacao
+DespesaController (Controllers\DespesaController.cs)
+•	GET    /api/despesa
+•	GET    /api/despesa/{id}
+•	POST   /api/despesa               (body: DespesaDTO)
+•	PUT    /api/despesa/{id}          (body: DespesaDTO)
+•	DELETE /api/despesa?id={id}       (id via query)
+•	PATCH  /api/despesa/{id}/alterar-situacao
+FornecedorController (Controllers\FornecedorController.cs)
+•	GET    /api/fornecedor
+•	GET    /api/fornecedor/{id}
+•	POST   /api/fornecedor            (body: FornecedorDTO)
+•	PUT    /api/fornecedor/{id}       (body: FornecedorDTO)
+•	PATCH  /api/fornecedor/{id}/alterar-situacao
+DocumentoController (Controllers\DocumentoController.cs)
+•	GET    /api/documento
+•	GET    /api/documento/{id}
+•	POST   /api/documento             (body: DocumentoDTO)
+•	PUT    /api/documento/{id}        (body: DocumentoDTO)
+•	DELETE /api/documento/{id}
+SecretariaController (Controllers\SecretariaController.cs)
+•	GET    /api/secretaria
+•	GET    /api/secretaria/{id}
+•	POST   /api/secretaria            (body: SecretariaDTO)
+•	PUT    /api/secretaria/{id}       (body: SecretariaDTO)
+•	DELETE /api/secretaria/{id}
+•	PATCH  /api/secretaria/{id}/alterar-situacao
+AuditoriaController (Controllers\AuditoriaController.cs)
+•	GET    /api/auditoria
+•	GET    /api/auditoria/{id}
+•	GET    /api/auditoria/GetByUsuarioId/{usuarioId}
+•	GET    /api/auditoria/GetByEntidade?nomeEntidade={nome}
+•	GET    /api/auditoria/GetByOperacao?operacao={operacao}
+•	POST   /api/auditoria              (body: AuditoriaDTO)
+•	PUT    /api/auditoria/{id}         (body: AuditoriaDTO)
+•	DELETE /api/auditoria/{id}
+•	PATCH  /api/auditoria/{id}/alterar-situacao
+InstituicaoController (Controllers\InstituicaoController.cs)
+•	GET    /api/instituicao
+•	GET    /api/instituicao/{id}
+•	GET    /api/instituicao/GetInstituicaoByName?name={name}
+•	POST   /api/instituicao            (body: InstituicaoDTO)
+•	PUT    /api/instituicao/{id}       (body: InstituicaoDTO)
+•	PATCH  /api/instituicao/{id}/AlterarSituacao
+UnidadeMedidaController (Controllers\UnidadeMedidaController.cs)
+•	GET    /api/unidademedida
+•	GET    /api/unidademedida/{id}
+•	POST   /api/unidademedida          (body: UnidadeMedidaDTO)
+•	PUT    /api/unidademedida/{id}     (body: UnidadeMedidaDTO)
+•	PATCH  /api/unidademedida/{id}/AlterarSituacao
+FluxoController (Controllers\FluxoController.cs)
+•	GET    /api/fluxo
+•	GET    /api/fluxo/{id}
+•	POST   /api/fluxo                  (body: FluxoDTO)
+•	PUT    /api/fluxo/{id}             (body: FluxoDTO)
+•	PATCH  /api/fluxo/{id}/alterar-status   (body: Status enum)
+TipoDespesaController (Controllers\TipoDespesaController.cs)
+•	GET    /api/tipodespesa
+•	GET    /api/tipodespesa/{id}
+•	POST   /api/tipodespesa            (body: TipoDespesaDTO)
+•	PUT    /api/tipodespesa/{id}       (body: TipoDespesaDTO)
+•	PATCH  /api/tipodespesa/{id}/AlterarSituacao
+OrcamentoController (Controllers\OrcamentoController.cs)
+•	GET    /api/orcamento
+•	GET    /api/orcamento/{idOrcamento}
+•	POST   /api/orcamento              (body: OrcamentoDTO)
+•	PUT    /api/orcamento/{idOrcamento} (body: OrcamentoDTO)
+•	DELETE /api/orcamento/{idOrcamento}

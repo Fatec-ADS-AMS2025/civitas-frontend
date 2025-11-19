@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Sidebar from '@/components/Sidebar/sidebar';
 import { useRouter } from "next/navigation";
+// import { alterLoading, loading } from '@/global/useLoading';
 
 
 export default function Layout({
@@ -10,9 +11,8 @@ export default function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  const [loading, setLoading] = useState(true);
   const paiRef = useRef<HTMLDivElement>(null);
+  const [loading, alterLoading] = useState(true);
 
   const router = useRouter();
   const pathname = usePathname() || "/dashboard"; // pega a rota atual
@@ -33,22 +33,21 @@ export default function Layout({
     }
   }
 
-  useEffect(() => {
-    setLoading(true);
-    if (!paiRef.current) return;
+  // useEffect(() => {
+  //   if (!paiRef.current) return;
 
-    // adiciona a classe skeleton a todos os divs do pai
-    const divs = paiRef.current.getElementsByClassName("skeleton");
+  //   // adiciona a classe skeleton a todos os divs do pai
+  //   const divs = paiRef.current.getElementsByClassName("skeleton");
 
-    // depois de 2s, remove o skeleton
-    const timer = setTimeout(() => {
-      Array.from(divs).forEach(div => div.classList.remove("skeleton"));
-      setLoading(false);
-    }, 2000);
+  //   // depois de 2s, remove o skeleton
+  //   const timer = setTimeout(() => {
+  //     Array.from(divs).forEach(div => div.classList.remove("skeleton"));
+  //     alterLoading(false);
+  //   }, 2000);
 
-    setLoading(false);
-    return () => clearTimeout(timer);
-  }, [pathname]);
+  //   alterLoading(false);
+  //   return () => clearTimeout(timer);
+  // }, [pathname, loading]);
 
   return (
     <div className='flex'>

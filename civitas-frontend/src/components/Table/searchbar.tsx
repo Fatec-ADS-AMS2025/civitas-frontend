@@ -18,7 +18,7 @@ type SearchBarProps = {
   camposFiltro?: FieldConfig[];
   dados: any;
   setDados: React.Dispatch<React.SetStateAction<any>>;
-  onCadastrar?: () => void;
+  onCadastrar?: (data: any) => Promise<any>;
   showCadastrarButton?: boolean;
   model: object | string[];
 };
@@ -29,6 +29,7 @@ const SearchBar = ({
   dados,
   setDados,
   model,
+  onCadastrar,
   showCadastrarButton = true,
 }: SearchBarProps) => {
   const [backupDados] = useState(dados);
@@ -155,7 +156,23 @@ const SearchBar = ({
       )}
       {modalOpen && (
         <Modal setValue={() => setModalOpen(false)} value={modalOpen}>
-          <Form object={model} name={nomePagina} onCancel={() => setModalOpen(false)} onConfirm={() => { }} />
+          <Form 
+            object={model} 
+            name={nomePagina} 
+            type="create"
+            onCancel={() => setModalOpen(false)} 
+            onConfirm={async (data) => {
+              try {
+                if (onCadastrar) {
+                  await onCadastrar(data);
+                }
+                setModalOpen(false);
+              } catch (error) {
+                console.error('Erro ao cadastrar:', error);
+                alert('Erro ao cadastrar. Tente novamente.');
+              }
+            }} 
+          />
         </Modal>
       )}
     </div>

@@ -11,14 +11,25 @@ type Column = {
 type TableProps = {
   data: any[];
   columns: Column[];
+  actions?: string[];
+  onEdit?: (id: number, data: any) => Promise<any>;
+  onDelete?: (id: number) => Promise<void>;
 };
 
-const Table = ({ data, columns }: TableProps) => {
+const Table = ({ data, columns, onEdit, onDelete, actions = ["edit", "view"] }: TableProps) => {
 
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
 
+  // Função para identificar o campo ID do objeto
+  const getIdField = (obj: any): string => {
+    if (obj.id !== undefined) return 'id';
+    if (obj.idSecretaria !== undefined) return 'idSecretaria';
+    if (obj.idFornecedor !== undefined) return 'idFornecedor';
+    if (obj.idOrcamento !== undefined) return 'idOrcamento';
+    return 'id';
+  };
 
   const [modalAction, setModalAction] = useState<string | null>(null);
   const [selectedContent, setSelectedContent] = useState<any | null>(null);
@@ -66,15 +77,21 @@ const Table = ({ data, columns }: TableProps) => {
                       </td>
                     ))}
                     <td className="p-3 border-t flex gap-1">
-                      <button onClick={() => openModal("view", objeto)} className="cursor-pointer">
-                        <span className="material-symbols-outlined">visibility</span>
-                      </button>
-                      <button onClick={() => openModal("edit", objeto)} className="cursor-pointer">
-                        <span className="material-symbols-outlined">edit_square</span>
-                      </button>
-                      <button onClick={() => openModal("delete", objeto)} className="cursor-pointer">
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
+                      {actions?.includes("view") && (
+                        <button onClick={() => openModal("view", objeto)} className="cursor-pointer">
+                          <span className="material-symbols-outlined">visibility</span>
+                        </button>
+                      )}
+                      {actions?.includes("edit") && (
+                        <button onClick={() => openModal("edit", objeto)} className="cursor-pointer">
+                          <span className="material-symbols-outlined">edit_square</span>
+                        </button>
+                      )}
+                      {actions?.includes("delete") && (
+                        <button onClick={() => openModal("delete", objeto)} className="cursor-pointer">
+                          <span className="material-symbols-outlined">delete</span>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -83,9 +100,38 @@ const Table = ({ data, columns }: TableProps) => {
           </table>
         </div>
       </div>
-      {modalAction && (
+      {modalAction && selectedContent && (
         <Modal setValue={closeModal} value={modalAction != null}>
-          <Form object={selectedContent} name={nomePagina} camps={Object.keys(data[0])} type={modalAction} onCancel={closeModal} onConfirm={() => { }} />
+          <Form 
+            object={selectedContent} 
+            name={nomePagina} 
+            camps={data.length > 0 ? Object.keys(data[0]) : []} 
+            type={modalAction} 
+            onCancel={closeModal} 
+            onConfirm={async (formData) => {
+              try {
+                if (modalAction === 'delete') {
+                  // Para delete, apenas confirma a ação
+                  const confirmDelete = window.confirm(`Tem certeza que deseja excluir este ${nomePagina}?`);
+                  if (!confirmDelete) return;
+                  
+                  if (onDelete) {
+                    const idField = getIdField(selectedContent);
+                    const id = selectedContent[idField];
+                    await onDelete(id);
+                  }
+                } else if (modalAction === 'edit' && onEdit) {
+                  const idField = getIdField(selectedContent);
+                  const id = selectedContent[idField];
+                  await onEdit(id, formData);
+                }
+                closeModal();
+              } catch (error) {
+                console.error('Erro na operação:', error);
+                alert('Erro na operação. Tente novamente.');
+              }
+            }} 
+          />
         </Modal>
       )}
     </div>

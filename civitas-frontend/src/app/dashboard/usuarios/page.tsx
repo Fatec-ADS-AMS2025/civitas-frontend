@@ -1,20 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
+import { usuarioService } from "@/hooks/usuario";
+import UsuarioDTO from "@/models/usuario";
 
-type User = {
-  id: number | undefined;
-  nome: string;
-  cpf: string;
-  matricula: string;
-  cidade: string;
-  estado: string;
-  tipo: "Administrador" | "Cidadão" | "Funcionário";
-};
+// Usando o tipo do service
+type User = UsuarioDTO;
 
 const novoUsuario: User = {
-  id: undefined,
+  id: 0,
   nome: "",
   cpf: "",
   matricula: "",
@@ -51,140 +46,102 @@ const camposConst: FieldConfig[] = [
   },
 ];
 
-const HomePage = () => {
-
-  const usuarios: User[] = [
-    {
-      id: 1,
-      nome: "Ana Silva",
-      cpf: "123.456.789-00",
-      matricula: "ADM001",
-      cidade: "São Paulo",
-      estado: "SP",
-      tipo: "Administrador",
-    },
-    {
-      id: 1,
-      nome: "Ana Silva",
-      cpf: "123.456.789-00",
-      matricula: "ADM001",
-      cidade: "São Paulo",
-      estado: "SP",
-      tipo: "Administrador",
-    },
-    {
-      id: 1,
-      nome: "Ana Silva",
-      cpf: "123.456.789-00",
-      matricula: "ADM001",
-      cidade: "São Paulo",
-      estado: "SP",
-      tipo: "Administrador",
-    },
-    {
-      id: 1,
-      nome: "Ana Silva",
-      cpf: "123.456.789-00",
-      matricula: "ADM001",
-      cidade: "São Paulo",
-      estado: "SP",
-      tipo: "Administrador",
-    },
-    {
-      id: 2,
-      nome: "João Santos",
-      cpf: "987.654.321-11",
-      matricula: "CID002",
-      cidade: "Belo Horizonte",
-      estado: "MG",
-      tipo: "Cidadão",
-    },
-    {
-      id: 3,
-      nome: "Maria Oliveira",
-      cpf: "456.789.123-22",
-      matricula: "FUN003",
-      cidade: "Rio de Janeiro",
-      estado: "RJ",
-      tipo: "Funcionário",
-    },
-    {
-      id: 4,
-      nome: "Pedro Lima",
-      cpf: "555.666.777-88",
-      matricula: "FUN004",
-      cidade: "São Paulo",
-      estado: "SP",
-      tipo: "Funcionário",
-    },
-    {
-      id: 5,
-      nome: "Lucas Pereira",
-      cpf: "111.222.333-44",
-      matricula: "CID005",
-      cidade: "Curitiba",
-      estado: "PR",
-      tipo: "Cidadão",
-    },
-    {
-      id: 6,
-      nome: "Fernanda Costa",
-      cpf: "222.333.444-55",
-      matricula: "ADM006",
-      cidade: "Salvador",
-      estado: "BA",
-      tipo: "Administrador",
-    },
-    {
-      id: 7,
-      nome: "Ricardo Almeida",
-      cpf: "333.444.555-66",
-      matricula: "FUN007",
-      cidade: "Fortaleza",
-      estado: "CE",
-      tipo: "Funcionário",
-    },
-    {
-      id: 8,
-      nome: "Juliana Rocha",
-      cpf: "444.555.666-77",
-      matricula: "CID008",
-      cidade: "Porto Alegre",
-      estado: "RS",
-      tipo: "Cidadão",
-    },
-    {
-      id: 9,
-      nome: "Camila Nunes",
-      cpf: "555.777.888-99",
-      matricula: "FUN009",
-      cidade: "Recife",
-      estado: "PE",
-      tipo: "Funcionário",
-    },
-    {
-      id: 10,
-      nome: "Bruno Martins",
-      cpf: "666.888.999-00",
-      matricula: "ADM010",
-      cidade: "Brasília",
-      estado: "DF",
-      tipo: "Administrador",
-    },
-  ];
-
-  const [filteredData, setFilteredData] = useState<User[]>(usuarios);
+const Page = () => {
+  const [usuarios, setUsuarios] = useState<User[]>([]);
+  const [filteredData, setFilteredData] = useState<User[]>([]);
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  return (
-    <>
-      {/* Barra de busca */}
-      <SearchBar model={novoUsuario} dados={usuarios} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
+  // Carregar dados da API
+  useEffect(() => {
+    const loadUsuarios = async () => {
+      try {
+        setLoading(true);
+        const data: any = await usuarioService.getAll();
+        setUsuarios(data.data);
+        setFilteredData(data.data);
+      } catch (err) {
+        console.error('Erro ao carregar usuários:', err);
+        setError('Erro ao carregar dados dos usuários');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      {/* Tabela de resultados */}
-      <Table data={filteredData} columns={columns} />
-    </>
-  );
+    loadUsuarios();
+  }, []);
+
+  // Função para criar novo usuário
+  const handleCreate = async (novoUsuarioData: Omit<User, 'id'>) => {
+    try {
+      const created = await usuarioService.create(novoUsuarioData);
+      const updatedData = [...usuarios, created];
+      setUsuarios(updatedData);
+      setFilteredData(updatedData);
+      return created;
+    } catch (err) {
+      console.error('Erro ao criar usuário:', err);
+      throw err;
+    }
+  };
+
+  // Função para atualizar usuário
+  const handleUpdate = async (id: number, dadosAtualizados: Partial<User>) => {
+    try {
+      const updated = await usuarioService.update(id, dadosAtualizados);
+      const updatedData = usuarios.map(u => u.id === id ? updated : u);
+      setUsuarios(updatedData);
+      setFilteredData(updatedData);
+      return updated;
+    } catch (err) {
+      console.error('Erro ao atualizar usuário:', err);
+      throw err;
+    }
+  };
+
+  // Função para deletar usuário
+  const handleDelete = async (id: number) => {
+    try {
+      await usuarioService.delete(id);
+      const updatedData = usuarios.filter(u => u.id !== id);
+      setUsuarios(updatedData);
+      setFilteredData(updatedData);
+    } catch (err) {
+      console.error('Erro ao deletar usuário:', err);
+      throw err;
+    }
+  };
+
+if (loading) {
+  return <div>Carregando usuários...</div>;
+}
+
+if (error) {
+  return <div>Erro: {error}</div>;
+}
+
+return (
+  <>
+    {/* Barra de busca */}
+    <SearchBar 
+      model={novoUsuario} 
+      dados={usuarios} 
+      setDados={setFilteredData} 
+      campos={campos} 
+      setCampos={setCampos}
+      onCadastrar={handleCreate}
+    />
+
+    {/* Tabela de resultados */}
+    <Table 
+      data={filteredData} 
+      columns={columns}
+      onEdit={handleUpdate}
+      onDelete={handleDelete}
+    />
+  </>
+);
 };
 
-export default HomePage;
+export default Page;

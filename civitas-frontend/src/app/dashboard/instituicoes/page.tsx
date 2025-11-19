@@ -1,43 +1,32 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
+import { instituicaoService} from "@/hooks/instituicao";
+import InstituicaoDTO from "@/models/instituicao";
 
-type Instituicao = {
-  id: number;
-  nome: string;
-  razao: string;
-  cnpj: string;
-  cep: string;
-  logradouro: string;
-  num: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-  telefone: string;
-  email: string;
-  situacao: "Ativa" | "Inativa";
-};
+// Usando o tipo do service
+type Instituicao = InstituicaoDTO;
 
 const novaInstituicao: Instituicao = {
   id: 0,
   nome: "",
-  razao: "",
+  razaoSocial: "",
   cnpj: "",
   cep: "",
   logradouro: "",
-  num: "",
+  numero: "",
   bairro: "",
   cidade: "",
   estado: "",
   telefone: "",
   email: "",
-  situacao: "Ativa",
+  situacao: 1,
 };
 
 const columns = [
   { id: "nome", label: "Nome" },
-  { id: "razao", label: "Razão Social" },
+  { id: "razaoSocial", label: "Razão Social" },
   { id: "cnpj", label: "CNPJ" },
   { id: "cidade", label: "Cidade" },
   { id: "estado", label: "Estado" },
@@ -57,192 +46,107 @@ const camposConst: FieldConfig[] = [
     local: "filtro",
     type: "select",
     options: [
-      { value: "Ativa", label: "Ativa" },
-      { value: "Inativa", label: "Inativa" },
+      { value: "1", label: "Ativa" },
+      { value: "0", label: "Inativa" },
     ],
   },
 ];
 
 const Page = () => {
-
-  const instituicoes: Instituicao[] = [
-    {
-      id: 1,
-      nome: "Fatec São",
-      razao: "Centro Estadual...",
-      cnpj: "12.345.678/0001-90",
-      cep: "01124-069",
-      logradouro: "Av.Tiradentes",
-      num: "615",
-      bairro: "Luz",
-      cidade: "São Paulo",
-      estado: "SP",
-      telefone: "(11) 80028-922",
-      email: "fatec@sp.gov.br",
-      situacao: "Ativa",
-    },
-    {
-      id: 2,
-      nome: "UNICAMP",
-      razao: "Inst. Federal...",
-      cnpj: "22.245.874/0001-20",
-      cep: "01124-069",
-      logradouro: "Av.Tiradedos",
-      num: "617",
-      bairro: "Butatã",
-      cidade: "São Paulo",
-      estado: "SP",
-      telefone: "(11) 80048-922",
-      email: "unicamp@sp.gov.br",
-      situacao: "Inativa",
-    },
-    {
-      id: 3,
-      nome: "Fatec Jales",
-      razao: "Centro Estadual...",
-      cnpj: "32.543.328/0001-21",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "Jales",
-      estado: "SP",
-      telefone: "(11) 80028-022",
-      email: "fatec@sp.gov.br",
-      situacao: "Ativa",
-    },
-    {
-      id: 4,
-      nome: "UFAM",
-      razao: "Inst. Federal...",
-      cnpj: "32.145.981/0001-22",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "Coari",
-      estado: "AM",
-      telefone: "(11) 80028-022",
-      email: "ufam@gov.br",
-      situacao: "Ativa",
-    },
-    {
-      id: 5,
-      nome: "UFMA",
-      razao: "Inst. Federal...",
-      cnpj: "29.842.667/0001-57",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "Imperatriz",
-      estado: "MA",
-      telefone: "(11) 80028-022",
-      email: "ufma@gov.br",
-      situacao: "Inativa",
-    },
-    {
-      id: 6,
-      nome: "UFPI",
-      razao: "Inst. Federal...",
-      cnpj: "26.441.213/0001-88",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "Paranaíba",
-      estado: "PI",
-      telefone: "(11) 80028-022",
-      email: "ufpi@gov.br",
-      situacao: "Ativa",
-    },
-    {
-      id: 7,
-      nome: "UFPE",
-      razao: "Inst. Federal...",
-      cnpj: "34.109.899/0001-04",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "Caruaru",
-      estado: "PE",
-      telefone: "(11) 80028-022",
-      email: "ufpe@gov.br",
-      situacao: "Inativa",
-    },
-    {
-      id: 8,
-      nome: "UFMT",
-      razao: "Inst. Federal...",
-      cnpj: "38.901.200/0001-67",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "SINOP",
-      estado: "MT",
-      telefone: "(11) 80028-022",
-      email: "ufmt@gov.br",
-      situacao: "Ativa",
-    },
-    {
-      id: 9,
-      nome: "UFRJ",
-      razao: "Inst. Federal...",
-      cnpj: "40.201.932/0001-03",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "Rio de Janeiro",
-      estado: "RJ",
-      telefone: "(11) 80028-022",
-      email: "ufrj@gov.br",
-      situacao: "Ativa",
-    },
-    {
-      id: 10,
-      nome: "UFPel",
-      razao: "Inst. Federal...",
-      cnpj: "28.990.155/0001-42",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "Pelotas",
-      estado: "RS",
-      telefone: "(11) 80028-022",
-      email: "ufpel@gov.br",
-      situacao: "Inativa",
-    },
-    {
-      id: 11,
-      nome: "UFRS",
-      razao: "Inst. Federal...",
-      cnpj: "27.210.551/0001-12",
-      cep: "01124-069",
-      logradouro: "Av.Tirape",
-      num: "619",
-      bairro: "Centro",
-      cidade: "P. Alegre",
-      estado: "RS",
-      telefone: "(11) 80028-022",
-      email: "ufrs@gov.br",
-      situacao: "Inativa",
-    }
-  ];
-
-  const [filteredData, setFilteredData] = useState<Instituicao[]>(instituicoes);
+  const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
+  const [filteredData, setFilteredData] = useState<Instituicao[]>([]);
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Carregar dados da API
+  useEffect(() => {
+    const loadInstituicoes = async () => {
+      try {
+        setLoading(true);
+        const data: any = await instituicaoService.getAll();
+        setInstituicoes(data.data);
+        setFilteredData(data.data);
+      } catch (err) {
+        console.error('Erro ao carregar instituições:', err);
+        setError('Erro ao carregar dados das instituições');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInstituicoes();
+  }, []);
+
+  // Função para criar nova instituição
+  const handleCreate = async (novaInstituicaoData: Omit<Instituicao, 'id'>) => {
+    try {
+      const created = await instituicaoService.create(novaInstituicaoData);
+      const updatedData = [...instituicoes, created];
+      setInstituicoes(updatedData);
+      setFilteredData(updatedData);
+      return created;
+    } catch (err) {
+      console.error('Erro ao criar instituição:', err);
+      throw err;
+    }
+  };
+
+  // Função para atualizar instituição
+  const handleUpdate = async (id: number, dadosAtualizados: Partial<Instituicao>) => {
+    try {
+      const updated = await instituicaoService.update(id, dadosAtualizados);
+      const updatedData = instituicoes.map(i => i.id === id ? updated : i);
+      setInstituicoes(updatedData);
+      setFilteredData(updatedData);
+      return updated;
+    } catch (err) {
+      console.error('Erro ao atualizar instituição:', err);
+      throw err;
+    }
+  };
+
+  // Função para deletar instituição (via alteração de situação)
+  const handleDelete = async (id: number) => {
+    try {
+      await instituicaoService.alterarSituacao(id);
+      // Recarregar dados após alterar situação
+      const data: any = await instituicaoService.getAll();
+      setInstituicoes(data.data);
+      setFilteredData(data.data);
+    } catch (err) {
+      console.error('Erro ao alterar situação da instituição:', err);
+      throw err;
+    }
+  };
+
+  if (loading) {
+    return <div>Carregando instituições...</div>;
+  }
+
+  if (error) {
+    return <div>Erro: {error}</div>;
+  }
 
   return (
     <>
       {/* Barra de busca */}
-      <SearchBar model={novaInstituicao} dados={instituicoes} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
+      <SearchBar 
+        model={novaInstituicao} 
+        dados={instituicoes} 
+        setDados={setFilteredData} 
+        campos={campos} 
+        setCampos={setCampos}
+        onCadastrar={handleCreate}
+      />
 
       {/* Tabela de resultados */}
-      <Table data={filteredData} columns={columns} />
+      <Table 
+        data={filteredData} 
+        columns={columns}
+        onEdit={handleUpdate}
+        onDelete={handleDelete}
+      />
     </>
   );
 };
