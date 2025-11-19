@@ -3,25 +3,8 @@
 import React, { useState, useEffect } from 'react'
 
 export default function Dashboard() {
-  const [fontSize, setFontSize] = useState(16)
-  const [highContrast, setHighContrast] = useState(false)
-
-  useEffect(() => {
-    document.documentElement.style.fontSize = `${fontSize}px`
-    if (highContrast) {
-      document.documentElement.classList.add('high-contrast')
-    } else {
-      document.documentElement.classList.remove('high-contrast')
-    }
-  }, [fontSize, highContrast])
-
-  const increaseFontSize = () => setFontSize(prev => Math.min(prev + 2, 24))
-  const resetFontSize = () => setFontSize(16)
-  const decreaseFontSize = () => setFontSize(prev => Math.max(prev - 2, 12))
-  const toggleHighContrast = () => setHighContrast(prev => !prev)
-
   return (
-    <div className="min-h-screen bg-transparent font-sans px-6 sm:px-10 lg:px-20 py-6 sm:py-10 lg:py-2">
+    <div className="min-h-screen font-sans">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-8 py-3 sm:py-4 md:py-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
@@ -34,24 +17,6 @@ export default function Dashboard() {
               Vamos ao gerenciamento?
             </p>
           </div>
-
-          {/* Botões de acessibilidade */}
-          <div className="bg-orange-400 text-black px-3 sm:px-4 py-4 sm:py-6 rounded-full flex flex-col items-center justify-center font-bold relative w-12 sm:w-16 h-28 sm:h-36 self-center sm:self-auto">
-            <button onClick={increaseFontSize} className="text-sm sm:text-lg leading-tight mb-1 hover:scale-110 active:scale-95 transition-transform">A+</button>
-            <button onClick={resetFontSize} className="text-sm sm:text-lg leading-tight mb-1 hover:scale-110 active:scale-95 transition-transform">Aa</button>
-            <button onClick={decreaseFontSize} className="text-sm sm:text-lg leading-tight mb-2 sm:mb-3 hover:scale-110 active:scale-95 transition-transform">A-</button>
-
-            <button
-              onClick={toggleHighContrast}
-              className="absolute bottom-2 sm:bottom-3 w-4 sm:w-5 h-4 sm:h-5 rounded-full overflow-hidden border border-black hover:scale-110 active:scale-95 transition-transform"
-              title={highContrast ? "Desativar alto contraste" : "Ativar alto contraste"}
-            >
-              <div className="w-full h-full flex">
-                <div className={`w-1/2 h-full transition-colors ${highContrast ? 'bg-white' : 'bg-black'}`}></div>
-                <div className={`w-1/2 h-full transition-colors ${highContrast ? 'bg-black' : 'bg-orange-400'}`}></div>
-              </div>
-            </button>
-          </div>
         </div>
       </div>
 
@@ -62,7 +27,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-8">
           {/* Valor Disponível */}
           <div
-            className="relative p-6 rounded-3xl text-[#003840] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm"
+            className="relative p-6 rounded-3xl text-[#003840] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md"
             style={{ background: "linear-gradient(180deg, #007E91 0%, #A3F3FF 100%)" }}
           >
             <div className="relative z-10">
@@ -80,7 +45,7 @@ export default function Dashboard() {
 
           {/* Balança */}
           <div
-            className="relative p-6 rounded-3xl text-[#E4E4E4] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm"
+            className="relative p-6 rounded-3xl text-[#E4E4E4] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md"
             style={{ background: "linear-gradient(180deg, #000000 0%, #454545 100%)" }}
           >
             <div className="relative z-10">
@@ -95,7 +60,7 @@ export default function Dashboard() {
 
           {/* Gastos Totais */}
           <div
-            className="relative p-6 rounded-3xl text-[#602B00] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm"
+            className="relative p-6 rounded-3xl text-[#602B00] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md"
             style={{ background: "linear-gradient(180deg, #FF8729 0%, #e3b17eff 100%)" }}
           >
             <div className="relative z-10">
@@ -115,7 +80,7 @@ export default function Dashboard() {
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           {/* Gastos Previstos */}
-          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Gastos previstos para esse mês:</h3>
@@ -129,7 +94,7 @@ export default function Dashboard() {
           </div>
 
           {/* Instituições Desbalanceadas */}
-          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Instituições desbalanceadas</h3>
@@ -146,7 +111,7 @@ export default function Dashboard() {
         {/* Chart and Last Expenses */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           {/* Gráfico */}
-          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold text-gray-900">Gráfico</h3>
               <span className="text-gray-400">...</span>
@@ -216,7 +181,7 @@ export default function Dashboard() {
           </div>
 
           {/* Últimos Gastos */}
-          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Últimos Gastos:</h3>
