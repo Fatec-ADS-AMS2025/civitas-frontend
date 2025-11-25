@@ -1,157 +1,163 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
+import { secretariaService } from "@/hooks/secretaria";
+import SecretariaDTO from "@/models/secretaria";
 
-type Secretaria = {
-  id: number;
-  nome: string;
-  cep: string;
-  cnpj: string;
-  razao: string;
-  situacao: "Ativa" | "Inativa";
+// Usando o tipo do service
+type Secretaria = SecretariaDTO;
+
+const novaSecretaria: Secretaria = {
+  idSecretaria: 0,
+  situacao: 1,
+  descricao: '',
+  cnpj: '',
+  nome: '',
+  logradouro: '',
+  numero: '',
+  bairro: '',
+  cep: '',
+  nomeRazaoSocial: '',
+  telefone: '',
+  email: '',
+  cidade: '',
+  estado: '',
 };
 
 const columns = [
-  { id: "nome", label: "Nome" },
-  { id: "cep", label: "CEP" },
+  { id: "idSecretaria", label: "ID Secretaria" },
+  { id: "descricao", label: "Descrição" },
   { id: "cnpj", label: "CNPJ" },
-  { id: "razao", label: "Razão Social" },
+  { id: "telefone", label: "Telefone" },
   { id: "situacao", label: "Situação" },
 ];
 
 const camposConst: FieldConfig[] = [
-  { key: "nome", placeholder: "Nome", local: "principal" },
+  { key: "descricao", placeholder: "Descrição", local: "principal" },
   { key: "cnpj", placeholder: "CNPJ", local: "principal" },
-  { key: "cep", placeholder: "CEP", local: "filtro" },
-  { key: "razao", placeholder: "Razão Social", local: "filtro" },
-  {
-    key: "situacao",
-    placeholder: "Situação",
-    local: "filtro",
-    type: "select",
-    options: [
-      { value: "Ativa", label: "Ativa" },
-      { value: "Inativa", label: "Inativa" },
-    ],
-  },
+  { key: "telefone", placeholder: "Telefone", local: "filtro" },
+  { key: "situacao", placeholder: "Situação", local: "principal" },
+  { key: "cidade", placeholder: "Cidade", local: "filtro" },
 ];
 
-const Page = () => {
+export default function Page() {
+  const [secretarias, setSecretarias] = useState<Secretaria[]>([]);
+  const [filteredData, setFilteredData] = useState<Secretaria[]>([]);
+  const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const secretarias: Secretaria[] = [
-    {
-      id: 1,
-      nome: "Educação",
-      cep: "01124-069",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Ativa",
-    },
-    {
-      id: 2,
-      nome: "Educação",
-      cep: "15524-849",
-      cnpj: "12.345.645/0001-60",
-      razao: "Centro Estadual...",
-      situacao: "Inativa",
-    },
-    {
-      id: 3,
-      nome: "Educação",
-      cep: "01421-679",
-      cnpj: "13.241.678/0001-30",
-      razao: "Centro Estadual...",
-      situacao: "Inativa",
-    },
-    {
-      id: 4,
-      nome: "Educação",
-      cep: "01234-039",
-      cnpj: "76.345.678/0001-10",
-      razao: "Centro Estadual...",
-      situacao: "Inativa",
-    },
-    {
-      id: 5,
-      nome: "Educação",
-      cep: "04394-329",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Ativa",
-    },
-    {
-      id: 6,
-      nome: "Educação",
-      cep: "01234-043",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Ativa",
-    },
-    {
-      id: 7,
-      nome: "Educação",
-      cep: "01424-069",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Inativa",
-    },
-    {
-      id: 8,
-      nome: "Educação",
-      cep: "01124-069",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Ativa",
-    },
-    {
-      id: 9,
-      nome: "Educação",
-      cep: "01124-069",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Ativa",
-    },
-    {
-      id: 10,
-      nome: "Educação",
-      cep: "01124-069",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Ativa",
-    },
-    {
-      id: 11,
-      nome: "Educação",
-      cep: "01124-069",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Ativa",
-    },
-    {
-      id: 12,
-      nome: "Educação",
-      cep: "01124-069",
-      cnpj: "12.345.678/0001-90",
-      razao: "Centro Estadual...",
-      situacao: "Ativa",
-    },
-  ];
+  // Carregar dados da API
+  useEffect(() => {
+    const loadSecretarias = async () => {
+      try {
+        setLoading(true);
+        const res: any = await secretariaService.getAll();
+        if(res === null) {
+          throw new Error('Resposta nula da API');
+        }
+        if(!res.data) {
+          throw new Error('Dados inválidos recebidos da API');
+        }
+        const data = res.data;
+        console.log(data);
+        setSecretarias(data);
+        setFilteredData(data);
+      } catch (err) {
+        console.error('Erro ao carregar secretarias:', err);
+        setError('Erro ao carregar dados das secretarias');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSecretarias();
+  }, []);
   
 
-  const [filteredData, setFilteredData] = useState<Secretaria[]>(secretarias);
-  const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
+  // Função para criar nova secretaria
+  const handleCreate = async (novaSecretaria: Omit<Secretaria, 'idSecretaria'>) => {
+    try {
+      const created = await secretariaService.create(novaSecretaria);
+      const updatedData = [...secretarias, created];
+      setSecretarias(updatedData);
+      setFilteredData(updatedData);
+      return created;
+    } catch (err) {
+      console.error('Erro ao criar secretaria:', err);
+      throw err;
+    }
+  };
+
+  // Função para atualizar secretaria
+  const handleUpdate = async (id: number, dadosAtualizados: Partial<Secretaria>) => {
+    try {
+      const updated = await secretariaService.update(id, dadosAtualizados);
+      const updatedData = secretarias.map(s => s.idSecretaria === id ? updated : s);
+      setSecretarias(updatedData);
+      setFilteredData(updatedData);
+      return updated;
+    } catch (err) {
+      console.error('Erro ao atualizar secretaria:', err);
+      throw err;
+    }
+  };
+
+  // Função para deletar secretaria
+  const handleDelete = async (id: number) => {
+    try {
+      await secretariaService.delete(id);
+      const updatedData = secretarias.filter(s => s.idSecretaria !== id);
+      setSecretarias(updatedData);
+      setFilteredData(updatedData);
+    } catch (err) {
+      console.error('Erro ao deletar secretaria:', err);
+      throw err;
+    }
+  };
+
+  // Função para alterar situação
+  const handleAlterarSituacao = async (id: number) => {
+    try {
+      await secretariaService.alterarSituacao(id);
+      // Recarregar dados após alterar situação
+      const data = await secretariaService.getAll();
+      setSecretarias(data);
+      setFilteredData(data);
+    } catch (err) {
+      console.error('Erro ao alterar situação:', err);
+      throw err;
+    }
+  };
+
+  if (loading) {
+    return <div>Carregando secretarias...</div>;
+  }
+
+  if (error) {
+    return <div>Erro: {error}</div>;
+  }
 
   return (
     <>
       {/* Barra de busca */}
-      <SearchBar dados={secretarias} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
+      <SearchBar 
+        model={novaSecretaria} 
+        dados={secretarias} 
+        setDados={setFilteredData} 
+        campos={campos} 
+        setCampos={setCampos}
+        onCadastrar={handleCreate}
+      />
 
       {/* Tabela de resultados */}
-      <Table data={filteredData} columns={columns} />
+      <Table 
+        data={filteredData} 
+        columns={columns}
+        onEdit={handleUpdate}
+        onDelete={handleDelete}
+      />
     </>
   );
-};
-
-export default Page;
+}

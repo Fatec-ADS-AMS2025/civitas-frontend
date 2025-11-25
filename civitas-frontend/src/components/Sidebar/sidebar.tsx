@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { usePathname } from 'next/navigation'
+
 
 export type SidebarItem = {
   key: string;
   label: string;
-  icon?: React.ReactNode;
+  icon?: string;
+  active?: boolean;
   href?: string;
   onClick?: () => void;
 };
@@ -16,83 +19,54 @@ interface SidebarProps {
   activeKey?: string;
 }
 
-const IconHome = () => <span className="material-symbols-outlined">home</span>;
-const IconPerson = () => (
-  <span className="material-symbols-outlined">person</span>
-);
-const IconStylus = () => (
-  <span className="material-symbols-outlined">stylus</span>
-);
-const IconApartment = () => (
-  <span className="material-symbols-outlined">apartment</span>
-);
-const IconCorporate = () => (
-  <span className="material-symbols-outlined">corporate_fare</span>
-);
-const IconMoney = () => (
-  <span className="material-symbols-outlined">attach_money</span>
-);
-const IconRequestQuote = () => (
-  <span className="material-symbols-outlined">request_quote</span>
-);
-const IconDashboard = () => (
-  <span className="material-symbols-outlined">dashboard</span>
-);
-const IconPersonApron = () => (
-  <span className="material-symbols-outlined">person_apron</span>
-);
-const IconHomeWork = () => (
-  <span className="material-symbols-outlined">home_work</span>
-);
-const IconAssignment = () => (
-  <span className="material-symbols-outlined">assignment</span>
-);
-const IconProfile = () => (
-  <span className="material-symbols-outlined">person</span>
-);
-const IconGroup = () => (
-  <span className="material-symbols-outlined">group</span>
-);
-const IconBalance = () => (
-  <span className="material-symbols-outlined">account_balance</span>
-);
-const IconFlowChart = () => (
-  <span className="material-symbols-outlined">flowchart</span>
-);
-const IconBox = () => <span className="material-symbols-outlined">box</span>;
-const IconSell = () => <span className="material-symbols-outlined">sell</span>;
-
 const defaultItems: SidebarItem[] = [
-  { key: "home", label: "Home", icon: <IconHome />, href: "/dashboard" },
+  {
+    key: "home",
+    label: "Home",
+    icon: "home",
+    active: true,
+    href: "/dashboard"
+  },
   {
     key: "secretaria",
     label: "Secretaria",
-    icon: <IconBalance />,
+    icon: "account_balance",
+    active: false,
     href: "/dashboard/secretaria",
   },
   {
     key: "instituicao",
     label: "Instituição",
-    icon: <IconFlowChart />,
+    icon: "flowchart",
+    active: false,
     href: "/dashboard/instituicoes",
   },
   {
     key: "fornecedor",
     label: "Fornecedor",
-    icon: <IconBox />,
+    icon: "box",
+    active: false,
     href: "/dashboard/fornecedor",
   },
   {
     key: "orcamento",
     label: "Orçamento",
-    icon: <IconRequestQuote />,
+    icon: "request_quote",
+    active: false,
     href: "/dashboard/orcamentos",
   },
-  { key: "despesas", label: "Despesas", icon: <IconSell />, href: "/despesas" },
+  {
+    key: "despesas",
+    label: "Despesas",
+    icon: "sell",
+    active: false,
+    href: "/dashboard/despesas"
+  },
   {
     key: "usuarios",
     label: "Usuários",
-    icon: <IconGroup />,
+    icon: "group",
+    active: false,
     href: "/dashboard/usuarios",
   },
 ];
@@ -105,6 +79,14 @@ export default function Sidebar({
   const router = useRouter();
 
   function handleNavigate(item: SidebarItem) {
+    defaultItems.forEach(element => {
+      if (item.key === element.key) {
+        element.active = true;
+        return;
+      } else {
+        element.active = false;
+      }
+    });
     //se item.onClick existir, execute
     if (item.onClick) {
       item.onClick();
@@ -118,6 +100,21 @@ export default function Sidebar({
     //caso contrário, mapeia pela key
     router.push(`/${item.key}`);
   }
+
+  const pathname = usePathname();
+
+  useEffect(() => {
+    console.log("Current pathname:", pathname);
+    const activeItem = defaultItems.find(item => item.href === pathname);
+    defaultItems.forEach(element => {
+      if (activeItem && activeItem.key === element.key) {
+        element.active = true;
+        return;
+      } else {
+        element.active = false;
+      }
+    });
+  }, []);
 
   return (
     <>
@@ -143,14 +140,14 @@ export default function Sidebar({
             </div>
           </div>
 
-          <nav className="flex flex-col gap-3">
+          <nav className="flex flex-col gap-3 transition-all duration-200">
             {items.map((it) => {
-              const isActive = activeKey === it.key;
+              const isActive = it.href === pathname;
               return (
                 <button
                   key={it.key}
                   onClick={() => handleNavigate(it)}
-                  className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 outline-none cursor-pointer 
+                  className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 outline-none cursor-pointer group 
                     ${isActive
                       ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white" //ativo
                       : " text-tertialy-1" // não ativo
@@ -162,7 +159,11 @@ export default function Sidebar({
                       : "text-tertialy-1"
                       } flex-none`}
                   >
-                    {it.icon}
+                    {isActive ? (
+                      <span className="material-symbols-outlined filled">{it.icon}</span>
+                    ) : (
+                      <span className="material-symbols-outlined">{it.icon}</span>
+                    )}
                   </div>
 
                   <div
@@ -185,7 +186,7 @@ export default function Sidebar({
             onClick={() => router.push("/perfil")}
           >
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-secundary-1">
-              <IconProfile />
+              <span className="material-symbols-outlined">person</span>
             </div>
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               Perfil
@@ -195,7 +196,7 @@ export default function Sidebar({
       </aside>
 
       {/* mobile bottom bar */}
-      <nav className="sm:hidden fixed bottom-4 left-4 right-4 bg-secundary-1 rounded-2xl flex items-center justify-between px-4 py-2 text-teal-100 shadow-lg">
+      {/* <nav className="sm:hidden fixed bottom-4 left-4 right-4 bg-secundary-1 rounded-2xl flex items-center justify-between px-4 py-2 text-teal-100 shadow-lg">
         {items.slice(0, 5).map((it) => (
           <button
             key={it.key}
@@ -219,7 +220,7 @@ export default function Sidebar({
           </div>
           <div className="truncate text-[11px]">Perfil</div>
         </button>
-      </nav>
+      </nav> */}
     </>
   );
 }
