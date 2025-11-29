@@ -1,158 +1,147 @@
 "use client";
-import React, { useState } from "react";
-import SearchBar from "@/components/Table/searchbar";
+import React, { useState, useEffect } from "react";
+import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
- 
-type User = {
-id: number;
-nome: string;
-cpf: string;
-matricula: string;
-cidade: string;
-estado: string;
-tipo: "Administrador" | "Cidadão" | "Funcionário";
+import { usuarioService } from "@/hooks/usuario";
+import UsuarioDTO from "@/models/usuario";
+
+// Usando o tipo do service
+type User = UsuarioDTO;
+
+const novoUsuario: User = {
+  id: 0,
+  nome: "",
+  cpf: "",
+  matricula: "",
+  cidade: "",
+  estado: "",
+  tipo: "Cidadão",
 };
- 
-const HomePage = () => {
- 
-const usuarios: User[] = [
+
+const columns = [
+  { id: "nome", label: "Nome" },
+  { id: "cpf", label: "CPF" },
+  { id: "matricula", label: "Matrícula" },
+  { id: "cidade", label: "Cidade" },
+  { id: "estado", label: "Estado" },
+  { id: "tipo", label: "Tipo" },
+];
+
+const camposConst: FieldConfig[] = [
+  { key: "nome", placeholder: "Nome", local: "principal" },
+  { key: "cpf", placeholder: "CPF", local: "principal" },
+  { key: "matricula", placeholder: "Matrícula", local: "filtro" },
+  { key: "cidade", placeholder: "Cidade", local: "filtro" },
+  { key: "estado", placeholder: "Estado", local: "filtro" },
   {
-    id: 1,
-    nome: "Ana Silva",
-    cpf: "123.456.789-00",
-    matricula: "ADM001",
-    cidade: "São Paulo",
-    estado: "SP",
-    tipo: "Administrador",
-  },
-  {
-    id: 2,
-    nome: "João Santos",
-    cpf: "987.654.321-11",
-    matricula: "CID002",
-    cidade: "Belo Horizonte",
-    estado: "MG",
-    tipo: "Cidadão",
-  },
-  {
-    id: 3,
-    nome: "Maria Oliveira",
-    cpf: "456.789.123-22",
-    matricula: "FUN003",
-    cidade: "Rio de Janeiro",
-    estado: "RJ",
-    tipo: "Funcionário",
-  },
-  {
-    id: 4,
-    nome: "Pedro Lima",
-    cpf: "555.666.777-88",
-    matricula: "FUN004",
-    cidade: "São Paulo",
-    estado: "SP",
-    tipo: "Funcionário",
-  },
-  {
-    id: 5,
-    nome: "Lucas Pereira",
-    cpf: "111.222.333-44",
-    matricula: "CID005",
-    cidade: "Curitiba",
-    estado: "PR",
-    tipo: "Cidadão",
-  },
-  {
-    id: 6,
-    nome: "Fernanda Costa",
-    cpf: "222.333.444-55",
-    matricula: "ADM006",
-    cidade: "Salvador",
-    estado: "BA",
-    tipo: "Administrador",
-  },
-  {
-    id: 7,
-    nome: "Ricardo Almeida",
-    cpf: "333.444.555-66",
-    matricula: "FUN007",
-    cidade: "Fortaleza",
-    estado: "CE",
-    tipo: "Funcionário",
-  },
-  {
-    id: 8,
-    nome: "Juliana Rocha",
-    cpf: "444.555.666-77",
-    matricula: "CID008",
-    cidade: "Porto Alegre",
-    estado: "RS",
-    tipo: "Cidadão",
-  },
-  {
-    id: 9,
-    nome: "Camila Nunes",
-    cpf: "555.777.888-99",
-    matricula: "FUN009",
-    cidade: "Recife",
-    estado: "PE",
-    tipo: "Funcionário",
-  },
-  {
-    id: 10,
-    nome: "Bruno Martins",
-    cpf: "666.888.999-00",
-    matricula: "ADM010",
-    cidade: "Brasília",
-    estado: "DF",
-    tipo: "Administrador",
+    key: "tipo",
+    placeholder: "Tipo",
+    local: "filtro",
+    type: "select",
+    options: [
+      { value: "Administrador", label: "Administrador" },
+      { value: "Cidadão", label: "Cidadão" },
+      { value: "Funcionário", label: "Funcionário" },
+    ],
   },
 ];
- 
- 
-const [filteredData, setFilteredData] = useState<User[]>(usuarios);
- 
-const normalizeString = (str: string) =>
-str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
- 
-const cleanCPF = (cpf: string) => cpf.replace(/\D/g, "");
- 
-const handleSearch = (filters: {
-nome: string;
-cpf: string;
-cidade: string;
-estado: string;
-tipo: string;
-}) => {
-const { nome, cpf, cidade, estado, tipo } = filters;
- 
- 
-const filtered = usuarios.filter((u) => {
-const nomeMatch = normalizeString(u.nome).includes(normalizeString(nome));
-const cpfMatch = cleanCPF(u.cpf).includes(cleanCPF(cpf));
-const cidadeMatch = normalizeString(u.cidade).includes(normalizeString(cidade));
-const estadoMatch = normalizeString(u.estado).includes(normalizeString(estado));
-const tipoMatch = tipo ? u.tipo === tipo : true;
-return nomeMatch && cpfMatch && cidadeMatch && estadoMatch && tipoMatch;
-});
- 
- 
-setFilteredData(filtered);
-};
- 
+
+const Page = () => {
+  const [usuarios, setUsuarios] = useState<User[]>([]);
+  const [filteredData, setFilteredData] = useState<User[]>([]);
+  const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Carregar dados da API
+  useEffect(() => {
+    const loadUsuarios = async () => {
+      try {
+        setLoading(true);
+        const data: any = await usuarioService.getAll();
+        setUsuarios(data.data);
+        setFilteredData(data.data);
+      } catch (err) {
+        console.error('Erro ao carregar usuários:', err);
+        setError('Erro ao carregar dados dos usuários');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsuarios();
+  }, []);
+
+  // Função para criar novo usuário
+  const handleCreate = async (novoUsuarioData: Omit<User, 'id'>) => {
+    try {
+      const created = await usuarioService.create(novoUsuarioData);
+      const updatedData = [...usuarios, created];
+      setUsuarios(updatedData);
+      setFilteredData(updatedData);
+      return created;
+    } catch (err) {
+      console.error('Erro ao criar usuário:', err);
+      throw err;
+    }
+  };
+
+  // Função para atualizar usuário
+  const handleUpdate = async (id: number, dadosAtualizados: Partial<User>) => {
+    try {
+      const updated = await usuarioService.update(id, dadosAtualizados);
+      const updatedData = usuarios.map(u => u.id === id ? updated : u);
+      setUsuarios(updatedData);
+      setFilteredData(updatedData);
+      return updated;
+    } catch (err) {
+      console.error('Erro ao atualizar usuário:', err);
+      throw err;
+    }
+  };
+
+  // Função para deletar usuário
+  const handleDelete = async (id: number) => {
+    try {
+      await usuarioService.delete(id);
+      const updatedData = usuarios.filter(u => u.id !== id);
+      setUsuarios(updatedData);
+      setFilteredData(updatedData);
+    } catch (err) {
+      console.error('Erro ao deletar usuário:', err);
+      throw err;
+    }
+  };
+
+if (loading) {
+  return <div>Carregando usuários...</div>;
+}
+
+if (error) {
+  return <div>Erro: {error}</div>;
+}
+
 return (
-<main className="p-6 bg-gray-100 min-h-screen">
-<div className="mb-6">
-<h1 className="text-4xl font-bold text-[#004D4D]">Listagem de Cadastros</h1>
-<p className="text-sm text-gray-500 mt-1">Home &lt; Cadastros &lt; Listagem</p>
-</div>
- 
-{/* Barra de busca */}
-<SearchBar onSearch={handleSearch} />
- 
-{/* Tabela de resultados */}
-<Table data={filteredData} />
-</main>
+  <>
+    {/* Barra de busca */}
+    <SearchBar 
+      model={novoUsuario} 
+      dados={usuarios} 
+      setDados={setFilteredData} 
+      campos={campos} 
+      setCampos={setCampos}
+      onCadastrar={handleCreate}
+    />
+
+    {/* Tabela de resultados */}
+    <Table 
+      data={filteredData} 
+      columns={columns}
+      onEdit={handleUpdate}
+      onDelete={handleDelete}
+    />
+  </>
 );
 };
- 
-export default HomePage;
+
+export default Page;

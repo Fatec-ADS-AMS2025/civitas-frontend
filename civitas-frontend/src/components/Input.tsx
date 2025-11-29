@@ -1,6 +1,6 @@
 import React, { useId } from 'react';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   className?: string;
@@ -21,7 +21,7 @@ export const Input: React.FC<InputProps> = ({
       {label && (
         <label 
           htmlFor={stableInputId}
-          className="block text-sm font-medium text-gray-700 mb-2"
+          className="block text-sm font-medium text-gray-700 mb-2 capitalize"
         >
           {label}
           {props.required && <span className="text-red-500 ml-1">*</span>}
@@ -55,3 +55,5 @@ export const Input: React.FC<InputProps> = ({
     </div>
   );
 };
+
+export default Input;

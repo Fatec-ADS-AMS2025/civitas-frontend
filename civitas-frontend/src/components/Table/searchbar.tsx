@@ -1,48 +1,114 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import Modal from "../modal";
+import Form from "../Form/form";
+import { usePathname } from 'next/navigation'
 
-type SearchBarProps = {
-  onSearch: (filters: {
-    nome: string;
-    cpf: string;
-    cidade: string;
-    estado: string;
-    tipo: string;
-  }) => void;
+type FieldConfig = {
+  key: string;
+  placeholder: string;
+  local: "principal" | "filtro";
+  value?: string;
+  type?: "text" | "select";
+  options?: { value: string; label: string }[];
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [filters, setFilters] = useState({
-    nome: "",
-    cpf: "",
-    cidade: "",
-    estado: "",
-    tipo: "",
-  });
+type SearchBarProps = {
+  campos: FieldConfig[];
+  setCampos: React.Dispatch<React.SetStateAction<FieldConfig[]>>;
+  camposFiltro?: FieldConfig[];
+  dados: any;
+  setDados: React.Dispatch<React.SetStateAction<any>>;
+  onCadastrar?: (data: any) => Promise<any>;
+  showCadastrarButton?: boolean;
+  model: object | string[];
+};
+
+const SearchBar = ({
+  campos,
+  setCampos,
+  dados,
+  setDados,
+  model,
+  onCadastrar,
+  showCadastrarButton = true,
+}: SearchBarProps) => {
+  const [backupDados] = useState(dados);
+  const [backupCampos] = useState(campos);
+  const [modalOpen, setModalOpen] = useState<boolean | null>(null);
+
+  const pathname = usePathname() || "";
+  const paths = pathname.split("/").filter(Boolean);
+  const nomePagina = paths[paths.length - 1];
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  useEffect(() => {
-    onSearch(filters);
-  }, [filters]);
+  // Função para normalizar texto: remove pontuação, caracteres especiais e converte para minúsculas
+  const normalizeText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize("NFD") // Decompõe caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+      .replace(/[^a-z0-9\s]/g, "") // Remove pontuação e caracteres especiais
+      .trim();
+  };
 
   const handleChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    campos = campos.map(c =>
+      c.key === key ? { ...c, value } : c
+    );
+    setCampos(campos);
+    let dadosFiltrados = dados;
+    campos.forEach(element => {
+      const fieldValue = normalizeText(element.value?.toString() || "");
+      if (fieldValue === "") return;
+      dadosFiltrados = dadosFiltrados.filter((item: any) => {
+        const itemFieldValue = normalizeText(item[element.key]?.toString() || "");
+        return itemFieldValue.includes(fieldValue);
+      });
+    });
+    setDados(dadosFiltrados);
   };
 
   const toggleAdvanced = () => setShowAdvanced((prev) => !prev);
 
   const clearFilters = () => {
-    setFilters({
-      nome: "",
-      cpf: "",
-      cidade: "",
-      estado: "",
-      tipo: "",
-    });
+    setDados(backupDados);
+    setCampos(backupCampos);
+  };
+
+  const renderField = (field: FieldConfig) => {
+    if (field.type === "select" && field.options) {
+      return (
+        <select
+          key={field.key}
+          value={dados[field.key] || ""}
+          onChange={(e) => handleChange(field.key, e.target.value)}
+          className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black"
+        >
+          <option value="">{field.placeholder}</option>
+          {field.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    return (
+      <input
+        key={field.key}
+        type="text"
+        value={campos.find(c => c.key === field.key)?.value || ""}
+        placeholder={field.placeholder}
+        onChange={(e) => handleChange(field.key, e.target.value)}
+        className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+      />
+    );
   };
 
   return (
-    <div className="bg-[#393939] rounded-2xl p-5 shadow-lg w-full flex flex-col gap-4">
+    <div className="bg-[#393939] rounded-xl p-5 shadow-lg w-full flex flex-col gap-4 skeleton">
       {/* Cabeçalho */}
       <div>
         <p className="text-white text-base">Busca:</p>
@@ -51,68 +117,35 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
 
       {/* Linha principal */}
       <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
-        <input
-          type="text"
-          placeholder="Nome"
-          value={filters.nome}
-          onChange={(e) => handleChange("nome", e.target.value)}
-          className="rounded-full px-4 py-2 text-sm max-w-md md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
-        />
-        <input
-          type="text"
-          placeholder="CPF"
-          value={filters.cpf}
-          onChange={(e) => handleChange("cpf", e.target.value)}
-          className="rounded-full px-4 py-2 text-sm max-w-sm md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
-        />
+        {(campos.filter(e => e.local === "principal")).map((field) => renderField(field))}
 
         <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
-          <button
-            onClick={() => alert("Levar para a tela de cadastro")}
-            className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
-          >
-            <span className="material-symbols-outlined text-white text-base">add</span>
-            Cadastrar
-          </button>
+          {showCadastrarButton && (
+            <button
+              onClick={() => setModalOpen(true)}
+              className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            >
+              <span className="material-symbols-outlined text-white text-base">add</span>
+              Cadastrar
+            </button>
+          )}
 
-          <button
-            onClick={toggleAdvanced}
-            className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
-          >
-            <span className="material-symbols-outlined text-white text-base">filter_alt</span>
-            {showAdvanced ? "Ocultar" : "Filtrar"}
-          </button>
+          {(campos.filter(e => e.local === "filtro")).length > 0 && (
+            <button
+              onClick={toggleAdvanced}
+              className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            >
+              <span className="material-symbols-outlined text-white text-base">filter_alt</span>
+              {showAdvanced ? "Ocultar" : "Filtrar"}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Filtros avançados */}
-      {showAdvanced && (
+      {showAdvanced && (campos.filter(e => e.local === "filtro")).length > 0 && (
         <div className="flex flex-col md:flex-row md:items-center gap-3 border-t border-gray-600 pt-4 animate-fadeIn">
-          <input
-            type="text"
-            placeholder="Cidade"
-            value={filters.cidade}
-            onChange={(e) => handleChange("cidade", e.target.value)}
-            className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
-          />
-          <input
-            type="text"
-            placeholder="Estado"
-            value={filters.estado}
-            onChange={(e) => handleChange("estado", e.target.value)}
-            className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
-          />
-          <select
-            value={filters.tipo}
-            onChange={(e) => handleChange("tipo", e.target.value)}
-            className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black"
-          >
-            <option value="">Tipo</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Cidadão">Cidadão</option>
-            <option value="Funcionário">Funcionário</option>
-          </select>
-
+          {campos.filter(e => e.local === "filtro").map((field) => renderField(field))}
           <button
             onClick={clearFilters}
             className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full transition w-full md:w-auto"
@@ -121,8 +154,29 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           </button>
         </div>
       )}
+      {modalOpen && (
+        <Modal setValue={() => setModalOpen(false)} value={modalOpen}>
+          <Form 
+            object={model} 
+            name={nomePagina} 
+            type="create"
+            onCancel={() => setModalOpen(false)} 
+            onConfirm={async (data) => {
+              try {
+                if (onCadastrar) {
+                  await onCadastrar(data);
+                }
+                setModalOpen(false);
+              } catch (error) {
+                console.error('Erro ao cadastrar:', error);
+                alert('Erro ao cadastrar. Tente novamente.');
+              }
+            }} 
+          />
+        </Modal>
+      )}
     </div>
   );
 };
 
-export default SearchBar;
+export { SearchBar, type FieldConfig };
