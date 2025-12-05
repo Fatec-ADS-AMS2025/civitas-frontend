@@ -61,13 +61,17 @@ body {
   font-size: 26px; /* se quiser mesmo maior */
 }
 
-/* .skeleton {
+.skeleton {
   position: relative;
-  color: gray !important;
-  opacity: 0.3;
-  background-color: gray;
-  animation: pulse 1.5s infinite;
+  overflow: hidden;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
   border-radius: 10px;
+}
+
+.skeleton * {
+  visibility: hidden;
 }
 
 .skeleton::before {
@@ -77,10 +81,19 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: gray;
-  opacity: 1;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer 1.5s infinite;
   z-index: 10;
-} */
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
 
 
 @keyframes pulse {
