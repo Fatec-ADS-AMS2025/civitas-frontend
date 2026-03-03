@@ -53,20 +53,15 @@ export default function Page() {
     const loadSecretarias = async () => {
       try {
         setLoading(true);
-        const res: any = await secretariaService.getAll();
-        if(res === null) {
-          throw new Error('Resposta nula da API');
-        }
-        if(!res.data) {
-          throw new Error('Dados inválidos recebidos da API');
-        }
-        const data = res.data;
-        console.log(data);
+        const data = await secretariaService.getAll();
         setSecretarias(data);
         setFilteredData(data);
+        setError(null);
       } catch (err) {
         console.error('Erro ao carregar secretarias:', err);
-        setError('Erro ao carregar dados das secretarias');
+        setSecretarias([]);
+        setFilteredData([]);
+        setError('Não foi possível carregar secretarias. Verifique o backend e tente novamente.');
       } finally {
         setLoading(false);
       }
@@ -117,30 +112,18 @@ export default function Page() {
     }
   };
 
-  // Função para alterar situação
-  const handleAlterarSituacao = async (id: number) => {
-    try {
-      await secretariaService.alterarSituacao(id);
-      // Recarregar dados após alterar situação
-      const data = await secretariaService.getAll();
-      setSecretarias(data);
-      setFilteredData(data);
-    } catch (err) {
-      console.error('Erro ao alterar situação:', err);
-      throw err;
-    }
-  };
-
   if (loading) {
     return <div>Carregando secretarias...</div>;
   }
 
-  if (error) {
-    return <div>Erro: {error}</div>;
-  }
-
   return (
     <>
+      {error && (
+        <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          {error}
+        </div>
+      )}
+
       {/* Barra de busca */}
       <SearchBar 
         model={novaSecretaria} 

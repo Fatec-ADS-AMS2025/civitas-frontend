@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Modal from "../modal";
 import Form from "../Form/form";
+import type { FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
 import { usePathname } from 'next/navigation'
 
 type FieldConfig = {
@@ -21,6 +22,9 @@ type SearchBarProps = {
   onCadastrar?: (data: any) => Promise<any>;
   showCadastrarButton?: boolean;
   model: object | string[];
+  formFields?: ModalFieldConfig[];
+  formValidationSchema?: Record<string, ValidationFn>;
+  formHiddenFields?: string[];
 };
 
 const SearchBar = ({
@@ -31,6 +35,9 @@ const SearchBar = ({
   model,
   onCadastrar,
   showCadastrarButton = true,
+  formFields,
+  formValidationSchema,
+  formHiddenFields,
 }: SearchBarProps) => {
   const [backupDados] = useState(dados);
   const [backupCampos] = useState(campos);
@@ -160,6 +167,9 @@ const SearchBar = ({
             object={model} 
             name={nomePagina} 
             type="create"
+            fields={formFields}
+            validationSchema={formValidationSchema}
+            hiddenFields={formHiddenFields}
             onCancel={() => setModalOpen(false)} 
             onConfirm={async (data) => {
               try {
