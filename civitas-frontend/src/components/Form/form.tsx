@@ -386,11 +386,22 @@ export default function Form({
                 </div>
             </div>
 
-            <div className='mt-6 pt-6 border-t border-gray-200 gap-3 grid grid-cols-1 md:grid-cols-2'>
-                <Button variant='secondary' className='!w-full !text-base !py-3 !px-6 !font-semibold' onClick={onCancel} type='button'>
-                    Cancelar
+            <div
+                className={`mt-6 pt-6 border-t border-gray-200 gap-3 grid ${mode === "view" && currentStep === totalSteps - 1
+                        ? "grid-cols-1 justify-items-center"
+                        : "grid-cols-1 md:grid-cols-2"
+                    }`}
+            >
+                <Button
+                    variant='secondary'
+                    className='!w-full !text-base !py-3 !px-6 !font-semibold'
+                    onClick={onCancel}
+                    type='button'
+                >
+                    {mode === 'view' ? 'Fechar' : 'Cancelar'}
                 </Button>
-                {(mode === 'view' || currentStep < totalSteps - 1) ? (
+
+                {currentStep < totalSteps - 1 ? (
                     <Button
                         className='!w-full !text-base !py-3 !px-6 !font-semibold'
                         type='button'
@@ -401,7 +412,7 @@ export default function Form({
                     >
                         Avançar
                     </Button>
-                ) : (
+                ) : mode === 'view' ? null : (
                     <Button
                         className='!w-full !text-base !py-3 !px-6 !font-semibold'
                         type="submit"

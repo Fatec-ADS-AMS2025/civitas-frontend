@@ -178,7 +178,8 @@ const SearchBar = ({
                 }
                 setModalOpen(false);
               } catch (error) {
-                console.error('Erro ao cadastrar:', error);
+                console.error('Erro completo:', error);
+console.log('Erro detalhado:', JSON.stringify(error, null, 2));
                 alert('Erro ao cadastrar. Tente novamente.');
               }
             }} 

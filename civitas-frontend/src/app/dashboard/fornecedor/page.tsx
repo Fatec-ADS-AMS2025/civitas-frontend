@@ -25,7 +25,7 @@ const novoFornecedor: Fornecedor = {
 };
 
 const columns = [
-  { id: "idFornecedor", label: "ID Orçamento" },
+  { id: "idFornecedor", label: "ID Fornecedor" }, //na label estava ID do Orçamento
   { id: "nomeFantasia", label: "Nome Fantasia" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
