@@ -109,3 +109,90 @@ body {
     background: linear-gradient(90deg, darkgray, gray);
   }
 }
+
+/* ========== ACESSIBILIDADE ========== */
+
+/* Skip-to-content link — visível apenas no foco via teclado */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 10000;
+  padding: 1rem 1.5rem;
+  background: var(--secundary-1);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 0 0 0.5rem 0;
+  text-decoration: none;
+}
+
+.skip-to-content:focus {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  outline: 3px solid var(--primary-1);
+  outline-offset: 2px;
+}
+
+/* Anel de foco visível e consistente para todos os elementos interativos */
+*:focus-visible {
+  outline: 3px solid var(--primary-1);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove outline padrão quando via mouse (apenas :focus sem :focus-visible) */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Respeita preferências de movimento reduzido do usuário */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .skeleton {
+    animation: none;
+    background: #e0e0e0;
+  }
+
+  .skeleton::before {
+    animation: none;
+  }
+}
+
+/* Classe utilitária para conteúdo acessível apenas a leitores de tela */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Alto contraste — respeita preferências do SO */
+@media (prefers-contrast: high) {
+  :root {
+    --primary-1: #007777;
+    --secundary-1: #003333;
+  }
+
+  *:focus-visible {
+    outline-width: 4px;
+  }
+}

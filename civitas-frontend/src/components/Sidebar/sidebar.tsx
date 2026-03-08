@@ -78,6 +78,26 @@ export default function Sidebar({
   const [keyboardExpanded, setKeyboardExpanded] = useState(false);
   const router = useRouter();
 
+  // Expande a sidebar quando o foco do teclado entra, recolhe quando sai
+  const handleSidebarFocus = () => {
+    setKeyboardExpanded(true);
+  };
+
+  const handleSidebarBlur = (e: React.FocusEvent<HTMLElement>) => {
+    // Só recolhe se o foco saiu completamente da sidebar
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setKeyboardExpanded(false);
+    }
+  };
+
+  // Permite navegar entre itens com setas e fechar expansão com Escape
+  const handleSidebarKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Escape') {
+      setKeyboardExpanded(false);
+      (e.currentTarget as HTMLElement).blur();
+    }
+  };
+
   function handleNavigate(item: SidebarItem) {
     defaultItems.forEach(element => {
       if (item.key === element.key) {
@@ -119,10 +139,13 @@ export default function Sidebar({
   return (
     <>
       <aside
-        aria-label="Sidebar"
-        className="group hidden sm:flex flex-col justify-between items-stretch bg-secundary-1 text-tertialy-1 rounded-2xl overflow-hidden select-none transition-all 
-          duration-200 ease-out w-18 hover:w-64 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4"
+        aria-label="Menu de navegação principal"
+        className={`group hidden sm:flex flex-col justify-between items-stretch bg-secundary-1 text-tertialy-1 rounded-2xl overflow-hidden select-none transition-all 
+          duration-200 ease-out hover:w-64 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4 ${keyboardExpanded ? 'w-64' : 'w-18'}`}
         style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
+        onFocus={handleSidebarFocus}
+        onBlur={handleSidebarBlur}
+        onKeyDown={handleSidebarKeyDown}
       >
 
 
@@ -135,22 +158,25 @@ export default function Sidebar({
                 className="object-contain size-full"
               />
             </div>
-            <div className="ml-1 text-2xl font-semibold text-tertialy-1  opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className={`ml-1 text-2xl font-semibold text-tertialy-1 transition-opacity duration-200 ${keyboardExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} aria-hidden="true">
               Civitas
             </div>
           </div>
 
-          <nav className="flex flex-col gap-3 transition-all duration-200">
+          <nav aria-label="Navegação principal" className="flex flex-col gap-3 transition-all duration-200">
             {items.map((it) => {
               const isActive = it.href === pathname;
               return (
                 <button
                   key={it.key}
                   onClick={() => handleNavigate(it)}
-                  className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 outline-none cursor-pointer group 
+                  aria-current={isActive ? "page" : undefined}
+                  aria-label={it.label}
+                  title={it.label}
+                  className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 cursor-pointer group 
                     ${isActive
-                      ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white" //ativo
-                      : " text-tertialy-1" // não ativo
+                      ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white"
+                      : " text-tertialy-1"
                     }`}>
 
                   <div
@@ -158,6 +184,7 @@ export default function Sidebar({
                       ? "text-white border-b-2 border-white pb-[2px]"
                       : "text-tertialy-1"
                       } flex-none`}
+                    aria-hidden="true"
                   >
                     {isActive ? (
                       <span className="material-symbols-outlined filled">{it.icon}</span>
@@ -167,11 +194,12 @@ export default function Sidebar({
                   </div>
 
                   <div
-                    className={`flex-1 text-base truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+                    className={`flex-1 text-base truncate transition-opacity duration-200 
                         ${isActive
                         ? "text-white opacity-100"
-                        : "font-semibold"
-                      }`}>
+                        : `font-semibold ${keyboardExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`
+                      }`}
+                    aria-hidden="true">
                     {it.label}
                   </div>
                 </button>
@@ -184,11 +212,12 @@ export default function Sidebar({
           <button
             className="flex items-center gap-3 w-full rounded-2xl px-3 py-2 bg-tertialy-1 text-secundary-1 font-semibold shadow-inner hover:shadow-md transition-shadow duration-150 cursor-pointer"
             onClick={() => router.push("/perfil")}
+            aria-label="Ir para o perfil do usuário"
           >
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-secundary-1">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-secundary-1" aria-hidden="true">
               <span className="material-symbols-outlined">person</span>
             </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className={`transition-opacity duration-200 ${keyboardExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} aria-hidden="true">
               Perfil
             </div>
           </button>

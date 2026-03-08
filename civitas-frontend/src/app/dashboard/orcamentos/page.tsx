@@ -93,11 +93,11 @@ const Page = () => {
   };
 
   if (loading) {
-    return <div>Carregando orçamentos...</div>;
+    return <div role="status" aria-live="polite"><p>Carregando orçamentos...</p></div>;
   }
 
   if (error) {
-    return <div>Erro: {error}</div>;
+    return <div role="alert"><p>Erro: {error}</p></div>;
   }
 
   return (

@@ -52,24 +52,40 @@ export default function Layout({
   return (
     <div className='flex'>
       <Sidebar />
-      <div className='flex-1 p-6 sm:ml-[80px]' ref={paiRef}>
+      <main id="main-content" className='flex-1 p-6 sm:ml-[80px]' ref={paiRef} role="main">
         <div className='mb-6'>
           <h1 className='text-4xl font-bold text-[#004D4D] capitalize'>{parts[parts.length - 1]}</h1>
-          <div className='flex gap-1'>
-            {parts.map((item, index) => (
-              <span
-                key={index}
-                onClick={() => alterarPagina(item)}
-                className='text-sm text-gray-500 mt-1 capitalize opacity-80 transition-all duration-300 cursor-pointer'
-              >
-                {item}
-                {index < parts.length - 1 && " > "}
-              </span>
-            ))}
-          </div>
+          <nav aria-label="Breadcrumb" className='mt-1'>
+            <ol className='flex gap-1 list-none p-0 m-0'>
+              {parts.map((item, index) => (
+                <li key={index} className='flex items-center'>
+                  {index < parts.length - 1 ? (
+                    <>
+                      <button
+                        onClick={() => alterarPagina(item)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alterarPagina(item); } }}
+                        className='text-sm text-gray-500 capitalize opacity-80 transition-all duration-300 cursor-pointer hover:text-gray-700 hover:underline bg-transparent border-none p-0 focus-visible:text-gray-900 focus-visible:underline'
+                        type="button"
+                      >
+                        {item}
+                      </button>
+                      <span className='text-sm text-gray-400 mx-1' aria-hidden="true">&gt;</span>
+                    </>
+                  ) : (
+                    <span
+                      className='text-sm text-gray-500 capitalize opacity-80'
+                      aria-current="page"
+                    >
+                      {item}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </nav>
         </div>
         {children}
-      </div>
+      </main>
     </div>
   )
 }

@@ -23,6 +23,9 @@ export default function RootLayout({
       <body
         className={`antialiased`}
       >
+        <a href="#main-content" className="skip-to-content">
+          Pular para o conteúdo principal
+        </a>
         <div className="w-full h-full p-10">
           {children}
         </div>

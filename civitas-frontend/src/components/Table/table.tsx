@@ -49,23 +49,38 @@ const Table = ({ data, columns, onEdit, onDelete, actions = ["edit", "view"] }: 
       {/* Tabela - Desktop */}
       <div className="hidden md:block">
 
-        <div className="relative overflow-auto max-h-[500px] skeleton">
+        <div
+          className="relative overflow-auto max-h-[500px] skeleton"
+          tabIndex={0}
+          role="region"
+          aria-label={`Tabela de ${nomePagina}`}
+          onKeyDown={(e) => {
+            const scrollAmount = 40;
+            if (e.key === 'ArrowDown') { e.preventDefault(); e.currentTarget.scrollTop += scrollAmount; }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); e.currentTarget.scrollTop -= scrollAmount; }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); e.currentTarget.scrollLeft += scrollAmount; }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); e.currentTarget.scrollLeft -= scrollAmount; }
+            else if (e.key === 'Home') { e.preventDefault(); e.currentTarget.scrollTop = 0; }
+            else if (e.key === 'End') { e.preventDefault(); e.currentTarget.scrollTop = e.currentTarget.scrollHeight; }
+          }}
+        >
           <table className="w-full text-left border-collapse text-black">
+            <caption className="sr-only">Lista de {nomePagina}</caption>
             <thead className="bg-primary-1 text-black sticky top-0 z-10">
               <tr>
                 {columns.map((column) => (
-                  <th key={column.id} className="p-3">
+                  <th key={column.id} scope="col" className="p-3">
                     {column.label}
                   </th>
                 ))}
-                <th className="p-3">Ações</th>
+                <th scope="col" className="p-3">Ações</th>
               </tr>
             </thead>
             <tbody>
               {data.length == 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="p-3 text-center">
-                    Nenhum dado encontrado.
+                  <td colSpan={columns.length + 1} className="p-3 text-center">
+                    <p role="status">Nenhum dado encontrado.</p>
                   </td>
                 </tr>
               ) : (
@@ -78,18 +93,36 @@ const Table = ({ data, columns, onEdit, onDelete, actions = ["edit", "view"] }: 
                     ))}
                     <td className="p-3 border-t flex gap-1">
                       {actions?.includes("view") && (
-                        <button onClick={() => openModal("view", objeto)} className="cursor-pointer">
-                          <span className="material-symbols-outlined">visibility</span>
+                        <button
+                          onClick={() => openModal("view", objeto)}
+                          className="cursor-pointer p-1 rounded hover:bg-gray-100"
+                          aria-label={`Visualizar registro ${i + 1}`}
+                          title="Visualizar"
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
                         </button>
                       )}
                       {actions?.includes("edit") && (
-                        <button onClick={() => openModal("edit", objeto)} className="cursor-pointer">
-                          <span className="material-symbols-outlined">edit_square</span>
+                        <button
+                          onClick={() => openModal("edit", objeto)}
+                          className="cursor-pointer p-1 rounded hover:bg-gray-100"
+                          aria-label={`Editar registro ${i + 1}`}
+                          title="Editar"
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined" aria-hidden="true">edit_square</span>
                         </button>
                       )}
                       {actions?.includes("delete") && (
-                        <button onClick={() => openModal("delete", objeto)} className="cursor-pointer">
-                          <span className="material-symbols-outlined">delete</span>
+                        <button
+                          onClick={() => openModal("delete", objeto)}
+                          className="cursor-pointer p-1 rounded hover:bg-gray-100"
+                          aria-label={`Excluir registro ${i + 1}`}
+                          title="Excluir"
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                         </button>
                       )}
                     </td>

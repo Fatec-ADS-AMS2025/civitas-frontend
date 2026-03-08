@@ -43,7 +43,7 @@ export default function Form({ camps, name, object, type, onCancel, onConfirm }:
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!onConfirm) return;
+        if (isLoading || !onConfirm) return;
 
         setIsLoading(true);
         try {
@@ -66,17 +66,27 @@ export default function Form({ camps, name, object, type, onCancel, onConfirm }:
     const fieldsToHide = ['id', 'idSecretaria', 'idFornecedor', 'idOrcamento'];
     const visibleFields = tipagem?.filter((field: string) => !fieldsToHide.includes(field)) || [];
 
+    const handleFormKeyDown = (e: React.KeyboardEvent) => {
+        // Escape cancela o formulário
+        // Enter submete nativamente via <button type="submit"> — sem necessidade de handler manual
+        if (e.key === 'Escape' && onCancel) {
+            e.preventDefault();
+            onCancel();
+        }
+    };
+
     return (
-        <form className='flex flex-col' onSubmit={handleSubmit}>
+        <form className='flex flex-col' onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} aria-label={`${tipos[type ? type : 'create']} ${name}`}>
             <div className='flex flex-col'>
-                <h1 className='text-2xl font-semibold'>{tipos[type ? type : 'create']} {name}</h1>
+                <h2 className='text-2xl font-semibold' id="form-title">{tipos[type ? type : 'create']} {name}</h2>
                 <p className='text-gray-400'>Vamos lá, preencha os campos abaixo:</p>
             </div>
             <div className='grid grid-cols-1 md:grid-cols-2'>
                 <div className='p-20'>
-                    <Image src={imgs[type ? type : 'create']} alt={tipos[type ? type : 'create']} className='w-full h-full max-w-[600px] max-h-[400px]' width={100} height={100} />
+                    <Image src={imgs[type ? type : 'create']} alt={`Ilustração de ${tipos[type ? type : 'create'].toLowerCase()}`} className='w-full h-full max-w-[600px] max-h-[400px]' width={100} height={100} />
                 </div>
-                <div className={`grid ${tipoColunas} gap-2`}>
+                <fieldset className={`grid ${tipoColunas} gap-2`}>
+                    <legend className="sr-only">Campos do formulário de {name}</legend>
                     {visibleFields.map((field: string, index: number) => (
                         <Input
                             key={field}
@@ -88,11 +98,11 @@ export default function Form({ camps, name, object, type, onCancel, onConfirm }:
                             onChange={(e) => handleInputChange(field, e.target.value)}
                         />
                     ))}
-                </div>
+                </fieldset>
             </div>
 
-            <div className='mt-4 gap-2 grid grid-cols-1 md:grid-cols-2'>
-                <Button variant='secondary' className='!w-full' onClick={onCancel}>
+            <div className='mt-4 gap-2 grid grid-cols-1 md:grid-cols-2' role="group" aria-label="Ações do formulário">
+                <Button variant='secondary' className='!w-full' type="button" onClick={onCancel}>
                     Cancelar
                 </Button>
                 {type !== 'view' ? (
@@ -100,11 +110,13 @@ export default function Form({ camps, name, object, type, onCancel, onConfirm }:
                         className='!w-full'
                         type="submit"
                         disabled={isLoading}
+                        aria-busy={isLoading}
                     >
-                        {isLoading ? 'Processando...' : 'Confirmar'}
+                        <span aria-live="polite">{isLoading ? 'Processando...' : 'Confirmar'}</span>
                     </Button>
                 ) : <div></div>}
             </div>
         </form>
     )
 }
+

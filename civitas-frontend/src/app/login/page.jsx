@@ -20,6 +20,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
+    if (loading) return
     setGeneralError('')
     const newErrors = { email: '', password: '' }
 
@@ -80,7 +81,7 @@ export default function LoginPage() {
     <div className="min-h-screen w-full bg-gray-100">
       <div className="mx-auto w-full h-full px-4 flex flex-1">
         {/* Left Section - Illustration */}
-        <div className="hidden lg:flex w-1/2 bg-white items-center justify-center p-8 rounded-3xl m-8">
+        <div className="hidden lg:flex w-1/2 bg-white items-center justify-center p-8 rounded-3xl m-8" aria-hidden="true">
           <div className="w-full flex flex-col items-center">
             <div className="mb-8 text-center">
               <h1 className="text-3xl font-bold text-gray-900">
@@ -90,18 +91,18 @@ export default function LoginPage() {
             
             {/* Illustration */}
             <div className="flex justify-center w-full">
-              <img src="/mnote.png" alt="Woman with laptop" className="w-full max-w-md h-auto" />
+              <img src="/mnote.png" alt="" role="presentation" className="w-full max-w-md h-auto" />
             </div>
           </div>
         </div>
 
         {/* Right Section - Login Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
+        <main id="main-content" className="w-full lg:w-1/2 flex items-center justify-center p-6">
           <div className="w-full max-w-sm">
             {/* Header */}
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
-                <img src="/logo1.png" alt="Civitas Logo" className="w-10 h-10 object-contain" />
+                <img src="/logo1.png" alt="Logo Civitas" className="w-10 h-10 object-contain" />
                 <span className="text-teal-700 font-semibold">Civitas</span>
               </div>
               <h2 className="text-5xl font-bold text-gray-900 mb-4">Login</h2>
@@ -111,10 +112,10 @@ export default function LoginPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleLogin} noValidate className="space-y-5">
+            <form onSubmit={handleLogin} noValidate className="space-y-5" aria-label="Formulário de login">
               {/* Mensagem de erro geral */}
               {generalError && (
-                <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-sm">
+                <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-sm" role="alert" aria-live="assertive">
                   {generalError}
                 </div>
               )}
@@ -183,11 +184,12 @@ export default function LoginPage() {
 
               {/* Login Button */}
               <button
-                type="button"
-                onClick={() => router.push('/dashboard')}
+                type="submit"
+                disabled={loading}
                 className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-4 rounded-full transition duration-200 mt-8 text-base disabled:opacity-60 disabled:cursor-not-allowed relative"
+                aria-busy={loading}
               >
-                Acessar Conta
+                {loading ? 'Entrando...' : 'Acessar Conta'}
               </button>
             </form>
 
@@ -201,9 +203,9 @@ export default function LoginPage() {
               </p>
             </div>
           </div>
-        </div>
+        </main>
       </div>
-      <div className="h-10 fixed bottom-0 left-0 right-0 bg-teal-700"></div>
+      <div className="h-10 fixed bottom-0 left-0 right-0 bg-teal-700" aria-hidden="true"></div>
       
       {/* Bottom Bar */}
     </div>
