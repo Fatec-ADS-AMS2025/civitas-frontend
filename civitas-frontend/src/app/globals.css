@@ -61,17 +61,13 @@ body {
   font-size: 26px; /* se quiser mesmo maior */
 }
 
-.skeleton {
+/* .skeleton {
   position: relative;
-  overflow: hidden;
-  background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  color: gray !important;
+  opacity: 0.3;
+  background-color: gray;
+  animation: pulse 1.5s infinite;
   border-radius: 10px;
-}
-
-.skeleton * {
-  visibility: hidden;
 }
 
 .skeleton::before {
@@ -81,19 +77,10 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-  animation: shimmer 1.5s infinite;
+  background-color: gray;
+  opacity: 1;
   z-index: 10;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
+} */
 
 
 @keyframes pulse {
@@ -109,90 +96,75 @@ body {
     background: linear-gradient(90deg, darkgray, gray);
   }
 }
-
-/* ========== ACESSIBILIDADE ========== */
-
-/* Skip-to-content link — visível apenas no foco via teclado */
-.skip-to-content {
-  position: absolute;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  z-index: 10000;
-  padding: 1rem 1.5rem;
-  background: var(--secundary-1);
-  color: #fff;
-  font-weight: 600;
-  border-radius: 0 0 0.5rem 0;
-  text-decoration: none;
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
 }
 
-.skip-to-content:focus {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: auto;
-  height: auto;
-  outline: 3px solid var(--primary-1);
-  outline-offset: 2px;
+body.high-contrast {
+  background: #000 !important;
+  color: #fff !important;
 }
 
-/* Anel de foco visível e consistente para todos os elementos interativos */
-*:focus-visible {
-  outline: 3px solid var(--primary-1);
-  outline-offset: 2px;
-  border-radius: 4px;
+body.high-contrast * {
+  border-color: #fff !important;
+  box-shadow: none !important;
 }
 
-/* Remove outline padrão quando via mouse (apenas :focus sem :focus-visible) */
-*:focus:not(:focus-visible) {
-  outline: none;
+body.high-contrast a,
+body.high-contrast button {
+  color: #ff0 !important;
 }
 
-/* Respeita preferências de movimento reduzido do usuário */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  .skeleton {
-    animation: none;
-    background: #e0e0e0;
-  }
-
-  .skeleton::before {
-    animation: none;
-  }
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
 }
 
-/* Classe utilitária para conteúdo acessível apenas a leitores de tela */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+body.high-contrast img {
+  filter: grayscale(100%) contrast(120%);
 }
 
-/* Alto contraste — respeita preferências do SO */
-@media (prefers-contrast: high) {
-  :root {
-    --primary-1: #007777;
-    --secundary-1: #003333;
-  }
+body.high-contrast aside[aria-label="Menu de acessibilidade"] {
+  background: #fff !important;
+}
 
-  *:focus-visible {
-    outline-width: 4px;
-  }
+body.high-contrast aside[aria-label="Menu de acessibilidade"] button {
+  color: #000 !important;
+}
+
+body.high-contrast .bg-white,
+body.high-contrast .bg-gray-100,
+body.high-contrast .bg-\[\#393939\],
+body.high-contrast .bg-secundary-1,
+body.high-contrast .bg-tertialy-1,
+body.high-contrast .bg-primary-1,
+body.high-contrast .bg-teal-700,
+body.high-contrast .bg-teal-800 {
+  background: #000 !important;
+}
+
+body.high-contrast .text-gray-400,
+body.high-contrast .text-gray-500,
+body.high-contrast .text-gray-600,
+body.high-contrast .text-gray-700,
+body.high-contrast .text-gray-900,
+body.high-contrast .text-white,
+body.high-contrast .text-black,
+body.high-contrast .text-teal-700,
+body.high-contrast .text-tertialy-1,
+body.high-contrast .text-secundary-1 {
+  color: #fff !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #ff8a00;
+  outline-offset: 3px;
 }

@@ -132,11 +132,11 @@ export default function Page() {
   };
 
   if (loading) {
-    return <div role="status" aria-live="polite"><p>Carregando secretarias...</p></div>;
+    return <div>Carregando secretarias...</div>;
   }
 
   if (error) {
-    return <div role="alert"><p>Erro: {error}</p></div>;
+    return <div>Erro: {error}</div>;
   }
 
   return (

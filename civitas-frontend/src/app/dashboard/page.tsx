@@ -6,7 +6,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen font-sans">
       {/* Header */}
-      <header className="bg-white border-gray-200 pb-10">
+      <div className="bg-white border-gray-200 pb-10">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
           <div className="flex-1">
             <h1 className="text-[48px] font-semibold leading-tight text-[#004C57] skeleton">
@@ -18,7 +18,7 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <div>
@@ -27,12 +27,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-8">
           {/* Valor Disponível */}
           <div
-            className="relative p-6 rounded-3xl text-[#003840] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton focus-visible:ring-3 focus-visible:ring-[#58AFAE] focus-visible:outline-none"
+            className="relative p-6 rounded-3xl text-[#003840] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton"
             style={{ background: "linear-gradient(180deg, #007E91 0%, #A3F3FF 100%)" }}
-            tabIndex={0}
-            role="button"
-            aria-label="Ver valor disponível"
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
           >
             <div className="relative z-10">
               <h3 className="text-xl font-semibold leading-tight">Valor Disponível</h3>
@@ -49,12 +45,8 @@ export default function Dashboard() {
 
           {/* Balança */}
           <div
-            className="relative p-6 rounded-3xl text-[#E4E4E4] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton focus-visible:ring-3 focus-visible:ring-[#58AFAE] focus-visible:outline-none"
+            className="relative p-6 rounded-3xl text-[#E4E4E4] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton"
             style={{ background: "linear-gradient(180deg, #000000 0%, #454545 100%)" }}
-            tabIndex={0}
-            role="button"
-            aria-label="Ver balança financeira"
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
           >
             <div className="relative z-10">
               <h3 className="text-xl font-semibold leading-tight">Balança</h3>
@@ -68,12 +60,8 @@ export default function Dashboard() {
 
           {/* Gastos Totais */}
           <div
-            className="relative p-6 rounded-3xl text-[#602B00] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton focus-visible:ring-3 focus-visible:ring-[#58AFAE] focus-visible:outline-none"
+            className="relative p-6 rounded-3xl text-[#602B00] overflow-hidden min-h-[170px] flex flex-col justify-between shadow-sm hover:brightness-105 transition-all hover:scale-105 duration-300 cursor-pointer hover:shadow-md skeleton"
             style={{ background: "linear-gradient(180deg, #FF8729 0%, #e3b17eff 100%)" }}
-            tabIndex={0}
-            role="button"
-            aria-label="Ver gastos totais"
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
           >
             <div className="relative z-10">
               <h3 className="text-xl font-semibold leading-tight">Gastos Totais</h3>
@@ -85,54 +73,53 @@ export default function Dashboard() {
         </div>
 
          {/* Countdown */}
-        <div className="text-center mb-4 sm:mb-6 lg:mb-8 skeleton" role="status" aria-live="polite">
+        <div className="text-center mb-4 sm:mb-6 lg:mb-8 skeleton">
           <p className="text-gray-700 font-bold text-sm sm:text-base px-2">14 dias até a reposição da verba.</p>
         </div>
 
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           {/* Gastos Previstos */}
-          <section className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton" aria-labelledby="gastos-previstos-title">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
-                <h2 id="gastos-previstos-title" className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Gastos previstos para esse mês:</h2>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Gastos previstos para esse mês:</h3>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1">Se não houver imprevistos, esse é o valor dos gastos totais.</p>
               </div>
-              <span className="text-gray-400 self-start sm:self-center" aria-hidden="true">...</span>
+              <span className="text-gray-400 self-start sm:self-center">...</span>
             </div>
-            <button type="button" className="w-full bg-[#C5C5C5] text-gray-800 rounded-full py-2.5 sm:py-3 px-4 sm:px-6 font-medium hover:bg-[#B5B5B5] active:bg-[#B5B5B5] transition-colors text-sm sm:text-base touch-manipulation">
+            <button className="w-full bg-[#C5C5C5] text-gray-800 rounded-full py-2.5 sm:py-3 px-4 sm:px-6 font-medium hover:bg-[#B5B5B5] active:bg-[#B5B5B5] transition-colors text-sm sm:text-base touch-manipulation">
               {"{Cálculo de gastos previstos}"}
             </button>
-          </section>
+          </div>
 
           {/* Instituições Desbalanceadas */}
-          <section className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton" aria-labelledby="inst-desbalanceadas-title">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
-                <h2 id="inst-desbalanceadas-title" className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Instituições desbalanceadas</h2>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Instituições desbalanceadas</h3>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1">Estão gastando bem mais que a média:</p>
               </div>
-              <span className="text-gray-400 self-start sm:self-center" aria-hidden="true">...</span>
+              <span className="text-gray-400 self-start sm:self-center">...</span>
             </div>
-            <button type="button" className="w-full bg-[#C5C5C5] text-gray-800 rounded-full py-2.5 sm:py-3 px-4 sm:px-6 font-medium hover:bg-[#B5B5B5] active:bg-[#B5B5B5] transition-colors text-sm sm:text-base touch-manipulation">
+            <button className="w-full bg-[#C5C5C5] text-gray-800 rounded-full py-2.5 sm:py-3 px-4 sm:px-6 font-medium hover:bg-[#B5B5B5] active:bg-[#B5B5B5] transition-colors text-sm sm:text-base touch-manipulation">
               {"{Nome da Instituição}"}
             </button>
-          </section>
+          </div>
         </div>
 
         {/* Chart and Last Expenses */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           {/* Gráfico */}
-          <section className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton" aria-labelledby="grafico-title">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 id="grafico-title" className="text-base sm:text-lg font-semibold text-gray-900">Gráfico</h2>
-              <span className="text-gray-400" aria-hidden="true">...</span>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Gráfico</h3>
+              <span className="text-gray-400">...</span>
             </div>
             <div className="h-48 sm:h-56 lg:h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl sm:rounded-2xl flex items-center justify-center relative overflow-hidden">
               {/* Chart representation EXACTLY like the reference image */}
               <div className="w-full h-full relative p-3 sm:p-4 lg:p-6">
-                <svg className="w-full h-full" viewBox="0 0 350 160" role="img" aria-label="Gráfico de linhas mostrando valor disponível em azul e gastos em vermelho ao longo do tempo">
-                  <title>Gráfico comparativo de valores disponíveis e gastos</title>
+                <svg className="w-full h-full" viewBox="0 0 350 160">
                   {/* Gradientes exatos da imagem de referência */}
                   <defs>
                     <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -191,65 +178,65 @@ export default function Dashboard() {
                 </svg>
               </div>
             </div>
-          </section>
+          </div>
 
           {/* Últimos Gastos */}
-          <section className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton" aria-labelledby="ultimos-gastos-title">
+          <div className="bg-gray-100 rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md skeleton">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-0">
               <div className="flex-1">
-                <h2 id="ultimos-gastos-title" className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Últimos Gastos:</h2>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Últimos Gastos:</h3>
                 <p className="text-xs sm:text-sm text-gray-600 mt-1">Aqui você pode ver onde está indo os fundos:</p>
               </div>
-              <span className="text-gray-400 self-start sm:self-center" aria-hidden="true">...</span>
+              <span className="text-gray-400 self-start sm:self-center">...</span>
             </div>
-            <ul className="space-y-2 sm:space-y-3 list-none p-0 m-0" aria-label="Lista de últimos gastos">
-              <li className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-900 truncate">- R$ 539 Área da saúde</div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <time className="text-xs text-gray-500" dateTime="2026-07-17T08:17">17/07/2026 08:17</time>
-                  <button type="button" className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
+                  <div className="text-xs text-gray-500">17/07/2026 08:17</div>
+                  <button className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
                 </div>
-              </li>
-              <li className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-900 truncate">- R$ 777 Secretaria</div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <time className="text-xs text-gray-500" dateTime="2026-07-17T08:17">17/07/2026 08:17</time>
-                  <button type="button" className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
+                  <div className="text-xs text-gray-500">17/07/2026 08:17</div>
+                  <button className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
                 </div>
-              </li>
-              <li className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-900 truncate">- R$ 4.000 Reforma</div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <time className="text-xs text-gray-500" dateTime="2026-07-16T08:15">16/07/2026 08:15</time>
-                  <button type="button" className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
+                  <div className="text-xs text-gray-500">16/07/2026 08:15</div>
+                  <button className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
                 </div>
-              </li>
-              <li className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-900 truncate">- R$ 777,07 Sabesp</div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <time className="text-xs text-gray-500" dateTime="2026-07-16T06:10">16/07/2026 06:10</time>
-                  <button type="button" className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
+                  <div className="text-xs text-gray-500">16/07/2026 06:10</div>
+                  <button className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
                 </div>
-              </li>
-              <li className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-1 sm:gap-0 border-b border-gray-100 last:border-0">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-900 truncate">+777,777,77 Verba</div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <time className="text-xs text-gray-500" dateTime="2026-07-15T06:09">15/07/2026 06:09</time>
-                  <button type="button" className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
+                  <div className="text-xs text-gray-500">15/07/2026 06:09</div>
+                  <button className="text-xs text-blue-600 hover:underline touch-manipulation">Ver mais...</button>
                 </div>
-              </li>
-            </ul>
-          </section>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

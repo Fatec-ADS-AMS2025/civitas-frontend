@@ -104,11 +104,11 @@ export default function Page() {
   };
 
   if (loading) {
-    return <div role="status" aria-live="polite"><p>Carregando fornecedores...</p></div>;
+    return <div>Carregando fornecedores...</div>;
   }
 
   if (error) {
-    return <div role="alert"><p>Erro: {error}</p></div>;
+    return <div>Erro: {error}</div>;
   }
 
   return (

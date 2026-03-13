@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
@@ -121,11 +121,11 @@ const Page = () => {
   };
 
   if (loading) {
-    return <div role="status" aria-live="polite"><p>Carregando instituições...</p></div>;
+    return <div>Carregando instituições...</div>;
   }
 
   if (error) {
-    return <div role="alert"><p>Erro: {error}</p></div>;
+    return <div>Erro: {error}</div>;
   }
 
   return (
