@@ -19,6 +19,9 @@ type SearchBarProps = {
   onCadastrar?: (data: any) => Promise<any>;
   showCadastrarButton?: boolean;
   model: object | string[];
+  formFields?: ModalFieldConfig[];
+  formValidationSchema?: Record<string, ValidationFn>;
+  formHiddenFields?: string[];
 };
 
 const SearchBar = ({
@@ -29,6 +32,9 @@ const SearchBar = ({
   model,
   onCadastrar,
   showCadastrarButton = true,
+  formFields,
+  formValidationSchema,
+  formHiddenFields,
 }: SearchBarProps) => {
   const [modalOpen, setModalOpen] = useState<boolean | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
