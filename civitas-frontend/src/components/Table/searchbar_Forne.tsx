@@ -25,6 +25,21 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleFieldKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const form = e.currentTarget.form ?? e.currentTarget.closest('form, div');
+      if (!form) return;
+      const selectors = 'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])';
+      const focusables = Array.from(form.querySelectorAll<HTMLElement>(selectors)).filter((el) => el.offsetParent !== null);
+      const index = focusables.indexOf(e.currentTarget as HTMLElement);
+      const next = focusables[index + 1];
+      if (next) {
+        next.focus();
+      }
+    }
+  };
+
   const toggleAdvanced = () => setShowAdvanced((prev) => !prev);
 
   const clearFilters = () => {
@@ -50,6 +65,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           placeholder="Nome"
           value={filters.nome}
           onChange={(e) => handleChange("nome", e.target.value)}
+          onKeyDown={handleFieldKeyDown}
           className="rounded-full px-4 py-2 text-sm max-w-md md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
         />
 
@@ -58,6 +74,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           placeholder="CPF"
           value={filters.cpf}
           onChange={(e) => handleChange("cpf", e.target.value)}
+          onKeyDown={handleFieldKeyDown}
           className="rounded-full px-4 py-2 text-sm max-w-sm md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
         />
 
@@ -89,6 +106,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
             placeholder="Telefone"
             value={filters.telefone}
             onChange={(e) => handleChange("telefone", e.target.value)}
+            onKeyDown={handleFieldKeyDown}
             className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
           />
 
