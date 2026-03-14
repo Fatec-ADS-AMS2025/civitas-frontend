@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Form from "../Form/form";
 import Modal from "../modal";
+import type { FieldConfig as ModalFieldConfig, FormMode, ValidationFn } from "../Form/form";
 import { usePathname } from 'next/navigation'
 
 type Column = {
@@ -14,9 +15,21 @@ type TableProps = {
   actions?: string[];
   onEdit?: (id: number, data: any) => Promise<any>;
   onDelete?: (id: number) => Promise<void>;
+  formFields?: ModalFieldConfig[];
+  formValidationSchema?: Record<string, ValidationFn>;
+  formHiddenFields?: string[];
 };
 
-const Table = ({ data, columns, onEdit, onDelete, actions = ["edit", "view"] }: TableProps) => {
+const Table = ({
+  data,
+  columns,
+  onEdit,
+  onDelete,
+  actions = ["edit", "view"],
+  formFields,
+  formValidationSchema,
+  formHiddenFields,
+}: TableProps) => {
 
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
@@ -31,10 +44,10 @@ const Table = ({ data, columns, onEdit, onDelete, actions = ["edit", "view"] }: 
     return 'id';
   };
 
-  const [modalAction, setModalAction] = useState<string | null>(null);
+  const [modalAction, setModalAction] = useState<FormMode | null>(null);
   const [selectedContent, setSelectedContent] = useState<any | null>(null);
 
-  const openModal = (action: string, objeto: any) => {
+  const openModal = (action: FormMode, objeto: any) => {
     setSelectedContent(objeto);
     setModalAction(action);
   };
@@ -107,6 +120,9 @@ const Table = ({ data, columns, onEdit, onDelete, actions = ["edit", "view"] }: 
             name={nomePagina} 
             camps={data.length > 0 ? Object.keys(data[0]) : []} 
             type={modalAction} 
+            fields={formFields}
+            validationSchema={formValidationSchema}
+            hiddenFields={formHiddenFields}
             onCancel={closeModal} 
             onConfirm={async (formData) => {
               try {

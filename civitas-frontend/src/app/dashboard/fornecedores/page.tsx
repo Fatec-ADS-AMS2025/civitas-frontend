@@ -1,26 +1,30 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
+import { fornecedorService } from "@/hooks/fornecedor";
+import FornecedorDTO from "@/models/fornecedor";
 
-type Fornecedor = {
-  id: number;
-  nomeFantasia: string;
-  cnpj: string;
-  telefone: string;
-  situacao: "Ativo" | "Inativo";
-};
+type Fornecedor = FornecedorDTO;
 
 const novoFornecedor: Fornecedor = {
-  id: 0,
-  nomeFantasia: "",
-  cnpj: "",
-  telefone: "",
-  situacao: "Ativo",
+  idFornecedor: 0,
+  nomeFantasia: '',
+  situacao: 1,
+  cnpj: '',
+  nome: '',
+  logradouro: '',
+  numero: '',
+  bairro: '',
+  cep: '',
+  telefone: '',
+  email: '',
+  cidade: '',
+  estado: '',
 };
 
 const columns = [
-  { id: "id", label: "ID" },
+  { id: "idFornecedor", label: "ID Fornecedor" },
   { id: "nomeFantasia", label: "Nome Fantasia" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
@@ -31,34 +35,51 @@ const camposConst: FieldConfig[] = [
   { key: "nomeFantasia", placeholder: "Nome Fantasia", local: "principal" },
   { key: "cnpj", placeholder: "CNPJ", local: "principal" },
   { key: "telefone", placeholder: "Telefone", local: "filtro" },
-  {
-    key: "situacao",
-    placeholder: "Situação",
-    local: "filtro",
-    type: "select",
-    options: [
-      { value: "Ativo", label: "Ativo" },
-      { value: "Inativo", label: "Inativo" },
-    ],
-  },
+  { key: "situacao", placeholder: "Situação", local: "filtro" },
+  { key: "cidade", placeholder: "Cidade", local: "filtro" },
 ];
 
 const Page = () => {
-
-  const fornecedores: Fornecedor[] = [
-    { id: 100, nomeFantasia: "Alpha Tech", cnpj: "12.345.678/0001-90", telefone: "(11) 98888-9999", situacao: "Ativo" },
-    { id: 101, nomeFantasia: "Global Farma", cnpj: "98.765.432/0001-11", telefone: "(31) 97777-4444", situacao: "Inativo" },
-    { id: 102, nomeFantasia: "Construmax", cnpj: "45.678.912/0001-22", telefone: "(21) 96666-3333", situacao: "Ativo" },
-    { id: 103, nomeFantasia: "Eco Verde", cnpj: "55.666.777/0001-88", telefone: "(11) 94444-2222", situacao: "Ativo" },
-    { id: 104, nomeFantasia: "Log Brasil", cnpj: "11.223.344/0001-44", telefone: "(41) 99999-8888", situacao: "Inativo" },
-    { id: 105, nomeFantasia: "Solar Energy", cnpj: "22.333.444/0001-55", telefone: "(71) 93333-6666", situacao: "Ativo" },
-  ];
-
-  const [filteredData, setFilteredData] = useState<Fornecedor[]>(fornecedores);
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
+  const [filteredData, setFilteredData] = useState<Fornecedor[]>([]);
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadFornecedores = async () => {
+      try {
+        setLoading(true);
+        const data: any = await fornecedorService.getAll();
+        const list = Array.isArray(data?.data) ? data.data : [];
+        setFornecedores(list);
+        setFilteredData(list);
+        setError(null);
+      } catch (err) {
+        console.error('Erro ao carregar fornecedores:', err);
+        setFornecedores([]);
+        setFilteredData([]);
+        setError('Não foi possível carregar fornecedores. Verifique o backend e tente novamente.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFornecedores();
+  }, []);
+
+  if (loading) {
+    return <div>Carregando fornecedores...</div>;
+  }
 
   return (
     <>
+      {error && (
+        <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          {error}
+        </div>
+      )}
+
       {/* Barra de busca */}
       <SearchBar model={novoFornecedor} dados={fornecedores} setDados={setFilteredData} campos={campos} setCampos={setCampos} />
 
