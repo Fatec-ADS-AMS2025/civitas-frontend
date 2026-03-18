@@ -1,0 +1,87 @@
+Sprint Documentation
+====================
+
+Sprint #: 13
+Start Date: 16/03/2026
+Final Date: 19/03/2026
+Project Name: civitas-frontend
+Ano: 5o
+Curso: Analise e Desenvolvimento de Sistemas - AMS
+
+Team Members
+------------
+- KaykyOne
+
+Sprint Backlog
+--------------
+- Task #: 103
+- Description: Front - Aprimoramento do formulario generico (FK + etapas)
+- Start Date: 16/03/2026
+- Final Date: 19/03/2026
+
+Task Description
+----------------
+- Task #: 103
+- Description: Sprint 13 - Front - Aprimoramento do formulario generico (FK + etapas)
+- Assigned To: KaykyOne
+- Status: Finish
+- Estimated Hours: 12 horas
+- Logged Hours: 12 horas
+
+Sprint Description
+------------------
+
+Objetivo
+--------
+Evoluir o formulario generico para suportar cenarios mais complexos de cadastro, com foco em:
+
+- campos select com estrutura value/label para chaves estrangeiras
+- conversao correta de tipos no submit, principalmente em campos numericos
+- divisao automatica em etapas para formularios longos
+- validacao por etapa no avancar e validacao completa no confirmar
+- compatibilidade com criacao, edicao, visualizacao e exclusao sem regressao
+
+Criterios de Aceite
+-------------------
+- O formulario passa a usar metadados como fonte unica de configuracao por meio de `FormFieldConfig`, mantendo compatibilidade com o alias antigo.
+- Campos select aceitam lista de opcoes com `value` e `label`, preservando o tipo original da opcao no payload final.
+- Conversao de tipo e aplicada no submit para campos `number`, sem degradar a experiencia de digitacao durante o preenchimento.
+- Formularios com mais de 4 campos visiveis entram automaticamente em modo por etapas.
+- Navegacao entre etapas conta com `Avancar` e `Voltar`, validando a etapa atual antes de seguir.
+- O submit final revalida todos os campos visiveis antes de enviar os dados.
+- O fluxo de criacao via `SearchBar` passa a reutilizar `formFields`, `validationSchema` e `hiddenFields`, assim como ja acontecia na tabela.
+- O comportamento permanece compativel com modos `create`, `edit`, `view` e `delete`.
+
+Observacoes
+-----------
+- A logica de negocio e de carregamento de opcoes FK permanece nas paginas consumidoras e nos hooks, nao no componente generico.
+- O componente foi mantido reutilizavel para modulos distintos, incluindo cadastros e cenarios financeiros.
+- A navegacao por etapas foi pensada para formularios extensos, reduzindo sobrecarga visual e melhorando a usabilidade.
+- Foi incluido suporte de acessibilidade para relacao entre campos e mensagens de erro.
+
+Sprint Results
+--------------
+Foi implementada uma evolucao estrutural no formulario generico do projeto, consolidando o uso de metadados como base para renderizacao, validacao e normalizacao dos valores enviados. Com isso, o componente passou a atender melhor cenarios com alto volume de campos e relacionamentos representados por selects com `value/label`.
+
+No componente principal do formulario, foi criado o tipo `FormFieldConfig`, mantendo compatibilidade com o alias anterior para evitar regressao nos modulos ja integrados. Tambem foi adicionada uma rotina central de normalizacao para preservar valores numericos e de chave estrangeira no tipo correto durante o submit, especialmente em campos `number` e `select`.
+
+O fluxo por etapas foi aprimorado para ser automatico em formularios com mais de quatro campos visiveis. A navegacao agora possui botoes explicitos de `Avancar` e `Voltar`, com bloqueio de avancos indevidos quando a etapa atual estiver invalida. Alem disso, o `Confirmar` passou a executar uma segunda validacao completa de todos os campos antes do envio final, garantindo a dupla validacao solicitada na task.
+
+Tambem foi corrigida a integracao do modal de criacao aberto pelo componente `SearchBar`, que agora repassa as mesmas configuracoes de formulario usadas nos modais de tabela. Com isso, os fluxos de criacao e edicao passaram a compartilhar o mesmo contrato de metadados, reduzindo inconsistencias e melhorando a manutencao.
+
+Como complemento, foram ajustados os utilitarios de busca para lidar corretamente com opcoes numericas e o componente de entrada passou a expor melhor a associacao entre mensagens de erro e campos, reforcando acessibilidade. Nas paginas que utilizam o campo `situacao`, as opcoes tambem foram normalizadas para `number`, evitando conversoes manuais repetidas.
+
+Validacoes realizadas
+---------------------
+- `npx tsc --noEmit`
+- `npm run build`
+
+Arquivos impactados
+-------------------
+- `src/components/Form/form.tsx`
+- `src/components/Table/searchbar.tsx`
+- `src/components/Table/search-utils.ts`
+- `src/components/Input.tsx`
+- `src/app/dashboard/fornecedor/page.tsx`
+- `src/app/dashboard/instituicoes/page.tsx`
+- `src/app/dashboard/secretaria/page.tsx`
