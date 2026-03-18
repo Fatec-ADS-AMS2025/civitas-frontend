@@ -50,8 +50,7 @@ const Page = () => {
     const loadFornecedores = async () => {
       try {
         setLoading(true);
-        const data: any = await fornecedorService.getAll();
-        const list = Array.isArray(data?.data) ? data.data : [];
+        const list = await fornecedorService.getAll();
         setFornecedores(list);
         setFilteredData(list);
         setError(null);
