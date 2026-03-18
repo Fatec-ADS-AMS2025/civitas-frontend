@@ -135,8 +135,8 @@ const secretariaFormFields: ModalFieldConfig[] = [
     type: "select",
     required: true,
     options: [
-      { value: "1", label: "Ativo" },
-      { value: "0", label: "Inativo" },
+      { value: 1, label: "Ativo" },
+      { value: 0, label: "Inativo" },
     ],
   },
 ];

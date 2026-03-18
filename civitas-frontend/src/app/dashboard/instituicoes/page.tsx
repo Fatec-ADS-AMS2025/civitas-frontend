@@ -47,8 +47,8 @@ const camposConst: FieldConfig[] = [
     local: "filtro",
     type: "select",
     options: [
-      { value: "1", label: "Ativa" },
-      { value: "0", label: "Inativa" },
+      { value: 1, label: "Ativa" },
+      { value: 0, label: "Inativa" },
     ],
   },
 ];
@@ -130,8 +130,8 @@ const instituicaoFormFields: ModalFieldConfig[] = [
     type: "select",
     required: true,
     options: [
-      { value: "1", label: "Ativa" },
-      { value: "0", label: "Inativa" },
+      { value: 1, label: "Ativa" },
+      { value: 0, label: "Inativa" },
     ],
   },
 ];
