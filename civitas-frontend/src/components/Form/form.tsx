@@ -44,7 +44,7 @@ type FormProps = {
     onConfirm?: (data: Record<string, unknown>) => Promise<unknown> | unknown;
 }
 
-const DEFAULT_HIDDEN_FIELDS = ['id', 'idSecretaria', 'idFornecedor', 'idOrcamento']
+const DEFAULT_HIDDEN_FIELDS = ['id']
 const FIELDS_PER_STEP = 4
 
 const toLabel = (field: string): string => field
@@ -180,7 +180,11 @@ export default function Form({
         source: Record<string, unknown>,
         stage: 'change' | 'submit'
     ): Record<string, unknown> => {
-        const normalizedEntries = Object.keys(source).map((key) => {
+        const keysToNormalize = mergedFields.length > 0
+            ? mergedFields.map((field) => field.key)
+            : Object.keys(source)
+
+        const normalizedEntries = keysToNormalize.map((key) => {
             const field = fieldMap.get(key)
             return [key, normalizeFieldValue(field, source[key], stage)] as const
         })

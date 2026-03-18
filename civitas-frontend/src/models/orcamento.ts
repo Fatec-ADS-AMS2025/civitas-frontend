@@ -1,7 +1,7 @@
 export default interface OrcamentoDTO {
   idOrcamento: number;
-  ano: number;
-  valor: number;
-  descricao?: string;
-  situacao?: number;
+  anoOrcamento: number;
+  valorOrcamento: number;
+  idInstituicao: number;
+  idTipoDespesa: number;
 }
