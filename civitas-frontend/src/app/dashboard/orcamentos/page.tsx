@@ -1,22 +1,24 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-// import { orcamentoService } from "@/hooks/orcamento";
+import { orcamentoService } from "@/hooks/orcamento";
 import OrcamentoDTO from "@/models/orcamento";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 
-// Usando o tipo do service
-type Orcamento = OrcamentoDTO;
+type Orcamento = OrcamentoDTO & { idInstituicao?: number };
+type ApiOrcamento = Record<string, any>;
 
 const novoOrcamento: Orcamento = {
   idOrcamento: 0,
   ano: 0,
   valor: 0,
+  descricao: "",
+  idInstituicao: 0,
 };
 
 const columns = [
-  { id: "idOrcamento", label: "ID Orçamento" },
+  { id: "idOrcamento", label: "ID Orcamento" },
   { id: "ano", label: "Ano" },
   { id: "valor", label: "Valor" },
 ];
@@ -29,6 +31,13 @@ const camposConst: FieldConfig[] = [
 const orcamentoFormFields: ModalFieldConfig[] = [
   { key: "idOrcamento", hidden: true },
   {
+    key: "idInstituicao",
+    label: "ID Instituicao",
+    placeholder: "Digite o ID da instituicao",
+    required: true,
+    type: "number",
+  },
+  {
     key: "ano",
     label: "Ano",
     placeholder: "Digite o ano",
@@ -38,7 +47,7 @@ const orcamentoFormFields: ModalFieldConfig[] = [
   {
     key: "valor",
     label: "Valor",
-    placeholder: "Digite o valor do orçamento",
+    placeholder: "Digite o valor do orcamento",
     required: true,
     type: "number",
   },
@@ -51,160 +60,92 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Dados fictícios para teste
-  const dadosFicticios: Orcamento[] = [
-    {
-      idOrcamento: 1,
-      ano: 2022,
-      valor: 150000,
-    },
-    {
-      idOrcamento: 2,
-      ano: 2023,
-      valor: 275500,
-    },
-    {
-      idOrcamento: 3,
-      ano: 2024,
-      valor: 320000,
-    },
-    {
-      idOrcamento: 4,
-      ano: 2025,
-      valor: 410750,
-    },
-    {
-      idOrcamento: 5,
-      ano: 2026,
-      valor: 525900,
-    },
-  ];
+  const mapApiOrcamentoToUi = (api: ApiOrcamento): Orcamento => ({
+    idOrcamento: Number(api?.idOrcamento ?? api?.id ?? 0),
+    ano: Number(api?.ano ?? api?.anoOrcamento ?? 0),
+    valor: Number(api?.valor ?? api?.valorOrcamento ?? 0),
+    descricao: api?.descricao ?? "",
+    situacao: api?.situacao !== undefined ? Number(api.situacao) : undefined,
+    idInstituicao: api?.idInstituicao !== undefined ? Number(api.idInstituicao) : 0,
+  });
 
-  // Carregar dados da API
+  const toApiOrcamentoPayload = (data: Partial<Orcamento> & Record<string, any>) => ({
+    idOrcamento: Number(data.idOrcamento ?? 0),
+    anoOrcamento: Number(data.ano ?? data.anoOrcamento ?? 0),
+    valorOrcamento: Number(data.valor ?? data.valorOrcamento ?? 0),
+    idInstituicao: Number(data.idInstituicao ?? 0),
+    descricao: data.descricao ?? "",
+    situacao: data.situacao !== undefined ? Number(data.situacao) : 1,
+  });
+
+  const loadOrcamentos = async () => {
+    try {
+      setLoading(true);
+      const list = await orcamentoService.getAll();
+      const normalizedList = (list as ApiOrcamento[]).map(mapApiOrcamentoToUi);
+      setOrcamentos(normalizedList);
+      setFilteredData(normalizedList);
+      setError(null);
+      return normalizedList;
+    } catch (err) {
+      console.error("Erro ao carregar orcamentos:", err);
+      setOrcamentos([]);
+      setFilteredData([]);
+      setError("Nao foi possivel carregar orcamentos.");
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadOrcamentos = async () => {
-      try {
-        setLoading(true);
-
-        // =========================
-        // TESTE COM DADOS FICTÍCIOS
-        // =========================
-        setOrcamentos(dadosFicticios);
-        setFilteredData(dadosFicticios);
-        setError(null);
-
-        // =========================
-        // CÓDIGO ORIGINAL DA API
-        // =========================
-        /*
-        const data: any = await orcamentoService.getAll();
-        setOrcamentos(data.data);
-        setFilteredData(data.data);
-        */
-      } catch (err) {
-        console.error("Erro ao carregar orçamentos:", err);
-        setError("Erro ao carregar dados dos orçamentos");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadOrcamentos();
   }, []);
 
-  // Função para criar novo orçamento
   const handleCreate = async (novoOrcamentoData: Omit<Orcamento, "idOrcamento">) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const created: Orcamento = {
-        ...novoOrcamentoData,
-        idOrcamento:
-          orcamentos.length > 0
-            ? Math.max(...orcamentos.map((o) => o.idOrcamento)) + 1
-            : 1,
-      };
-
-      const updatedData = [...orcamentos, created];
-      setOrcamentos(updatedData);
-      setFilteredData(updatedData);
-      return created;
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      const created = await orcamentoService.create(novoOrcamentoData);
-      const updatedData = [...orcamentos, created];
-      setOrcamentos(updatedData);
-      setFilteredData(updatedData);
-      return created;
-      */
+      const payload = toApiOrcamentoPayload({ ...novoOrcamentoData, idOrcamento: 0 });
+      await orcamentoService.create(payload);
+      const list = await loadOrcamentos();
+      return list[list.length - 1];
     } catch (err) {
-      console.error("Erro ao criar orçamento:", err);
+      console.error("Erro ao criar orcamento:", err);
       throw err;
     }
   };
 
-  // Função para atualizar orçamento
   const handleUpdate = async (id: number, dadosAtualizados: Partial<Orcamento>) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
+      const atual = orcamentos.find((o) => Number(o.idOrcamento) === Number(id));
+      const payload = toApiOrcamentoPayload({ ...(atual ?? {}), ...dadosAtualizados, idOrcamento: id });
+      const updated = await orcamentoService.update(id, payload);
+      const normalizedUpdated = mapApiOrcamentoToUi(updated as ApiOrcamento);
       const updatedData = orcamentos.map((o) =>
-        o.idOrcamento === id ? { ...o, ...dadosAtualizados } : o
+        Number(o.idOrcamento) === Number(id) ? normalizedUpdated : o
       );
-
-      const updated = updatedData.find((o) => o.idOrcamento === id);
       setOrcamentos(updatedData);
       setFilteredData(updatedData);
-      return updated;
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      const updated = await orcamentoService.update(id, dadosAtualizados);
-      const updatedData = orcamentos.map(o => o.idOrcamento === id ? updated : o);
-      setOrcamentos(updatedData);
-      setFilteredData(updatedData);
-      return updated;
-      */
+      return normalizedUpdated;
     } catch (err) {
-      console.error("Erro ao atualizar orçamento:", err);
+      console.error("Erro ao atualizar orcamento:", err);
       throw err;
     }
   };
 
-  // Função para deletar orçamento
   const handleDelete = async (id: number) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
+      await orcamentoService.delete(id);
       const updatedData = orcamentos.filter((o) => o.idOrcamento !== id);
       setOrcamentos(updatedData);
       setFilteredData(updatedData);
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      await orcamentoService.delete(id);
-      const updatedData = orcamentos.filter(o => o.idOrcamento !== id);
-      setOrcamentos(updatedData);
-      setFilteredData(updatedData);
-      */
     } catch (err) {
-      console.error("Erro ao deletar orçamento:", err);
+      console.error("Erro ao deletar orcamento:", err);
       throw err;
     }
   };
 
   if (loading) {
-    return <div>Carregando orçamentos...</div>;
+    return <div>Carregando orcamentos...</div>;
   }
 
   if (error) {

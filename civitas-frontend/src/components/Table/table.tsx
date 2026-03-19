@@ -76,11 +76,14 @@ const Table = ({
             </thead>
             <tbody>
               {data.length == 0 ? (
+                
                 <tr>
+                  
                   <td colSpan={columns.length} className="p-3 text-center">
                     Nenhum dado encontrado.
                   </td>
                 </tr>
+                
               ) : (
                 data.map((objeto, i) => (
                   <tr key={i}>
@@ -89,6 +92,8 @@ const Table = ({
                         {objeto[column.id]}
                       </td>
                     ))}
+                    
+
                     <td className="p-3 border-t flex gap-1">
                       {actions?.includes("view") && (
                         <button onClick={() => openModal("view", objeto)} className="cursor-pointer">
