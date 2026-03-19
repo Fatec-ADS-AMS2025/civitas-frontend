@@ -104,29 +104,29 @@ export default function Dashboard() {
   const othersPercentage = Math.max(0, 100 - healthPercentage - secretariaPercentage - reformasPercentage);
 
   return (
-    <div className="min-h-screen font-sans">
+    <div className="min-h-screen w-full font-sans">
       {/* Header */}
       <div className="bg-white border-gray-200 pb-10">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           <div className="flex-1">
             <h1 className="text-[48px] font-semibold leading-tight text-[#004C57] skeleton">
               Bem-Vindo {"{user}"}
             </h1>
 
-            <p className="text-gray-600 mt-1 text-sm sm:text-base skeleton">
+            <p className="mt-1 text-sm text-gray-600 skeleton sm:text-base">
               Vamos ao gerenciamento?
             </p>
           </div>
         </div>
       </div>
 
-      <div className="min-h-screen bg-white pr-1">
-        <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="min-h-screen w-full bg-white pr-1">
+        <div className="w-full max-w-none px-0">
           <p className="mb-3 pt-2 text-center text-[24px] font-bold text-[#1F1F1F]">
             14 dias até a reposição da verba.
           </p>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             <TopCard
               title="Valor Disponível"
               subtitle="Saldo Atualizado:"
@@ -160,7 +160,7 @@ export default function Dashboard() {
             />
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="mt-4 grid w-full grid-cols-1 gap-5 xl:grid-cols-[1.1fr_0.9fr]">
             <section className="rounded-[28px] bg-[#FFFDFB] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] ring-1 ring-[#EFE8DE]">
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex gap-1 text-[#C8C1B6]">
@@ -241,7 +241,7 @@ export default function Dashboard() {
             </section>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
+          <div className="mt-5 grid w-full grid-cols-1 gap-5 xl:grid-cols-2">
             <InfoCard
               badge="PREVISÃO DO MÊS"
               title="Gastos previstos para esse mês:"
@@ -260,7 +260,7 @@ export default function Dashboard() {
             />
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
+          <div className="mt-5 grid w-full grid-cols-1 gap-5 xl:grid-cols-2">
             <article className="relative overflow-hidden rounded-[30px] bg-[#FFFDFB] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.06)] ring-1 ring-[#ECE6DD]">
               <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#F7F4EF]" />
               <div className="relative z-10 flex gap-1 text-[#C9C2B7]">
@@ -288,7 +288,7 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <div className="relative z-10 mt-2 h-[220px] sm:h-[260px] lg:h-[300px] rounded-[16px] px-2 pb-8 pt-2">
+              <div className="relative z-10 mt-2 h-[220px] rounded-[16px] px-2 pb-8 pt-2 sm:h-[260px] lg:h-[300px]">
                 <svg viewBox="0 0 740 300" className="h-full w-full" preserveAspectRatio="none" aria-label="Gráfico financeiro comparativo">
                   <defs>
                     <linearGradient id="tealFillExact" x1="0" y1="0" x2="0" y2="1">
@@ -470,7 +470,7 @@ export default function Dashboard() {
               <p className="mt-1 text-center text-[13px] text-[#B0ACA5]">Aqui você pode ver onde está indo os fundos.</p>
               <div className="mt-6 space-y-3">
                 {expenses.map((item, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto] items-center gap-3 rounded-[16px] border border-[#F0ECE5] bg-white px-3 py-3">
+                  <div key={index} className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[16px] border border-[#F0ECE5] bg-white px-3 py-3 sm:grid-cols-[1fr_auto_auto]">
                     <div>
                       <p className={`text-[15px] font-bold ${item.tone === 'green' ? 'text-[#35B86B]' : 'text-[#3B3B3B]'}`}>
                         {showMoneyValues ? item.value : "* * * * * *"}
@@ -526,7 +526,7 @@ function TopCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative h-[164px] overflow-hidden rounded-[20px] p-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
+      className="relative h-[164px] w-full overflow-hidden rounded-[20px] p-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
       style={{ background: gradient }}
     >
       <div className={`absolute right-4 top-4 opacity-70 ${dark ? 'text-white/60' : accent ? 'text-white/55' : 'text-white/55'}`}>
@@ -557,6 +557,7 @@ function TopCard({
     </button>
   )
 }
+
 function Legend({ color, text }: { color: string; text: string }) {
   return (
     <div className="flex items-center gap-2">

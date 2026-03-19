@@ -71,7 +71,7 @@ const Table = ({
     const normalized = String(status).toLowerCase();
 
     let classes =
-      "inline-flex min-w-[74px] justify-center rounded-full px-3 py-1 text-xs font-bold";
+      "inline-flex min-w-[64px] justify-center rounded-full px-3 py-[6px] text-[11px] font-bold leading-none";
 
     if (normalized === "ativo" || normalized === "true" || normalized === "sim") {
       classes += " bg-[#F7A600] text-white";
@@ -98,7 +98,7 @@ const Table = ({
 
     if (column.id.toLowerCase() === "id") {
       return (
-        <span className="inline-flex rounded-full bg-[#F7D21A] px-4 py-1 text-sm font-bold text-black">
+        <span className="inline-flex min-w-[74px] justify-center rounded-full bg-[#F7D21A] px-4 py-[7px] text-sm font-bold leading-none text-black">
           #{String(value).padStart(3, "0")}
         </span>
       );
@@ -108,20 +108,19 @@ const Table = ({
   };
 
   return (
-    <div className="mt-5 w-full rounded-[28px] bg-white shadow-[0_10px_24px_rgba(0,0,0,0.06)] ring-1 ring-[#DDEEEF] overflow-hidden">
-      {/* Desktop / Tablet */}
+    <div className="mt-5 w-full rounded-[30px] bg-white shadow-[0_10px_24px_rgba(0,0,0,0.04)] ring-1 ring-[#E5F1F2] overflow-hidden">
       <div className="hidden md:block">
-        <div className="overflow-x-auto px-4 py-5 lg:px-6">
-          <table className="w-full border-separate border-spacing-y-4 text-left text-black">
+        <div className="w-full overflow-x-auto px-5 py-5 lg:px-6">
+          <table className="w-full border-separate border-spacing-y-[16px] text-left text-black">
             <thead>
-              <tr className="text-sm font-semibold text-[#C7C7C7]">
+              <tr className="text-[13px] font-semibold uppercase tracking-[0.04em] text-[#C8C8C8]">
                 {columns.map((column) => (
-                  <th key={column.id} className="px-4 py-2">
+                  <th key={column.id} className="px-6 py-2">
                     {column.label}
                   </th>
                 ))}
-                <th className="px-4 py-2 text-center">Status</th>
-                <th className="px-4 py-2 text-center">Ações</th>
+                <th className="px-6 py-2 text-center">Status</th>
+                <th className="px-6 py-2 text-center">Ações</th>
               </tr>
             </thead>
 
@@ -142,32 +141,32 @@ const Table = ({
                   return (
                     <tr
                       key={i}
-                      className="overflow-hidden rounded-[18px] bg-white shadow-sm ring-1 ring-[#DDEEEF]"
+                      className="overflow-hidden rounded-[20px] bg-white shadow-none ring-1 ring-[#D9EFF1]"
                     >
                       {columns.map((column, index) => (
                         <td
                           key={column.id}
-                          className={`px-4 py-5 align-middle text-[15px] ${
-                            index === 0 ? "rounded-l-[18px]" : ""
+                          className={`px-6 py-[18px] align-middle text-[15px] font-medium text-[#333333] ${
+                            index === 0 ? "rounded-l-[20px]" : ""
                           }`}
                         >
                           {renderCellValue(objeto, column)}
                         </td>
                       ))}
 
-                      <td className="px-4 py-5 text-center align-middle">
+                      <td className="px-6 py-[18px] text-center align-middle">
                         {renderStatusBadge(status)}
                       </td>
 
-                      <td className="rounded-r-[18px] px-4 py-5 align-middle">
+                      <td className="rounded-r-[20px] px-6 py-[18px] align-middle">
                         <div className="flex items-center justify-center gap-2">
                           {actions?.includes("view") && (
                             <button
                               type="button"
                               onClick={() => openModal("view", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-[#E9F2F3] text-[#0B6470] transition hover:bg-[#F6FBFB]"
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#0B6470] transition hover:bg-[#F8FBFB]"
                             >
-                              <span className="material-symbols-outlined !text-[20px]">
+                              <span className="material-symbols-outlined !text-[22px]">
                                 visibility
                               </span>
                             </button>
@@ -177,9 +176,9 @@ const Table = ({
                             <button
                               type="button"
                               onClick={() => openModal("edit", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-[#E9F2F3] text-[#0B6470] transition hover:bg-[#F6FBFB]"
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#0B6470] transition hover:bg-[#F8FBFB]"
                             >
-                              <span className="material-symbols-outlined !text-[20px]">
+                              <span className="material-symbols-outlined !text-[22px]">
                                 edit
                               </span>
                             </button>
@@ -189,9 +188,9 @@ const Table = ({
                             <button
                               type="button"
                               onClick={() => openModal("delete", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-[#E9F2F3] text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
                             >
-                              <span className="material-symbols-outlined !text-[20px]">
+                              <span className="material-symbols-outlined !text-[22px]">
                                 delete
                               </span>
                             </button>
@@ -207,7 +206,6 @@ const Table = ({
         </div>
       </div>
 
-      {/* Mobile */}
       <div className="block md:hidden">
         <div className="space-y-4 p-4">
           {data.length === 0 ? (
@@ -246,9 +244,9 @@ const Table = ({
                       <button
                         type="button"
                         onClick={() => openModal("view", objeto)}
-                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-[#E9F2F3] text-[#0B6470] transition hover:bg-[#F6FBFB]"
+                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#0B6470] transition hover:bg-[#F8FBFB]"
                       >
-                        <span className="material-symbols-outlined !text-[20px]">
+                        <span className="material-symbols-outlined !text-[22px]">
                           visibility
                         </span>
                       </button>
@@ -258,9 +256,9 @@ const Table = ({
                       <button
                         type="button"
                         onClick={() => openModal("edit", objeto)}
-                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-[#E9F2F3] text-[#0B6470] transition hover:bg-[#F6FBFB]"
+                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#0B6470] transition hover:bg-[#F8FBFB]"
                       >
-                        <span className="material-symbols-outlined !text-[20px]">
+                        <span className="material-symbols-outlined !text-[22px]">
                           edit
                         </span>
                       </button>
@@ -270,9 +268,9 @@ const Table = ({
                       <button
                         type="button"
                         onClick={() => openModal("delete", objeto)}
-                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-[#E9F2F3] text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
                       >
-                        <span className="material-symbols-outlined !text-[20px]">
+                        <span className="material-symbols-outlined !text-[22px]">
                           delete
                         </span>
                       </button>
