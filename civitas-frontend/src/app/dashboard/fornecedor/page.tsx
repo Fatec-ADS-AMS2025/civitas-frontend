@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-// import { fornecedorService } from "@/hooks/fornecedor";
+import { fornecedorService } from "@/hooks/fornecedor";
 import FornecedorDTO from "@/models/fornecedor";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 
@@ -119,10 +119,26 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     required: true,
     options: [
       { value: "1", label: "Ativo" },
-      { value: "0", label: "Inativo" },
+      { value: "2", label: "Inativo" },
     ],
   },
 ];
+
+const toFornecedorPayload = (data: Partial<Fornecedor>, id?: number): Fornecedor => ({
+  idFornecedor: id ?? Number(data.idFornecedor ?? 0),
+  nomeFantasia: String(data.nomeFantasia ?? ""),
+  situacao: Number(data.situacao ?? 1),
+  cnpj: String(data.cnpj ?? ""),
+  nome: String(data.nome ?? ""),
+  logradouro: String(data.logradouro ?? ""),
+  numero: String(data.numero ?? ""),
+  bairro: String(data.bairro ?? ""),
+  cep: String(data.cep ?? ""),
+  telefone: String(data.telefone ?? ""),
+  email: String(data.email ?? ""),
+  cidade: String(data.cidade ?? ""),
+  estado: String(data.estado ?? ""),
+});
 
 export default function Page() {
   const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
@@ -131,105 +147,17 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const dadosFicticios: Fornecedor[] = [
-    {
-      idFornecedor: 1,
-      nomeFantasia: "Alpha Distribuidora",
-      situacao: 1,
-      cnpj: "12.345.678/0001-11",
-      nome: "Alpha Distribuidora LTDA",
-      logradouro: "Rua das Indústrias",
-      numero: "120",
-      bairro: "Centro",
-      cep: "01010-000",
-      telefone: "(11) 99999-1111",
-      email: "contato@alpha.com.br",
-      cidade: "São Paulo",
-      estado: "SP",
-    },
-    {
-      idFornecedor: 2,
-      nomeFantasia: "Comercial Beta",
-      situacao: 1,
-      cnpj: "23.456.789/0001-22",
-      nome: "Comercial Beta LTDA",
-      logradouro: "Av. Brasil",
-      numero: "450",
-      bairro: "Centro",
-      cep: "20040-100",
-      telefone: "(21) 98888-2222",
-      email: "vendas@beta.com.br",
-      cidade: "Rio de Janeiro",
-      estado: "RJ",
-    },
-    {
-      idFornecedor: 3,
-      nomeFantasia: "Gamma Suprimentos",
-      situacao: 0,
-      cnpj: "34.567.890/0001-33",
-      nome: "Gamma Suprimentos ME",
-      logradouro: "Rua Bahia",
-      numero: "780",
-      bairro: "Funcionários",
-      cep: "30160-011",
-      telefone: "(31) 97777-3333",
-      email: "contato@gamma.com.br",
-      cidade: "Belo Horizonte",
-      estado: "MG",
-    },
-    {
-      idFornecedor: 4,
-      nomeFantasia: "Delta Materiais",
-      situacao: 1,
-      cnpj: "45.678.901/0001-44",
-      nome: "Delta Materiais LTDA",
-      logradouro: "Rua XV de Novembro",
-      numero: "230",
-      bairro: "Centro",
-      cep: "80020-310",
-      telefone: "(41) 96666-4444",
-      email: "atendimento@delta.com.br",
-      cidade: "Curitiba",
-      estado: "PR",
-    },
-    {
-      idFornecedor: 5,
-      nomeFantasia: "Omega Serviços",
-      situacao: 1,
-      cnpj: "56.789.012/0001-55",
-      nome: "Omega Serviços Empresariais LTDA",
-      logradouro: "Av. Beira Mar",
-      numero: "1500",
-      bairro: "Centro",
-      cep: "88015-400",
-      telefone: "(48) 95555-5555",
-      email: "contato@omega.com.br",
-      cidade: "Florianópolis",
-      estado: "SC",
-    },
-  ];
-
   const loadFornecedores = async () => {
     try {
       setLoading(true);
-
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      setFornecedores(dadosFicticios);
-      setFilteredData(dadosFicticios);
+      const list = await fornecedorService.getAllData();
+      setFornecedores(list);
+      setFilteredData(list);
       setError(null);
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      const data: any = await fornecedorService.getAll();
-      setFornecedores(data.data);
-      setFilteredData(data.data);
-      */
     } catch (err) {
       console.error("Erro ao carregar fornecedores:", err);
+      setFornecedores([]);
+      setFilteredData([]);
       setError("Erro ao carregar dados dos fornecedores");
     } finally {
       setLoading(false);
@@ -243,31 +171,10 @@ export default function Page() {
   // Função para criar novo fornecedor
   const handleCreate = async (novoFornecedorData: Omit<Fornecedor, "idFornecedor">) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const created: Fornecedor = {
-        ...novoFornecedorData,
-        situacao: Number((novoFornecedorData as any).situacao) === 0 ? 0 : 1,
-        idFornecedor:
-          fornecedores.length > 0
-            ? Math.max(...fornecedores.map((f) => f.idFornecedor)) + 1
-            : 1,
-      };
-
-      const updatedData = [...fornecedores, created];
-      setFornecedores(updatedData);
-      setFilteredData(updatedData);
-      return created;
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      await fornecedorService.create(novoFornecedorData);
+      const payload = toFornecedorPayload(novoFornecedorData, 0);
+      const created = await fornecedorService.createData(payload);
       await loadFornecedores();
-      return;
-      */
+      return created;
     } catch (err) {
       console.error("Erro ao criar fornecedor:", err);
       throw err;
@@ -277,33 +184,10 @@ export default function Page() {
   // Função para atualizar fornecedor
   const handleUpdate = async (id: number, dadosAtualizados: Partial<Fornecedor>) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const dadosNormalizados: Partial<Fornecedor> = {
-        ...dadosAtualizados,
-        ...(dadosAtualizados.situacao !== undefined
-          ? { situacao: Number(dadosAtualizados.situacao) === 0 ? 0 : 1 }
-          : {}),
-      };
-
-      const updatedData = fornecedores.map((f) =>
-        f.idFornecedor === id ? { ...f, ...dadosNormalizados } : f
-      );
-
-      const updated = updatedData.find((f) => f.idFornecedor === id);
-      setFornecedores(updatedData);
-      setFilteredData(updatedData);
-      return updated;
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      await fornecedorService.update(id, dadosAtualizados);
+      const payload = toFornecedorPayload(dadosAtualizados, id);
+      const updated = await fornecedorService.updateData(id, payload);
       await loadFornecedores();
-      return;
-      */
+      return updated;
     } catch (err) {
       console.error("Erro ao atualizar fornecedor:", err);
       throw err;
@@ -313,27 +197,9 @@ export default function Page() {
   // Função para deletar fornecedor (via alteração de situação)
   const handleDelete = async (id: number) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const updatedData = fornecedores.map((f) =>
-        f.idFornecedor === id
-          ? { ...f, situacao: f.situacao === 1 ? 0 : 1 }
-          : f
-      );
-
-      setFornecedores(updatedData);
-      setFilteredData(updatedData);
-      return;
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
       await fornecedorService.alterarSituacao(id);
       await loadFornecedores();
       return;
-      */
     } catch (err) {
       console.error("Erro ao alterar situação do fornecedor:", err);
       throw err;

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-// import { instituicaoService } from "@/hooks/instituicao";
+import { instituicaoService } from "@/hooks/instituicao";
 import InstituicaoDTO from "@/models/instituicao";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 
@@ -12,7 +12,7 @@ type Instituicao = InstituicaoDTO;
 const novaInstituicao: Instituicao = {
   id: 0,
   nome: "",
-  razaoSocial: "",
+  nomeRazaoSocial: "",
   cnpj: "",
   cep: "",
   logradouro: "",
@@ -23,11 +23,23 @@ const novaInstituicao: Instituicao = {
   telefone: "",
   email: "",
   situacao: 1,
+  idTipoInstituicao: undefined,
+  idSecretaria: undefined,
+};
+
+const validatePositiveInteger = (value: unknown, label: string): string | undefined => {
+  const numericValue = Number(value);
+
+  if (!Number.isInteger(numericValue) || numericValue <= 0) {
+    return `${label} deve ser um numero inteiro maior que 0.`;
+  }
+
+  return undefined;
 };
 
 const columns = [
   { id: "nome", label: "Nome" },
-  { id: "razaoSocial", label: "Razão Social" },
+  { id: "nomeRazaoSocial", label: "Razão Social" },
   { id: "cnpj", label: "CNPJ" },
   { id: "cidade", label: "Cidade" },
   { id: "estado", label: "Estado" },
@@ -48,7 +60,7 @@ const camposConst: FieldConfig[] = [
     type: "select",
     options: [
       { value: "1", label: "Ativa" },
-      { value: "0", label: "Inativa" },
+      { value: "2", label: "Inativa" },
     ],
   },
 ];
@@ -63,7 +75,7 @@ const instituicaoFormFields: ModalFieldConfig[] = [
     required: true,
   },
   {
-    key: "razaoSocial",
+    key: "nomeRazaoSocial",
     label: "Razão Social",
     placeholder: "Razão social da instituição",
     required: true,
@@ -131,10 +143,49 @@ const instituicaoFormFields: ModalFieldConfig[] = [
     required: true,
     options: [
       { value: "1", label: "Ativa" },
-      { value: "0", label: "Inativa" },
+      { value: "2", label: "Inativa" },
     ],
   },
+  {
+    key: "idTipoInstituicao",
+    label: "ID Tipo Instituição",
+    placeholder: "Informe o ID do tipo da instituição",
+    required: true,
+    type: "number",
+    validate: (value) => validatePositiveInteger(value, "ID Tipo Instituição"),
+  },
+  {
+    key: "idSecretaria",
+    label: "ID Secretaria",
+    placeholder: "Informe o ID da secretaria",
+    required: true,
+    type: "number",
+    validate: (value) => validatePositiveInteger(value, "ID Secretaria"),
+  },
 ];
+
+const toInstituicaoPayload = (data: Partial<Instituicao>, id?: number): Partial<Instituicao> => {
+  const idTipoInstituicao = Number(data.idTipoInstituicao);
+  const idSecretaria = Number(data.idSecretaria);
+
+  return {
+    ...(id !== undefined ? { id } : {}),
+    nome: String(data.nome ?? ""),
+    nomeRazaoSocial: String(data.nomeRazaoSocial ?? ""),
+    cnpj: String(data.cnpj ?? ""),
+    cep: String(data.cep ?? ""),
+    logradouro: String(data.logradouro ?? ""),
+    numero: String(data.numero ?? ""),
+    bairro: String(data.bairro ?? ""),
+    cidade: String(data.cidade ?? ""),
+    estado: String(data.estado ?? ""),
+    telefone: String(data.telefone ?? ""),
+    email: String(data.email ?? ""),
+    situacao: Number(data.situacao ?? 1),
+    idTipoInstituicao,
+    idSecretaria,
+  };
+};
 
 const Page = () => {
   const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
@@ -143,143 +194,39 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Dados fictícios para teste
-  const dadosFicticios: Instituicao[] = [
-    {
-      id: 1,
-      nome: "Instituto Alfa",
-      razaoSocial: "Instituto Alfa de Ensino LTDA",
-      cnpj: "12.345.678/0001-10",
-      cep: "01001-000",
-      logradouro: "Rua das Palmeiras",
-      numero: "100",
-      bairro: "Centro",
-      cidade: "São Paulo",
-      estado: "SP",
-      telefone: "(11) 99999-1111",
-      email: "contato@institutoalfa.com.br",
-      situacao: 1,
-    },
-    {
-      id: 2,
-      nome: "Faculdade Horizonte",
-      razaoSocial: "Faculdade Horizonte Educacional LTDA",
-      cnpj: "23.456.789/0001-20",
-      cep: "20040-020",
-      logradouro: "Av. Rio Branco",
-      numero: "250",
-      bairro: "Centro",
-      cidade: "Rio de Janeiro",
-      estado: "RJ",
-      telefone: "(21) 98888-2222",
-      email: "atendimento@horizonte.edu.br",
-      situacao: 1,
-    },
-    {
-      id: 3,
-      nome: "Centro Técnico Brasil",
-      razaoSocial: "Centro Técnico Brasil Serviços Educacionais LTDA",
-      cnpj: "34.567.890/0001-30",
-      cep: "30130-110",
-      logradouro: "Rua da Bahia",
-      numero: "780",
-      bairro: "Lourdes",
-      cidade: "Belo Horizonte",
-      estado: "MG",
-      telefone: "(31) 97777-3333",
-      email: "secretaria@ctbrasil.com.br",
-      situacao: 0,
-    },
-    {
-      id: 4,
-      nome: "Colégio Evolução",
-      razaoSocial: "Colégio Evolução Integral LTDA",
-      cnpj: "45.678.901/0001-40",
-      cep: "80010-000",
-      logradouro: "Rua XV de Novembro",
-      numero: "430",
-      bairro: "Centro",
-      cidade: "Curitiba",
-      estado: "PR",
-      telefone: "(41) 96666-4444",
-      email: "contato@evolucao.edu.br",
-      situacao: 1,
-    },
-    {
-      id: 5,
-      nome: "Universidade Litoral",
-      razaoSocial: "Universidade Litoral do Sul LTDA",
-      cnpj: "56.789.012/0001-50",
-      cep: "88010-200",
-      logradouro: "Av. Beira Mar Norte",
-      numero: "1500",
-      bairro: "Centro",
-      cidade: "Florianópolis",
-      estado: "SC",
-      telefone: "(48) 95555-5555",
-      email: "reitoria@ulitoral.edu.br",
-      situacao: 1,
-    },
-  ];
+  const loadInstituicoes = async () => {
+    try {
+      setLoading(true);
+      const list = await instituicaoService.getAllData();
+      setInstituicoes(list);
+      setFilteredData(list);
+      setError(null);
+    } catch (err) {
+      console.error("Erro ao carregar instituições:", err);
+      setInstituicoes([]);
+      setFilteredData([]);
+      setError("Erro ao carregar dados das instituições");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Carregar dados da API
   useEffect(() => {
-    const loadInstituicoes = async () => {
-      try {
-        setLoading(true);
-
-        // =========================
-        // TESTE COM DADOS FICTÍCIOS
-        // =========================
-        setInstituicoes(dadosFicticios);
-        setFilteredData(dadosFicticios);
-        setError(null);
-
-        // =========================
-        // CÓDIGO ORIGINAL DA API
-        // =========================
-        /*
-        const data: any = await instituicaoService.getAll();
-        setInstituicoes(data.data);
-        setFilteredData(data.data);
-        */
-      } catch (err) {
-        console.error("Erro ao carregar instituições:", err);
-        setError("Erro ao carregar dados das instituições");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInstituicoes();
+    void loadInstituicoes();
   }, []);
 
   // Função para criar nova instituição
   const handleCreate = async (novaInstituicaoData: Omit<Instituicao, "id">) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const created: Instituicao = {
-        ...novaInstituicaoData,
-        id: instituicoes.length > 0 ? Math.max(...instituicoes.map((i) => i.id)) + 1 : 1,
-      };
+      const payload = toInstituicaoPayload(novaInstituicaoData);
 
-      const updatedData = [...instituicoes, created];
-      setInstituicoes(updatedData);
-      setFilteredData(updatedData);
-      return created;
+      if (!payload.idTipoInstituicao || !payload.idSecretaria) {
+        throw new Error("Informe IDs validos para Tipo Instituicao e Secretaria (maiores que 0).");
+      }
 
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      const created = await instituicaoService.create(novaInstituicaoData);
-      const updatedData = [...instituicoes, created];
-      setInstituicoes(updatedData);
-      setFilteredData(updatedData);
+      const created = await instituicaoService.createData(payload);
+      await loadInstituicoes();
       return created;
-      */
     } catch (err) {
       console.error("Erro ao criar instituição:", err);
       throw err;
@@ -289,28 +236,15 @@ const Page = () => {
   // Função para atualizar instituição
   const handleUpdate = async (id: number, dadosAtualizados: Partial<Instituicao>) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const updatedData = instituicoes.map((i) =>
-        i.id === id ? { ...i, ...dadosAtualizados } : i
-      );
+      const payload = toInstituicaoPayload(dadosAtualizados, id);
 
-      const updated = updatedData.find((i) => i.id === id);
-      setInstituicoes(updatedData);
-      setFilteredData(updatedData);
-      return updated;
+      if (!payload.idTipoInstituicao || !payload.idSecretaria) {
+        throw new Error("Informe IDs validos para Tipo Instituicao e Secretaria (maiores que 0).");
+      }
 
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      const updated = await instituicaoService.update(id, dadosAtualizados);
-      const updatedData = instituicoes.map(i => i.id === id ? updated : i);
-      setInstituicoes(updatedData);
-      setFilteredData(updatedData);
+      const updated = await instituicaoService.updateData(id, payload);
+      await loadInstituicoes();
       return updated;
-      */
     } catch (err) {
       console.error("Erro ao atualizar instituição:", err);
       throw err;
@@ -320,27 +254,8 @@ const Page = () => {
   // Função para deletar instituição (via alteração de situação)
   const handleDelete = async (id: number) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const updatedData = instituicoes.map((i) =>
-        i.id === id
-          ? { ...i, situacao: i.situacao === 1 ? 0 : 1 }
-          : i
-      );
-
-      setInstituicoes(updatedData);
-      setFilteredData(updatedData);
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
       await instituicaoService.alterarSituacao(id);
-      const data: any = await instituicaoService.getAll();
-      setInstituicoes(data.data);
-      setFilteredData(data.data);
-      */
+      await loadInstituicoes();
     } catch (err) {
       console.error("Erro ao alterar situação da instituição:", err);
       throw err;
@@ -365,6 +280,7 @@ const Page = () => {
         setCampos={setCampos}
         onCadastrar={handleCreate}
         formFields={instituicaoFormFields}
+        formHiddenFields={["id"]}
       />
 
       <Table
@@ -373,6 +289,7 @@ const Page = () => {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={instituicaoFormFields}
+        formHiddenFields={["id"]}
       />
     </>
   );

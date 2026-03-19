@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Modal from "../modal";
 import Form from "../Form/form";
+import type { FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
 import { usePathname } from "next/navigation";
 import {
   applySearchFilters,
@@ -141,7 +142,7 @@ const SearchBar = ({
         type="text"
         value={fieldValue}
         placeholder={field.placeholder}
-        onChange={(e) => handleChange(field.key, e.target.value)}
+        onChange={(e) => handleAdvancedChange(field.key, e.target.value)}
         onKeyDown={handleFieldKeyDown}
         className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
       />
@@ -205,6 +206,9 @@ const SearchBar = ({
             object={model}
             name={nomePagina}
             type="create"
+            fields={formFields}
+            validationSchema={formValidationSchema}
+            hiddenFields={formHiddenFields}
             onCancel={() => setModalOpen(false)}
             onConfirm={async (data) => {
               try {
@@ -214,7 +218,8 @@ const SearchBar = ({
                 setModalOpen(false);
               } catch (error) {
                 console.error("Erro ao cadastrar:", error);
-                alert("Erro ao cadastrar. Tente novamente.");
+                const message = error instanceof Error ? error.message : "Erro ao cadastrar. Tente novamente.";
+                alert(message);
               }
             }}
           />

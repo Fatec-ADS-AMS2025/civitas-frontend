@@ -3,7 +3,7 @@ import SecretariaDTO from '@/models/secretaria';
 
 export class SecretariaService extends GenericService<SecretariaDTO> {
   constructor() {
-    super('secretaria');
+    super('secretarias');
   }
 }
 

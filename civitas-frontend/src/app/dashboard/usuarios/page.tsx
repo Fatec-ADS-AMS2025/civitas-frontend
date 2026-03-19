@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-// import { usuarioService } from "@/hooks/usuario";
+import { usuarioService } from "@/hooks/usuario";
 import UsuarioDTO from "@/models/usuario";
 import type { FieldConfig as ModalFieldConfig} from "@/components/Form/form";
 
@@ -11,43 +11,51 @@ type User = UsuarioDTO;
 
 const novoUsuario: User = {
   id: 0,
-  nome: "",
   cpf: "",
+  nome: "",
+  rg: "",
+  logradouro: "",
+  numero: "",
   matricula: "",
   cidade: "",
   estado: "",
+  cep: "",
+  bairro: "",
   email: "",
-  telefone: "",
-  tipo: "Cidadão",
+  senha: "",
+  situacao: 1,
+  tipoUsuario: 1,
 };
 
 const columns = [
   { id: "nome", label: "Nome" },
   { id: "cpf", label: "CPF" },
+  { id: "rg", label: "RG" },
   { id: "matricula", label: "Matrícula" },
   { id: "cidade", label: "Cidade" },
   { id: "estado", label: "Estado" },
   { id: "email", label: "E-mail" },
-  { id: "telefone", label: "Telefone" },
-  { id: "tipo", label: "Tipo" },
+  { id: "situacao", label: "Situação" },
+  { id: "tipoUsuario", label: "Tipo" },
 ];
 
 const camposConst: FieldConfig[] = [
   { key: "nome", placeholder: "Nome", local: "principal" },
   { key: "cpf", placeholder: "CPF", local: "principal" },
+  { key: "rg", placeholder: "RG", local: "filtro" },
   { key: "matricula", placeholder: "Matrícula", local: "filtro" },
   { key: "cidade", placeholder: "Cidade", local: "filtro" },
   { key: "email", placeholder: "E-mail", local: "filtro" },
   { key: "estado", placeholder: "Estado", local: "filtro" },
   {
-    key: "tipo",
+    key: "tipoUsuario",
     placeholder: "Tipo",
     local: "filtro",
     type: "select",
     options: [
-      { value: "Administrador", label: "Administrador" },
-      { value: "Cidadão", label: "Cidadão" },
-      { value: "Funcionário", label: "Funcionário" },
+      { value: "1", label: "Visitante" },
+      { value: "2", label: "Administrador" },
+      { value: "3", label: "Funcionário" },
     ],
   },
 ];
@@ -56,23 +64,56 @@ const usuarioFormFields: ModalFieldConfig[] = [
   { key: "id", hidden: true },
   { key: "nome", label: "Nome", placeholder: "Nome completo", required: true },
   { key: "cpf", label: "CPF", placeholder: "000.000.000-00", required: true },
+  { key: "rg", label: "RG", placeholder: "00.000.000-0", required: true },
+  { key: "logradouro", label: "Logradouro", placeholder: "Rua / Avenida", required: true },
+  { key: "numero", label: "Número", placeholder: "Número", required: true },
+  { key: "bairro", label: "Bairro", placeholder: "Bairro", required: true },
+  { key: "cep", label: "CEP", placeholder: "00000000", required: true },
   { key: "matricula", label: "Matrícula", placeholder: "MAT-0000", required: true },
   { key: "cidade", label: "Cidade", placeholder: "Cidade", required: true },
   { key: "estado", label: "Estado", placeholder: "UF", required: true },
   { key: "email", label: "E-mail", placeholder: "email@exemplo.com", type: "email" },
-  { key: "telefone", label: "Telefone", placeholder: "(00) 00000-0000", type: "tel" },
+  { key: "senha", label: "Senha", placeholder: "Senha", type: "password", required: true },
   {
-    key: "tipo",
+    key: "situacao",
+    label: "Situação",
+    type: "select",
+    required: true,
+    options: [
+      { value: "1", label: "Ativo" },
+      { value: "2", label: "Inativo" },
+    ],
+  },
+  {
+    key: "tipoUsuario",
     label: "Tipo",
     type: "select",
     required: true,
     options: [
-      { value: "Administrador", label: "Administrador" },
-      { value: "Cidadão", label: "Cidadão" },
-      { value: "Funcionário", label: "Funcionário" },
+      { value: "1", label: "Visitante" },
+      { value: "2", label: "Administrador" },
+      { value: "3", label: "Funcionário" },
     ],
   },
 ];
+
+const toUsuarioPayload = (data: Partial<User>, id?: number): User => ({
+  id: id ?? Number(data.id ?? 0),
+  cpf: String(data.cpf ?? ""),
+  nome: String(data.nome ?? ""),
+  rg: String(data.rg ?? ""),
+  logradouro: String(data.logradouro ?? ""),
+  numero: String(data.numero ?? ""),
+  cidade: String(data.cidade ?? ""),
+  estado: String(data.estado ?? ""),
+  cep: String(data.cep ?? ""),
+  bairro: String(data.bairro ?? ""),
+  email: String(data.email ?? ""),
+  senha: String(data.senha ?? ""),
+  matricula: String(data.matricula ?? ""),
+  situacao: Number(data.situacao ?? 1),
+  tipoUsuario: Number(data.tipoUsuario ?? 1),
+});
 
 
 const Page = () => {
@@ -82,126 +123,34 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const dadosFicticios: User[] = [
-    {
-      id: 1,
-      nome: "João da Silva",
-      cpf: "123.456.789-01",
-      matricula: "MAT-1001",
-      cidade: "São Paulo",
-      estado: "SP",
-      email: "joao.silva@exemplo.com",
-      telefone: "(11) 99999-1111",
-      tipo: "Administrador",
-    },
-    {
-      id: 2,
-      nome: "Maria Oliveira",
-      cpf: "234.567.890-12",
-      matricula: "MAT-1002",
-      cidade: "Rio de Janeiro",
-      estado: "RJ",
-      email: "maria.oliveira@exemplo.com",
-      telefone: "(21) 98888-2222",
-      tipo: "Funcionário",
-    },
-    {
-      id: 3,
-      nome: "Carlos Santos",
-      cpf: "345.678.901-23",
-      matricula: "MAT-1003",
-      cidade: "Belo Horizonte",
-      estado: "MG",
-      email: "carlos.santos@exemplo.com",
-      telefone: "(31) 97777-3333",
-      tipo: "Cidadão",
-    },
-    {
-      id: 4,
-      nome: "Ana Souza",
-      cpf: "456.789.012-34",
-      matricula: "MAT-1004",
-      cidade: "Curitiba",
-      estado: "PR",
-      email: "ana.souza@exemplo.com",
-      telefone: "(41) 96666-4444",
-      tipo: "Funcionário",
-    },
-    {
-      id: 5,
-      nome: "Pedro Lima",
-      cpf: "567.890.123-45",
-      matricula: "MAT-1005",
-      cidade: "Florianópolis",
-      estado: "SC",
-      email: "pedro.lima@exemplo.com",
-      telefone: "(48) 95555-5555",
-      tipo: "Cidadão",
-    },
-  ];
+  const loadUsuarios = async () => {
+    try {
+      setLoading(true);
+      const list = await usuarioService.getAllData();
+      setUsuarios(list);
+      setFilteredData(list);
+      setError(null);
+    } catch (err) {
+      console.error("Erro ao carregar usuários:", err);
+      setUsuarios([]);
+      setFilteredData([]);
+      setError("Não foi possível carregar usuários. Verifique o backend e tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Carregar dados
   useEffect(() => {
-    const loadUsuarios = async () => {
-      try {
-        setLoading(true);
-
-        // =========================
-        // TESTE COM DADOS FICTÍCIOS
-        // =========================
-        setUsuarios(dadosFicticios);
-        setFilteredData(dadosFicticios);
-        setError(null);
-
-        // =========================
-        // CÓDIGO ORIGINAL DA API
-        // =========================
-        /*
-        const data: any = await usuarioService.getAll();
-        const list = Array.isArray(data?.data) ? data.data : [];
-        setUsuarios(list);
-        setFilteredData(list);
-        setError(null);
-        */
-      } catch (err) {
-        console.error("Erro ao carregar usuários:", err);
-        setUsuarios([]);
-        setFilteredData([]);
-        setError("Não foi possível carregar usuários. Verifique o backend e tente novamente.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUsuarios();
+    void loadUsuarios();
   }, []);
 
   // Função para criar novo usuário
   const handleCreate = async (novoUsuarioData: Omit<User, "id">) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const created: User = {
-        ...novoUsuarioData,
-        id: usuarios.length > 0 ? Math.max(...usuarios.map((u) => u.id)) + 1 : 1,
-      };
-
-      const updatedData = [...usuarios, created];
-      setUsuarios(updatedData);
-      setFilteredData(updatedData);
+      const payload = toUsuarioPayload(novoUsuarioData, 0);
+      const created = await usuarioService.createData(payload);
+      await loadUsuarios();
       return created;
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      const created = await usuarioService.create(novoUsuarioData);
-      const updatedData = [...usuarios, created];
-      setUsuarios(updatedData);
-      setFilteredData(updatedData);
-      return created;
-      */
     } catch (err) {
       console.error("Erro ao criar usuário:", err);
       throw err;
@@ -211,28 +160,10 @@ const Page = () => {
   // Função para atualizar usuário
   const handleUpdate = async (id: number, dadosAtualizados: Partial<User>) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const updatedData = usuarios.map((u) =>
-        u.id === id ? { ...u, ...dadosAtualizados } : u
-      );
-
-      const updated = updatedData.find((u) => u.id === id);
-      setUsuarios(updatedData);
-      setFilteredData(updatedData);
+      const payload = toUsuarioPayload(dadosAtualizados, id);
+      const updated = await usuarioService.updateData(id, payload);
+      await loadUsuarios();
       return updated;
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
-      const updated = await usuarioService.update(id, dadosAtualizados);
-      const updatedData = usuarios.map(u => u.id === id ? updated : u);
-      setUsuarios(updatedData);
-      setFilteredData(updatedData);
-      return updated;
-      */
     } catch (err) {
       console.error("Erro ao atualizar usuário:", err);
       throw err;
@@ -242,22 +173,8 @@ const Page = () => {
   // Função para deletar usuário
   const handleDelete = async (id: number) => {
     try {
-      // =========================
-      // TESTE COM DADOS FICTÍCIOS
-      // =========================
-      const updatedData = usuarios.filter((u) => u.id !== id);
-      setUsuarios(updatedData);
-      setFilteredData(updatedData);
-
-      // =========================
-      // CÓDIGO ORIGINAL DA API
-      // =========================
-      /*
       await usuarioService.delete(id);
-      const updatedData = usuarios.filter(u => u.id !== id);
-      setUsuarios(updatedData);
-      setFilteredData(updatedData);
-      */
+      await loadUsuarios();
     } catch (err) {
       console.error("Erro ao deletar usuário:", err);
       throw err;
