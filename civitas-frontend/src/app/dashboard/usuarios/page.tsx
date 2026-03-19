@@ -4,6 +4,7 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { usuarioService } from "@/hooks/usuario";
 import UsuarioDTO from "@/models/usuario";
+import { SkeletonTable } from "@/components/skeleton";
 
 // Usando o tipo do service
 type User = UsuarioDTO;
@@ -114,7 +115,7 @@ const Page = () => {
   };
 
 if (loading) {
-  return <div>Carregando usuários...</div>;
+  return <SkeletonTable rows={5} cols={4} />;
 }
 
 if (error) {

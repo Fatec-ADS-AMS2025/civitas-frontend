@@ -4,7 +4,7 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { fornecedorService } from "@/hooks/fornecedor";
 import FornecedorDTO from "@/models/fornecedor";
-
+import { SkeletonTable } from "@/components/skeleton";
 // Usando o tipo do service
 type Fornecedor = FornecedorDTO;
 
@@ -103,9 +103,9 @@ export default function Page() {
     }
   };
 
-  if (loading) {
-    return <div>Carregando fornecedores...</div>;
-  }
+ if (loading) {
+  return <SkeletonTable rows={5} cols={4} />;
+}
 
   if (error) {
     return <div>Erro: {error}</div>;

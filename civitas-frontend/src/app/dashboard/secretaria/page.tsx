@@ -4,6 +4,7 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { secretariaService } from "@/hooks/secretaria";
 import SecretariaDTO from "@/models/secretaria";
+import { SkeletonTable } from "@/components/skeleton";
 
 // Usando o tipo do service
 type Secretaria = SecretariaDTO;
@@ -132,8 +133,8 @@ export default function Page() {
   };
 
   if (loading) {
-    return <div>Carregando secretarias...</div>;
-  }
+  return <SkeletonTable rows={5} cols={4} />;
+}
 
   if (error) {
     return <div>Erro: {error}</div>;

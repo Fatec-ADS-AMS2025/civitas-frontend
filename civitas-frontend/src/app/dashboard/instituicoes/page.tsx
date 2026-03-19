@@ -4,7 +4,7 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { instituicaoService} from "@/hooks/instituicao";
 import InstituicaoDTO from "@/models/instituicao";
-
+import { SkeletonTable } from "@/components/skeleton";
 // Usando o tipo do service
 type Instituicao = InstituicaoDTO;
 
@@ -121,8 +121,8 @@ const Page = () => {
   };
 
   if (loading) {
-    return <div>Carregando instituições...</div>;
-  }
+  return <SkeletonTable rows={5} cols={4} />;
+}
 
   if (error) {
     return <div>Erro: {error}</div>;

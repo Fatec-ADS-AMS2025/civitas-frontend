@@ -4,6 +4,7 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { orcamentoService } from "@/hooks/orcamento";
 import OrcamentoDTO from "@/models/orcamento";
+import { SkeletonTable } from "@/components/skeleton";
 
 // Usando o tipo do service
 type Orcamento = OrcamentoDTO;
@@ -93,8 +94,8 @@ const Page = () => {
   };
 
   if (loading) {
-    return <div>Carregando orçamentos...</div>;
-  }
+  return <SkeletonTable rows={5} cols={4} />;
+}
 
   if (error) {
     return <div>Erro: {error}</div>;
