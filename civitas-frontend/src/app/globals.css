@@ -96,3 +96,75 @@ body {
     background: linear-gradient(90deg, darkgray, gray);
   }
 }
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body.high-contrast {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+body.high-contrast * {
+  border-color: #fff !important;
+  box-shadow: none !important;
+}
+
+body.high-contrast a,
+body.high-contrast button {
+  color: #ff0 !important;
+}
+
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+body.high-contrast img {
+  filter: grayscale(100%) contrast(120%);
+}
+
+body.high-contrast aside[aria-label="Menu de acessibilidade"] {
+  background: #fff !important;
+}
+
+body.high-contrast aside[aria-label="Menu de acessibilidade"] button {
+  color: #000 !important;
+}
+
+body.high-contrast .bg-white,
+body.high-contrast .bg-gray-100,
+body.high-contrast .bg-\[\#393939\],
+body.high-contrast .bg-secundary-1,
+body.high-contrast .bg-tertialy-1,
+body.high-contrast .bg-primary-1,
+body.high-contrast .bg-teal-700,
+body.high-contrast .bg-teal-800 {
+  background: #000 !important;
+}
+
+body.high-contrast .text-gray-400,
+body.high-contrast .text-gray-500,
+body.high-contrast .text-gray-600,
+body.high-contrast .text-gray-700,
+body.high-contrast .text-gray-900,
+body.high-contrast .text-white,
+body.high-contrast .text-black,
+body.high-contrast .text-teal-700,
+body.high-contrast .text-tertialy-1,
+body.high-contrast .text-secundary-1 {
+  color: #fff !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #ff8a00;
+  outline-offset: 3px;
+}

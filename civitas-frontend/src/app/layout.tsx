@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import AccessibilityMenu from "@/components/AccessibilityMenu";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,17 +15,21 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
-        {/* ✅ Adicione este link para os ícones do Google Fonts */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
           rel="stylesheet"
         />
       </head>
-      <body
-        className={`antialiased`}
-      >
+      <body className="antialiased">
+        <a
+          href="#conteudo-principal"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[10000] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-black"
+        >
+          Pular para o conteúdo principal
+        </a>
+        <AccessibilityMenu />
         <div className="w-full h-full p-10">
-          {children}
+          <main id="conteudo-principal">{children}</main>
         </div>
       </body>
     </html>

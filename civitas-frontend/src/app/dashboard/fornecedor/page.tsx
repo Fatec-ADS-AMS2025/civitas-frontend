@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
@@ -6,40 +6,82 @@ import { fornecedorService } from "@/hooks/fornecedor";
 import FornecedorDTO from "@/models/fornecedor";
 import { SkeletonTable } from "@/components/skeleton";
 // Usando o tipo do service
+
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+
 type Fornecedor = FornecedorDTO;
 
 const novoFornecedor: Fornecedor = {
   idFornecedor: 0,
-  nomeFantasia: '',
+  nomeFantasia: "",
   situacao: 1,
-  cnpj: '',
-  nome: '',
-  logradouro: '',
-  numero: '',
-  bairro: '',
-  cep: '',
-  telefone: '',
-  email: '',
-  cidade: '',
-  estado: '',
+  cnpj: "",
+  nome: "",
+  logradouro: "",
+  numero: "",
+  bairro: "",
+  cep: "",
+  telefone: "",
+  email: "",
+  cidade: "",
+  estado: "",
 };
 
 const columns = [
-  { id: "idFornecedor", label: "ID Orçamento" },
+  { id: "idFornecedor", label: "ID Fornecedor" },
   { id: "nomeFantasia", label: "Nome Fantasia" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacao", label: "Situação" },
+  { id: "situacao", label: "Situacao" },
 ];
 
 const camposConst: FieldConfig[] = [
   { key: "nomeFantasia", placeholder: "Nome Fantasia", local: "principal" },
   { key: "cnpj", placeholder: "CNPJ", local: "principal" },
   { key: "telefone", placeholder: "Telefone", local: "filtro" },
-  { key: "situacao", placeholder: "Situação", local: "principal" },
+  {
+    key: "situacao",
+    placeholder: "Situacao",
+    local: "filtro",
+    type: "select",
+    options: [
+      { value: "1", label: "Ativo" },
+      { value: "2", label: "Inativo" },
+    ],
+  },
   { key: "cidade", placeholder: "Cidade", local: "filtro" },
 ];
 
+const fornecedorFormFields: ModalFieldConfig[] = [
+  { key: "idFornecedor", hidden: true },
+  { key: "nomeFantasia", label: "Nome Fantasia", placeholder: "Nome fantasia", required: true },
+  { key: "nome", label: "Razao Social / Nome", placeholder: "Nome ou razao social", required: true },
+  { key: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", required: true },
+  { key: "logradouro", label: "Logradouro", placeholder: "Rua / Avenida", required: true },
+  { key: "numero", label: "Numero", placeholder: "Numero", required: true },
+  { key: "bairro", label: "Bairro", placeholder: "Bairro", required: true },
+  { key: "cep", label: "CEP", placeholder: "00000-000", required: true },
+  { key: "cidade", label: "Cidade", placeholder: "Cidade", required: true },
+  { key: "estado", label: "Estado", placeholder: "UF", required: true },
+  { key: "telefone", label: "Telefone", placeholder: "(00) 00000-0000", type: "tel", required: true },
+  {
+    key: "email",
+    label: "E-mail",
+    placeholder: "email@fornecedor.com.br",
+    type: "email",
+    required: true,
+  },
+  {
+    key: "situacao",
+    label: "Situacao",
+    type: "select",
+    required: true,
+    options: [
+      { value: "1", label: "Ativo" },
+      { value: "2", label: "Inativo" },
+    ],
+  },
+];
 
 export default function Page() {
   const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
@@ -48,16 +90,57 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const normalizeSituacaoForApi = (value: unknown): number => {
+    const n = Number(value);
+    if (n === 2) return 2;
+    return 1;
+  };
+
+  const normalizePayload = (data: Partial<Fornecedor> & Record<string, any>) => ({
+    idFornecedor: Number(data.idFornecedor ?? 0),
+    nomeFantasia: data.nomeFantasia ?? "",
+    situacao: normalizeSituacaoForApi(data.situacao),
+    cnpj: data.cnpj ?? "",
+    nome: data.nome ?? "",
+    logradouro: data.logradouro ?? "",
+    numero: data.numero ?? "",
+    bairro: data.bairro ?? "",
+    cep: data.cep ?? "",
+    telefone: data.telefone ?? "",
+    email: data.email ?? "",
+    cidade: data.cidade ?? "",
+    estado: data.estado ?? "",
+  });
+
+  const normalizeCreatePayload = (data: Partial<Fornecedor> & Record<string, any>) => ({
+    nomeFantasia: data.nomeFantasia ?? "",
+    situacao: normalizeSituacaoForApi(data.situacao),
+    cnpj: data.cnpj ?? "",
+    nome: data.nome ?? "",
+    logradouro: data.logradouro ?? "",
+    numero: data.numero ?? "",
+    bairro: data.bairro ?? "",
+    cep: data.cep ?? "",
+    telefone: data.telefone ?? "",
+    email: data.email ?? "",
+    cidade: data.cidade ?? "",
+    estado: data.estado ?? "",
+  });
 
   const loadFornecedores = async () => {
     try {
       setLoading(true);
-      const data: any = await fornecedorService.getAll();
-      setFornecedores(data.data);
-      setFilteredData(data.data);
+      const list = await fornecedorService.getAll();
+      setFornecedores(list);
+      setFilteredData(list);
+      setError(null);
+      return list;
     } catch (err) {
-      console.error('Erro ao carregar fornecedores:', err);
-      setError('Erro ao carregar dados dos fornecedores');
+      console.error("Erro ao carregar fornecedores:", err);
+      setFornecedores([]);
+      setFilteredData([]);
+      setError("Nao foi possivel carregar fornecedores.");
+      return [];
     } finally {
       setLoading(false);
     }
@@ -67,38 +150,41 @@ export default function Page() {
     loadFornecedores();
   }, []);
 
-  // Função para criar novo fornecedor
-  const handleCreate = async (novoFornecedorData: Omit<Fornecedor, 'idFornecedor'>) => {
+  const handleCreate = async (novoFornecedorData: Omit<Fornecedor, "idFornecedor">) => {
     try {
-      await fornecedorService.create(novoFornecedorData);
-      await loadFornecedores();
-      return;
+      const payload = normalizeCreatePayload(novoFornecedorData as any);
+      await fornecedorService.create(payload);
+      const list = await loadFornecedores();
+      return list[list.length - 1];
     } catch (err) {
-      console.error('Erro ao criar fornecedor:', err);
+      console.error("Erro ao criar fornecedor:", err);
       throw err;
     }
   };
 
-  // Função para atualizar fornecedor
   const handleUpdate = async (id: number, dadosAtualizados: Partial<Fornecedor>) => {
     try {
-      await fornecedorService.update(id, dadosAtualizados);
-      await loadFornecedores();
-      return;
+      const atual = fornecedores.find((f) => Number(f.idFornecedor) === Number(id));
+      const payload = normalizePayload({ ...(atual ?? {}), ...dadosAtualizados, idFornecedor: id });
+      const updated = await fornecedorService.update(id, payload);
+      const updatedData = fornecedores.map((f) =>
+        Number(f.idFornecedor) === Number(id) ? updated : f
+      );
+      setFornecedores(updatedData);
+      setFilteredData(updatedData);
+      return updated;
     } catch (err) {
-      console.error('Erro ao atualizar fornecedor:', err);
+      console.error("Erro ao atualizar fornecedor:", err);
       throw err;
     }
   };
 
-  // Função para deletar fornecedor (via alteração de situação)
   const handleDelete = async (id: number) => {
     try {
       await fornecedorService.alterarSituacao(id);
       await loadFornecedores();
-      return; 
     } catch (err) {
-      console.error('Erro ao alterar situação do fornecedor:', err);
+      console.error("Erro ao alterar situacao do fornecedor:", err);
       throw err;
     }
   };
@@ -113,7 +199,6 @@ export default function Page() {
 
   return (
     <>
-      {/* Barra de busca */}
       <SearchBar
         model={novoFornecedor}
         dados={fornecedores}
@@ -121,16 +206,16 @@ export default function Page() {
         campos={campos}
         setCampos={setCampos}
         onCadastrar={handleCreate}
+        formFields={fornecedorFormFields}
       />
 
-      {/* Tabela de resultados */}
       <Table
         data={filteredData}
         columns={columns}
         onEdit={handleUpdate}
         onDelete={handleDelete}
+        formFields={fornecedorFormFields}
       />
     </>
   );
-
 }
