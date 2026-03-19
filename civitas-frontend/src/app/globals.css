@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
 
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -40,7 +39,11 @@ body {
 html,
 body {
   overflow-x: hidden;
-  /* prevents white strip caused by 100vw/w-screen overflow */
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
 }
 
 .material-symbols-outlined {
@@ -58,33 +61,10 @@ body {
 
 .material-symbols-outlined.filled {
   font-variation-settings: 'FILL' 1;
-  font-size: 26px; /* se quiser mesmo maior */
+  font-size: 26px;
 }
-
-/* .skeleton {
-  position: relative;
-  color: gray !important;
-  opacity: 0.3;
-  background-color: gray;
-  animation: pulse 1.5s infinite;
-  border-radius: 10px;
-}
-
-.skeleton::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: gray;
-  opacity: 1;
-  z-index: 10;
-} */
-
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 1;
@@ -96,57 +76,64 @@ body {
     background: linear-gradient(90deg, darkgray, gray);
   }
 }
-html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-}
+
+/* =========================
+   ALTO CONTRASTE LIMPO
+========================= */
 
 body.high-contrast {
   background: #000 !important;
   color: #fff !important;
 }
 
-body.high-contrast * {
-  border-color: #fff !important;
-  box-shadow: none !important;
+/* estrutura principal */
+body.high-contrast main,
+body.high-contrast section,
+body.high-contrast article,
+body.high-contrast header,
+body.high-contrast footer,
+body.high-contrast nav {
+  background-color: #000 !important;
 }
 
-body.high-contrast a,
-body.high-contrast button {
-  color: #ff0 !important;
-}
-
-body.high-contrast input,
-body.high-contrast select,
-body.high-contrast textarea {
-  background: #000 !important;
-  color: #fff !important;
-  border: 2px solid #fff !important;
-}
-
-body.high-contrast img {
-  filter: grayscale(100%) contrast(120%);
-}
-
-body.high-contrast aside[aria-label="Menu de acessibilidade"] {
-  background: #fff !important;
-}
-
-body.high-contrast aside[aria-label="Menu de acessibilidade"] button {
-  color: #000 !important;
-}
-
+/* cards e fundos claros */
 body.high-contrast .bg-white,
+body.high-contrast .bg-gray-50,
 body.high-contrast .bg-gray-100,
-body.high-contrast .bg-\[\#393939\],
-body.high-contrast .bg-secundary-1,
-body.high-contrast .bg-tertialy-1,
-body.high-contrast .bg-primary-1,
-body.high-contrast .bg-teal-700,
-body.high-contrast .bg-teal-800 {
+body.high-contrast .bg-\[\#FFFDFB\],
+body.high-contrast .bg-\[\#F8F4EC\],
+body.high-contrast .bg-\[\#F7F4EF\],
+body.high-contrast .bg-\[\#FFF0DD\],
+body.high-contrast .bg-\[\#FFF1DB\],
+body.high-contrast .bg-\[\#F3E7D5\],
+body.high-contrast .bg-\[\#F5F3EF\],
+body.high-contrast .bg-\[\#EFF5FF\],
+body.high-contrast .bg-\[\#FFF7E8\],
+body.high-contrast .bg-\[\#F8F8F8\],
+body.high-contrast .bg-\[\#EAF4F5\],
+body.high-contrast .bg-\[\#FFF3F3\],
+body.high-contrast .bg-\[\#FFF6E8\],
+body.high-contrast .bg-\[\#EAF9EF\],
+body.high-contrast .bg-\[\#393939\] {
   background: #000 !important;
 }
 
+/* texto */
+body.high-contrast,
+body.high-contrast p,
+body.high-contrast span,
+body.high-contrast small,
+body.high-contrast strong,
+body.high-contrast label,
+body.high-contrast td,
+body.high-contrast th,
+body.high-contrast li,
+body.high-contrast h1,
+body.high-contrast h2,
+body.high-contrast h3,
+body.high-contrast h4,
+body.high-contrast h5,
+body.high-contrast h6,
 body.high-contrast .text-gray-400,
 body.high-contrast .text-gray-500,
 body.high-contrast .text-gray-600,
@@ -156,10 +143,107 @@ body.high-contrast .text-white,
 body.high-contrast .text-black,
 body.high-contrast .text-teal-700,
 body.high-contrast .text-tertialy-1,
-body.high-contrast .text-secundary-1 {
+body.high-contrast .text-secundary-1,
+body.high-contrast .text-\[\#1F1F1F\],
+body.high-contrast .text-\[\#232323\],
+body.high-contrast .text-\[\#212121\],
+body.high-contrast .text-\[\#B0ACA5\],
+body.high-contrast .text-\[\#A9A29A\],
+body.high-contrast .text-\[\#8E8E8E\],
+body.high-contrast .text-\[\#A8A29A\] {
   color: #fff !important;
 }
 
+/* bordas */
+body.high-contrast .border,
+body.high-contrast [class*="border-"],
+body.high-contrast .ring-1 {
+  border-color: #fff !important;
+}
+
+/* remove só sombra */
+body.high-contrast * {
+  box-shadow: none !important;
+}
+
+/* botões e links */
+body.high-contrast a,
+body.high-contrast button {
+  color: #ffeb3b !important;
+}
+
+/* inputs */
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+/* imagens bitmap */
+body.high-contrast img {
+  filter: grayscale(100%) contrast(120%);
+}
+
+/* IMPORTANTE: não aplicar filtro global no svg */
+body.high-contrast svg {
+  filter: none !important;
+}
+
+/* manter textos e números do svg visíveis */
+body.high-contrast svg text,
+body.high-contrast svg tspan {
+  fill: #fff !important;
+  color: #fff !important;
+}
+
+/* não destruir linhas e formas do gráfico */
+body.high-contrast svg path,
+body.high-contrast svg line,
+body.high-contrast svg circle,
+body.high-contrast svg rect {
+  filter: none !important;
+}
+
+/* correção dos cards com gradiente */
+body.high-contrast button[style*="linear-gradient"] {
+  border: 1px solid #fff !important;
+}
+
+body.high-contrast button[style*="linear-gradient"] * {
+  background: transparent !important;
+}
+
+body.high-contrast button[style*="linear-gradient"] div,
+body.high-contrast button[style*="linear-gradient"] span {
+  color: #fff !important;
+}
+
+/* card laranja do topo */
+body.high-contrast button[style*="linear-gradient(135deg,#FF961F"] div,
+body.high-contrast button[style*="linear-gradient(135deg,#FF961F"] span {
+  color: #2b1a00 !important;
+}
+
+/* faixa inferior dos cards */
+body.high-contrast button[style*="linear-gradient"] .bg-black\/12 {
+  background: rgba(0, 0, 0, 0.22) !important;
+}
+
+/* menu de acessibilidade */
+body.high-contrast aside[aria-label="Menu de acessibilidade"],
+body.high-contrast div[aria-label="Menu de acessibilidade"] {
+  background: #fff !important;
+  border: 2px solid #000 !important;
+}
+
+body.high-contrast aside[aria-label="Menu de acessibilidade"] button,
+body.high-contrast div[aria-label="Menu de acessibilidade"] button {
+  color: #000 !important;
+}
+
+/* foco */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,

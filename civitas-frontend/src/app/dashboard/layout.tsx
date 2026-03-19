@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Sidebar from '@/components/Sidebar/sidebar';
 import { useRouter } from "next/navigation";
-import AccessibilityMenu from "@/components/AccessibilityMenu";
+
 // import { alterLoading, loading } from '@/global/useLoading';
 
 
@@ -70,7 +70,6 @@ export default function Layout({
           </div>
           
         </div>
-       <AccessibilityMenu />
         {children}
       </div>
     </div>

@@ -120,47 +120,47 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="min-h-screen bg-[#F5F3EF] pr-1">
-        <div className="mx-auto max-w-[1120px]">
+      <div className="min-h-screen bg-white pr-1">
+        <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-4 md:px-6 lg:px-8">
           <p className="mb-3 pt-2 text-center text-[24px] font-bold text-[#1F1F1F]">
             14 dias até a reposição da verba.
           </p>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             <TopCard
-  title="Valor Disponível"
-  subtitle="Saldo Atualizado:"
-  value={renderTopValue(availableDisplay)}
-  gradient="linear-gradient(135deg,#0D7A7C 0%,#62B8B2 55%,#65C4D1 100%)"
-  icon="account_balance"
-  showMoneyValues={showMoneyValues}
-  onClick={() => setShowMoneyValues((prev) => !prev)}
-/>
+              title="Valor Disponível"
+              subtitle="Saldo Atualizado:"
+              value={renderTopValue(availableDisplay)}
+              gradient="linear-gradient(135deg,#0D7A7C 0%,#62B8B2 55%,#65C4D1 100%)"
+              icon="account_balance"
+              showMoneyValues={showMoneyValues}
+              onClick={() => setShowMoneyValues((prev) => !prev)}
+            />
 
-<TopCard
-  title="Balança"
-  subtitle="Valor disponível - Gastos totais:"
-  value={renderTopValue(balanceDisplay)}
-  gradient="linear-gradient(135deg,#181818 0%,#4F4F4F 50%,#1F2126 100%)"
-  icon="balance"
-  showMoneyValues={showMoneyValues}
-  dark
-  onClick={() => router.push('/dashboard')}
-/>
+            <TopCard
+              title="Balança"
+              subtitle="Valor disponível - Gastos totais:"
+              value={renderTopValue(balanceDisplay)}
+              gradient="linear-gradient(135deg,#181818 0%,#4F4F4F 50%,#1F2126 100%)"
+              icon="balance"
+              showMoneyValues={showMoneyValues}
+              dark
+              onClick={() => router.push('/dashboard')}
+            />
 
-<TopCard
-  title="Gastos Totais"
-  subtitle="Nos últimos 30 dias:"
-  value={renderTopValue(expenseDisplay)}
-  gradient="linear-gradient(135deg,#FF961F 0%,#F4AA39 48%,#F8BF68 100%)"
-  icon="monetization_on"
-  showMoneyValues={showMoneyValues}
-  accent
-  onClick={() => setShowMoneyValues((prev) => !prev)}
-/>
+            <TopCard
+              title="Gastos Totais"
+              subtitle="Nos últimos 30 dias:"
+              value={renderTopValue(expenseDisplay)}
+              gradient="linear-gradient(135deg,#FF961F 0%,#F4AA39 48%,#F8BF68 100%)"
+              icon="monetization_on"
+              showMoneyValues={showMoneyValues}
+              accent
+              onClick={() => setShowMoneyValues((prev) => !prev)}
+            />
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="mt-4 grid grid-cols-1 gap-5 xl:grid-cols-[1.1fr_0.9fr]">
             <section className="rounded-[28px] bg-[#FFFDFB] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] ring-1 ring-[#EFE8DE]">
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex gap-1 text-[#C8C1B6]">
@@ -216,7 +216,7 @@ export default function Dashboard() {
               <h3 className="mt-2 text-center text-[18px] font-semibold text-[#222]">Gastos por Categoria</h3>
 
               <div className="mx-auto mt-4 flex max-w-[330px] items-center justify-center">
-                <div className="relative h-[250px] w-[250px]">
+                <div className="relative h-[200px] w-[200px] sm:h-[230px] sm:w-[230px] md:h-[250px] md:w-[250px]">
                   <div
                     className="absolute inset-0 rounded-full"
                     style={{
@@ -241,7 +241,7 @@ export default function Dashboard() {
             </section>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
             <InfoCard
               badge="PREVISÃO DO MÊS"
               title="Gastos previstos para esse mês:"
@@ -260,7 +260,7 @@ export default function Dashboard() {
             />
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
             <article className="relative overflow-hidden rounded-[30px] bg-[#FFFDFB] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.06)] ring-1 ring-[#ECE6DD]">
               <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#F7F4EF]" />
               <div className="relative z-10 flex gap-1 text-[#C9C2B7]">
@@ -288,7 +288,7 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <div className="relative z-10 mt-2 h-[300px] rounded-[16px] px-2 pb-8 pt-2">
+              <div className="relative z-10 mt-2 h-[220px] sm:h-[260px] lg:h-[300px] rounded-[16px] px-2 pb-8 pt-2">
                 <svg viewBox="0 0 740 300" className="h-full w-full" preserveAspectRatio="none" aria-label="Gráfico financeiro comparativo">
                   <defs>
                     <linearGradient id="tealFillExact" x1="0" y1="0" x2="0" y2="1">
@@ -470,7 +470,7 @@ export default function Dashboard() {
               <p className="mt-1 text-center text-[13px] text-[#B0ACA5]">Aqui você pode ver onde está indo os fundos.</p>
               <div className="mt-6 space-y-3">
                 {expenses.map((item, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-[16px] border border-[#F0ECE5] bg-white px-3 py-3">
+                  <div key={index} className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto] items-center gap-3 rounded-[16px] border border-[#F0ECE5] bg-white px-3 py-3">
                     <div>
                       <p className={`text-[15px] font-bold ${item.tone === 'green' ? 'text-[#35B86B]' : 'text-[#3B3B3B]'}`}>
                         {showMoneyValues ? item.value : "* * * * * *"}
@@ -484,7 +484,7 @@ export default function Dashboard() {
                     <button
                       type="button"
                       onClick={() => window.alert(`${item.label} - ${item.value}`)}
-                      className={`rounded-full px-4 py-2 text-[12px] font-bold ${
+                      className={`hidden sm:inline-flex rounded-full px-4 py-2 text-[12px] font-bold ${
                         item.tone === 'green' ? 'bg-[#EAF9EF] text-[#35B86B]' : 'bg-[#FFF1DB] text-[#F0A126]'
                       }`}
                     >
@@ -526,7 +526,7 @@ function TopCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative min-h-[124px] overflow-hidden rounded-[20px] p-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
+      className="relative h-[164px] overflow-hidden rounded-[20px] p-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
       style={{ background: gradient }}
     >
       <div className={`absolute right-4 top-4 opacity-70 ${dark ? 'text-white/60' : accent ? 'text-white/55' : 'text-white/55'}`}>
@@ -541,7 +541,7 @@ function TopCard({
         {title}
       </div>
 
-      <div className={`mt-1 text-[12px] ${dark ? 'text-white/70' : accent ? 'text-[#7A4C15]' : 'text-white/80'}`}>
+      <div className={`mt-1 h-[18px] text-[12px] ${dark ? 'text-white/70' : accent ? 'text-[#7A4C15]' : 'text-white/80'}`}>
         {subtitle}
       </div>
 
@@ -550,18 +550,9 @@ function TopCard({
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-end bg-black/12 px-4 py-2">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
-          className="flex items-center justify-center text-white"
-        >
-          <span className="material-symbols-outlined !text-[22px]">
-            {showMoneyValues ? "visibility" : "visibility_off"}
-          </span>
-        </button>
+        <span className="material-symbols-outlined !text-[22px] text-white">
+          {showMoneyValues ? "visibility" : "visibility_off"}
+        </span>
       </div>
     </button>
   )
