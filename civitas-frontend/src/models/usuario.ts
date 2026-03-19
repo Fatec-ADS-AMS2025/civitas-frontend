@@ -1,4 +1,4 @@
-export default interface UsuarioDTO {
+﻿export default interface UsuarioDTO {
   id: number;
   nome: string;
   cpf: string;
@@ -8,5 +8,5 @@ export default interface UsuarioDTO {
   email?: string;
   telefone?: string;
   situacao?: number;
-  tipo: "Administrador" | "Cidadão" | "Funcionário";
+  tipo: "Administrador" | "Visitante" | "Funcionario";
 }

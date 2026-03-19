@@ -1,3 +1,4 @@
+<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -10,9 +11,17 @@ import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import InstituicaoDTO from "@/models/instituicao";
+=======
+﻿"use client";
+import React, { useState, useEffect } from "react";
+import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
+import Table from "@/components/Table/table";
+import { orcamentoService } from "@/hooks/orcamento";
+>>>>>>> dev
 import OrcamentoDTO from "@/models/orcamento";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 
+<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
 type Orcamento = OrcamentoDTO;
 type Instituicao = InstituicaoDTO;
 type TipoDespesa = TipoDespesaDTO;
@@ -20,6 +29,10 @@ type OrcamentoRow = Orcamento & {
   instituicaoLabel: string;
   tipoDespesaLabel: string;
 };
+=======
+type Orcamento = OrcamentoDTO & { idInstituicao?: number };
+type ApiOrcamento = Record<string, any>;
+>>>>>>> dev
 
 type OrcamentoPageData = {
   orcamentos: Orcamento[];
@@ -29,14 +42,22 @@ type OrcamentoPageData = {
 
 const novoOrcamento = {
   idOrcamento: 0,
+<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
   anoOrcamento: "",
   valorOrcamento: "",
   idInstituicao: "",
   idTipoDespesa: "",
+=======
+  ano: 0,
+  valor: 0,
+  descricao: "",
+  idInstituicao: 0,
+>>>>>>> dev
 };
 
 const columns = [
   { id: "idOrcamento", label: "ID Orcamento" },
+<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
   { id: "anoOrcamento", label: "Ano" },
   { id: "valorOrcamento", label: "Valor" },
   { id: "instituicaoLabel", label: "Instituicao" },
@@ -253,10 +274,142 @@ export default function Page() {
   const handleDelete = async (id: number) => {
     await orcamentoService.delete(id);
     await refreshOrcamentos();
+=======
+  { id: "ano", label: "Ano" },
+  { id: "valor", label: "Valor" },
+];
+
+const camposConst: FieldConfig[] = [
+  { key: "ano", placeholder: "Ano", local: "principal" },
+  { key: "valor", placeholder: "Valor", local: "principal" },
+];
+
+const orcamentoFormFields: ModalFieldConfig[] = [
+  { key: "idOrcamento", hidden: true },
+  {
+    key: "idInstituicao",
+    label: "ID Instituicao",
+    placeholder: "Digite o ID da instituicao",
+    required: true,
+    type: "number",
+  },
+  {
+    key: "ano",
+    label: "Ano",
+    placeholder: "Digite o ano",
+    required: true,
+    type: "number",
+  },
+  {
+    key: "valor",
+    label: "Valor",
+    placeholder: "Digite o valor do orcamento",
+    required: true,
+    type: "number",
+  },
+];
+
+const Page = () => {
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
+  const [filteredData, setFilteredData] = useState<Orcamento[]>([]);
+  const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const mapApiOrcamentoToUi = (api: ApiOrcamento): Orcamento => ({
+    idOrcamento: Number(api?.idOrcamento ?? api?.id ?? 0),
+    ano: Number(api?.ano ?? api?.anoOrcamento ?? 0),
+    valor: Number(api?.valor ?? api?.valorOrcamento ?? 0),
+    descricao: api?.descricao ?? "",
+    situacao: api?.situacao !== undefined ? Number(api.situacao) : undefined,
+    idInstituicao: api?.idInstituicao !== undefined ? Number(api.idInstituicao) : 0,
+  });
+
+  const toApiOrcamentoPayload = (data: Partial<Orcamento> & Record<string, any>) => ({
+    idOrcamento: Number(data.idOrcamento ?? 0),
+    anoOrcamento: Number(data.ano ?? data.anoOrcamento ?? 0),
+    valorOrcamento: Number(data.valor ?? data.valorOrcamento ?? 0),
+    idInstituicao: Number(data.idInstituicao ?? 0),
+    descricao: data.descricao ?? "",
+    situacao: data.situacao !== undefined ? Number(data.situacao) : 1,
+  });
+
+  const loadOrcamentos = async () => {
+    try {
+      setLoading(true);
+      const list = await orcamentoService.getAll();
+      const normalizedList = (list as ApiOrcamento[]).map(mapApiOrcamentoToUi);
+      setOrcamentos(normalizedList);
+      setFilteredData(normalizedList);
+      setError(null);
+      return normalizedList;
+    } catch (err) {
+      console.error("Erro ao carregar orcamentos:", err);
+      setOrcamentos([]);
+      setFilteredData([]);
+      setError("Nao foi possivel carregar orcamentos.");
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrcamentos();
+  }, []);
+
+  const handleCreate = async (novoOrcamentoData: Omit<Orcamento, "idOrcamento">) => {
+    try {
+      const payload = toApiOrcamentoPayload({ ...novoOrcamentoData, idOrcamento: 0 });
+      await orcamentoService.create(payload);
+      const list = await loadOrcamentos();
+      return list[list.length - 1];
+    } catch (err) {
+      console.error("Erro ao criar orcamento:", err);
+      throw err;
+    }
+  };
+
+  const handleUpdate = async (id: number, dadosAtualizados: Partial<Orcamento>) => {
+    try {
+      const atual = orcamentos.find((o) => Number(o.idOrcamento) === Number(id));
+      const payload = toApiOrcamentoPayload({ ...(atual ?? {}), ...dadosAtualizados, idOrcamento: id });
+      const updated = await orcamentoService.update(id, payload);
+      const normalizedUpdated = mapApiOrcamentoToUi(updated as ApiOrcamento);
+      const updatedData = orcamentos.map((o) =>
+        Number(o.idOrcamento) === Number(id) ? normalizedUpdated : o
+      );
+      setOrcamentos(updatedData);
+      setFilteredData(updatedData);
+      return normalizedUpdated;
+    } catch (err) {
+      console.error("Erro ao atualizar orcamento:", err);
+      throw err;
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await orcamentoService.delete(id);
+      const updatedData = orcamentos.filter((o) => o.idOrcamento !== id);
+      setOrcamentos(updatedData);
+      setFilteredData(updatedData);
+    } catch (err) {
+      console.error("Erro ao deletar orcamento:", err);
+      throw err;
+    }
+>>>>>>> dev
   };
 
   if (loading) {
     return <div>Carregando orcamentos...</div>;
+<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
+=======
+  }
+
+  if (error) {
+    return <div>Erro: {error}</div>;
+>>>>>>> dev
   }
 
   return (
@@ -286,4 +439,10 @@ export default function Page() {
       />
     </>
   );
+<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
 }
+=======
+};
+
+export default Page;
+>>>>>>> dev

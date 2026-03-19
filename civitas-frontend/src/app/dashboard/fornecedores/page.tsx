@@ -54,12 +54,17 @@ export default function Page() {
       try {
         setLoading(true);
         const list = await fornecedorService.getAll();
+<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
         const rows = list.map((fornecedor) => ({
           ...fornecedor,
           situacaoLabel: getSituacaoLabel(fornecedor.situacao),
         }));
         setFornecedores(rows);
         setFilteredData(rows);
+=======
+        setFornecedores(list);
+        setFilteredData(list);
+>>>>>>> dev
         setError(null);
       } catch (err) {
         console.error("Erro ao carregar fornecedores:", err);
