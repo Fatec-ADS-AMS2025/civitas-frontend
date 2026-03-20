@@ -1,10 +1,15 @@
+"use client";
+
 import React, { useEffect, useMemo, useState } from "react";
 import Modal from "../modal";
+import Form from "../Form/form";
+import type { FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
+import { usePathname } from "next/navigation";
 import Form, {
-  type FieldConfig as ModalFieldConfig,
+  type FormFieldConfig,
   type ValidationFn,
 } from "../Form/form";
-import { usePathname } from "next/navigation";
+import Modal from "../modal";
 import {
   applySearchFilters,
   buildInitialAdvancedFilters,
@@ -22,7 +27,7 @@ type SearchBarProps = {
   onCadastrar?: (data: any) => Promise<any>;
   showCadastrarButton?: boolean;
   model: object | string[];
-  formFields?: ModalFieldConfig[];
+  formFields?: FormFieldConfig[];
   formValidationSchema?: Record<string, ValidationFn>;
   formHiddenFields?: string[];
 };
@@ -39,7 +44,7 @@ const SearchBar = ({
   formValidationSchema,
   formHiddenFields,
 }: SearchBarProps) => {
-  const [modalOpen, setModalOpen] = useState<boolean | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [globalQuery, setGlobalQuery] = useState("");
   const [advancedFilters, setAdvancedFilters] = useState<Record<string, string>>(() =>
@@ -65,7 +70,7 @@ const SearchBar = ({
     setAdvancedFilters((prev) => {
       const next: Record<string, string> = {};
       campos.forEach((campo) => {
-        next[campo.key] = prev[campo.key] ?? campo.value ?? "";
+        next[campo.key] = prev[campo.key] ?? String(campo.value ?? "");
       });
       return next;
     });
@@ -84,13 +89,19 @@ const SearchBar = ({
     );
   };
 
-  const handleFieldKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>) => {
-    if (e.key === 'Enter') {
+  const handleFieldKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    if (e.key === "Enter") {
       e.preventDefault();
-      const form = e.currentTarget.form ?? e.currentTarget.closest('form, div');
+      const form = e.currentTarget.form ?? e.currentTarget.closest("form, div");
       if (!form) return;
-      const selectors = 'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])';
-      const focusables = Array.from(form.querySelectorAll<HTMLElement>(selectors)).filter((el) => el.offsetParent !== null);
+
+      const selectors =
+        "input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])";
+      const focusables = Array.from(form.querySelectorAll<HTMLElement>(selectors)).filter(
+        (el) => el.offsetParent !== null
+      );
       const index = focusables.indexOf(e.currentTarget as HTMLElement);
       const next = focusables[index + 1];
       if (next) {
@@ -130,7 +141,7 @@ const SearchBar = ({
         >
           <option value="">{field.placeholder}</option>
           {field.options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={String(option.value)} value={String(option.value)}>
               {option.label}
             </option>
           ))}
@@ -170,6 +181,7 @@ const SearchBar = ({
         <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
           {showCadastrarButton && (
             <button
+              type="button"
               onClick={() => setModalOpen(true)}
               className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
             >
@@ -180,10 +192,13 @@ const SearchBar = ({
 
           {hasAnyField && (
             <button
+              type="button"
               onClick={toggleAdvanced}
               className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
             >
-              <span className="material-symbols-outlined text-white text-base">filter_alt</span>
+              <span className="material-symbols-outlined text-white text-base">
+                filter_alt
+              </span>
               {showAdvanced ? "Ocultar" : "Filtrar"}
             </button>
           )}
@@ -194,6 +209,7 @@ const SearchBar = ({
         <div className="flex flex-col md:flex-row md:items-center gap-3 border-t border-gray-600 pt-4 animate-fadeIn">
           {campos.map((field) => renderField(field))}
           <button
+            type="button"
             onClick={clearFilters}
             className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full transition w-full md:w-auto"
           >
@@ -220,7 +236,8 @@ const SearchBar = ({
                 setModalOpen(false);
               } catch (error) {
                 console.error("Erro ao cadastrar:", error);
-                alert("Erro ao cadastrar. Tente novamente.");
+                const message = error instanceof Error ? error.message : "Erro ao cadastrar. Tente novamente.";
+                alert(message);
               }
             }}
           />

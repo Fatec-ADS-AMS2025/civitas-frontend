@@ -25,15 +25,18 @@ const Table = ({
   columns,
   onEdit,
   onDelete,
-  actions = ["edit", "view"],
+  actions,
   formFields,
   formValidationSchema,
   formHiddenFields,
 }: TableProps) => {
 
+  const safeData = Array.isArray(data) ? data : [];
+
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
+  const resolvedActions = actions ?? (onDelete ? ["edit", "view", "delete"] : ["edit", "view"]);
 
   // Função para identificar o campo ID do objeto
   const getIdField = (obj: any): string => {
@@ -76,31 +79,36 @@ const Table = ({
             </thead>
             <tbody>
               {data.length == 0 ? (
+                
                 <tr>
+                  
                   <td colSpan={columns.length} className="p-3 text-center">
                     Nenhum dado encontrado.
                   </td>
                 </tr>
+                
               ) : (
-                data.map((objeto, i) => (
+                safeData.map((objeto, i) => (
                   <tr key={i}>
                     {columns.map((column) => (
                       <td key={column.id} className="p-3 border-t">
                         {objeto[column.id]}
                       </td>
                     ))}
+                    
+
                     <td className="p-3 border-t flex gap-1">
-                      {actions?.includes("view") && (
+                      {resolvedActions.includes("view") && (
                         <button onClick={() => openModal("view", objeto)} className="cursor-pointer">
                           <span className="material-symbols-outlined">visibility</span>
                         </button>
                       )}
-                      {actions?.includes("edit") && (
+                      {resolvedActions.includes("edit") && (
                         <button onClick={() => openModal("edit", objeto)} className="cursor-pointer">
                           <span className="material-symbols-outlined">edit_square</span>
                         </button>
                       )}
-                      {actions?.includes("delete") && (
+                      {resolvedActions.includes("delete") && (
                         <button onClick={() => openModal("delete", objeto)} className="cursor-pointer">
                           <span className="material-symbols-outlined">delete</span>
                         </button>
@@ -118,7 +126,7 @@ const Table = ({
           <Form 
             object={selectedContent} 
             name={nomePagina} 
-            camps={data.length > 0 ? Object.keys(data[0]) : []} 
+            camps={safeData.length > 0 ? Object.keys(safeData[0]) : []} 
             type={modalAction} 
             fields={formFields}
             validationSchema={formValidationSchema}
