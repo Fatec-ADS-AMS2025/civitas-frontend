@@ -1,5 +1,5 @@
-import { GenericService } from './generic';
-import UsuarioDTO from '@/models/usuario';
+import { GenericService } from "./generic";
+import UsuarioDTO from "@/models/usuario";
 
 export class UsuarioService extends GenericService<UsuarioDTO> {
   constructor() {
@@ -18,6 +18,8 @@ export class UsuarioService extends GenericService<UsuarioDTO> {
     return Array.isArray(payload) ? payload[0] ?? null : null;
   }
 
+    return users[0];
+  }
 }
 
 export const usuarioService = new UsuarioService();

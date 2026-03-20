@@ -1,18 +1,47 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useEffect, useMemo, useState } from "react";
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
+import {
+  composeValidators,
+  normalizeInstituicaoPayload,
+  validateDigitsLength,
+  validateMaxLength,
+  validateUfCode,
+} from "@/global/formPayload";
+import {
+  getSituacaoLabel,
+  SITUACAO_ATIVO,
+  SITUACAO_INATIVO,
+  SITUACAO_OPTIONS,
+} from "@/global/situacao";
 import { instituicaoService } from "@/hooks/instituicao";
+import { secretariaService } from "@/hooks/secretaria";
+import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
 import InstituicaoDTO from "@/models/instituicao";
-import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import SecretariaDTO from "@/models/secretaria";
+import TipoInstituicaoDTO from "@/models/tipoInstituicao";
 
-// Usando o tipo do service
 type Instituicao = InstituicaoDTO;
+type Secretaria = SecretariaDTO;
+type TipoInstituicao = TipoInstituicaoDTO;
+type InstituicaoRow = Instituicao & {
+  situacaoLabel: string;
+  secretariaLabel: string;
+  tipoInstituicaoLabel: string;
+};
 
-const novaInstituicao: Instituicao = {
+type InstituicaoPageData = {
+  instituicoes: Instituicao[];
+  secretarias: Secretaria[];
+  tiposInstituicao: TipoInstituicao[];
+};
+
+const novaInstituicao = {
   id: 0,
   nome: "",
-  nomeRazaoSocial: "",
   cnpj: "",
   cep: "",
   logradouro: "",
@@ -22,256 +51,309 @@ const novaInstituicao: Instituicao = {
   estado: "",
   telefone: "",
   email: "",
-  situacao: 1,
-  idTipoInstituicao: undefined,
-  idSecretaria: undefined,
-};
-
-const validatePositiveInteger = (value: unknown, label: string): string | undefined => {
-  const numericValue = Number(value);
-
-  if (!Number.isInteger(numericValue) || numericValue <= 0) {
-    return `${label} deve ser um numero inteiro maior que 0.`;
-  }
-
-  return undefined;
+  nomeRazaoSocial: "",
+  situacao: SITUACAO_ATIVO,
+  idTipoInstituicao: "",
+  idSecretaria: "",
 };
 
 const columns = [
   { id: "nome", label: "Nome" },
-  { id: "nomeRazaoSocial", label: "Razão Social" },
+  { id: "nomeRazaoSocial", label: "Razao Social" },
   { id: "cnpj", label: "CNPJ" },
+  { id: "tipoInstituicaoLabel", label: "Tipo de Instituicao" },
+  { id: "secretariaLabel", label: "Secretaria" },
   { id: "cidade", label: "Cidade" },
   { id: "estado", label: "Estado" },
-  { id: "telefone", label: "Telefone" },
-  { id: "email", label: "E-mail" },
-  { id: "situacao", label: "Situação" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
-const camposConst: FieldConfig[] = [
-  { key: "nome", placeholder: "Nome", local: "principal" },
-  { key: "cnpj", placeholder: "CNPJ", local: "principal" },
-  { key: "cidade", placeholder: "Cidade", local: "filtro" },
-  { key: "estado", placeholder: "Estado", local: "filtro" },
-  {
-    key: "situacao",
-    placeholder: "Situação",
-    local: "filtro",
-    type: "select",
-    options: [
-      { value: "1", label: "Ativa" },
-      { value: "2", label: "Inativa" },
-    ],
-  },
-];
+const buildInstituicaoCampos = (
+  secretariaOptions: FieldConfig["options"],
+  tipoInstituicaoOptions: FieldConfig["options"]
+): FieldConfig[] => {
+  return [
+    { key: "nome", placeholder: "Nome", local: "principal" },
+    { key: "cnpj", placeholder: "CNPJ", local: "principal" },
+    {
+      key: "idTipoInstituicao",
+      placeholder: "Tipo de Instituicao",
+      local: "filtro",
+      type: "select",
+      options: tipoInstituicaoOptions,
+    },
+    {
+      key: "idSecretaria",
+      placeholder: "Secretaria",
+      local: "filtro",
+      type: "select",
+      options: secretariaOptions,
+    },
+    {
+      key: "situacao",
+      placeholder: "Situacao",
+      local: "filtro",
+      type: "select",
+      options: SITUACAO_OPTIONS,
+    },
+  ];
+};
 
-const instituicaoFormFields: ModalFieldConfig[] = [
-  { key: "id", hidden: true },
+const buildLookupLabel = (label: string, situacao: number): string => {
+  if (situacao === SITUACAO_INATIVO) {
+    return `${label} (Inativo)`;
+  }
 
-  {
-    key: "nome",
-    label: "Nome",
-    placeholder: "Nome da instituição",
-    required: true,
-  },
-  {
-    key: "nomeRazaoSocial",
-    label: "Razão Social",
-    placeholder: "Razão social da instituição",
-    required: true,
-  },
-  {
-    key: "cnpj",
-    label: "CNPJ",
-    placeholder: "00.000.000/0000-00",
-    required: true,
-  },
-  {
-    key: "cep",
-    label: "CEP",
-    placeholder: "00000-000",
-    required: true,
-  },
-  {
-    key: "logradouro",
-    label: "Logradouro",
-    placeholder: "Rua / Avenida",
-    required: true,
-  },
-  {
-    key: "numero",
-    label: "Número",
-    placeholder: "Número",
-    required: true,
-  },
-  {
-    key: "bairro",
-    label: "Bairro",
-    placeholder: "Bairro",
-    required: true,
-  },
-  {
-    key: "cidade",
-    label: "Cidade",
-    placeholder: "Cidade",
-    required: true,
-  },
-  {
-    key: "estado",
-    label: "Estado",
-    placeholder: "UF",
-    required: true,
-  },
-  {
-    key: "telefone",
-    label: "Telefone",
-    placeholder: "(00) 00000-0000",
-    type: "tel",
-    required: true,
-  },
-  {
-    key: "email",
-    label: "E-mail",
-    placeholder: "email@instituicao.com",
-    type: "email",
-    required: true,
-  },
-  {
-    key: "situacao",
-    label: "Situação",
-    type: "select",
-    required: true,
-    options: [
-      { value: "1", label: "Ativa" },
-      { value: "2", label: "Inativa" },
-    ],
-  },
-  {
-    key: "idTipoInstituicao",
-    label: "ID Tipo Instituição",
-    placeholder: "Informe o ID do tipo da instituição",
-    required: true,
-    type: "number",
-    validate: (value) => validatePositiveInteger(value, "ID Tipo Instituição"),
-  },
-  {
-    key: "idSecretaria",
-    label: "ID Secretaria",
-    placeholder: "Informe o ID da secretaria",
-    required: true,
-    type: "number",
-    validate: (value) => validatePositiveInteger(value, "ID Secretaria"),
-  },
-];
+  return label;
+};
 
-const toInstituicaoPayload = (data: Partial<Instituicao>, id?: number): Partial<Instituicao> => {
-  const idTipoInstituicao = Number(data.idTipoInstituicao);
-  const idSecretaria = Number(data.idSecretaria);
+const mapInstituicaoRows = (
+  instituicoes: Instituicao[],
+  secretarias: Secretaria[],
+  tiposInstituicao: TipoInstituicao[]
+): InstituicaoRow[] => {
+  const secretariaMap = new Map(
+    secretarias.map((secretaria) => [secretaria.idSecretaria, secretaria.nome])
+  );
+  const tipoMap = new Map(
+    tiposInstituicao.map((tipoInstituicao) => [
+      tipoInstituicao.id,
+      tipoInstituicao.descricao,
+    ])
+  );
+
+  return instituicoes.map((instituicao) => ({
+    ...instituicao,
+    situacaoLabel: getSituacaoLabel(instituicao.situacao),
+    secretariaLabel:
+      secretariaMap.get(instituicao.idSecretaria) ??
+      `Secretaria #${instituicao.idSecretaria}`,
+    tipoInstituicaoLabel:
+      tipoMap.get(instituicao.idTipoInstituicao) ??
+      `Tipo #${instituicao.idTipoInstituicao}`,
+  }));
+};
+
+const fetchInstituicaoPageData = async (): Promise<InstituicaoPageData> => {
+  const [instituicoes, secretarias, tiposInstituicao] = await Promise.all([
+    instituicaoService.getAll(),
+    secretariaService.getAll(),
+    tipoInstituicaoService.getAll(),
+  ]);
 
   return {
-    ...(id !== undefined ? { id } : {}),
-    nome: String(data.nome ?? ""),
-    nomeRazaoSocial: String(data.nomeRazaoSocial ?? ""),
-    cnpj: String(data.cnpj ?? ""),
-    cep: String(data.cep ?? ""),
-    logradouro: String(data.logradouro ?? ""),
-    numero: String(data.numero ?? ""),
-    bairro: String(data.bairro ?? ""),
-    cidade: String(data.cidade ?? ""),
-    estado: String(data.estado ?? ""),
-    telefone: String(data.telefone ?? ""),
-    email: String(data.email ?? ""),
-    situacao: Number(data.situacao ?? 1),
-    idTipoInstituicao,
-    idSecretaria,
+    instituicoes,
+    secretarias,
+    tiposInstituicao,
   };
 };
 
-const Page = () => {
-  const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
-  const [filteredData, setFilteredData] = useState<Instituicao[]>([]);
-  const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
+export default function Page() {
+  const [instituicoes, setInstituicoes] = useState<InstituicaoRow[]>([]);
+  const [filteredData, setFilteredData] = useState<InstituicaoRow[]>([]);
+  const [secretarias, setSecretarias] = useState<Secretaria[]>([]);
+  const [tiposInstituicao, setTiposInstituicao] = useState<TipoInstituicao[]>([]);
+  const [campos, setCampos] = useState<FieldConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadInstituicoes = async () => {
-    try {
-      setLoading(true);
-      const list = await instituicaoService.getAllData();
-      setInstituicoes(list);
-      setFilteredData(list);
-      setError(null);
-    } catch (err) {
-      console.error("Erro ao carregar instituições:", err);
-      setInstituicoes([]);
-      setFilteredData([]);
-      setError("Erro ao carregar dados das instituições");
-    } finally {
-      setLoading(false);
-    }
+  const secretariaOptions = useMemo(() => {
+    return secretarias.map((secretaria) => ({
+      value: secretaria.idSecretaria,
+      label: buildLookupLabel(secretaria.nome, secretaria.situacao),
+    }));
+  }, [secretarias]);
+
+  const tipoInstituicaoOptions = useMemo(() => {
+    return tiposInstituicao.map((tipoInstituicao) => ({
+      value: tipoInstituicao.id,
+      label: buildLookupLabel(tipoInstituicao.descricao, tipoInstituicao.situacao),
+    }));
+  }, [tiposInstituicao]);
+
+  const instituicaoFormFields = useMemo<ModalFieldConfig[]>(() => {
+    return [
+      { key: "id", hidden: true },
+      {
+        key: "nome",
+        label: "Nome",
+        placeholder: "Nome da instituicao",
+        required: true,
+      },
+      {
+        key: "nomeRazaoSocial",
+        label: "Razao Social",
+        placeholder: "Razao social da instituicao",
+        required: true,
+      },
+      {
+        key: "cnpj",
+        label: "CNPJ",
+        placeholder: "00.000.000/0000-00",
+        required: true,
+        validate: validateDigitsLength("CNPJ", 14),
+      },
+      {
+        key: "cep",
+        label: "CEP",
+        placeholder: "00000-000",
+        required: true,
+        validate: validateDigitsLength("CEP", 8),
+      },
+      {
+        key: "logradouro",
+        label: "Logradouro",
+        placeholder: "Rua / Avenida",
+        required: true,
+      },
+      {
+        key: "numero",
+        label: "Numero",
+        placeholder: "Numero",
+        required: true,
+        validate: validateMaxLength("Numero", 4),
+      },
+      {
+        key: "bairro",
+        label: "Bairro",
+        placeholder: "Bairro",
+        required: true,
+      },
+      {
+        key: "cidade",
+        label: "Cidade",
+        placeholder: "Cidade",
+        required: true,
+      },
+      {
+        key: "estado",
+        label: "Estado",
+        placeholder: "UF",
+        required: true,
+        validate: composeValidators(
+          validateUfCode(),
+          validateMaxLength("Estado", 2)
+        ),
+      },
+      {
+        key: "telefone",
+        label: "Telefone",
+        placeholder: "(00) 00000-0000",
+        type: "tel",
+        required: true,
+      },
+      {
+        key: "email",
+        label: "E-mail",
+        placeholder: "email@instituicao.com",
+        type: "email",
+        required: true,
+      },
+      {
+        key: "idTipoInstituicao",
+        label: "Tipo de Instituicao",
+        placeholder: "Selecione o tipo de instituicao",
+        type: "select",
+        required: true,
+        options: tipoInstituicaoOptions,
+      },
+      {
+        key: "idSecretaria",
+        label: "Secretaria",
+        placeholder: "Selecione a secretaria",
+        type: "select",
+        required: true,
+        options: secretariaOptions,
+      },
+      {
+        key: "situacao",
+        label: "Situacao",
+        type: "select",
+        required: true,
+        options: SITUACAO_OPTIONS,
+      },
+    ];
+  }, [secretariaOptions, tipoInstituicaoOptions]);
+
+  const refreshInstituicoes = async () => {
+    const pageData = await fetchInstituicaoPageData();
+    const rows = mapInstituicaoRows(
+      pageData.instituicoes,
+      pageData.secretarias,
+      pageData.tiposInstituicao
+    );
+
+    setSecretarias(pageData.secretarias);
+    setTiposInstituicao(pageData.tiposInstituicao);
+    setInstituicoes(rows);
+    setFilteredData(rows);
   };
 
   useEffect(() => {
+    setCampos(buildInstituicaoCampos(secretariaOptions, tipoInstituicaoOptions));
+  }, [secretariaOptions, tipoInstituicaoOptions]);
+
+  useEffect(() => {
+    const loadInstituicoes = async () => {
+      try {
+        setLoading(true);
+        const pageData = await fetchInstituicaoPageData();
+        const rows = mapInstituicaoRows(
+          pageData.instituicoes,
+          pageData.secretarias,
+          pageData.tiposInstituicao
+        );
+
+        setSecretarias(pageData.secretarias);
+        setTiposInstituicao(pageData.tiposInstituicao);
+        setInstituicoes(rows);
+        setFilteredData(rows);
+        setError(null);
+      } catch (err) {
+        console.error("Erro ao carregar instituicoes:", err);
+        setInstituicoes([]);
+        setFilteredData([]);
+        setSecretarias([]);
+        setTiposInstituicao([]);
+        setCampos([]);
+        setError(
+          "Nao foi possivel carregar as instituicoes. Verifique o backend e tente novamente."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     void loadInstituicoes();
   }, []);
 
-  // Função para criar nova instituição
-  const handleCreate = async (novaInstituicaoData: Omit<Instituicao, "id">) => {
-    try {
-      const payload = toInstituicaoPayload(novaInstituicaoData);
-
-      if (!payload.idTipoInstituicao || !payload.idSecretaria) {
-        throw new Error("Informe IDs validos para Tipo Instituicao e Secretaria (maiores que 0).");
-      }
-
-      const created = await instituicaoService.createData(payload);
-      await loadInstituicoes();
-      return created;
-    } catch (err) {
-      console.error("Erro ao criar instituição:", err);
-      throw err;
-    }
+  const handleCreate = async (data: Omit<Instituicao, "id">) => {
+    await instituicaoService.create(normalizeInstituicaoPayload(data));
+    await refreshInstituicoes();
   };
 
-  // Função para atualizar instituição
-  const handleUpdate = async (id: number, dadosAtualizados: Partial<Instituicao>) => {
-    try {
-      const payload = toInstituicaoPayload(dadosAtualizados, id);
-
-      if (!payload.idTipoInstituicao || !payload.idSecretaria) {
-        throw new Error("Informe IDs validos para Tipo Instituicao e Secretaria (maiores que 0).");
-      }
-
-      const updated = await instituicaoService.updateData(id, payload);
-      await loadInstituicoes();
-      return updated;
-    } catch (err) {
-      console.error("Erro ao atualizar instituição:", err);
-      throw err;
-    }
+  const handleUpdate = async (id: number, data: Partial<Instituicao>) => {
+    await instituicaoService.update(id, normalizeInstituicaoPayload(data));
+    await refreshInstituicoes();
   };
 
-  // Função para deletar instituição (via alteração de situação)
   const handleDelete = async (id: number) => {
-    try {
-      await instituicaoService.alterarSituacao(id);
-      await loadInstituicoes();
-    } catch (err) {
-      console.error("Erro ao alterar situação da instituição:", err);
-      throw err;
-    }
+    await instituicaoService.alterarSituacao(id);
+    await refreshInstituicoes();
   };
 
   if (loading) {
-    return <div>Carregando instituições...</div>;
-  }
-
-  if (error) {
-    return <div>Erro: {error}</div>;
+    return <div>Carregando instituicoes...</div>;
   }
 
   return (
     <>
+      {error && (
+        <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          {error}
+        </div>
+      )}
+
       <SearchBar
         model={novaInstituicao}
         dados={instituicoes}
@@ -293,6 +375,4 @@ const Page = () => {
       />
     </>
   );
-};
-
-export default Page;
+}

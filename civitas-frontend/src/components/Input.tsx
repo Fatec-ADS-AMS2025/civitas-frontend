@@ -10,6 +10,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className = '', id, ...props }, ref) => {
     const autoId = useId();
     const stableInputId = id ?? autoId;
+    const errorId = typeof props['aria-describedby'] === 'string'
+      ? props['aria-describedby']
+      : undefined;
 
     return (
       <div className="w-full mb-4">
@@ -44,7 +47,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           `.trim().replace(/\s+/g, ' ')}
           {...props}
         />
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+        {error && (
+          <p id={errorId} className="mt-1 text-sm text-red-600">
+            {error}
+          </p>
+        )}
       </div>
     );
   }

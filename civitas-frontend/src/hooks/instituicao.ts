@@ -15,6 +15,7 @@ export class InstituicaoService extends GenericService<InstituicaoDTO> {
     }
 
     return Array.isArray(payload) ? payload : [];
+    super("instituicoes");
   }
 }
 

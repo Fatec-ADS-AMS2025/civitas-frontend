@@ -1,25 +1,55 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5210/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
 
-export interface ApiResponse<T> {
-  data: T;
-  success: boolean;
+export interface ResponseEnvelope<T> {
+  code?: string;
   message?: string;
+  data?: T | null;
 }
 
-export interface ApiEnvelope<T> {
-  code?: number;
-  data: T;
-  message?: string;
+export interface PaginatedResult<T> {
+  items: T[];
+  totalRecords: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
 }
 
-type PagedListPayload<R> = {
-  items?: R[];
-  records?: R[];
-  resultados?: R[];
+export interface ListQuery {
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDirection?: "asc" | "desc";
+}
+
+const DEFAULT_LIST_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
+  page: 1,
+  size: 100,
 };
 
-type QueryParamValue = string | number | boolean | null | undefined;
-export type QueryParams = Record<string, QueryParamValue>;
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
+const isResponseEnvelope = <T>(value: unknown): value is ResponseEnvelope<T> => {
+  return isRecord(value) && "data" in value;
+};
+
+const isPaginatedResult = <T>(value: unknown): value is PaginatedResult<T> => {
+  return isRecord(value) && Array.isArray(value.items);
+};
+
+const toQueryString = (query?: ListQuery): string => {
+  const params = new URLSearchParams();
+  const mergedQuery = { ...DEFAULT_LIST_QUERY, ...query };
+
+  Object.entries(mergedQuery).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+    params.set(key, String(value));
+  });
+
+  const queryString = params.toString();
+  return queryString ? `?${queryString}` : "";
+};
 
 export class GenericService<T> {
   private endpoint: string;
@@ -28,116 +58,71 @@ export class GenericService<T> {
     this.endpoint = endpoint;
   }
 
-  public async handleResponse<R>(response: Response): Promise<R> {
+  protected getUrlEndpoint(): string {
+    return `${BASE_URL}/${this.endpoint}`;
+  }
+
+  protected async handleResponse(response: Response): Promise<unknown> {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
-    
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
+
+    if (response.status === 204) return undefined;
+
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
       return response.json();
     }
-    return response.text() as unknown as R;
+
+    return response.text();
   }
 
-  protected extractData<R>(payload: R | ApiEnvelope<R> | ApiResponse<R>): R {
-    if (payload && typeof payload === 'object' && 'data' in payload) {
-      return (payload as ApiEnvelope<R> | ApiResponse<R>).data;
+  protected unwrapItem<R>(payload: unknown): R {
+    if (isResponseEnvelope<R>(payload)) {
+      return payload.data as R;
     }
 
     return payload as R;
   }
 
-  protected extractListData<R>(payload: unknown): R[] {
-    if (Array.isArray(payload)) {
-      return payload as R[];
+  protected unwrapCollection<R>(payload: unknown): R[] {
+    const data = isResponseEnvelope<unknown>(payload) ? payload.data : payload;
+
+    if (Array.isArray(data)) {
+      return data as R[];
     }
 
-    if (payload && typeof payload === 'object') {
-      const dataPayload = payload as { data?: unknown } & PagedListPayload<R>;
-
-      if (Array.isArray(dataPayload.data)) {
-        return dataPayload.data as R[];
-      }
-
-      if (dataPayload.data && typeof dataPayload.data === 'object') {
-        const nestedData = dataPayload.data as PagedListPayload<R>;
-        if (Array.isArray(nestedData.items)) return nestedData.items;
-        if (Array.isArray(nestedData.records)) return nestedData.records;
-        if (Array.isArray(nestedData.resultados)) return nestedData.resultados;
-      }
-
-      if (Array.isArray(dataPayload.items)) return dataPayload.items;
-      if (Array.isArray(dataPayload.records)) return dataPayload.records;
-      if (Array.isArray(dataPayload.resultados)) return dataPayload.resultados;
+    if (isPaginatedResult<R>(data)) {
+      return data.items;
     }
 
     return [];
   }
 
-  protected buildQueryString(queryParams?: QueryParams): string {
-    if (!queryParams) {
-      return '';
-    }
-
-    const searchParams = new URLSearchParams();
-
-    Object.entries(queryParams).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === '') {
-        return;
-      }
-
-      searchParams.append(key, String(value));
-    });
-
-    const queryString = searchParams.toString();
-    return queryString ? `?${queryString}` : '';
-  }
-
-  protected buildUrl(path = '', queryParams?: QueryParams): string {
-    const normalizedPath = path ? `/${path.replace(/^\/+/, '')}` : '';
-    return `${BASE_URL}/${this.endpoint}${normalizedPath}${this.buildQueryString(queryParams)}`;
-  }
-
-  async getAll(): Promise<T[]> {
-    const response = await fetch(this.buildUrl());
-    return this.handleResponse<T[]>(response);
-  }
-
-  async getAllWithParams(queryParams?: QueryParams): Promise<unknown> {
-    const response = await fetch(this.buildUrl('', queryParams));
-    return this.handleResponse<unknown>(response);
-  }
-
-  async getAllData(queryParams?: QueryParams): Promise<T[]> {
-    const payload = await this.getAllWithParams(queryParams);
-    return this.extractListData<T>(payload);
-  }
-
-  getUrlEndpoint(): string {
-    return `${BASE_URL}/${this.endpoint}/`;
+  async getAll(query?: ListQuery): Promise<T[]> {
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
+    const payload = await this.handleResponse(response);
+    return this.unwrapCollection<T>(payload);
   }
 
   async getById(id: number): Promise<T> {
-    const response = await fetch(this.buildUrl(String(id)));
-    return this.handleResponse<T>(response);
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`);
+    const payload = await this.handleResponse(response);
+    return this.unwrapItem<T>(payload);
   }
 
-  async getByIdData(id: number): Promise<T> {
-    const payload = await this.getById(id);
-    return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
-  }
-
-  async create(data: any): Promise<T> {
-    const response = await fetch(this.buildUrl(), {
-      method: 'POST',
+  async create(data: unknown): Promise<T> {
+    const response = await fetch(this.getUrlEndpoint(), {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    return this.handleResponse<T>(response);
+
+    const payload = await this.handleResponse(response);
+    return this.unwrapItem<T>(payload);
   }
 
   async createData(data: any): Promise<T> {
@@ -146,14 +131,16 @@ export class GenericService<T> {
   }
 
   async update(id: number, data: Partial<T>): Promise<T> {
-    const response = await fetch(this.buildUrl(String(id)), {
-      method: 'PUT',
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    return this.handleResponse<T>(response);
+
+    const payload = await this.handleResponse(response);
+    return this.unwrapItem<T>(payload);
   }
 
   async updateData(id: number, data: Partial<T>): Promise<T> {
@@ -162,25 +149,24 @@ export class GenericService<T> {
   }
 
   async delete(id: number): Promise<void> {
-    const response = await fetch(this.buildUrl(String(id)), {
-      method: 'DELETE',
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
+      method: "DELETE",
     });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
+
+    await this.handleResponse(response);
   }
 
   async patch(id: number, data: Partial<T>): Promise<T> {
-    const response = await fetch(this.buildUrl(String(id)), {
-      method: 'PATCH',
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    return this.handleResponse<T>(response);
+
+    const payload = await this.handleResponse(response);
+    return this.unwrapItem<T>(payload);
   }
 
   async patchData(id: number, data: Partial<T>): Promise<T> {
@@ -189,13 +175,10 @@ export class GenericService<T> {
   }
 
   async alterarSituacao(id: number): Promise<void> {
-    const response = await fetch(this.buildUrl(`situacao/${id}`), {
-      method: 'PATCH',
+    const response = await fetch(`${this.getUrlEndpoint()}/situacao/${id}`, {
+      method: "PATCH",
     });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
-    }
+
+    await this.handleResponse(response);
   }
 }

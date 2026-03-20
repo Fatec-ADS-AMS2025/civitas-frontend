@@ -1,18 +1,31 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
+import {
+  composeValidators,
+  normalizeFornecedorPayload,
+  validateDigitsLength,
+  validateMaxLength,
+  validateUfCode,
+} from "@/global/formPayload";
+import {
+  getSituacaoLabel,
+  SITUACAO_ATIVO,
+  SITUACAO_OPTIONS,
+} from "@/global/situacao";
 import { fornecedorService } from "@/hooks/fornecedor";
 import FornecedorDTO from "@/models/fornecedor";
-import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 
-// Usando o tipo do service
 type Fornecedor = FornecedorDTO;
+type FornecedorRow = Fornecedor & { situacaoLabel: string };
 
-const novoFornecedor: Fornecedor = {
+const novoFornecedor = {
   idFornecedor: 0,
   nomeFantasia: "",
-  situacao: 1,
+  situacao: SITUACAO_ATIVO,
   cnpj: "",
   nome: "",
   logradouro: "",
@@ -30,20 +43,25 @@ const columns = [
   { id: "nomeFantasia", label: "Nome Fantasia" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacao", label: "Situação" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const camposConst: FieldConfig[] = [
   { key: "nomeFantasia", placeholder: "Nome Fantasia", local: "principal" },
   { key: "cnpj", placeholder: "CNPJ", local: "principal" },
   { key: "telefone", placeholder: "Telefone", local: "filtro" },
-  { key: "situacao", placeholder: "Situação", local: "principal" },
+  {
+    key: "situacao",
+    placeholder: "Situacao",
+    local: "filtro",
+    type: "select",
+    options: SITUACAO_OPTIONS,
+  },
   { key: "cidade", placeholder: "Cidade", local: "filtro" },
 ];
 
 const fornecedorFormFields: ModalFieldConfig[] = [
   { key: "idFornecedor", hidden: true },
-
   {
     key: "nomeFantasia",
     label: "Nome Fantasia",
@@ -52,8 +70,8 @@ const fornecedorFormFields: ModalFieldConfig[] = [
   },
   {
     key: "nome",
-    label: "Razão Social / Nome",
-    placeholder: "Nome ou razão social do fornecedor",
+    label: "Razao Social / Nome",
+    placeholder: "Nome ou razao social do fornecedor",
     required: true,
   },
   {
@@ -61,6 +79,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     label: "CNPJ",
     placeholder: "00.000.000/0000-00",
     required: true,
+    validate: validateDigitsLength("CNPJ", 14),
   },
   {
     key: "logradouro",
@@ -70,9 +89,10 @@ const fornecedorFormFields: ModalFieldConfig[] = [
   },
   {
     key: "numero",
-    label: "Número",
-    placeholder: "Número",
+    label: "Numero",
+    placeholder: "Numero",
     required: true,
+    validate: validateMaxLength("Numero", 10),
   },
   {
     key: "bairro",
@@ -85,6 +105,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     label: "CEP",
     placeholder: "00000-000",
     required: true,
+    validate: validateDigitsLength("CEP", 8),
   },
   {
     key: "cidade",
@@ -97,6 +118,10 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     label: "Estado",
     placeholder: "UF",
     required: true,
+    validate: composeValidators(
+      validateUfCode(),
+      validateMaxLength("Estado", 2)
+    ),
   },
   {
     key: "telefone",
@@ -114,108 +139,89 @@ const fornecedorFormFields: ModalFieldConfig[] = [
   },
   {
     key: "situacao",
-    label: "Situação",
+    label: "Situacao",
     type: "select",
     required: true,
-    options: [
-      { value: "1", label: "Ativo" },
-      { value: "2", label: "Inativo" },
-    ],
+    options: SITUACAO_OPTIONS,
   },
 ];
 
-const toFornecedorPayload = (data: Partial<Fornecedor>, id?: number): Fornecedor => ({
-  idFornecedor: id ?? Number(data.idFornecedor ?? 0),
-  nomeFantasia: String(data.nomeFantasia ?? ""),
-  situacao: Number(data.situacao ?? 1),
-  cnpj: String(data.cnpj ?? ""),
-  nome: String(data.nome ?? ""),
-  logradouro: String(data.logradouro ?? ""),
-  numero: String(data.numero ?? ""),
-  bairro: String(data.bairro ?? ""),
-  cep: String(data.cep ?? ""),
-  telefone: String(data.telefone ?? ""),
-  email: String(data.email ?? ""),
-  cidade: String(data.cidade ?? ""),
-  estado: String(data.estado ?? ""),
-});
+const mapFornecedorRows = (items: Fornecedor[]): FornecedorRow[] => {
+  return items.map((item) => ({
+    ...item,
+    situacaoLabel: getSituacaoLabel(item.situacao),
+  }));
+};
+
+const fetchFornecedorRows = async (): Promise<FornecedorRow[]> => {
+  const items = await fornecedorService.getAll();
+  return mapFornecedorRows(items);
+};
 
 export default function Page() {
-  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
-  const [filteredData, setFilteredData] = useState<Fornecedor[]>([]);
+  const [fornecedores, setFornecedores] = useState<FornecedorRow[]>([]);
+  const [filteredData, setFilteredData] = useState<FornecedorRow[]>([]);
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadFornecedores = async () => {
-    try {
-      setLoading(true);
-      const list = await fornecedorService.getAllData();
-      setFornecedores(list);
-      setFilteredData(list);
-      setError(null);
-    } catch (err) {
-      console.error("Erro ao carregar fornecedores:", err);
-      setFornecedores([]);
-      setFilteredData([]);
-      setError("Erro ao carregar dados dos fornecedores");
-    } finally {
-      setLoading(false);
-    }
+  const refreshFornecedores = async () => {
+    const rows = await fetchFornecedorRows();
+    setFornecedores(rows);
+    setFilteredData(rows);
   };
 
   useEffect(() => {
-    loadFornecedores();
+    const loadFornecedores = async () => {
+      try {
+        setLoading(true);
+        await refreshFornecedores();
+        setError(null);
+      } catch (err) {
+        console.error("Erro ao carregar fornecedores:", err);
+        setFornecedores([]);
+        setFilteredData([]);
+        setError(
+          "Nao foi possivel carregar os fornecedores. Verifique o backend e tente novamente."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadFornecedores();
   }, []);
 
-  // Função para criar novo fornecedor
   const handleCreate = async (novoFornecedorData: Omit<Fornecedor, "idFornecedor">) => {
-    try {
-      const payload = toFornecedorPayload(novoFornecedorData, 0);
-      const created = await fornecedorService.createData(payload);
-      await loadFornecedores();
-      return created;
-    } catch (err) {
-      console.error("Erro ao criar fornecedor:", err);
-      throw err;
-    }
+    await fornecedorService.create(normalizeFornecedorPayload(novoFornecedorData));
+    await refreshFornecedores();
   };
 
-  // Função para atualizar fornecedor
   const handleUpdate = async (id: number, dadosAtualizados: Partial<Fornecedor>) => {
-    try {
-      const payload = toFornecedorPayload(dadosAtualizados, id);
-      const updated = await fornecedorService.updateData(id, payload);
-      await loadFornecedores();
-      return updated;
-    } catch (err) {
-      console.error("Erro ao atualizar fornecedor:", err);
-      throw err;
-    }
+    await fornecedorService.update(
+      id,
+      normalizeFornecedorPayload(dadosAtualizados)
+    );
+    await refreshFornecedores();
   };
 
-  // Função para deletar fornecedor (via alteração de situação)
   const handleDelete = async (id: number) => {
-    try {
-      await fornecedorService.alterarSituacao(id);
-      await loadFornecedores();
-      return;
-    } catch (err) {
-      console.error("Erro ao alterar situação do fornecedor:", err);
-      throw err;
-    }
+    await fornecedorService.alterarSituacao(id);
+    await refreshFornecedores();
   };
 
   if (loading) {
     return <div>Carregando fornecedores...</div>;
   }
 
-  if (error) {
-    return <div>Erro: {error}</div>;
-  }
-
   return (
     <>
+      {error && (
+        <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          {error}
+        </div>
+      )}
+
       <SearchBar
         model={novoFornecedor}
         dados={fornecedores}

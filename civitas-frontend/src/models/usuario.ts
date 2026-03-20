@@ -1,4 +1,4 @@
-export default interface UsuarioDTO {
+﻿export default interface UsuarioDTO {
   id: number;
   cpf: string;
   nome: string;
