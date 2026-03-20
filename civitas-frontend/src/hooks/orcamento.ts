@@ -1,9 +1,9 @@
-import { GenericService } from './generic';
-import OrcamentoDTO from '@/models/orcamento';
+import { GenericService } from "./generic";
+import OrcamentoDTO from "@/models/orcamento";
 
 export class OrcamentoService extends GenericService<OrcamentoDTO> {
   constructor() {
-    super('orcamentos');
+    super("orcamentos");
   }
 }
 

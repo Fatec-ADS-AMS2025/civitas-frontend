@@ -3,7 +3,7 @@ import FornecedorDTO from '@/models/fornecedor';
 
 export class FornecedorService extends GenericService<FornecedorDTO> {
   constructor() {
-    super('fornecedores');
+    super("fornecedores");
   }
 }
 

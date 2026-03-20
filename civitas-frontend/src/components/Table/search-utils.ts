@@ -4,9 +4,9 @@ export type SearchFieldConfig = {
   key: string;
   placeholder: string;
   local: "principal" | "filtro";
-  value?: string;
+  value?: string | number;
   type?: SearchFieldType;
-  options?: { value: string; label: string }[];
+  options?: { value: string | number; label: string }[];
 };
 
 const normalizeText = (value: unknown): string => {
@@ -52,7 +52,7 @@ export const buildInitialAdvancedFilters = (
   fields: SearchFieldConfig[]
 ): Record<string, string> => {
   return fields.reduce<Record<string, string>>((acc, field) => {
-    acc[field.key] = field.value || "";
+    acc[field.key] = String(field.value ?? "");
     return acc;
   }, {});
 };
