@@ -176,6 +176,7 @@ export default function Page() {
   const [solicitaUcQuery, setSolicitaUcQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDespesa, setEditingDespesa] = useState<Despesa | null>(null);
+  const [valuesVisible, setValuesVisible] = useState(false);
 
   const filteredDespesas = useMemo(() => {
     return despesas.filter((despesa) => {
@@ -234,7 +235,7 @@ export default function Page() {
   };
 
   return (
-    <div className="space-y-6">
+   <div className="space-y-6">
       <section className="grid gap-5 xl:grid-cols-3">
         {summaryCards.map((card, index) => (
           <div
@@ -256,15 +257,23 @@ export default function Page() {
             </div>
 
             <div className="relative z-10 mt-5 flex items-center justify-between rounded-2xl bg-black/20 px-4 py-3 backdrop-blur-sm">
-              <span className="tracking-[0.55em] text-lg">* * * * * *</span>
-              <span className="material-symbols-outlined !text-[28px]">visibility_off</span>
+              <span className="tracking-[0.55em] text-lg">
+                {valuesVisible ? formatCurrency(cardValues[index]) : "* * * * * *"}
+              </span>
+              <span
+                className="material-symbols-outlined !text-[28px] cursor-pointer"
+                onClick={() => setValuesVisible(!valuesVisible)}
+              >
+                {valuesVisible ? "visibility_off" : "visibility"}
+              </span>
             </div>
 
             <p className="relative z-10 mt-3 text-sm font-medium opacity-90">
-              {formatCurrency(cardValues[index])}
+              {valuesVisible ? formatCurrency(cardValues[index]) : "* * * * * *"}
             </p>
           </div>
         ))}
+        
       </section>
 
       <section className="rounded-[22px] bg-[#393939] px-4 py-5 text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)] sm:px-5">
