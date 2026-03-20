@@ -3,11 +3,19 @@ import InstituicaoDTO from '@/models/instituicao';
 
 export class InstituicaoService extends GenericService<InstituicaoDTO> {
   constructor() {
-<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
-    super("instituicoes");
-=======
     super('instituicoes');
->>>>>>> dev
+  }
+
+  async getByName(name: string): Promise<InstituicaoDTO[]> {
+    const response = await fetch(`${this.getUrlEndpoint()}nome?name=${encodeURIComponent(name)}`);
+    const payload = await this.handleResponse<InstituicaoDTO[] | { data: InstituicaoDTO[] | null }>(response);
+
+    if (payload && typeof payload === 'object' && 'data' in payload) {
+      return Array.isArray(payload.data) ? payload.data : [];
+    }
+
+    return Array.isArray(payload) ? payload : [];
+    super("instituicoes");
   }
 }
 

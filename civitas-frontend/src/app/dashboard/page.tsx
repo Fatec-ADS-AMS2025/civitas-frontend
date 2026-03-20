@@ -1,8 +1,22 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import { useFinanceiro } from '@/hooks/financeiro'
+
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value);
+};
 
 export default function Dashboard() {
+  const { resumo, loading, error } = useFinanceiro();
+
+  const valorDisponivel = loading || !resumo ? 'Carregando...' : formatCurrency(resumo.saldo);
+  const balanca = loading || !resumo ? 'Carregando...' : formatCurrency(resumo.balanca);
+  const gastosTotais = loading || !resumo ? 'Carregando...' : formatCurrency(resumo.totalDespesas);
+
   return (
     <div className="min-h-screen font-sans">
       {/* Header */}
@@ -22,6 +36,11 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div>
+        {error && (
+          <div className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+            Erro ao carregar resumo financeiro: {error}
+          </div>
+        )}
 
         {/* Top Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full mb-8">
@@ -33,7 +52,7 @@ export default function Dashboard() {
             <div className="relative z-10">
               <h3 className="text-xl font-semibold leading-tight">Valor Disponível</h3>
               <p className="text-sm opacity-90 mb-3">Atualmente:</p>
-              <div className="text-6xl font-bold tracking-widest relative top-[25px]">* * * * * *</div>
+              <div className="text-2xl font-bold tracking-tight relative top-[25px]">{valorDisponivel}</div>
             </div>
             <img
               src="/home.png"
@@ -51,7 +70,7 @@ export default function Dashboard() {
             <div className="relative z-10">
               <h3 className="text-xl font-semibold leading-tight">Balança</h3>
               <p className="text-sm opacity-80 mb-3">Valor disponível - Gastos totais:</p>
-              <div className="text-6xl font-bold tracking-widest relative top-[25px]">* * * * * *</div>
+              <div className="text-2xl font-bold tracking-tight relative top-[25px]">{balanca}</div>
             </div>
             <img src="/balance.png" alt="Ícone balança"
               className="absolute bottom-8 right-2 w-36 rotate-[8deg] opacity-48 grayscale contrast-50 brightness-90 mix-blend-luminosity"
@@ -66,7 +85,7 @@ export default function Dashboard() {
             <div className="relative z-10">
               <h3 className="text-xl font-semibold leading-tight">Gastos Totais</h3>
               <p className="text-sm opacity-90 mb-3">nos últimos 30 dias:</p>
-              <div className="text-6xl font-bold tracking-widest relative top-[25px]">* * * * * *</div>
+              <div className="text-2xl font-bold tracking-tight relative top-[25px]">{gastosTotais}</div>
             </div>
             <img src="/dinheiro.png" alt="Ícone dinheiro"
               className="absolute bottom-11 right-2 w-36 rotate-[8deg] opacity-70 grayscale contrast-75 mix-blend-multiply rotate-[360deg]" />          </div>

@@ -125,6 +125,11 @@ export class GenericService<T> {
     return this.unwrapItem<T>(payload);
   }
 
+  async createData(data: any): Promise<T> {
+    const payload = await this.create(data);
+    return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
+  }
+
   async update(id: number, data: Partial<T>): Promise<T> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "PUT",
@@ -136,6 +141,11 @@ export class GenericService<T> {
 
     const payload = await this.handleResponse(response);
     return this.unwrapItem<T>(payload);
+  }
+
+  async updateData(id: number, data: Partial<T>): Promise<T> {
+    const payload = await this.update(id, data);
+    return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
   }
 
   async delete(id: number): Promise<void> {
@@ -157,6 +167,11 @@ export class GenericService<T> {
 
     const payload = await this.handleResponse(response);
     return this.unwrapItem<T>(payload);
+  }
+
+  async patchData(id: number, data: Partial<T>): Promise<T> {
+    const payload = await this.patch(id, data);
+    return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
   }
 
   async alterarSituacao(id: number): Promise<void> {

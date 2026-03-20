@@ -1,4 +1,3 @@
-<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -11,17 +10,16 @@ import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import InstituicaoDTO from "@/models/instituicao";
-=======
-﻿"use client";
-import React, { useState, useEffect } from "react";
-import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
-import Table from "@/components/Table/table";
+import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
->>>>>>> dev
+import { tipoDespesaService } from "@/hooks/tipoDespesa";
+import InstituicaoDTO from "@/models/instituicao";
+import OrcamentoDTO from "@/models/orcamento";
+import TipoDespesaDTO from "@/models/tipoDespesa";
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import OrcamentoDTO from "@/models/orcamento";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 
-<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
 type Orcamento = OrcamentoDTO;
 type Instituicao = InstituicaoDTO;
 type TipoDespesa = TipoDespesaDTO;
@@ -29,10 +27,6 @@ type OrcamentoRow = Orcamento & {
   instituicaoLabel: string;
   tipoDespesaLabel: string;
 };
-=======
-type Orcamento = OrcamentoDTO & { idInstituicao?: number };
-type ApiOrcamento = Record<string, any>;
->>>>>>> dev
 
 type OrcamentoPageData = {
   orcamentos: Orcamento[];
@@ -42,22 +36,47 @@ type OrcamentoPageData = {
 
 const novoOrcamento = {
   idOrcamento: 0,
-<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
   anoOrcamento: "",
   valorOrcamento: "",
   idInstituicao: "",
   idTipoDespesa: "",
-=======
-  ano: 0,
-  valor: 0,
-  descricao: "",
-  idInstituicao: 0,
->>>>>>> dev
+  valorOrcamento: undefined,
+  idInstituicao: undefined,
+  idTipoDespesa: undefined,
+  situacao: 1,
+};
+
+const validatePositiveInteger = (value: unknown, label: string): string | undefined => {
+  const numericValue = Number(value);
+
+  if (!Number.isInteger(numericValue) || numericValue <= 0) {
+    return `${label} deve ser um numero inteiro maior que 0.`;
+  }
+
+  return undefined;
+};
+
+const validatePositiveNumber = (value: unknown, label: string): string | undefined => {
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return `${label} deve ser maior que 0.`;
+  }
+
+  return undefined;
+};
+
+const columns = [
+  { id: "idOrcamento", label: "ID Orçamento" },
+  { id: "anoOrcamento", label: "Ano" },
+  { id: "valorOrcamento", label: "Valor" },
+  { id: "idInstituicao", label: "ID Instituição" },
+  { id: "idTipoDespesa", label: "ID Tipo Despesa" },
+  { id: "situacao", label: "Situação" },
 };
 
 const columns = [
   { id: "idOrcamento", label: "ID Orcamento" },
-<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
   { id: "anoOrcamento", label: "Ano" },
   { id: "valorOrcamento", label: "Valor" },
   { id: "instituicaoLabel", label: "Instituicao" },
@@ -274,96 +293,152 @@ export default function Page() {
   const handleDelete = async (id: number) => {
     await orcamentoService.delete(id);
     await refreshOrcamentos();
-=======
-  { id: "ano", label: "Ano" },
-  { id: "valor", label: "Valor" },
 ];
 
 const camposConst: FieldConfig[] = [
-  { key: "ano", placeholder: "Ano", local: "principal" },
-  { key: "valor", placeholder: "Valor", local: "principal" },
+  { key: "anoOrcamento", placeholder: "Ano", local: "principal" },
+  { key: "valorOrcamento", placeholder: "Valor", local: "principal" },
+  { key: "idInstituicao", placeholder: "ID Instituição", local: "filtro" },
+  { key: "idTipoDespesa", placeholder: "ID Tipo Despesa", local: "filtro" },
 ];
 
-const orcamentoFormFields: ModalFieldConfig[] = [
-  { key: "idOrcamento", hidden: true },
-  {
-    key: "idInstituicao",
-    label: "ID Instituicao",
-    placeholder: "Digite o ID da instituicao",
-    required: true,
-    type: "number",
-  },
-  {
-    key: "ano",
-    label: "Ano",
-    placeholder: "Digite o ano",
-    required: true,
-    type: "number",
-  },
-  {
-    key: "valor",
-    label: "Valor",
-    placeholder: "Digite o valor do orcamento",
-    required: true,
-    type: "number",
-  },
-];
+const toOrcamentoPayload = (data: Partial<Orcamento>, id?: number): Partial<Orcamento> => {
+  const anoOrcamento = Number(data.anoOrcamento ?? data.ano);
+  const valorOrcamento = Number(data.valorOrcamento ?? data.valor);
+  const idInstituicao = Number(data.idInstituicao);
+  const idTipoDespesa = Number(data.idTipoDespesa);
+
+  return {
+    ...(id !== undefined ? { idOrcamento: id, id } : {}),
+    anoOrcamento,
+    valorOrcamento,
+    idInstituicao,
+    idTipoDespesa,
+    situacao: Number(data.situacao ?? 1),
+  };
+};
 
 const Page = () => {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
+  const [instituicoes, setInstituicoes] = useState<InstituicaoDTO[]>([]);
+  const [tiposDespesa, setTiposDespesa] = useState<TipoDespesaDTO[]>([]);
   const [filteredData, setFilteredData] = useState<Orcamento[]>([]);
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const mapApiOrcamentoToUi = (api: ApiOrcamento): Orcamento => ({
-    idOrcamento: Number(api?.idOrcamento ?? api?.id ?? 0),
-    ano: Number(api?.ano ?? api?.anoOrcamento ?? 0),
-    valor: Number(api?.valor ?? api?.valorOrcamento ?? 0),
-    descricao: api?.descricao ?? "",
-    situacao: api?.situacao !== undefined ? Number(api.situacao) : undefined,
-    idInstituicao: api?.idInstituicao !== undefined ? Number(api.idInstituicao) : 0,
-  });
-
-  const toApiOrcamentoPayload = (data: Partial<Orcamento> & Record<string, any>) => ({
-    idOrcamento: Number(data.idOrcamento ?? 0),
-    anoOrcamento: Number(data.ano ?? data.anoOrcamento ?? 0),
-    valorOrcamento: Number(data.valor ?? data.valorOrcamento ?? 0),
-    idInstituicao: Number(data.idInstituicao ?? 0),
-    descricao: data.descricao ?? "",
-    situacao: data.situacao !== undefined ? Number(data.situacao) : 1,
-  });
+  const orcamentoFormFields: ModalFieldConfig[] = [
+    { key: "idOrcamento", hidden: true },
+    {
+      key: "anoOrcamento",
+      label: "Ano",
+      placeholder: "Digite o ano",
+      required: true,
+      type: "number",
+      validate: (value) => validatePositiveInteger(value, "Ano"),
+    },
+    {
+      key: "valorOrcamento",
+      label: "Valor",
+      placeholder: "Digite o valor do orçamento",
+      required: true,
+      type: "number",
+      validate: (value) => validatePositiveNumber(value, "Valor"),
+    },
+    {
+      key: "idInstituicao",
+      label: "Instituição",
+      placeholder: "Selecione a instituição",
+      required: true,
+      type: "select",
+      validate: (value) => validatePositiveInteger(value, "Instituição"),
+      options: instituicoes.map((item) => ({
+        value: String(item.id),
+        label: `${item.id} - ${item.nome}`,
+      })),
+    },
+    {
+      key: "idTipoDespesa",
+      label: "Tipo de Despesa",
+      placeholder: "Selecione o tipo de despesa",
+      required: true,
+      type: "select",
+      validate: (value) => validatePositiveInteger(value, "Tipo de Despesa"),
+      options: tiposDespesa.map((item) => ({
+        value: String(item.id),
+        label: `${item.id} - ${item.descricao}`,
+      })),
+    },
+    {
+      key: "situacao",
+      label: "Situação",
+      type: "select",
+      required: true,
+      options: [
+        { value: "1", label: "Ativo" },
+        { value: "2", label: "Inativo" },
+      ],
+    },
+  ];
 
   const loadOrcamentos = async () => {
     try {
       setLoading(true);
-      const list = await orcamentoService.getAll();
-      const normalizedList = (list as ApiOrcamento[]).map(mapApiOrcamentoToUi);
-      setOrcamentos(normalizedList);
-      setFilteredData(normalizedList);
+      const [list, instituicoesData, tiposDespesaData] = await Promise.all([
+        orcamentoService.getAllData(),
+        instituicaoService.getAllData(),
+        tipoDespesaService.getAllData(),
+      ]);
+      setOrcamentos(list);
+      setInstituicoes(instituicoesData);
+      setTiposDespesa(tiposDespesaData);
+      setFilteredData(list);
       setError(null);
-      return normalizedList;
     } catch (err) {
-      console.error("Erro ao carregar orcamentos:", err);
+      console.error("Erro ao carregar orçamentos:", err);
       setOrcamentos([]);
+      setInstituicoes([]);
+      setTiposDespesa([]);
       setFilteredData([]);
-      setError("Nao foi possivel carregar orcamentos.");
-      return [];
+      setError("Erro ao carregar dados dos orçamentos");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadOrcamentos();
+    void loadOrcamentos();
   }, []);
 
   const handleCreate = async (novoOrcamentoData: Omit<Orcamento, "idOrcamento">) => {
     try {
-      const payload = toApiOrcamentoPayload({ ...novoOrcamentoData, idOrcamento: 0 });
-      await orcamentoService.create(payload);
-      const list = await loadOrcamentos();
-      return list[list.length - 1];
+      const payload = toOrcamentoPayload(novoOrcamentoData);
+
+      if (!payload.anoOrcamento || payload.anoOrcamento <= 0) {
+        throw new Error("Informe um ano de orçamento valido (maior que 0).");
+      }
+
+      if (!payload.valorOrcamento || payload.valorOrcamento <= 0) {
+        throw new Error("Informe um valor de orçamento valido (maior que 0).");
+      }
+
+      if (!payload.idInstituicao || !payload.idTipoDespesa) {
+        throw new Error("Informe IDs validos para Instituicao e Tipo Despesa (maiores que 0).");
+      }
+
+      const instituicaoExiste = instituicoes.some((item) => item.id === payload.idInstituicao);
+      if (!instituicaoExiste) {
+        throw new Error("A instituição selecionada não existe na base.");
+      }
+
+      const tipoDespesaExiste = tiposDespesa.some((item) => item.id === payload.idTipoDespesa);
+      if (!tipoDespesaExiste) {
+        throw new Error("O tipo de despesa selecionado não existe na base.");
+      }
+
+      const created = await orcamentoService.createData(payload);
+      await loadOrcamentos();
+      return created;
     } catch (err) {
       console.error("Erro ao criar orcamento:", err);
       throw err;
@@ -372,16 +447,33 @@ const Page = () => {
 
   const handleUpdate = async (id: number, dadosAtualizados: Partial<Orcamento>) => {
     try {
-      const atual = orcamentos.find((o) => Number(o.idOrcamento) === Number(id));
-      const payload = toApiOrcamentoPayload({ ...(atual ?? {}), ...dadosAtualizados, idOrcamento: id });
-      const updated = await orcamentoService.update(id, payload);
-      const normalizedUpdated = mapApiOrcamentoToUi(updated as ApiOrcamento);
-      const updatedData = orcamentos.map((o) =>
-        Number(o.idOrcamento) === Number(id) ? normalizedUpdated : o
-      );
-      setOrcamentos(updatedData);
-      setFilteredData(updatedData);
-      return normalizedUpdated;
+      const payload = toOrcamentoPayload(dadosAtualizados, id);
+
+      if (!payload.anoOrcamento || payload.anoOrcamento <= 0) {
+        throw new Error("Informe um ano de orçamento valido (maior que 0).");
+      }
+
+      if (!payload.valorOrcamento || payload.valorOrcamento <= 0) {
+        throw new Error("Informe um valor de orçamento valido (maior que 0).");
+      }
+
+      if (!payload.idInstituicao || !payload.idTipoDespesa) {
+        throw new Error("Informe IDs validos para Instituicao e Tipo Despesa (maiores que 0).");
+      }
+
+      const instituicaoExiste = instituicoes.some((item) => item.id === payload.idInstituicao);
+      if (!instituicaoExiste) {
+        throw new Error("A instituição selecionada não existe na base.");
+      }
+
+      const tipoDespesaExiste = tiposDespesa.some((item) => item.id === payload.idTipoDespesa);
+      if (!tipoDespesaExiste) {
+        throw new Error("O tipo de despesa selecionado não existe na base.");
+      }
+
+      const updated = await orcamentoService.updateData(id, payload);
+      await loadOrcamentos();
+      return updated;
     } catch (err) {
       console.error("Erro ao atualizar orcamento:", err);
       throw err;
@@ -391,25 +483,15 @@ const Page = () => {
   const handleDelete = async (id: number) => {
     try {
       await orcamentoService.delete(id);
-      const updatedData = orcamentos.filter((o) => o.idOrcamento !== id);
-      setOrcamentos(updatedData);
-      setFilteredData(updatedData);
+      await loadOrcamentos();
     } catch (err) {
       console.error("Erro ao deletar orcamento:", err);
       throw err;
     }
->>>>>>> dev
   };
 
   if (loading) {
     return <div>Carregando orcamentos...</div>;
-<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
-=======
-  }
-
-  if (error) {
-    return <div>Erro: {error}</div>;
->>>>>>> dev
   }
 
   return (
@@ -439,10 +521,4 @@ const Page = () => {
       />
     </>
   );
-<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
 }
-=======
-};
-
-export default Page;
->>>>>>> dev

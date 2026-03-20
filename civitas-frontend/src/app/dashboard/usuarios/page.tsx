@@ -11,11 +11,16 @@ type ApiUsuario = Record<string, any>;
 
 const novoUsuario: User = {
   id: 0,
-  nome: "",
   cpf: "",
+  nome: "",
+  rg: "",
+  logradouro: "",
+  numero: "",
   matricula: "",
   cidade: "",
   estado: "",
+  cep: "",
+  bairro: "",
   email: "",
   telefone: "",
   tipo: "Visitante",
@@ -39,7 +44,7 @@ const camposConst: FieldConfig[] = [
   { key: "email", placeholder: "E-mail", local: "filtro" },
   { key: "estado", placeholder: "Estado", local: "filtro" },
   {
-    key: "tipo",
+    key: "tipoUsuario",
     placeholder: "Tipo",
     local: "filtro",
     type: "select",
@@ -60,7 +65,7 @@ const usuarioFormFields: ModalFieldConfig[] = [
   { key: "estado", label: "Estado", placeholder: "UF", required: true },
   { key: "email", label: "E-mail", placeholder: "email@exemplo.com", type: "email" },
   {
-    key: "tipo",
+    key: "tipoUsuario",
     label: "Tipo",
     type: "select",
     required: true,

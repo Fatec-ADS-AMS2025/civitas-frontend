@@ -1,5 +1,7 @@
 export default interface InstituicaoDTO {
   id: number;
+  nome: string;
+  nomeRazaoSocial?: string;
   cnpj: string;
   nome: string;
   logradouro: string;
@@ -12,6 +14,6 @@ export default interface InstituicaoDTO {
   cidade: string;
   estado: string;
   situacao: number;
-  idTipoInstituicao: number;
-  idSecretaria: number;
+  idTipoInstituicao?: number;
+  idSecretaria?: number;
 }

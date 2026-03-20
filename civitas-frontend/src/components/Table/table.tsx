@@ -31,6 +31,8 @@ const Table = ({
   formHiddenFields,
 }: TableProps) => {
 
+  const safeData = Array.isArray(data) ? data : [];
+
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
@@ -86,7 +88,7 @@ const Table = ({
                 </tr>
                 
               ) : (
-                data.map((objeto, i) => (
+                safeData.map((objeto, i) => (
                   <tr key={i}>
                     {columns.map((column) => (
                       <td key={column.id} className="p-3 border-t">
@@ -124,7 +126,7 @@ const Table = ({
           <Form 
             object={selectedContent} 
             name={nomePagina} 
-            camps={data.length > 0 ? Object.keys(data[0]) : []} 
+            camps={safeData.length > 0 ? Object.keys(safeData[0]) : []} 
             type={modalAction} 
             fields={formFields}
             validationSchema={formValidationSchema}

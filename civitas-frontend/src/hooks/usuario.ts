@@ -3,17 +3,20 @@ import UsuarioDTO from "@/models/usuario";
 
 export class UsuarioService extends GenericService<UsuarioDTO> {
   constructor() {
-    super("usuarios");
+    super('usuarios');
   }
 
-  async getByCpf(cpf: string): Promise<UsuarioDTO> {
-    const response = await fetch(`${this.getUrlEndpoint()}/cpf?cpf=${cpf}`);
-    const payload = await this.handleResponse(response);
-    const users = this.unwrapCollection<UsuarioDTO>(payload);
+  async getByCpf(cpf: string): Promise<UsuarioDTO | null> {
+    const response = await fetch(`${this.getUrlEndpoint()}cpf?cpf=${cpf}`);
+    const payload = await this.handleResponse<UsuarioDTO[] | { data: UsuarioDTO[] | null }>(response);
 
-    if (users.length === 0) {
-      throw new Error("Usuário não encontrado");
+    if (payload && typeof payload === 'object' && 'data' in payload) {
+      const users = payload.data;
+      return Array.isArray(users) ? users[0] ?? null : null;
     }
+
+    return Array.isArray(payload) ? payload[0] ?? null : null;
+  }
 
     return users[0];
   }

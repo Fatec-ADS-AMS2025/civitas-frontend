@@ -362,6 +362,7 @@ export default function Page() {
         setCampos={setCampos}
         onCadastrar={handleCreate}
         formFields={instituicaoFormFields}
+        formHiddenFields={["id"]}
       />
 
       <Table
@@ -370,6 +371,7 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={instituicaoFormFields}
+        formHiddenFields={["id"]}
       />
     </>
   );

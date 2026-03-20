@@ -4,18 +4,6 @@ import React, { useEffect, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-import {
-  composeValidators,
-  normalizeSecretariaPayload,
-  validateDigitsLength,
-  validateMaxLength,
-  validateUfCode,
-} from "@/global/formPayload";
-import {
-  getSituacaoLabel,
-  SITUACAO_ATIVO,
-  SITUACAO_OPTIONS,
-} from "@/global/situacao";
 import { secretariaService } from "@/hooks/secretaria";
 import SecretariaDTO from "@/models/secretaria";
 

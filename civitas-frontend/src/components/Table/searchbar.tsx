@@ -1,12 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-<<<<<<< 103-sprint-13---front---aprimoramento-do-formulário-genérico-fk-etapas-já-implementadas-mas-precisa-de-dupla-validação
-=======
 import Modal from "../modal";
 import Form from "../Form/form";
 import type { FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
->>>>>>> dev
 import { usePathname } from "next/navigation";
 import Form, {
   type FormFieldConfig,
@@ -239,7 +236,8 @@ const SearchBar = ({
                 setModalOpen(false);
               } catch (error) {
                 console.error("Erro ao cadastrar:", error);
-                alert("Erro ao cadastrar. Tente novamente.");
+                const message = error instanceof Error ? error.message : "Erro ao cadastrar. Tente novamente.";
+                alert(message);
               }
             }}
           />
