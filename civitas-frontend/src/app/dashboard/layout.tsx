@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Sidebar from '@/components/Sidebar/sidebar';
 import { useRouter } from "next/navigation";
@@ -11,11 +11,52 @@ export default function Layout({
 }>) {
 
   const paiRef = useRef<HTMLDivElement>(null);
-  const [loading, alterLoading] = useState(true);
 
   const router = useRouter();
   const pathname = usePathname() || "/dashboard";
   const parts = pathname.split("/").filter(Boolean);
+  const currentPage = parts[parts.length - 1] ?? "dashboard";
+  const isDespesasPage = pathname === "/dashboard/despesas";
+
+  const pageMeta: Record<string, { title: string; breadcrumbs: string[] }> = {
+    dashboard: {
+      title: "Dashboard",
+      breadcrumbs: ["Home"],
+    },
+    despesas: {
+      title: "Listagem de Despesa",
+      breadcrumbs: ["Home", "Listagem", "Tipo Despesa"],
+    },
+    secretaria: {
+      title: "Secretaria",
+      breadcrumbs: ["Home", "Secretaria"],
+    },
+    instituicoes: {
+      title: "Instituições",
+      breadcrumbs: ["Home", "Instituições"],
+    },
+    fornecedor: {
+      title: "Fornecedor",
+      breadcrumbs: ["Home", "Fornecedor"],
+    },
+    fornecedores: {
+      title: "Fornecedores",
+      breadcrumbs: ["Home", "Fornecedores"],
+    },
+    orcamentos: {
+      title: "Orçamentos",
+      breadcrumbs: ["Home", "Orçamentos"],
+    },
+    usuarios: {
+      title: "Usuários",
+      breadcrumbs: ["Home", "Usuários"],
+    },
+  };
+
+  const currentMeta = pageMeta[currentPage] ?? {
+    title: currentPage,
+    breadcrumbs: parts.map((item) => item.charAt(0).toUpperCase() + item.slice(1)),
+  };
 
   const alterarPagina = (item: string) => {
     const paths = pathname.split("/");

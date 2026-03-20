@@ -25,7 +25,7 @@ const Table = ({
   columns,
   onEdit,
   onDelete,
-  actions = ["edit", "view"],
+  actions,
   formFields,
   formValidationSchema,
   formHiddenFields,
@@ -33,6 +33,7 @@ const Table = ({
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
+  const resolvedActions = actions ?? (onDelete ? ["edit", "view", "delete"] : ["edit", "view"]);
 
   const getIdField = (obj: any): string => {
     if (obj.id !== undefined) return "id";
@@ -134,6 +135,7 @@ const Table = ({
                     Nenhum dado encontrado.
                   </td>
                 </tr>
+                
               ) : (
                 data.map((objeto, i) => {
                   const status = getStatusValue(objeto);

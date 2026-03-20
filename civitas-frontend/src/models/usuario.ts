@@ -1,12 +1,17 @@
-export default interface UsuarioDTO {
+﻿export default interface UsuarioDTO {
   id: number;
-  nome: string;
   cpf: string;
+  nome: string;
+  rg: string;
+  logradouro: string;
+  numero: string;
   matricula: string;
   cidade: string;
   estado: string;
-  email?: string;
-  telefone?: string;
-  situacao?: number;
-  tipo: "Administrador" | "Cidadão" | "Funcionário";
+  cep: string;
+  bairro: string;
+  email: string;
+  senha: string;
+  situacao: number;
+  tipoUsuario: number;
 }
