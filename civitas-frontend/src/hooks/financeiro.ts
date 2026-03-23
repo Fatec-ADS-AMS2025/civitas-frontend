@@ -119,11 +119,11 @@ const safeListRequest = async <T>(request: () => Promise<T[] | null | undefined>
     const response = await request();
     return toArray(response);
   } catch (error) {
-    if (isHttpNotFound(error)) {
-      return [];
+    if (!isHttpNotFound(error)) {
+      console.error('Erro ao carregar lista financeira:', error);
     }
 
-    throw error;
+    return [];
   }
 };
 

@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Modal from "../modal";
-import Form from "../Form/form";
-import type { FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
 import { usePathname } from "next/navigation";
 import Form, {
   type FormFieldConfig,

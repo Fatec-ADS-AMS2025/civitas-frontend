@@ -7,15 +7,21 @@ export class InstituicaoService extends GenericService<InstituicaoDTO> {
   }
 
   async getByName(name: string): Promise<InstituicaoDTO[]> {
-    const response = await fetch(`${this.getUrlEndpoint()}nome?name=${encodeURIComponent(name)}`);
-    const payload = await this.handleResponse<InstituicaoDTO[] | { data: InstituicaoDTO[] | null }>(response);
+    try {
+      const response = await fetch(`${this.getUrlEndpoint()}/nome?name=${encodeURIComponent(name)}`);
+      const payload = await this.handleResponse<
+        InstituicaoDTO[] | { data: InstituicaoDTO[] | null }
+      >(response);
 
-    if (payload && typeof payload === 'object' && 'data' in payload) {
-      return Array.isArray(payload.data) ? payload.data : [];
+      if (payload && typeof payload === 'object' && 'data' in payload) {
+        return Array.isArray(payload.data) ? payload.data : [];
+      }
+
+      return Array.isArray(payload) ? payload : [];
+    } catch (error) {
+      console.error('Erro ao buscar instituicoes por nome:', error);
+      return [];
     }
-
-    return Array.isArray(payload) ? payload : [];
-    super("instituicoes");
   }
 }
 

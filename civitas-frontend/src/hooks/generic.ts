@@ -6,6 +6,9 @@ export interface ResponseEnvelope<T> {
   data?: T | null;
 }
 
+export type ApiEnvelope<T> = ResponseEnvelope<T>;
+export type ApiResponse<T> = ResponseEnvelope<T>;
+
 export interface PaginatedResult<T> {
   items: T[];
   totalRecords: number;
@@ -38,6 +41,10 @@ const isPaginatedResult = <T>(value: unknown): value is PaginatedResult<T> => {
   return isRecord(value) && Array.isArray(value.items);
 };
 
+const isHttpNotFoundError = (error: unknown): boolean => {
+  return error instanceof Error && error.message.includes("HTTP 404");
+};
+
 const toQueryString = (query?: ListQuery): string => {
   const params = new URLSearchParams();
   const mergedQuery = { ...DEFAULT_LIST_QUERY, ...query };
@@ -62,20 +69,20 @@ export class GenericService<T> {
     return `${BASE_URL}/${this.endpoint}`;
   }
 
-  protected async handleResponse(response: Response): Promise<unknown> {
+  protected async handleResponse<R = unknown>(response: Response): Promise<R> {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
-    if (response.status === 204) return undefined;
+    if (response.status === 204) return undefined as R;
 
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
-      return response.json();
+      return (await response.json()) as R;
     }
 
-    return response.text();
+    return (await response.text()) as R;
   }
 
   protected unwrapItem<R>(payload: unknown): R {
@@ -100,16 +107,46 @@ export class GenericService<T> {
     return [];
   }
 
+  protected extractData<R>(payload: unknown): R {
+    if (isResponseEnvelope<R>(payload)) {
+      return payload.data as R;
+    }
+
+    return payload as R;
+  }
+
   async getAll(query?: ListQuery): Promise<T[]> {
     const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
     const payload = await this.handleResponse(response);
     return this.unwrapCollection<T>(payload);
   }
 
+  async getAllData(query?: ListQuery): Promise<T[]> {
+    try {
+      return await this.getAll(query);
+    } catch (error) {
+      console.error(`Erro ao listar ${this.endpoint}:`, error);
+      return [];
+    }
+  }
+
   async getById(id: number): Promise<T> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`);
     const payload = await this.handleResponse(response);
     return this.unwrapItem<T>(payload);
+  }
+
+  async getByIdData(id: number): Promise<T | null> {
+    try {
+      return await this.getById(id);
+    } catch (error) {
+      if (isHttpNotFoundError(error)) {
+        return null;
+      }
+
+      console.error(`Erro ao buscar ${this.endpoint} por ID ${id}:`, error);
+      return null;
+    }
   }
 
   async create(data: unknown): Promise<T> {
@@ -126,8 +163,13 @@ export class GenericService<T> {
   }
 
   async createData(data: any): Promise<T> {
-    const payload = await this.create(data);
-    return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
+    try {
+      const payload = await this.create(data);
+      return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
+    } catch (error) {
+      console.error(`Erro ao criar ${this.endpoint}:`, error);
+      throw error;
+    }
   }
 
   async update(id: number, data: Partial<T>): Promise<T> {
@@ -144,8 +186,13 @@ export class GenericService<T> {
   }
 
   async updateData(id: number, data: Partial<T>): Promise<T> {
-    const payload = await this.update(id, data);
-    return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
+    try {
+      const payload = await this.update(id, data);
+      return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
+    } catch (error) {
+      console.error(`Erro ao atualizar ${this.endpoint} com ID ${id}:`, error);
+      throw error;
+    }
   }
 
   async delete(id: number): Promise<void> {
@@ -170,8 +217,13 @@ export class GenericService<T> {
   }
 
   async patchData(id: number, data: Partial<T>): Promise<T> {
-    const payload = await this.patch(id, data);
-    return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
+    try {
+      const payload = await this.patch(id, data);
+      return this.extractData<T>(payload as unknown as T | ApiEnvelope<T> | ApiResponse<T>);
+    } catch (error) {
+      console.error(`Erro ao atualizar parcialmente ${this.endpoint} com ID ${id}:`, error);
+      throw error;
+    }
   }
 
   async alterarSituacao(id: number): Promise<void> {
