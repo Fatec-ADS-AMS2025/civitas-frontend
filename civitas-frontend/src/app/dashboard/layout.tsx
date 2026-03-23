@@ -16,7 +16,6 @@ export default function Layout({
   const pathname = usePathname() || "/dashboard";
   const parts = pathname.split("/").filter(Boolean);
   const currentPage = parts[parts.length - 1] ?? "dashboard";
-  const isDespesasPage = pathname === "/dashboard/despesas";
 
   const pageMeta: Record<string, { title: string; breadcrumbs: string[] }> = {
     dashboard: {
@@ -32,8 +31,8 @@ export default function Layout({
       breadcrumbs: ["Home", "Secretaria"],
     },
     instituicoes: {
-      title: "Instituições",
-      breadcrumbs: ["Home", "Instituições"],
+      title: "Instituicoes",
+      breadcrumbs: ["Home", "Instituicoes"],
     },
     fornecedor: {
       title: "Fornecedor",
@@ -44,12 +43,16 @@ export default function Layout({
       breadcrumbs: ["Home", "Fornecedores"],
     },
     orcamentos: {
-      title: "Orçamentos",
-      breadcrumbs: ["Home", "Orçamentos"],
+      title: "Orcamentos",
+      breadcrumbs: ["Home", "Orcamentos"],
+    },
+    financeiro: {
+      title: "Financeiro",
+      breadcrumbs: ["Home", "Financeiro"],
     },
     usuarios: {
-      title: "Usuários",
-      breadcrumbs: ["Home", "Usuários"],
+      title: "Usuarios",
+      breadcrumbs: ["Home", "Usuarios"],
     },
   };
 
@@ -87,7 +90,7 @@ export default function Layout({
 
         <div className='mb-6'>
           <h1 className='text-4xl font-bold text-[#004D4D] capitalize'>
-            {parts[parts.length - 1]}
+            {currentMeta.title}
           </h1>
 
           <div className='flex gap-1'>

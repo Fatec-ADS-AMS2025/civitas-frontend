@@ -77,6 +77,37 @@ html {
   }
 }
 
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-loader {
+  --skeleton-base: #e6eef1;
+  --skeleton-highlight: #f7fbfc;
+  --skeleton-shadow: #dbe8ec;
+}
+
+.skeleton-line {
+  background-image: linear-gradient(
+    100deg,
+    var(--skeleton-base) 20%,
+    var(--skeleton-highlight) 42%,
+    var(--skeleton-shadow) 62%,
+    var(--skeleton-base) 80%
+  );
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-card {
+  backdrop-filter: blur(1px);
+}
+
 /* =========================
    ALTO CONTRASTE LIMPO
 ========================= */
@@ -179,6 +210,16 @@ body.high-contrast textarea {
   background: #000 !important;
   color: #fff !important;
   border: 2px solid #fff !important;
+}
+
+body.high-contrast .skeleton-line {
+  background-image: linear-gradient(
+    100deg,
+    #2b2b2b 20%,
+    #4b4b4b 42%,
+    #6b6b6b 62%,
+    #2b2b2b 80%
+  ) !important;
 }
 
 /* imagens bitmap */

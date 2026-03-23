@@ -364,8 +364,8 @@ export default function Form({
 
         if (field.type === 'select') {
             return (
-                <div key={field.key} className='w-full mb-4'>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                <div key={field.key} className='w-full'>
+                    <label className='mb-2 block text-sm font-semibold tracking-[0.01em] text-[#4D5A63]'>
                         {commonProps.label}
                         {commonProps.required && <span className='text-red-500 ml-1'>*</span>}
                     </label>
@@ -376,7 +376,7 @@ export default function Form({
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         aria-invalid={Boolean(commonProps.error)}
                         aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-                        className='w-full px-4 py-3 border-2 border-primary-1 rounded-full bg-white text-gray-700 focus:outline-none disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-200'
+                        className='w-full rounded-2xl border border-[#CFE3E3] bg-white px-4 py-3.5 text-[15px] text-[#22313A] shadow-[0_2px_10px_rgba(0,0,0,0.03)] transition-all duration-200 focus:border-[#58AFAE] focus:outline-none focus:ring-4 focus:ring-[#58AFAE]/20 disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
                     >
                         <option value=''>{field.placeholder ?? commonProps.label}</option>
                         {(field.options ?? []).map((option) => (
@@ -386,7 +386,7 @@ export default function Form({
                         ))}
                     </select>
                     {commonProps.error && (
-                        <p id={commonProps.errorId} className='mt-1 text-sm text-red-600'>
+                        <p id={commonProps.errorId} className='mt-1.5 text-sm font-medium text-red-600'>
                             {commonProps.error}
                         </p>
                     )}
@@ -396,8 +396,8 @@ export default function Form({
 
         if (field.type === 'textarea') {
             return (
-                <div key={field.key} className='w-full mb-4'>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                <div key={field.key} className='w-full'>
+                    <label className='mb-2 block text-sm font-semibold tracking-[0.01em] text-[#4D5A63]'>
                         {commonProps.label}
                         {commonProps.required && <span className='text-red-500 ml-1'>*</span>}
                     </label>
@@ -409,10 +409,10 @@ export default function Form({
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         aria-invalid={Boolean(commonProps.error)}
                         aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-                        className='w-full px-4 py-3 border-2 border-primary-1 rounded-2xl bg-white text-gray-700 focus:outline-none disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-all duration-200 min-h-[120px] resize-none'
+                        className='min-h-[132px] w-full resize-none rounded-2xl border border-[#CFE3E3] bg-white px-4 py-3.5 text-[15px] text-[#22313A] shadow-[0_2px_10px_rgba(0,0,0,0.03)] transition-all duration-200 focus:border-[#58AFAE] focus:outline-none focus:ring-4 focus:ring-[#58AFAE]/20 disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
                     />
                     {commonProps.error && (
-                        <p id={commonProps.errorId} className='mt-1 text-sm text-red-600'>
+                        <p id={commonProps.errorId} className='mt-1.5 text-sm font-medium text-red-600'>
                             {commonProps.error}
                         </p>
                     )}
@@ -439,21 +439,21 @@ export default function Form({
 
     return (
         <form
-            className='flex flex-col w-full max-w-[980px] text-gray-900'
+            className='flex w-full max-w-[1120px] flex-col rounded-[28px] border border-[#E8ECEF] bg-[#FFFDFB] p-5 text-gray-900 shadow-[0_14px_36px_rgba(0,0,0,0.06)] sm:p-7'
             onSubmit={handleSubmit}
             aria-busy={isLoading}
         >
-            <div className='flex flex-col gap-4 pb-5 border-b border-gray-200 md:flex-row md:items-center md:justify-between'>
+            <div className='flex flex-col gap-4 border-b border-[#E8ECEF] pb-6 md:flex-row md:items-center md:justify-between'>
                 <div className='flex flex-col'>
-                    <h1 className='text-4xl font-bold tracking-wide uppercase'>
+                    <h1 className='text-[30px] font-bold uppercase tracking-[0.02em] text-[#1F2A32] sm:text-[36px]'>
                         {mode === 'create' ? 'Cadastro' : `${tipos[mode]} ${name ?? ''}`}
                     </h1>
-                    <p className='text-gray-500 font-medium'>Preencha os campos e CONFIRME.</p>
+                    <p className='font-medium text-[#72808A]'>Preencha os campos e confirme.</p>
                 </div>
 
                 {hasMultipleSteps && (
-                    <div className='flex items-center gap-2 text-primary-1 font-semibold flex-wrap'>
-                        <span className='text-sm text-gray-600'>Etapas:</span>
+                    <div className='flex flex-wrap items-center gap-2 font-semibold text-primary-1'>
+                        <span className='mr-1 text-sm text-[#72808A]'>Etapas:</span>
                         {Array.from({ length: totalSteps }).map((_, index) => {
                             const isActive = index === currentStep
                             const isCompleted = index < currentStep
@@ -466,9 +466,9 @@ export default function Form({
                                         event.preventDefault()
                                         goToStep(index)
                                     }}
-                                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm transition-colors ${isActive || isCompleted
-                                        ? 'border-primary-1 bg-primary-1 text-white'
-                                        : 'border-primary-1 text-primary-1'
+                                    className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm transition-all ${isActive || isCompleted
+                                        ? 'border-[#58AFAE] bg-[#58AFAE] text-white shadow-[0_4px_12px_rgba(88,175,174,0.35)]'
+                                        : 'border-[#BFD9D8] bg-white text-[#58AFAE]'
                                         }`}
                                     aria-label={`Ir para etapa ${index + 1}`}
                                 >
@@ -476,31 +476,31 @@ export default function Form({
                                 </button>
                             )
                         })}
-                        <span className={`px-4 py-1 rounded-full border-2 text-sm ${currentStep === totalSteps - 1 ? 'border-primary-1 bg-primary-1 text-white' : 'border-primary-1 text-primary-1'}`}>
+                        <span className={`rounded-full border px-4 py-1 text-sm ${currentStep === totalSteps - 1 ? 'border-[#58AFAE] bg-[#58AFAE] text-white' : 'border-[#BFD9D8] bg-white text-[#58AFAE]'}`}>
                             CONFIRMAR
                         </span>
                     </div>
                 )}
             </div>
 
-            <div className='grid grid-cols-1 md:grid-cols-12 gap-5 mt-6'>
-                <div className='hidden md:flex md:col-span-4 items-start justify-center bg-gray-50 rounded-2xl p-6 border border-gray-100'>
+            <div className='mt-7 grid grid-cols-1 gap-6 md:grid-cols-12'>
+                <div className='hidden items-start justify-center rounded-[24px] border border-[#E8ECEF] bg-gradient-to-b from-[#F8FCFC] to-[#F4F8F8] p-6 md:col-span-4 md:flex'>
                     <Image src={imgs[mode]} alt={tipos[mode]} className='w-full h-auto max-w-[260px]' width={260} height={260} />
                 </div>
-                <div className='md:col-span-8'>
-                    <p className='text-sm text-gray-500 mb-2'>
+                <div className='rounded-[24px] border border-[#E8ECEF] bg-white p-4 md:col-span-8 md:p-5'>
+                    <p className='mb-3 text-sm font-medium text-[#72808A]'>
                         Etapa {currentStep + 1} de {totalSteps}
                     </p>
-                    <div className={`grid ${currentStepColumns} gap-3`}>
+                    <div className={`grid ${currentStepColumns} gap-4`}>
                         {currentFields.map((field) => renderField(field))}
                     </div>
                 </div>
             </div>
 
-            <div className='mt-6 pt-6 border-t border-gray-200 flex flex-col md:flex-row gap-3'>
+            <div className='mt-7 flex flex-col gap-3 border-t border-[#E8ECEF] pt-6 md:flex-row'>
                 <Button
                     variant='secondary'
-                    className='!w-full !text-base !py-3 !px-6 !font-semibold'
+                    className='!w-full !max-w-none !rounded-2xl !px-6 !py-3.5 !text-base !font-semibold'
                     onClick={onCancel}
                     type='button'
                 >
@@ -510,7 +510,7 @@ export default function Form({
                 {currentStep > 0 && (
                     <Button
                         variant='secondary'
-                        className='!w-full !text-base !py-3 !px-6 !font-semibold'
+                        className='!w-full !max-w-none !rounded-2xl !px-6 !py-3.5 !text-base !font-semibold'
                         onClick={handlePreviousStep}
                         type='button'
                     >
@@ -520,7 +520,7 @@ export default function Form({
 
                 {currentStep < totalSteps - 1 ? (
                     <Button
-                        className='!w-full !text-base !py-3 !px-6 !font-semibold'
+                        className='!w-full !max-w-none !rounded-2xl !px-6 !py-3.5 !text-base !font-semibold'
                         type='button'
                         onClick={(event) => {
                             event.preventDefault()
@@ -531,7 +531,7 @@ export default function Form({
                     </Button>
                 ) : isViewMode ? null : (
                     <Button
-                        className='!w-full !text-base !py-3 !px-6 !font-semibold'
+                        className='!w-full !max-w-none !rounded-2xl !px-6 !py-3.5 !text-base !font-semibold'
                         type='submit'
                         disabled={isLoading}
                     >

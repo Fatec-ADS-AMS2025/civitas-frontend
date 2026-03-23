@@ -34,6 +34,7 @@ const Table = ({
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
   const resolvedActions = actions ?? (onDelete ? ["edit", "view", "delete"] : ["edit", "view"]);
+  const hasActions = resolvedActions.length > 0;
 
   const getIdField = (obj: any): string => {
     if (obj.id !== undefined) return "id";
@@ -57,13 +58,7 @@ const Table = ({
   };
 
   const getStatusValue = (objeto: any) => {
-    return (
-      objeto.status ??
-      objeto.situacao ??
-      objeto.ativo ??
-      objeto.estado ??
-      null
-    );
+    return objeto.status ?? objeto.situacao ?? objeto.ativo ?? objeto.estado ?? null;
   };
 
   const renderStatusBadge = (status: any) => {
@@ -79,8 +74,8 @@ const Table = ({
     } else if (
       normalized === "inativo" ||
       normalized === "false" ||
-      normalized === "não" ||
-      normalized === "nao"
+      normalized === "nao" ||
+      normalized === "n�o"
     ) {
       classes += " bg-[#FF8A8A] text-white";
     } else {
@@ -109,19 +104,19 @@ const Table = ({
   };
 
   return (
-    <div className="mt-5 w-full rounded-[30px] bg-white shadow-[0_10px_24px_rgba(0,0,0,0.04)] ring-1 ring-[#E5F1F2] overflow-hidden">
+    <div className="mt-5 w-full overflow-hidden rounded-[30px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
       <div className="hidden md:block">
         <div className="w-full overflow-x-auto px-5 py-5 lg:px-6">
           <table className="w-full border-separate border-spacing-y-[16px] text-left text-black">
             <thead>
-              <tr className="text-[13px] font-semibold uppercase tracking-[0.04em] text-[#C8C8C8]">
+              <tr className="text-[13px] font-semibold uppercase tracking-[0.04em] text-[#95A5AA]">
                 {columns.map((column) => (
                   <th key={column.id} className="px-6 py-2">
                     {column.label}
                   </th>
                 ))}
                 <th className="px-6 py-2 text-center">Status</th>
-                <th className="px-6 py-2 text-center">Ações</th>
+                {hasActions && <th className="px-6 py-2 text-center">Acoes</th>}
               </tr>
             </thead>
 
@@ -129,13 +124,12 @@ const Table = ({
               {data.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={columns.length + 2}
+                    colSpan={columns.length + 1 + (hasActions ? 1 : 0)}
                     className="rounded-[18px] border border-[#DDEEEF] px-4 py-6 text-center text-[#6B7280]"
                   >
                     Nenhum dado encontrado.
                   </td>
                 </tr>
-                
               ) : (
                 data.map((objeto, i) => {
                   const status = getStatusValue(objeto);
@@ -143,7 +137,7 @@ const Table = ({
                   return (
                     <tr
                       key={i}
-                      className="overflow-hidden rounded-[20px] bg-white shadow-none ring-1 ring-[#D9EFF1]"
+                      className="overflow-hidden rounded-[20px] bg-white shadow-none ring-1 ring-[#D9EFF1] transition-colors hover:bg-[#FBFDFD]"
                     >
                       {columns.map((column, index) => (
                         <td
@@ -156,49 +150,43 @@ const Table = ({
                         </td>
                       ))}
 
-                      <td className="px-6 py-[18px] text-center align-middle">
-                        {renderStatusBadge(status)}
-                      </td>
+                      <td className="px-6 py-[18px] text-center align-middle">{renderStatusBadge(status)}</td>
 
-                      <td className="rounded-r-[20px] px-6 py-[18px] align-middle">
-                        <div className="flex items-center justify-center gap-2">
-                          {actions?.includes("view") && (
-                            <button
-                              type="button"
-                              onClick={() => openModal("view", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#0B6470] transition hover:bg-[#F8FBFB]"
-                            >
-                              <span className="material-symbols-outlined !text-[22px]">
-                                visibility
-                              </span>
-                            </button>
-                          )}
+                      {hasActions && (
+                        <td className="rounded-r-[20px] px-6 py-[18px] align-middle">
+                          <div className="flex items-center justify-center gap-2">
+                            {resolvedActions.includes("view") && (
+                              <button
+                                type="button"
+                                onClick={() => openModal("view", objeto)}
+                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                              >
+                                <span className="material-symbols-outlined !text-[22px]">visibility</span>
+                              </button>
+                            )}
 
-                          {actions?.includes("edit") && (
-                            <button
-                              type="button"
-                              onClick={() => openModal("edit", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#0B6470] transition hover:bg-[#F8FBFB]"
-                            >
-                              <span className="material-symbols-outlined !text-[22px]">
-                                edit
-                              </span>
-                            </button>
-                          )}
+                            {resolvedActions.includes("edit") && (
+                              <button
+                                type="button"
+                                onClick={() => openModal("edit", objeto)}
+                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                              >
+                                <span className="material-symbols-outlined !text-[22px]">edit</span>
+                              </button>
+                            )}
 
-                          {actions?.includes("delete") && (
-                            <button
-                              type="button"
-                              onClick={() => openModal("delete", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
-                            >
-                              <span className="material-symbols-outlined !text-[22px]">
-                                delete
-                              </span>
-                            </button>
-                          )}
-                        </div>
-                      </td>
+                            {resolvedActions.includes("delete") && (
+                              <button
+                                type="button"
+                                onClick={() => openModal("delete", objeto)}
+                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                              >
+                                <span className="material-symbols-outlined !text-[22px]">delete</span>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })
@@ -241,43 +229,39 @@ const Table = ({
                     ))}
                   </div>
 
-                  <div className="mt-4 flex items-center justify-end gap-2">
-                    {actions?.includes("view") && (
-                      <button
-                        type="button"
-                        onClick={() => openModal("view", objeto)}
-                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#0B6470] transition hover:bg-[#F8FBFB]"
-                      >
-                        <span className="material-symbols-outlined !text-[22px]">
-                          visibility
-                        </span>
-                      </button>
-                    )}
+                  {hasActions && (
+                    <div className="mt-4 flex items-center justify-end gap-2">
+                      {resolvedActions.includes("view") && (
+                        <button
+                          type="button"
+                          onClick={() => openModal("view", objeto)}
+                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                        >
+                          <span className="material-symbols-outlined !text-[22px]">visibility</span>
+                        </button>
+                      )}
 
-                    {actions?.includes("edit") && (
-                      <button
-                        type="button"
-                        onClick={() => openModal("edit", objeto)}
-                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#0B6470] transition hover:bg-[#F8FBFB]"
-                      >
-                        <span className="material-symbols-outlined !text-[22px]">
-                          edit
-                        </span>
-                      </button>
-                    )}
+                      {resolvedActions.includes("edit") && (
+                        <button
+                          type="button"
+                          onClick={() => openModal("edit", objeto)}
+                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                        >
+                          <span className="material-symbols-outlined !text-[22px]">edit</span>
+                        </button>
+                      )}
 
-                    {actions?.includes("delete") && (
-                      <button
-                        type="button"
-                        onClick={() => openModal("delete", objeto)}
-                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#EEF3F4] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
-                      >
-                        <span className="material-symbols-outlined !text-[22px]">
-                          delete
-                        </span>
-                      </button>
-                    )}
-                  </div>
+                      {resolvedActions.includes("delete") && (
+                        <button
+                          type="button"
+                          onClick={() => openModal("delete", objeto)}
+                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                        >
+                          <span className="material-symbols-outlined !text-[22px]">delete</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })
@@ -317,8 +301,8 @@ const Table = ({
 
                 closeModal();
               } catch (error) {
-                console.error("Erro na operação:", error);
-                alert("Erro na operação. Tente novamente.");
+                console.error("Erro na operacao:", error);
+                alert("Erro na operacao. Tente novamente.");
               }
             }}
           />
