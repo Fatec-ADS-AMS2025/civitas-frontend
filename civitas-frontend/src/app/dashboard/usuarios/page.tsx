@@ -4,6 +4,7 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { usuarioService } from "@/hooks/usuario";
 import UsuarioDTO from "@/models/usuario";
+import { SkeletonTable } from "@/components/skeleton";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 
 type User = UsuarioDTO;
@@ -241,6 +242,36 @@ const Page = () => {
       throw err;
     }
   };
+
+if (loading) {
+  return <SkeletonTable rows={5} cols={4} />;
+}
+
+if (error) {
+  return <div>Erro: {error}</div>;
+}
+
+return (
+  <>
+    {/* Barra de busca */}
+    <SearchBar 
+      model={novoUsuario} 
+      dados={usuarios} 
+      setDados={setFilteredData} 
+      campos={campos} 
+      setCampos={setCampos}
+      onCadastrar={handleCreate}
+    />
+
+    {/* Tabela de resultados */}
+    <Table 
+      data={filteredData} 
+      columns={columns}
+      onEdit={handleUpdate}
+      onDelete={handleDelete}
+    />
+  </>
+);
 
   if (loading) {
     return <div>Carregando usuarios...</div>;

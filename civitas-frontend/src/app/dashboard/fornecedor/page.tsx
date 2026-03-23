@@ -18,6 +18,10 @@ import {
 } from "@/global/situacao";
 import { fornecedorService } from "@/hooks/fornecedor";
 import FornecedorDTO from "@/models/fornecedor";
+import { SkeletonTable } from "@/components/skeleton";
+// Usando o tipo do service
+
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 
 type Fornecedor = FornecedorDTO;
 type FornecedorRow = Fornecedor & { situacaoLabel: string };
@@ -210,9 +214,9 @@ export default function Page() {
     await refreshFornecedores();
   };
 
-  if (loading) {
-    return <div>Carregando fornecedores...</div>;
-  }
+ if (loading) {
+  return <SkeletonTable rows={5} cols={4} />;
+}
 
   return (
     <>

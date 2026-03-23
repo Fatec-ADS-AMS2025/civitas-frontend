@@ -21,6 +21,10 @@ import { instituicaoService } from "@/hooks/instituicao";
 import { secretariaService } from "@/hooks/secretaria";
 import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
 import InstituicaoDTO from "@/models/instituicao";
+import { SkeletonTable } from "@/components/skeleton";
+// Usando o tipo do service
+
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import SecretariaDTO from "@/models/secretaria";
 import TipoInstituicaoDTO from "@/models/tipoInstituicao";
 
@@ -343,6 +347,8 @@ export default function Page() {
   };
 
   if (loading) {
+  return <SkeletonTable rows={5} cols={4} />;
+}
     return <div>Carregando instituicoes...</div>;
   }
 

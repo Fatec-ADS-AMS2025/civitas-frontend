@@ -15,6 +15,7 @@ import { orcamentoService } from "@/hooks/orcamento";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import InstituicaoDTO from "@/models/instituicao";
 import OrcamentoDTO from "@/models/orcamento";
+import { SkeletonTable } from "@/components/skeleton";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import OrcamentoDTO from "@/models/orcamento";
@@ -491,6 +492,9 @@ const Page = () => {
   };
 
   if (loading) {
+  return <SkeletonTable rows={5} cols={4} />;
+}
+
     return <div>Carregando orcamentos...</div>;
   }
 
