@@ -62,6 +62,13 @@ const defaultItems: SidebarItem[] = [
     href: "/dashboard/despesas",
   },
   {
+    key: "financeiro",
+    label: "Financeiro",
+    icon: "finance_mode",
+    active: false,
+    href: "/dashboard/financeiro",
+  },
+  {
     key: "usuarios",
     label: "Usuários",
     icon: "group",
@@ -154,6 +161,10 @@ export default function Sidebar({
           router.push("/dashboard/despesas");
           break;
         case "7":
+          e.preventDefault();
+          router.push("/dashboard/financeiro");
+          break;
+        case "8":
           e.preventDefault();
           router.push("/dashboard/usuarios");
           break;

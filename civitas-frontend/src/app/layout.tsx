@@ -28,9 +28,9 @@ export default function RootLayout({
           Pular para o conteúdo principal
         </a>
         <AccessibilityMenu />
-        <div className="w-full h-full p-10">
-          <main id="conteudo-principal">{children}</main>
-        </div>
+        <main id="conteudo-principal" className="w-full min-h-screen">
+  {children}
+</main>
       </body>
     </html>
   );

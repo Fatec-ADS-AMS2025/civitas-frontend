@@ -1,5 +1,7 @@
-﻿"use client";
-import React, { useState, useEffect } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { secretariaService } from "@/hooks/secretaria";
@@ -8,10 +10,11 @@ import { SkeletonTable } from "@/components/skeleton";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 
 type Secretaria = SecretariaDTO;
+type SecretariaRow = Secretaria & { situacaoLabel: string };
 
-const novaSecretaria: Secretaria = {
+const novaSecretaria = {
   idSecretaria: 0,
-  situacao: 1,
+  situacao: SITUACAO_ATIVO,
   descricao: "",
   cnpj: "",
   nome: "",
@@ -31,7 +34,7 @@ const columns = [
   { id: "descricao", label: "Descricao" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacao", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const camposConst: FieldConfig[] = [
@@ -43,136 +46,162 @@ const camposConst: FieldConfig[] = [
     placeholder: "Situacao",
     local: "filtro",
     type: "select",
-    options: [
-      { value: "1", label: "Ativo" },
-      { value: "0", label: "Inativo" },
-    ],
+    options: SITUACAO_OPTIONS,
   },
   { key: "cidade", placeholder: "Cidade", local: "filtro" },
 ];
 
 const secretariaFormFields: ModalFieldConfig[] = [
   { key: "idSecretaria", hidden: true },
-  { key: "nome", label: "Nome", placeholder: "Nome da secretaria", required: true },
+  {
+    key: "nome",
+    label: "Nome",
+    placeholder: "Nome da secretaria",
+    required: true,
+  },
   {
     key: "nomeRazaoSocial",
     label: "Razao Social",
     placeholder: "Razao social da secretaria",
     required: true,
   },
-  { key: "cnpj", label: "CNPJ", placeholder: "00.000.000/0000-00", required: true },
-  { key: "descricao", label: "Descricao", placeholder: "Descricao da secretaria", required: true },
-  { key: "logradouro", label: "Logradouro", placeholder: "Rua / Avenida", required: true },
-  { key: "numero", label: "Numero", placeholder: "Numero", required: true },
-  { key: "bairro", label: "Bairro", placeholder: "Bairro", required: true },
-  { key: "cep", label: "CEP", placeholder: "00000-000", required: true },
-  { key: "cidade", label: "Cidade", placeholder: "Cidade", required: true },
-  { key: "estado", label: "Estado", placeholder: "UF", required: true },
-  { key: "telefone", label: "Telefone", placeholder: "(00) 00000-0000", type: "tel" },
+  {
+    key: "cnpj",
+    label: "CNPJ",
+    placeholder: "00.000.000/0000-00",
+    required: true,
+    validate: validateDigitsLength("CNPJ", 14),
+  },
+  {
+    key: "descricao",
+    label: "Descricao",
+    placeholder: "Descricao da secretaria",
+    required: true,
+  },
+  {
+    key: "logradouro",
+    label: "Logradouro",
+    placeholder: "Rua / Avenida",
+    required: true,
+  },
+  {
+    key: "numero",
+    label: "Numero",
+    placeholder: "Numero",
+    required: true,
+    validate: validateMaxLength("Numero", 10),
+  },
+  {
+    key: "bairro",
+    label: "Bairro",
+    placeholder: "Bairro",
+    required: true,
+  },
+  {
+    key: "cep",
+    label: "CEP",
+    placeholder: "00000-000",
+    required: true,
+    validate: validateDigitsLength("CEP", 8),
+  },
+  {
+    key: "cidade",
+    label: "Cidade",
+    placeholder: "Cidade",
+    required: true,
+  },
+  {
+    key: "estado",
+    label: "Estado",
+    placeholder: "UF",
+    required: true,
+    validate: composeValidators(
+      validateUfCode(),
+      validateMaxLength("Estado", 2)
+    ),
+  },
+  {
+    key: "telefone",
+    label: "Telefone",
+    placeholder: "(00) 00000-0000",
+    type: "tel",
+    required: true,
+  },
   {
     key: "email",
     label: "E-mail",
     placeholder: "email@secretaria.gov.br",
     type: "email",
+    required: true,
   },
   {
     key: "situacao",
     label: "Situacao",
     type: "select",
     required: true,
-    options: [
-      { value: "1", label: "Ativo" },
-      { value: "0", label: "Inativo" },
-    ],
+    options: SITUACAO_OPTIONS,
   },
 ];
 
+const mapSecretariaRows = (items: Secretaria[]): SecretariaRow[] => {
+  return items.map((item) => ({
+    ...item,
+    situacaoLabel: getSituacaoLabel(item.situacao),
+  }));
+};
+
+const fetchSecretariaRows = async (): Promise<SecretariaRow[]> => {
+  const items = await secretariaService.getAll();
+  return mapSecretariaRows(items);
+};
+
 export default function Page() {
-  const [secretarias, setSecretarias] = useState<Secretaria[]>([]);
-  const [filteredData, setFilteredData] = useState<Secretaria[]>([]);
+  const [secretarias, setSecretarias] = useState<SecretariaRow[]>([]);
+  const [filteredData, setFilteredData] = useState<SecretariaRow[]>([]);
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const normalizePayload = (data: Partial<Secretaria> & Record<string, any>) => ({
-    idSecretaria: Number(data.idSecretaria ?? 0),
-    situacao: Number(data.situacao ?? 1),
-    descricao: data.descricao ?? "",
-    cnpj: data.cnpj ?? "",
-    nome: data.nome ?? "",
-    logradouro: data.logradouro ?? "",
-    numero: data.numero ?? "",
-    bairro: data.bairro ?? "",
-    cep: data.cep ?? "",
-    nomeRazaoSocial: data.nomeRazaoSocial ?? "",
-    telefone: data.telefone ?? "",
-    email: data.email ?? "",
-    cidade: data.cidade ?? "",
-    estado: data.estado ?? "",
-  });
-
-  const loadSecretarias = async () => {
-    try {
-      setLoading(true);
-      const list = await secretariaService.getAll();
-      setSecretarias(list);
-      setFilteredData(list);
-      setError(null);
-      return list;
-    } catch (err) {
-      console.error("Erro ao carregar secretarias:", err);
-      setSecretarias([]);
-      setFilteredData([]);
-      setError("Nao foi possivel carregar secretarias.");
-      return [];
-    } finally {
-      setLoading(false);
-    }
+  const refreshSecretarias = async () => {
+    const rows = await fetchSecretariaRows();
+    setSecretarias(rows);
+    setFilteredData(rows);
   };
 
   useEffect(() => {
-    loadSecretarias();
+    const loadSecretarias = async () => {
+      try {
+        setLoading(true);
+        await refreshSecretarias();
+        setError(null);
+      } catch (err) {
+        console.error("Erro ao carregar secretarias:", err);
+        setSecretarias([]);
+        setFilteredData([]);
+        setError(
+          "Nao foi possivel carregar as secretarias. Verifique o backend e tente novamente."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadSecretarias();
   }, []);
 
-  const handleCreate = async (novaSecretariaData: Omit<Secretaria, "idSecretaria">) => {
-    try {
-      const payload = normalizePayload({ ...novaSecretariaData, idSecretaria: 0 });
-      await secretariaService.create(payload);
-      const list = await loadSecretarias();
-      return list[list.length - 1];
-    } catch (err) {
-      console.error("Erro ao criar secretaria:", err);
-      throw err;
-    }
+  const handleCreate = async (data: Omit<Secretaria, "idSecretaria">) => {
+    await secretariaService.create(normalizeSecretariaPayload(data));
+    await refreshSecretarias();
   };
 
-  const handleUpdate = async (id: number, dadosAtualizados: Partial<Secretaria>) => {
-    try {
-      const atual = secretarias.find((s) => Number(s.idSecretaria) === Number(id));
-      const payload = normalizePayload({ ...(atual ?? {}), ...dadosAtualizados, idSecretaria: id });
-      const updated = await secretariaService.update(id, payload);
-      const updatedData = secretarias.map((s) =>
-        Number(s.idSecretaria) === Number(id) ? updated : s
-      );
-      setSecretarias(updatedData);
-      setFilteredData(updatedData);
-      return updated;
-    } catch (err) {
-      console.error("Erro ao atualizar secretaria:", err);
-      throw err;
-    }
+  const handleUpdate = async (id: number, data: Partial<Secretaria>) => {
+    await secretariaService.update(id, normalizeSecretariaPayload(data));
+    await refreshSecretarias();
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await secretariaService.delete(id);
-      const updatedData = secretarias.filter((s) => s.idSecretaria !== id);
-      setSecretarias(updatedData);
-      setFilteredData(updatedData);
-    } catch (err) {
-      console.error("Erro ao deletar secretaria:", err);
-      throw err;
-    }
+    await secretariaService.alterarSituacao(id);
+    await refreshSecretarias();
   };
 
   if (loading) {
@@ -201,8 +230,8 @@ export default function Page() {
         data={filteredData}
         columns={columns}
         onEdit={handleUpdate}
-        formFields={secretariaFormFields}
         onDelete={handleDelete}
+        formFields={secretariaFormFields}
       />
     </>
   );
