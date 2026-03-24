@@ -106,8 +106,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen w-full bg-[#FCFCFB] font-sans">
       {/* Header */}
-      <div className="border-b border-[#F0EEE9] bg-white/95 pb-10 pt-2">
-        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-3 px-1 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+      <div className="border-b w-full border-[#F0EEE9] bg-white/95 pb-10 pt-2">
+        <div className="mx-auto flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           <div className="flex-1">
             <h1 className="text-[40px] font-semibold leading-tight text-[#004C57] skeleton sm:text-[48px]">
               Bem-Vindo {"{user}"}
@@ -121,7 +121,7 @@ export default function Dashboard() {
       </div>
 
       <div className="w-full pb-14 pt-8">
-        <div className="mx-auto w-full max-w-[1400px] px-1">
+        <div className="mx-auto w-full px-1">
           <p className="mb-6 pt-2 text-center text-[24px] font-bold text-[#1F1F1F]">
             14 dias até a reposição da verba.
           </p>

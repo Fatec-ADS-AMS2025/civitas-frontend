@@ -59,30 +59,35 @@ const Table = ({
 
   const getStatusValue = (objeto: any) => {
     return objeto.status ?? objeto.situacao ?? objeto.ativo ?? objeto.estado ?? null;
-  };
+  };  
 
   const renderStatusBadge = (status: any) => {
     if (status === null || status === undefined) return null;
+    let statusText = "";
 
     const normalized = String(status).toLowerCase();
 
     let classes =
       "inline-flex min-w-[64px] justify-center rounded-full px-3 py-[6px] text-[11px] font-bold leading-none";
 
-    if (normalized === "ativo" || normalized === "true" || normalized === "sim") {
-      classes += " bg-[#F7A600] text-white";
+    if (normalized === "ativo" || normalized === "true" || normalized === "sim" || normalized === "1") {
+      classes += " bg-green-600 text-white";
+      statusText = "Ativo";
     } else if (
       normalized === "inativo" ||
       normalized === "false" ||
       normalized === "nao" ||
-      normalized === "n�o"
+      normalized === "n�o" ||
+      normalized === "0"
     ) {
-      classes += " bg-[#FF8A8A] text-white";
+      classes += " bg-red-600 text-white";
+      statusText = "Inativo";
     } else {
       classes += " bg-gray-300 text-black";
+      statusText = String(status);
     }
 
-    return <span className={classes}>{String(status)}</span>;
+    return <span className={classes}>{statusText}</span>;
   };
 
   const renderCellValue = (objeto: any, column: Column) => {
@@ -205,7 +210,7 @@ const Table = ({
           ) : (
             data.map((objeto, i) => {
               const status = getStatusValue(objeto);
-
+              
               return (
                 <div
                   key={i}

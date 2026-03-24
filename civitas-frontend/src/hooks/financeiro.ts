@@ -283,6 +283,9 @@ export class FinanceiroService {
 
     // Merge with current record to avoid breaking required fields when updating only part of a despesa.
     const current = await despesaService.getByIdData(id);
+    if (!current) {
+      throw new Error(`Despesa ${id} nao encontrada.`);
+    }
 
     const numeroDocumento = payload.numeroDocumento?.trim() || current.numeroDocumento || `DESPESA-${id}`;
     const uc = payload.uc?.trim() || current.uc || '';

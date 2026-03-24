@@ -48,13 +48,16 @@ export default function AccessibilityMenu() {
     <div
       aria-label="Menu de acessibilidade"
       className="
-        fixed right-[18px] top-[14px] z-[9999]
+        fixed right-[14px] top-[88px] z-[9999]
+        lg:right-[18px] lg:top-[96px]
         flex flex-col items-center
         w-[46px]
         rounded-[999px]
         bg-[#FF981F]
         px-[6px] py-[8px]
-        shadow-[0_4px_10px_rgba(0,0,0,0.18)]
+        border border-[#F2A94D]
+        shadow-[0_10px_20px_rgba(0,0,0,0.18)]
+        backdrop-blur-[2px]
       "
     >
       <button

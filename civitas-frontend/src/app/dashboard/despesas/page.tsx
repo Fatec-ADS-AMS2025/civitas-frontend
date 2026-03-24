@@ -180,9 +180,10 @@ export default function Page() {
 
   const filteredDespesas = useMemo(() => {
     return despesas.filter((despesa) => {
+      const descricao = despesa.descricao ?? "";
       const matchesDescricao =
         descricaoQuery.trim().length === 0 ||
-        despesa.descricao.toLowerCase().includes(descricaoQuery.toLowerCase());
+        descricao.toLowerCase().includes(descricaoQuery.toLowerCase());
 
       const matchesSolicitaUc =
         solicitaUcQuery.trim().length === 0 ||
@@ -194,7 +195,7 @@ export default function Page() {
     });
   }, [despesas, descricaoQuery, solicitaUcQuery]);
 
-  const totalGastos = filteredDespesas.reduce((acc, despesa) => acc + despesa.valor, 0);
+  const totalGastos = filteredDespesas.reduce((acc, despesa) => acc + (despesa.valor ?? 0), 0);
   const saldoDisponivel = 185000 - totalGastos;
   const balanca = saldoDisponivel - totalGastos;
 
@@ -346,16 +347,16 @@ export default function Page() {
                 filteredDespesas.map((despesa) => (
                   <tr key={despesa.id} className="border-b border-gray-200 last:border-b-0">
                     <td className="px-8 py-5 text-sm text-gray-700">{String(despesa.id).padStart(2, "0")}</td>
-                    <td className="px-8 py-5 text-sm text-gray-800">{despesa.descricao}</td>
+                    <td className="px-8 py-5 text-sm text-gray-800">{despesa.descricao ?? "-"}</td>
                     <td className="px-8 py-5 text-sm text-gray-700">{despesa.solicitaUc ? "Sim" : "Não"}</td>
-                    <td className="px-8 py-5 text-sm text-gray-700">{formatCurrency(despesa.valor)}</td>
+                    <td className="px-8 py-5 text-sm text-gray-700">{formatCurrency(despesa.valor ?? 0)}</td>
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
                         <button
                           type="button"
                           onClick={() => setEditingDespesa(despesa)}
                           className="text-gray-800 transition-colors hover:text-secundary-1 cursor-pointer"
-                          aria-label={`Editar despesa ${despesa.descricao}`}
+                          aria-label={`Editar despesa ${despesa.descricao ?? "-"}`}
                         >
                           <span className="material-symbols-outlined !text-[20px]">edit_square</span>
                         </button>
@@ -363,7 +364,7 @@ export default function Page() {
                           type="button"
                           onClick={() => handleDelete(despesa.id)}
                           className="text-gray-800 transition-colors hover:text-red-600 cursor-pointer"
-                          aria-label={`Excluir despesa ${despesa.descricao}`}
+                          aria-label={`Excluir despesa ${despesa.descricao ?? "-"}`}
                         >
                           <span className="material-symbols-outlined !text-[20px]">delete</span>
                         </button>
@@ -414,3 +415,5 @@ export default function Page() {
     </div>
   );
 }
+
+
