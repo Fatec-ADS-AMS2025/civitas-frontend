@@ -59,7 +59,17 @@ const Table = ({
 
   const getStatusValue = (objeto: any) => {
     return objeto.status ?? objeto.situacao ?? objeto.ativo ?? objeto.estado ?? null;
-  };  
+  };
+
+  const isStatusColumn = (columnId: string) => {
+    const normalized = columnId.toLowerCase();
+    return (
+      normalized === "status" ||
+      normalized === "statuslabel" ||
+      normalized === "situacao" ||
+      normalized === "situacaolabel"
+    );
+  };
 
   const renderStatusBadge = (status: any) => {
     if (status === null || status === undefined) return null;
@@ -91,6 +101,15 @@ const Table = ({
   };
 
   const renderCellValue = (objeto: any, column: Column) => {
+    if (isStatusColumn(column.id)) {
+      const statusValue =
+        objeto[column.id] !== undefined && objeto[column.id] !== null && objeto[column.id] !== ""
+          ? objeto[column.id]
+          : getStatusValue(objeto);
+
+      return renderStatusBadge(statusValue) ?? "-";
+    }
+
     const value = objeto[column.id];
 
     if (value === null || value === undefined || value === "") {
@@ -120,7 +139,6 @@ const Table = ({
                     {column.label}
                   </th>
                 ))}
-                <th className="px-6 py-2 text-center">Status</th>
                 {hasActions && <th className="px-6 py-2 text-center">Acoes</th>}
               </tr>
             </thead>
@@ -129,7 +147,7 @@ const Table = ({
               {data.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={columns.length + 1 + (hasActions ? 1 : 0)}
+                    colSpan={columns.length + (hasActions ? 1 : 0)}
                     className="rounded-[18px] border border-[#DDEEEF] px-4 py-6 text-center text-[#6B7280]"
                   >
                     Nenhum dado encontrado.
@@ -137,8 +155,6 @@ const Table = ({
                 </tr>
               ) : (
                 data.map((objeto, i) => {
-                  const status = getStatusValue(objeto);
-
                   return (
                     <tr
                       key={i}
@@ -154,8 +170,6 @@ const Table = ({
                           {renderCellValue(objeto, column)}
                         </td>
                       ))}
-
-                      <td className="px-6 py-[18px] text-center align-middle">{renderStatusBadge(status)}</td>
 
                       {hasActions && (
                         <td className="rounded-r-[20px] px-6 py-[18px] align-middle">
@@ -209,7 +223,7 @@ const Table = ({
             </div>
           ) : (
             data.map((objeto, i) => {
-              const status = getStatusValue(objeto);
+              const statusColumn = columns.find((column) => isStatusColumn(column.id));
               
               return (
                 <div
@@ -218,11 +232,14 @@ const Table = ({
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div>{columns[0] && renderCellValue(objeto, columns[0])}</div>
-                    <div>{renderStatusBadge(status)}</div>
+                    <div>{statusColumn && renderCellValue(objeto, statusColumn)}</div>
                   </div>
 
                   <div className="space-y-2">
-                    {columns.slice(1).map((column) => (
+                    {columns
+                      .slice(1)
+                      .filter((column) => !isStatusColumn(column.id))
+                      .map((column) => (
                       <div key={column.id} className="flex flex-col">
                         <span className="text-xs font-semibold uppercase tracking-wide text-[#B8B8B8]">
                           {column.label}

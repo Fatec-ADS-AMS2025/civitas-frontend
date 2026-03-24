@@ -52,6 +52,7 @@ const columns = [
   { id: "estado", label: "Estado" },
   { id: "email", label: "E-mail" },
   { id: "tipoUsuarioLabel", label: "Tipo" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const camposConst: FieldConfig[] = [
