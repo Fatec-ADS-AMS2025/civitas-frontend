@@ -7,11 +7,11 @@ type SkeletonProps = {
 
 export function Skeleton({ lines = 5, height = 40 }: SkeletonProps) {
   return (
-    <div className="w-full animate-pulse space-y-3">
+    <div className="skeleton-loader w-full space-y-3">
       {Array.from({ length: lines }).map((_, index) => (
         <div
           key={index}
-          className="bg-gray-300 rounded-md"
+          className="skeleton-line rounded-[12px]"
           style={{ height: `${height}px` }}
         />
       ))}
@@ -19,27 +19,24 @@ export function Skeleton({ lines = 5, height = 40 }: SkeletonProps) {
   );
 }
 
-// Skeleton específico para tabelas (CRUD)
+// Skeleton especifico para tabelas (CRUD)
 export function SkeletonTable({ rows = 5, cols = 4 }) {
   return (
-    <div className="w-full animate-pulse space-y-4">
-      
-      {/* Cabeçalho */}
+    <div className="skeleton-loader w-full space-y-4">
       <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
         {Array.from({ length: cols }).map((_, i) => (
-          <div key={i} className="h-6 bg-gray-400 rounded-md" />
+          <div key={i} className="skeleton-line h-6 rounded-[10px]" />
         ))}
       </div>
 
-      {/* Linhas */}
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div
           key={rowIndex}
-          className="grid gap-4"
+          className="skeleton-card grid gap-4 rounded-[16px] border border-[#E6EFF1] bg-white p-4"
           style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
         >
           {Array.from({ length: cols }).map((_, colIndex) => (
-            <div key={colIndex} className="h-8 bg-gray-300 rounded-md" />
+            <div key={colIndex} className="skeleton-line h-8 rounded-[10px]" />
           ))}
         </div>
       ))}
@@ -47,15 +44,18 @@ export function SkeletonTable({ rows = 5, cols = 4 }) {
   );
 }
 
-// Skeleton para formulário
+// Skeleton para formulario
 export function SkeletonForm() {
   return (
-    <div className="w-full animate-pulse space-y-4">
-      <div className="h-10 bg-gray-300 rounded-md" />
-      <div className="h-10 bg-gray-300 rounded-md" />
-      <div className="h-10 bg-gray-300 rounded-md" />
-      <div className="h-10 bg-gray-300 rounded-md" />
-      <div className="h-12 bg-gray-400 rounded-md w-32" />
+    <div className="skeleton-loader w-full space-y-4">
+      <div className="skeleton-line h-5 w-40 rounded-[10px]" />
+      <div className="skeleton-card space-y-3 rounded-[16px] border border-[#E6EFF1] bg-white p-4">
+        <div className="skeleton-line h-11 rounded-[12px]" />
+        <div className="skeleton-line h-11 rounded-[12px]" />
+        <div className="skeleton-line h-11 rounded-[12px]" />
+        <div className="skeleton-line h-11 rounded-[12px]" />
+      </div>
+      <div className="skeleton-line h-11 w-36 rounded-[12px]" />
     </div>
   );
 }

@@ -7,18 +7,22 @@ export class UsuarioService extends GenericService<UsuarioDTO> {
   }
 
   async getByCpf(cpf: string): Promise<UsuarioDTO | null> {
-    const response = await fetch(`${this.getUrlEndpoint()}cpf?cpf=${cpf}`);
-    const payload = await this.handleResponse<UsuarioDTO[] | { data: UsuarioDTO[] | null }>(response);
+    try {
+      const response = await fetch(`${this.getUrlEndpoint()}/cpf?cpf=${encodeURIComponent(cpf)}`);
+      const payload = await this.handleResponse<UsuarioDTO[] | { data: UsuarioDTO[] | null }>(
+        response
+      );
 
-    if (payload && typeof payload === 'object' && 'data' in payload) {
-      const users = payload.data;
-      return Array.isArray(users) ? users[0] ?? null : null;
+      if (payload && typeof payload === 'object' && 'data' in payload) {
+        const users = payload.data;
+        return Array.isArray(users) ? users[0] ?? null : null;
+      }
+
+      return Array.isArray(payload) ? payload[0] ?? null : null;
+    } catch (error) {
+      console.error('Erro ao buscar usuario por CPF:', error);
+      return null;
     }
-
-    return Array.isArray(payload) ? payload[0] ?? null : null;
-  }
-
-    return users[0];
   }
 }
 

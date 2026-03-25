@@ -182,7 +182,7 @@ export default function Sidebar({
       <aside
         aria-label="Sidebar"
         className="group hidden sm:flex flex-col justify-between items-stretch bg-secundary-1 text-tertialy-1 rounded-2xl overflow-hidden select-none transition-all 
-          duration-200 ease-out w-18 hover:w-64 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4"
+          duration-200 ease-out w-[76px] xl:hover:w-56 2xl:hover:w-60 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4"
         style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
       >
         <div className="pt-6 pb-4 px-3 flex flex-col gap-6">
@@ -194,7 +194,7 @@ export default function Sidebar({
                 className="object-contain size-full"
               />
             </div>
-            <div className="ml-1 text-2xl font-semibold text-tertialy-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="ml-1 text-2xl font-semibold text-tertialy-1 opacity-0 xl:group-hover:opacity-100 transition-opacity duration-200">
               Civitas
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function Sidebar({
                   </div>
 
                   <div
-                    className={`flex-1 text-base truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                    className={`flex-1 text-base truncate opacity-0 xl:group-hover:opacity-100 transition-opacity duration-200
                       ${isActive ? "text-white opacity-100" : "font-semibold"}`}
                   >
                     {it.label}
@@ -266,7 +266,7 @@ export default function Sidebar({
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-secundary-1">
               <span className="material-symbols-outlined">person</span>
             </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="opacity-0 xl:group-hover:opacity-100 transition-opacity duration-200">
               Perfil
             </div>
           </button>

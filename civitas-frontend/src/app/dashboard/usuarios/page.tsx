@@ -1,14 +1,30 @@
-﻿"use client";
-import React, { useState, useEffect } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-import { usuarioService } from "@/hooks/usuario";
-import UsuarioDTO from "@/models/usuario";
 import { SkeletonTable } from "@/components/skeleton";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import { usuarioService } from "@/hooks/usuario";
+import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
+import UsuarioDTO from "@/models/usuario";
 
 type User = UsuarioDTO;
-type ApiUsuario = Record<string, any>;
+type UserRow = User & {
+  tipoUsuarioLabel: string;
+  situacaoLabel: string;
+};
+
+const TIPO_USUARIO_OPTIONS = [
+  { value: 1, label: "Visitante" },
+  { value: 2, label: "Administrador" },
+  { value: 3, label: "Funcionario" },
+];
+
+const getTipoUsuarioLabel = (value: number | null | undefined): string => {
+  const item = TIPO_USUARIO_OPTIONS.find((option) => option.value === value);
+  return item?.label ?? "Visitante";
+};
 
 const novoUsuario: User = {
   id: 0,
@@ -23,8 +39,9 @@ const novoUsuario: User = {
   cep: "",
   bairro: "",
   email: "",
-  telefone: "",
-  tipo: "Visitante",
+  senha: "",
+  situacao: SITUACAO_ATIVO,
+  tipoUsuario: 1,
 };
 
 const columns = [
@@ -34,7 +51,8 @@ const columns = [
   { id: "cidade", label: "Cidade" },
   { id: "estado", label: "Estado" },
   { id: "email", label: "E-mail" },
-  { id: "tipo", label: "Tipo" },
+  { id: "tipoUsuarioLabel", label: "Tipo" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const camposConst: FieldConfig[] = [
@@ -49,11 +67,14 @@ const camposConst: FieldConfig[] = [
     placeholder: "Tipo",
     local: "filtro",
     type: "select",
-    options: [
-      { value: "Administrador", label: "Administrador" },
-      { value: "Visitante", label: "Visitante" },
-      { value: "Funcionario", label: "Funcionario" },
-    ],
+    options: TIPO_USUARIO_OPTIONS,
+  },
+  {
+    key: "situacao",
+    placeholder: "Situacao",
+    local: "filtro",
+    type: "select",
+    options: SITUACAO_OPTIONS,
   },
 ];
 
@@ -61,116 +82,98 @@ const usuarioFormFields: ModalFieldConfig[] = [
   { key: "id", hidden: true },
   { key: "nome", label: "Nome", placeholder: "Nome completo", required: true },
   { key: "cpf", label: "CPF", placeholder: "000.000.000-00", required: true },
+  { key: "rg", label: "RG", placeholder: "RG", required: true },
   { key: "matricula", label: "Matricula", placeholder: "MAT-0000", required: true },
+  { key: "logradouro", label: "Logradouro", placeholder: "Rua / Avenida", required: true },
+  { key: "numero", label: "Numero", placeholder: "Numero", required: true },
+  { key: "bairro", label: "Bairro", placeholder: "Bairro", required: true },
+  { key: "cep", label: "CEP", placeholder: "00000-000", required: true },
   { key: "cidade", label: "Cidade", placeholder: "Cidade", required: true },
   { key: "estado", label: "Estado", placeholder: "UF", required: true },
-  { key: "email", label: "E-mail", placeholder: "email@exemplo.com", type: "email" },
+  { key: "email", label: "E-mail", placeholder: "email@exemplo.com", type: "email", required: true },
+  { key: "senha", label: "Senha", placeholder: "Senha", type: "password", required: true },
   {
     key: "tipoUsuario",
     label: "Tipo",
     type: "select",
     required: true,
-    options: [
-      { value: "Administrador", label: "Administrador" },
-      { value: "Visitante", label: "Visitante" },
-      { value: "Funcionario", label: "Funcionario" },
-    ],
+    options: TIPO_USUARIO_OPTIONS,
+  },
+  {
+    key: "situacao",
+    label: "Situacao",
+    type: "select",
+    required: true,
+    options: SITUACAO_OPTIONS,
   },
 ];
 
-const resolveUserId = (api: ApiUsuario): number => {
-  const rawId = api?.id ?? api?.idUsuario ?? api?.usuarioId ?? api?.id_usuario ?? 0;
-  const id = Number(rawId);
-  return Number.isFinite(id) ? id : 0;
+const toNumber = (value: unknown, fallback: number): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const mapUsuarioToRow = (api: Partial<User>): UserRow => {
+  const tipoUsuario = toNumber(api.tipoUsuario, 1);
+  const situacao = toNumber(api.situacao, SITUACAO_ATIVO);
+
+  return {
+    id: toNumber(api.id, 0),
+    cpf: String(api.cpf ?? ""),
+    nome: String(api.nome ?? ""),
+    rg: String(api.rg ?? ""),
+    logradouro: String(api.logradouro ?? ""),
+    numero: String(api.numero ?? ""),
+    matricula: String(api.matricula ?? ""),
+    cidade: String(api.cidade ?? ""),
+    estado: String(api.estado ?? ""),
+    cep: String(api.cep ?? ""),
+    bairro: String(api.bairro ?? ""),
+    email: String(api.email ?? ""),
+    senha: String(api.senha ?? ""),
+    situacao,
+    tipoUsuario,
+    tipoUsuarioLabel: getTipoUsuarioLabel(tipoUsuario),
+    situacaoLabel: getSituacaoLabel(situacao),
+  };
+};
+
+const toApiUsuarioPayload = (data: Partial<User>, base?: Partial<User>): User => {
+  return {
+    id: Number(data.id ?? base?.id ?? 0),
+    cpf: String(data.cpf ?? base?.cpf ?? ""),
+    nome: String(data.nome ?? base?.nome ?? ""),
+    rg: String(data.rg ?? base?.rg ?? ""),
+    logradouro: String(data.logradouro ?? base?.logradouro ?? ""),
+    numero: String(data.numero ?? base?.numero ?? ""),
+    matricula: String(data.matricula ?? base?.matricula ?? ""),
+    cidade: String(data.cidade ?? base?.cidade ?? ""),
+    estado: String(data.estado ?? base?.estado ?? ""),
+    cep: String(data.cep ?? base?.cep ?? ""),
+    bairro: String(data.bairro ?? base?.bairro ?? ""),
+    email: String(data.email ?? base?.email ?? ""),
+    senha: String(data.senha ?? base?.senha ?? ""),
+    situacao: toNumber(data.situacao ?? base?.situacao, SITUACAO_ATIVO),
+    tipoUsuario: toNumber(data.tipoUsuario ?? base?.tipoUsuario, 1),
+  };
 };
 
 const Page = () => {
-  const [usuarios, setUsuarios] = useState<User[]>([]);
-  const [filteredData, setFilteredData] = useState<User[]>([]);
+  const [usuarios, setUsuarios] = useState<UserRow[]>([]);
+  const [filteredData, setFilteredData] = useState<UserRow[]>([]);
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const mapApiUsuarioToUser = (api: ApiUsuario): User => {
-    const tipoRaw = api?.tipo ?? api?.tipoUsuario;
-
-    const tipoMapNumero: Record<number, User["tipo"]> = {
-      1: "Visitante",
-      2: "Administrador",
-      3: "Funcionario",
-    };
-
-    const tipoMapString: Record<string, User["tipo"]> = {
-      VISITANTE: "Visitante",
-      ADMINISTRADOR: "Administrador",
-      FUNCIONARIO: "Funcionario",
-      Visitante: "Visitante",
-      Administrador: "Administrador",
-      Funcionario: "Funcionario",
-    };
-
-    let tipoNormalizado: User["tipo"] = "Visitante";
-
-    if (typeof tipoRaw === "number") {
-      tipoNormalizado = tipoMapNumero[tipoRaw] ?? "Visitante";
-    } else if (typeof tipoRaw === "string") {
-      tipoNormalizado = tipoMapString[tipoRaw] ?? "Visitante";
-    }
-
-    return {
-      id: resolveUserId(api),
-      nome: api?.nome ?? "",
-      cpf: api?.cpf ?? "",
-      matricula: api?.matricula ?? "",
-      cidade: api?.cidade ?? "",
-      estado: api?.estado ?? "",
-      email: api?.email ?? "",
-      telefone: api?.telefone ?? "",
-      situacao: Number(api?.situacao ?? 1),
-      tipo: tipoNormalizado,
-    };
-  };
-
-  const toApiUsuarioPayload = (
-    data: Partial<User> & Record<string, any>,
-    base: ApiUsuario = {}
-  ) => {
-    const tipoMap: Record<User["tipo"], number> = {
-      Visitante: 1,
-      Administrador: 2,
-      Funcionario: 3,
-    };
-
-    const tipoSelecionado = (data.tipo as User["tipo"]) ?? mapApiUsuarioToUser(base).tipo;
-
-    return {
-      id: Number(data.id ?? base.id ?? base.idUsuario ?? 0),
-      cpf: data.cpf ?? base.cpf ?? "",
-      nome: data.nome ?? base.nome ?? "",
-      rg: data.rg ?? base.rg ?? "",
-      logradouro: data.logradouro ?? base.logradouro ?? "",
-      numero: data.numero ?? base.numero ?? "",
-      cidade: data.cidade ?? base.cidade ?? "",
-      estado: data.estado ?? base.estado ?? "",
-      cep: data.cep ?? base.cep ?? "",
-      bairro: data.bairro ?? base.bairro ?? "",
-      email: data.email ?? base.email ?? "",
-      senha: data.senha ?? base.senha ?? "",
-      matricula: data.matricula ?? base.matricula ?? "",
-      situacao: Number(data.situacao ?? base.situacao ?? 1),
-      tipoUsuario: tipoMap[tipoSelecionado],
-    };
-  };
 
   const loadUsuarios = async () => {
     try {
       setLoading(true);
       const list = await usuarioService.getAll();
-      const normalizedList = (list as ApiUsuario[]).map(mapApiUsuarioToUser);
-      setUsuarios(normalizedList);
-      setFilteredData(normalizedList);
+      const rows = list.map(mapUsuarioToRow);
+      setUsuarios(rows);
+      setFilteredData(rows);
       setError(null);
-      return normalizedList;
+      return rows;
     } catch (err) {
       console.error("Erro ao carregar usuarios:", err);
       setUsuarios([]);
@@ -183,108 +186,38 @@ const Page = () => {
   };
 
   useEffect(() => {
-    loadUsuarios();
+    void loadUsuarios();
   }, []);
 
   const handleCreate = async (novoUsuarioData: Omit<User, "id">) => {
-    try {
-      const payload = toApiUsuarioPayload(novoUsuarioData as any);
-      await usuarioService.create(payload);
-
-      // Recarrega da API para garantir que o novo registro venha com ID real.
-      const listaAtualizada = await loadUsuarios();
-      const criado = listaAtualizada.find(
-        (u) =>
-          u.cpf === (novoUsuarioData.cpf ?? "") &&
-          u.matricula === (novoUsuarioData.matricula ?? "")
-      );
-
-      return criado ?? listaAtualizada[listaAtualizada.length - 1];
-    } catch (err) {
-      console.error("Erro ao criar usuario:", err);
-      throw err;
-    }
+    const payload = toApiUsuarioPayload(novoUsuarioData);
+    await usuarioService.create(payload);
+    await loadUsuarios();
   };
 
   const handleUpdate = async (id: number, dadosAtualizados: Partial<User>) => {
-    try {
-      const idNumerico = Number(id);
-      if (!Number.isFinite(idNumerico) || idNumerico <= 0) {
-        throw new Error("ID de usuario invalido para atualizacao.");
-      }
+    const current = usuarios.find((item) => item.id === id);
+    const payload = toApiUsuarioPayload({ ...dadosAtualizados, id }, current);
 
-      const usuarioApiAtual = (await usuarioService.getById(idNumerico)) as unknown as ApiUsuario;
-      const payload = toApiUsuarioPayload({ ...dadosAtualizados, id: idNumerico } as any, usuarioApiAtual);
-
-      const updated = await usuarioService.update(idNumerico, payload);
-      const normalizedUpdated = mapApiUsuarioToUser(updated as ApiUsuario);
-
-      const updatedData = usuarios.map((u) =>
-        Number(u.id) === idNumerico ? normalizedUpdated : u
-      );
-      setUsuarios(updatedData);
-      setFilteredData(updatedData);
-      return normalizedUpdated;
-    } catch (err) {
-      console.error("Erro ao atualizar usuario:", err);
-      throw err;
-    }
+    await usuarioService.update(id, payload);
+    await loadUsuarios();
   };
 
   const handleDelete = async (id: number) => {
-    try {
-      await usuarioService.delete(id);
-      const updatedData = usuarios.filter((u) => u.id !== id);
-      setUsuarios(updatedData);
-      setFilteredData(updatedData);
-    } catch (err) {
-      console.error("Erro ao deletar usuario:", err);
-      throw err;
-    }
+    await usuarioService.delete(id);
+    await loadUsuarios();
   };
 
-if (loading) {
-  return <SkeletonTable rows={5} cols={4} />;
-}
-
-if (error) {
-  return <div>Erro: {error}</div>;
-}
-
-return (
-  <>
-    {/* Barra de busca */}
-    <SearchBar 
-      model={novoUsuario} 
-      dados={usuarios} 
-      setDados={setFilteredData} 
-      campos={campos} 
-      setCampos={setCampos}
-      onCadastrar={handleCreate}
-    />
-
-    {/* Tabela de resultados */}
-    <Table 
-      data={filteredData} 
-      columns={columns}
-      onEdit={handleUpdate}
-      onDelete={handleDelete}
-    />
-  </>
-);
-
   if (loading) {
-    return <div>Carregando usuarios...</div>;
+    return <SkeletonTable rows={5} cols={4} />;
+  }
+
+  if (error) {
+    return <div>Erro: {error}</div>;
   }
 
   return (
     <>
-      {error && (
-        <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
-          {error}
-        </div>
-      )}
-
       <SearchBar
         model={novoUsuario}
         dados={usuarios}

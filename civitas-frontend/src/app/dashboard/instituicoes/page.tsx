@@ -21,12 +21,9 @@ import { instituicaoService } from "@/hooks/instituicao";
 import { secretariaService } from "@/hooks/secretaria";
 import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
 import InstituicaoDTO from "@/models/instituicao";
-import { SkeletonTable } from "@/components/skeleton";
-// Usando o tipo do service
-
-import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import SecretariaDTO from "@/models/secretaria";
 import TipoInstituicaoDTO from "@/models/tipoInstituicao";
+import { SkeletonTable } from "@/components/skeleton";
 
 type Instituicao = InstituicaoDTO;
 type Secretaria = SecretariaDTO;
@@ -103,7 +100,7 @@ const buildInstituicaoCampos = (
   ];
 };
 
-const buildLookupLabel = (label: string, situacao: number): string => {
+const buildLookupLabel = (label: string, situacao?: number): string => {
   if (situacao === SITUACAO_INATIVO) {
     return `${label} (Inativo)`;
   }
@@ -126,16 +123,23 @@ const mapInstituicaoRows = (
     ])
   );
 
-  return instituicoes.map((instituicao) => ({
-    ...instituicao,
-    situacaoLabel: getSituacaoLabel(instituicao.situacao),
-    secretariaLabel:
-      secretariaMap.get(instituicao.idSecretaria) ??
-      `Secretaria #${instituicao.idSecretaria}`,
-    tipoInstituicaoLabel:
-      tipoMap.get(instituicao.idTipoInstituicao) ??
-      `Tipo #${instituicao.idTipoInstituicao}`,
-  }));
+  return instituicoes.map((instituicao) => {
+    const secretariaId = instituicao.idSecretaria;
+    const tipoInstituicaoId = instituicao.idTipoInstituicao;
+
+    return {
+      ...instituicao,
+      situacaoLabel: getSituacaoLabel(instituicao.situacao),
+      secretariaLabel:
+        secretariaId !== undefined
+          ? secretariaMap.get(secretariaId) ?? `Secretaria #${secretariaId}`
+          : "Secretaria nao informada",
+      tipoInstituicaoLabel:
+        tipoInstituicaoId !== undefined
+          ? tipoMap.get(tipoInstituicaoId) ?? `Tipo #${tipoInstituicaoId}`
+          : "Tipo nao informado",
+    };
+  });
 };
 
 const fetchInstituicaoPageData = async (): Promise<InstituicaoPageData> => {
@@ -347,9 +351,7 @@ export default function Page() {
   };
 
   if (loading) {
-  return <SkeletonTable rows={5} cols={4} />;
-}
-    return <div>Carregando instituicoes...</div>;
+    return <SkeletonTable rows={5} cols={4} />;
   }
 
   return (

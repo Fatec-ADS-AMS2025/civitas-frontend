@@ -21,8 +21,6 @@ import FornecedorDTO from "@/models/fornecedor";
 import { SkeletonTable } from "@/components/skeleton";
 // Usando o tipo do service
 
-import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-
 type Fornecedor = FornecedorDTO;
 type FornecedorRow = Fornecedor & { situacaoLabel: string };
 

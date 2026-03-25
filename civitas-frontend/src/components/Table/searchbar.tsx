@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Modal from "../modal";
-import Form from "../Form/form";
-import type { FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
 import { usePathname } from "next/navigation";
 import Form, {
   type FormFieldConfig,
@@ -136,7 +133,7 @@ const SearchBar = ({
           key={field.key}
           value={fieldValue}
           onChange={(e) => handleAdvancedChange(field.key, e.target.value)}
-          className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black"
+          className="w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
           onKeyDown={handleFieldKeyDown}
         >
           <option value="">{field.placeholder}</option>
@@ -157,16 +154,16 @@ const SearchBar = ({
         placeholder={field.placeholder}
         onChange={(e) => handleAdvancedChange(field.key, e.target.value)}
         onKeyDown={handleFieldKeyDown}
-        className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+        className="w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] placeholder-[#97A6AE] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
       />
     );
   };
 
   return (
-    <div className="bg-[#393939] rounded-xl p-5 shadow-lg w-full flex flex-col gap-4 skeleton">
+    <div className="skeleton flex w-full flex-col gap-4 rounded-[24px] border border-[#E4EEF0] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
       <div>
-        <p className="text-white text-base">Busca:</p>
-        <p className="text-sm text-gray-400 -mt-1">Busca global + filtros avancados</p>
+        <p className="text-base font-semibold text-[#1F2A32]">Busca</p>
+        <p className="-mt-1 text-sm text-[#8FA0A8]">Busca global + filtros avancados</p>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
@@ -175,7 +172,7 @@ const SearchBar = ({
           value={globalQuery}
           placeholder={globalPlaceholder}
           onChange={(e) => setGlobalQuery(e.target.value)}
-          className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+          className="w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] placeholder-[#97A6AE] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
         />
 
         <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
@@ -183,7 +180,7 @@ const SearchBar = ({
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#58AFAE] px-5 py-2.5 font-semibold text-white transition hover:brightness-95 sm:w-auto"
             >
               <span className="material-symbols-outlined text-white text-base">add</span>
               Cadastrar
@@ -194,9 +191,9 @@ const SearchBar = ({
             <button
               type="button"
               onClick={toggleAdvanced}
-              className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
             >
-              <span className="material-symbols-outlined text-white text-base">
+              <span className="material-symbols-outlined text-[#1F2A32] text-base">
                 filter_alt
               </span>
               {showAdvanced ? "Ocultar" : "Filtrar"}
@@ -206,12 +203,12 @@ const SearchBar = ({
       </div>
 
       {showAdvanced && hasAnyField && (
-        <div className="flex flex-col md:flex-row md:items-center gap-3 border-t border-gray-600 pt-4 animate-fadeIn">
+        <div className="animate-fadeIn flex flex-col gap-3 border-t border-[#E5EEF0] pt-4 md:flex-row md:items-center">
           {campos.map((field) => renderField(field))}
           <button
             type="button"
             onClick={clearFilters}
-            className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full transition w-full md:w-auto"
+            className="w-full rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] md:w-auto"
           >
             Limpar
           </button>

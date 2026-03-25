@@ -4,10 +4,21 @@ import React, { useEffect, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
+import { SkeletonTable } from "@/components/skeleton";
+import {
+  composeValidators,
+  normalizeSecretariaPayload,
+  validateDigitsLength,
+  validateMaxLength,
+  validateUfCode,
+} from "@/global/formPayload";
+import {
+  getSituacaoLabel,
+  SITUACAO_ATIVO,
+  SITUACAO_OPTIONS,
+} from "@/global/situacao";
 import { secretariaService } from "@/hooks/secretaria";
 import SecretariaDTO from "@/models/secretaria";
-import { SkeletonTable } from "@/components/skeleton";
-import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 
 type Secretaria = SecretariaDTO;
 type SecretariaRow = Secretaria & { situacaoLabel: string };
@@ -115,10 +126,7 @@ const secretariaFormFields: ModalFieldConfig[] = [
     label: "Estado",
     placeholder: "UF",
     required: true,
-    validate: composeValidators(
-      validateUfCode(),
-      validateMaxLength("Estado", 2)
-    ),
+    validate: composeValidators(validateUfCode(), validateMaxLength("Estado", 2)),
   },
   {
     key: "telefone",
@@ -178,9 +186,7 @@ export default function Page() {
         console.error("Erro ao carregar secretarias:", err);
         setSecretarias([]);
         setFilteredData([]);
-        setError(
-          "Nao foi possivel carregar as secretarias. Verifique o backend e tente novamente."
-        );
+        setError("Nao foi possivel carregar as secretarias. Verifique o backend e tente novamente.");
       } finally {
         setLoading(false);
       }
@@ -205,8 +211,8 @@ export default function Page() {
   };
 
   if (loading) {
-  return <SkeletonTable rows={5} cols={4} />;
-}
+    return <SkeletonTable rows={5} cols={4} />;
+  }
 
   return (
     <>

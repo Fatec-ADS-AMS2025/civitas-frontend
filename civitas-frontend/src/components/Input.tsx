@@ -15,11 +15,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       : undefined;
 
     return (
-      <div className="w-full mb-4">
+      <div className="w-full">
         {label && (
           <label
             htmlFor={stableInputId}
-            className="block text-sm font-medium text-gray-700 mb-2 capitalize"
+            className="mb-2 block text-sm font-semibold capitalize tracking-[0.01em] text-[#4D5A63]"
           >
             {label}
             {props.required && <span className="text-red-500 ml-1">*</span>}
@@ -30,25 +30,28 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           id={stableInputId}
           className={`
             w-full
-            px-4 py-3
-            border-2 border-primary-1
-            rounded-full
+            rounded-2xl
+            border border-[#CFE3E3]
             bg-white
-            text-gray-700
+            px-4 py-3.5
+            text-[15px] text-[#22313A]
+            shadow-[0_2px_10px_rgba(0,0,0,0.03)]
+            focus:border-[#58AFAE]
             focus:outline-none
-            focus:ring-2 focus:ring-primary-1
-            disabled:bg-gray-200
-            disabled:text-gray-400
+            focus:ring-4 focus:ring-[#58AFAE]/20
+            disabled:bg-[#F4F6F8]
+            disabled:text-[#9AA5AD]
             disabled:cursor-not-allowed
-            disabled:placeholder:text-gray-300
+            disabled:border-[#E3E7EA]
+            disabled:placeholder:text-[#AAB3BA]
             transition-all duration-200
-            ${error ? 'border-red-500 bg-red-50 focus:border-red-500 focus:bg-red-50' : ''}
+            ${error ? 'border-red-400 bg-red-50 focus:border-red-500 focus:bg-red-50 focus:ring-red-200' : ''}
             ${className}
           `.trim().replace(/\s+/g, ' ')}
           {...props}
         />
         {error && (
-          <p id={errorId} className="mt-1 text-sm text-red-600">
+          <p id={errorId} className="mt-1.5 text-sm font-medium text-red-600">
             {error}
           </p>
         )}

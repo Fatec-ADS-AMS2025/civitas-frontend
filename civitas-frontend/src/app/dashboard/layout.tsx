@@ -16,7 +16,6 @@ export default function Layout({
   const pathname = usePathname() || "/dashboard";
   const parts = pathname.split("/").filter(Boolean);
   const currentPage = parts[parts.length - 1] ?? "dashboard";
-  const isDespesasPage = pathname === "/dashboard/despesas";
 
   const pageMeta: Record<string, { title: string; breadcrumbs: string[] }> = {
     dashboard: {
@@ -32,8 +31,8 @@ export default function Layout({
       breadcrumbs: ["Home", "Secretaria"],
     },
     instituicoes: {
-      title: "Instituições",
-      breadcrumbs: ["Home", "Instituições"],
+      title: "Instituicoes",
+      breadcrumbs: ["Home", "Instituicoes"],
     },
     fornecedor: {
       title: "Fornecedor",
@@ -44,12 +43,16 @@ export default function Layout({
       breadcrumbs: ["Home", "Fornecedores"],
     },
     orcamentos: {
-      title: "Orçamentos",
-      breadcrumbs: ["Home", "Orçamentos"],
+      title: "Orcamentos",
+      breadcrumbs: ["Home", "Orcamentos"],
+    },
+    financeiro: {
+      title: "Financeiro",
+      breadcrumbs: ["Home", "Financeiro"],
     },
     usuarios: {
-      title: "Usuários",
-      breadcrumbs: ["Home", "Usuários"],
+      title: "Usuarios",
+      breadcrumbs: ["Home", "Usuarios"],
     },
   };
 
@@ -76,37 +79,39 @@ export default function Layout({
   }
 
   return (
-    <div className="flex w-full min-h-screen">
+    <div className="flex w-full min-h-screen bg-[#F8FAFA]">
 
       <Sidebar />
 
       <div
         ref={paiRef}
-        className="flex-1 w-[calc(100%-80px)] p-6 sm:ml-[80px]"
+        className="w-full flex-1 sm:ml-[82px]"
       >
+        <div className="mx-auto w-full max-w-[1680px] px-4 pb-8 pt-6 lg:px-7 2xl:px-10">
+          <div className='mb-7'>
+            <h1 className='text-[34px] font-bold text-[#004D4D] capitalize lg:text-[38px]'>
+              {currentMeta.title}
+            </h1>
 
-        <div className='mb-6'>
-          <h1 className='text-4xl font-bold text-[#004D4D] capitalize'>
-            {parts[parts.length - 1]}
-          </h1>
+            <div className='mt-1 flex flex-wrap gap-1'>
+              {parts.map((item, index) => (
+                <span
+                  key={index}
+                  onClick={() => alterarPagina(item)}
+                  className='text-sm text-gray-500 capitalize opacity-80 transition-all duration-300 cursor-pointer'
+                >
+                  {item}
+                  {index < parts.length - 1 && " > "}
+                </span>
+              ))}
+            </div>
 
-          <div className='flex gap-1'>
-            {parts.map((item, index) => (
-              <span
-                key={index}
-                onClick={() => alterarPagina(item)}
-                className='text-sm text-gray-500 mt-1 capitalize opacity-80 transition-all duration-300 cursor-pointer'
-              >
-                {item}
-                {index < parts.length - 1 && " > "}
-              </span>
-            ))}
           </div>
 
+          <div className='w-full'>
+            {children}
+          </div>
         </div>
-
-        {children}
-
       </div>
 
     </div>

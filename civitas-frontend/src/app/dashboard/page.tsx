@@ -104,12 +104,12 @@ export default function Dashboard() {
   const othersPercentage = Math.max(0, 100 - healthPercentage - secretariaPercentage - reformasPercentage);
 
   return (
-    <div className="min-h-screen w-full font-sans">
+    <div className="min-h-screen w-full bg-[#FCFCFB] font-sans">
       {/* Header */}
-      <div className="bg-white border-gray-200 pb-10">
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+      <div className="border-b w-full border-[#F0EEE9] bg-white/95 pb-10 pt-2">
+        <div className="mx-auto flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           <div className="flex-1">
-            <h1 className="text-[48px] font-semibold leading-tight text-[#004C57] skeleton">
+            <h1 className="text-[40px] font-semibold leading-tight text-[#004C57] skeleton sm:text-[48px]">
               Bem-Vindo {"{user}"}
             </h1>
 
@@ -120,13 +120,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="min-h-screen w-full bg-white pr-1">
-        <div className="w-full max-w-none px-0">
-          <p className="mb-3 pt-2 text-center text-[24px] font-bold text-[#1F1F1F]">
+      <div className="w-full pb-14 pt-8">
+        <div className="mx-auto w-full px-1">
+          <p className="mb-6 pt-2 text-center text-[24px] font-bold text-[#1F1F1F]">
             14 dias até a reposição da verba.
           </p>
 
-          <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             <TopCard
               title="Valor Disponível"
               subtitle="Saldo Atualizado:"
@@ -160,7 +160,7 @@ export default function Dashboard() {
             />
           </div>
 
-          <div className="mt-4 grid w-full grid-cols-1 gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="mt-8 grid w-full grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
             <section className="rounded-[28px] bg-[#FFFDFB] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] ring-1 ring-[#EFE8DE]">
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex gap-1 text-[#C8C1B6]">
@@ -241,7 +241,7 @@ export default function Dashboard() {
             </section>
           </div>
 
-          <div className="mt-5 grid w-full grid-cols-1 gap-5 xl:grid-cols-2">
+          <div className="mt-8 grid w-full grid-cols-1 gap-6 xl:grid-cols-2">
             <InfoCard
               badge="PREVISÃO DO MÊS"
               title="Gastos previstos para esse mês:"
@@ -260,7 +260,7 @@ export default function Dashboard() {
             />
           </div>
 
-          <div className="mt-5 grid w-full grid-cols-1 gap-5 xl:grid-cols-2">
+          <div className="mt-8 grid w-full grid-cols-1 gap-6 xl:grid-cols-2">
             <article className="relative overflow-hidden rounded-[30px] bg-[#FFFDFB] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.06)] ring-1 ring-[#ECE6DD]">
               <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#F7F4EF]" />
               <div className="relative z-10 flex gap-1 text-[#C9C2B7]">
