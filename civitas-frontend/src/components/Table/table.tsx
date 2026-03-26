@@ -4,23 +4,52 @@ import Modal from "../modal";
 import type { FieldConfig as ModalFieldConfig, FormMode, ValidationFn } from "../Form/form";
 import { usePathname } from "next/navigation";
 
+type TableRow = object;
+
 type Column = {
   id: string;
   label: string;
 };
 
-type TableProps = {
-  data: any[];
+export type TablePaginationConfig = {
+  currentPage: number;
+  totalPages: number;
+  totalRecords: number;
+  pageSize: number;
+  pageSizeOptions?: number[];
+  onPageChange: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
+};
+
+type BaseTableProps<T extends TableRow> = {
+  data: T[];
   columns: Column[];
   actions?: string[];
-  onEdit?: (id: number, data: any) => Promise<any>;
+  onEdit?: (id: number, data: Partial<T> & Record<string, unknown>) => Promise<unknown>;
   onDelete?: (id: number) => Promise<void>;
   formFields?: ModalFieldConfig[];
   formValidationSchema?: Record<string, ValidationFn>;
   formHiddenFields?: string[];
 };
 
-const Table = ({
+export type TableProps<T extends TableRow> = BaseTableProps<T> &
+  (
+    | {
+        paginationEnabled: true;
+        pagination: TablePaginationConfig;
+      }
+    | {
+        paginationEnabled?: false;
+        pagination?: TablePaginationConfig;
+      }
+  );
+
+const resolvePageSizeOptions = (pagination: TablePaginationConfig): number[] => {
+  const options = pagination.pageSizeOptions ?? [];
+  return Array.from(new Set([pagination.pageSize, ...options])).sort((a, b) => a - b);
+};
+
+const Table = <T extends TableRow,>({
   data,
   columns,
   onEdit,
@@ -29,25 +58,44 @@ const Table = ({
   formFields,
   formValidationSchema,
   formHiddenFields,
-}: TableProps) => {
+  paginationEnabled,
+  pagination,
+}: TableProps<T>) => {
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
   const resolvedActions = actions ?? (onDelete ? ["edit", "view", "delete"] : ["edit", "view"]);
   const hasActions = resolvedActions.length > 0;
 
-  const getIdField = (obj: any): string => {
-    if (obj.id !== undefined) return "id";
-    if (obj.idSecretaria !== undefined) return "idSecretaria";
-    if (obj.idFornecedor !== undefined) return "idFornecedor";
-    if (obj.idOrcamento !== undefined) return "idOrcamento";
+  const [modalAction, setModalAction] = useState<FormMode | null>(null);
+  const [selectedContent, setSelectedContent] = useState<T | null>(null);
+
+  const toRecord = (value: T): Record<string, unknown> => value as Record<string, unknown>;
+
+  const getIdField = (obj: T): string => {
+    const record = toRecord(obj);
+
+    if (record.id !== undefined) return "id";
+    if (record.idSecretaria !== undefined) return "idSecretaria";
+    if (record.idFornecedor !== undefined) return "idFornecedor";
+    if (record.idOrcamento !== undefined) return "idOrcamento";
     return "id";
   };
 
-  const [modalAction, setModalAction] = useState<FormMode | null>(null);
-  const [selectedContent, setSelectedContent] = useState<any | null>(null);
+  const getResolvedId = (obj: T): number => {
+    const record = toRecord(obj);
+    const idField = getIdField(obj);
+    const rawValue = record[idField];
+    const resolvedId = typeof rawValue === "number" ? rawValue : Number(rawValue);
 
-  const openModal = (action: FormMode, objeto: any) => {
+    if (!Number.isFinite(resolvedId)) {
+      throw new Error("ID invalido para a operacao.");
+    }
+
+    return resolvedId;
+  };
+
+  const openModal = (action: FormMode, objeto: T) => {
     setSelectedContent(objeto);
     setModalAction(action);
   };
@@ -57,8 +105,9 @@ const Table = ({
     setSelectedContent(null);
   };
 
-  const getStatusValue = (objeto: any) => {
-    return objeto.status ?? objeto.situacao ?? objeto.ativo ?? objeto.estado ?? null;
+  const getStatusValue = (objeto: T) => {
+    const record = toRecord(objeto);
+    return record.status ?? record.situacao ?? record.ativo ?? record.estado ?? null;
   };
 
   const isStatusColumn = (columnId: string) => {
@@ -71,7 +120,7 @@ const Table = ({
     );
   };
 
-  const renderStatusBadge = (status: any) => {
+  const renderStatusBadge = (status: unknown) => {
     if (status === null || status === undefined) return null;
     let statusText = "";
 
@@ -87,7 +136,7 @@ const Table = ({
       normalized === "inativo" ||
       normalized === "false" ||
       normalized === "nao" ||
-      normalized === "n�o" ||
+      normalized === "nï¿½o" ||
       normalized === "0"
     ) {
       classes += " bg-red-600 text-white";
@@ -100,17 +149,19 @@ const Table = ({
     return <span className={classes}>{statusText}</span>;
   };
 
-  const renderCellValue = (objeto: any, column: Column) => {
+  const renderCellValue = (objeto: T, column: Column) => {
+    const record = toRecord(objeto);
+
     if (isStatusColumn(column.id)) {
       const statusValue =
-        objeto[column.id] !== undefined && objeto[column.id] !== null && objeto[column.id] !== ""
-          ? objeto[column.id]
+        record[column.id] !== undefined && record[column.id] !== null && record[column.id] !== ""
+          ? record[column.id]
           : getStatusValue(objeto);
 
       return renderStatusBadge(statusValue) ?? "-";
     }
 
-    const value = objeto[column.id];
+    const value = record[column.id];
 
     if (value === null || value === undefined || value === "") {
       return "-";
@@ -125,6 +176,67 @@ const Table = ({
     }
 
     return String(value);
+  };
+
+  const renderPagination = () => {
+    if (!paginationEnabled || !pagination) {
+      return null;
+    }
+
+    const displayCurrentPage = Math.max(pagination.currentPage, 1);
+    const displayTotalPages = Math.max(pagination.totalPages, 1);
+    const canGoPrevious = displayCurrentPage > 1;
+    const canGoNext = displayCurrentPage < displayTotalPages;
+    const pageSizeOptions = resolvePageSizeOptions(pagination);
+
+    return (
+      <div className="border-t border-[#E5EEF0] px-5 py-4 lg:px-6">
+        <div className="flex flex-col gap-3 text-sm text-[#6B7280] md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+            <span>{pagination.totalRecords} registros</span>
+            <span className="inline-flex items-center rounded-full bg-[#F3F9FA] px-3 py-1 font-medium text-[#0B6470]">
+              Pagina {displayCurrentPage} de {displayTotalPages}
+            </span>
+
+            {pagination.onPageSizeChange && pageSizeOptions.length > 0 && (
+              <label className="flex items-center gap-2">
+                <span>Tamanho</span>
+                <select
+                  value={pagination.pageSize}
+                  onChange={(event) => pagination.onPageSizeChange?.(Number(event.target.value))}
+                  className="rounded-2xl border border-[#D5E3E6] bg-white px-3 py-2 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
+                >
+                  {pageSizeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => pagination.onPageChange(displayCurrentPage - 1)}
+              disabled={!canGoPrevious}
+              className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              onClick={() => pagination.onPageChange(displayCurrentPage + 1)}
+              disabled={!canGoNext}
+              className="rounded-2xl bg-[#58AFAE] px-4 py-2 font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Proxima
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -154,61 +266,59 @@ const Table = ({
                   </td>
                 </tr>
               ) : (
-                data.map((objeto, i) => {
-                  return (
-                    <tr
-                      key={i}
-                      className="overflow-hidden rounded-[20px] bg-white shadow-none ring-1 ring-[#D9EFF1] transition-colors hover:bg-[#FBFDFD]"
-                    >
-                      {columns.map((column, index) => (
-                        <td
-                          key={column.id}
-                          className={`px-6 py-[18px] align-middle text-[15px] font-medium text-[#333333] ${
-                            index === 0 ? "rounded-l-[20px]" : ""
-                          }`}
-                        >
-                          {renderCellValue(objeto, column)}
-                        </td>
-                      ))}
+                data.map((objeto, index) => (
+                  <tr
+                    key={index}
+                    className="overflow-hidden rounded-[20px] bg-white shadow-none ring-1 ring-[#D9EFF1] transition-colors hover:bg-[#FBFDFD]"
+                  >
+                    {columns.map((column, columnIndex) => (
+                      <td
+                        key={column.id}
+                        className={`px-6 py-[18px] align-middle text-[15px] font-medium text-[#333333] ${
+                          columnIndex === 0 ? "rounded-l-[20px]" : ""
+                        }`}
+                      >
+                        {renderCellValue(objeto, column)}
+                      </td>
+                    ))}
 
-                      {hasActions && (
-                        <td className="rounded-r-[20px] px-6 py-[18px] align-middle">
-                          <div className="flex items-center justify-center gap-2">
-                            {resolvedActions.includes("view") && (
-                              <button
-                                type="button"
-                                onClick={() => openModal("view", objeto)}
-                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
-                              >
-                                <span className="material-symbols-outlined !text-[22px]">visibility</span>
-                              </button>
-                            )}
+                    {hasActions && (
+                      <td className="rounded-r-[20px] px-6 py-[18px] align-middle">
+                        <div className="flex items-center justify-center gap-2">
+                          {resolvedActions.includes("view") && (
+                            <button
+                              type="button"
+                              onClick={() => openModal("view", objeto)}
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                            >
+                              <span className="material-symbols-outlined !text-[22px]">visibility</span>
+                            </button>
+                          )}
 
-                            {resolvedActions.includes("edit") && (
-                              <button
-                                type="button"
-                                onClick={() => openModal("edit", objeto)}
-                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
-                              >
-                                <span className="material-symbols-outlined !text-[22px]">edit</span>
-                              </button>
-                            )}
+                          {resolvedActions.includes("edit") && (
+                            <button
+                              type="button"
+                              onClick={() => openModal("edit", objeto)}
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                            >
+                              <span className="material-symbols-outlined !text-[22px]">edit</span>
+                            </button>
+                          )}
 
-                            {resolvedActions.includes("delete") && (
-                              <button
-                                type="button"
-                                onClick={() => openModal("delete", objeto)}
-                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
-                              >
-                                <span className="material-symbols-outlined !text-[22px]">delete</span>
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })
+                          {resolvedActions.includes("delete") && (
+                            <button
+                              type="button"
+                              onClick={() => openModal("delete", objeto)}
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                            >
+                              <span className="material-symbols-outlined !text-[22px]">delete</span>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
@@ -222,12 +332,12 @@ const Table = ({
               Nenhum dado encontrado.
             </div>
           ) : (
-            data.map((objeto, i) => {
+            data.map((objeto, index) => {
               const statusColumn = columns.find((column) => isStatusColumn(column.id));
-              
+
               return (
                 <div
-                  key={i}
+                  key={index}
                   className="rounded-[20px] border border-[#DDEEEF] bg-white p-4 shadow-sm"
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">
@@ -240,15 +350,15 @@ const Table = ({
                       .slice(1)
                       .filter((column) => !isStatusColumn(column.id))
                       .map((column) => (
-                      <div key={column.id} className="flex flex-col">
-                        <span className="text-xs font-semibold uppercase tracking-wide text-[#B8B8B8]">
-                          {column.label}
-                        </span>
-                        <span className="text-[15px] font-medium text-[#1F1F1F]">
-                          {renderCellValue(objeto, column)}
-                        </span>
-                      </div>
-                    ))}
+                        <div key={column.id} className="flex flex-col">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-[#B8B8B8]">
+                            {column.label}
+                          </span>
+                          <span className="text-[15px] font-medium text-[#1F1F1F]">
+                            {renderCellValue(objeto, column)}
+                          </span>
+                        </div>
+                      ))}
                   </div>
 
                   {hasActions && (
@@ -291,6 +401,8 @@ const Table = ({
         </div>
       </div>
 
+      {renderPagination()}
+
       {modalAction && selectedContent && (
         <Modal setValue={closeModal} value={modalAction != null}>
           <Form
@@ -311,14 +423,13 @@ const Table = ({
                   if (!confirmDelete) return;
 
                   if (onDelete) {
-                    const idField = getIdField(selectedContent);
-                    const id = selectedContent[idField];
-                    await onDelete(id);
+                    await onDelete(getResolvedId(selectedContent));
                   }
                 } else if (modalAction === "edit" && onEdit) {
-                  const idField = getIdField(selectedContent);
-                  const id = selectedContent[idField];
-                  await onEdit(id, formData);
+                  await onEdit(
+                    getResolvedId(selectedContent),
+                    formData as Partial<T> & Record<string, unknown>
+                  );
                 }
 
                 closeModal();
