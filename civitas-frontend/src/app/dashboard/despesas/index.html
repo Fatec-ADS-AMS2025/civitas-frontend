@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel de Despesas</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero card">
+        <div class="hero-content">
+          <p class="pill">Modulo financeiro</p>
+          <h1>Acompanhe despesas, filtros e manutencao em um unico painel.</h1>
+          <p class="hero-text">
+            Visualize o resumo local, aplique filtros com clareza e gerencie os registros de despesas em uma tela unica.
+          </p>
+
+          <div class="hero-tags">
+            <span class="tag tag-primary">
+              <span class="material-symbols-outlined">schedule</span>
+              Ultima movimentacao: 10/03/2026
+            </span>
+            <span class="tag tag-alert">
+              <span class="material-symbols-outlined">verified</span>
+              Painel local atualizado
+            </span>
+          </div>
+
+          <div class="hero-actions">
+            <button class="btn btn-main" type="button">
+              <span class="material-symbols-outlined">add_circle</span>
+              Cadastrar despesa
+            </button>
+            <button class="btn btn-alt" type="button">
+              <span class="material-symbols-outlined">south</span>
+              Ir para listagem
+            </button>
+            <button class="btn btn-soft" type="button">
+              <span class="material-symbols-outlined">visibility_off</span>
+              Ocultar valores
+            </button>
+          </div>
+        </div>
+
+        <aside class="hero-stats">
+          <article class="mini-card">
+            <p class="mini-title">Despesas monitoradas</p>
+            <p class="mini-value">4</p>
+          </article>
+          <article class="mini-card">
+            <p class="mini-title">Categorias visiveis</p>
+            <p class="mini-value">4</p>
+          </article>
+          <article class="mini-card">
+            <p class="mini-title">Filtros ativos</p>
+            <p class="mini-value">0</p>
+          </article>
+        </aside>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary summary-teal">
+          <p>Total de despesas</p>
+          <h2>R$ 13.372,10</h2>
+          <small>Saida consolidada das despesas visiveis no recorte atual.</small>
+        </article>
+        <article class="summary summary-sand">
+          <p>Ticket medio</p>
+          <h2>R$ 3.343,02</h2>
+          <small>Media por despesa considerando os filtros aplicados.</small>
+        </article>
+        <article class="summary summary-mist">
+          <p>Despesas ativas</p>
+          <h2>3</h2>
+          <small>Itens liberados para acompanhamento e manutencao.</small>
+        </article>
+        <article class="summary summary-orange">
+          <p>Solicitam UC</p>
+          <h2>2</h2>
+          <small>Registros que dependem de unidade consumidora.</small>
+        </article>
+      </section>
+
+      <section class="panel-grid">
+        <article class="card panel">
+          <p class="panel-label">Filtros</p>
+          <h2>Refinar visao de despesas</h2>
+          <p class="panel-text">Combine periodo, categoria, status e busca textual para encontrar rapidamente os registros que importam.</p>
+
+          <form class="filters" action="#" method="get">
+            <label>
+              Inicio do periodo
+              <input type="date" name="inicio" />
+            </label>
+            <label>
+              Fim do periodo
+              <input type="date" name="fim" />
+            </label>
+            <label>
+              Categoria
+              <select name="categoria">
+                <option>Todas</option>
+                <option>Administrativo</option>
+                <option>Transporte</option>
+                <option>Merenda</option>
+                <option>Infraestrutura</option>
+              </select>
+            </label>
+            <label>
+              Situacao
+              <select name="situacao">
+                <option>Todas</option>
+                <option>Ativas</option>
+                <option>Inativas</option>
+              </select>
+            </label>
+            <label>
+              Busca rapida
+              <input type="search" name="busca" placeholder="Descricao, categoria ou ID" />
+            </label>
+            <label>
+              Solicita UC
+              <select name="uc">
+                <option>Todos</option>
+                <option>Com solicitacao</option>
+                <option>Sem solicitacao</option>
+              </select>
+            </label>
+          </form>
+
+          <div class="actions-row">
+            <button class="btn btn-main" type="submit">Aplicar filtros</button>
+            <button class="btn btn-soft" type="reset">Limpar painel</button>
+          </div>
+        </article>
+
+        <article class="card panel">
+          <p class="panel-label panel-label-orange">Operacao</p>
+          <h2>Cadastro e manutencao</h2>
+          <p class="panel-text">Cadastre novas despesas e acompanhe o destaque atual da listagem com menos cliques.</p>
+
+          <div class="feature-box">
+            <h3>Cadastrar despesa</h3>
+            <p>Abra o formulario para incluir um novo item sem sair da tela.</p>
+            <button class="btn btn-main" type="button">Abrir cadastro</button>
+          </div>
+
+          <div class="feature-box feature-box-alt">
+            <h3>Atualizar destaque</h3>
+            <p>Material de Escritorio</p>
+            <p class="feature-price">R$ 1.240,90</p>
+            <div class="actions-row">
+              <button class="btn btn-alt" type="button">Editar destaque</button>
+              <button class="btn btn-soft" type="button">Ver listagem</button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="card table-panel">
+        <div class="table-head">
+          <div>
+            <p class="panel-label">Monitoramento</p>
+            <h2>Listagem de despesas</h2>
+            <p class="panel-text">Painel com leitura rapida de categoria, valor, data, situacao e acoes de manutencao.</p>
+          </div>
+          <div class="overview">
+            <article><span>Total</span><strong>4</strong></article>
+            <article><span>Ativas</span><strong>3</strong></article>
+            <article><span>Com UC</span><strong>2</strong></article>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Registro</th>
+                <th>Categoria</th>
+                <th>Descricao</th>
+                <th>Valor</th>
+                <th>Data</th>
+                <th>Situacao</th>
+                <th>Acao</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#001</td>
+                <td>Administrativo</td>
+                <td>Material de Escritorio</td>
+                <td>R$ 1.240,90</td>
+                <td>10/03/2026</td>
+                <td><span class="status active">Ativo</span></td>
+                <td class="cell-actions">
+                  <button class="btn btn-small btn-main" type="button">Editar</button>
+                  <button class="btn btn-small btn-alt" type="button">Excluir</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#002</td>
+                <td>Transporte</td>
+                <td>Transporte Escolar</td>
+                <td>R$ 3.890,00</td>
+                <td>08/03/2026</td>
+                <td><span class="status active">Ativo</span></td>
+                <td class="cell-actions">
+                  <button class="btn btn-small btn-main" type="button">Editar</button>
+                  <button class="btn btn-small btn-alt" type="button">Excluir</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#003</td>
+                <td>Merenda</td>
+                <td>Alimentacao</td>
+                <td>R$ 5.780,45</td>
+                <td>05/03/2026</td>
+                <td><span class="status active">Ativo</span></td>
+                <td class="cell-actions">
+                  <button class="btn btn-small btn-main" type="button">Editar</button>
+                  <button class="btn btn-small btn-alt" type="button">Excluir</button>
+                </td>
+              </tr>
+              <tr>
+                <td>#004</td>
+                <td>Infraestrutura</td>
+                <td>Manutencao Predial</td>
+                <td>R$ 2.460,75</td>
+                <td>28/02/2026</td>
+                <td><span class="status inactive">Inativo</span></td>
+                <td class="cell-actions">
+                  <button class="btn btn-small btn-main" type="button">Editar</button>
+                  <button class="btn btn-small btn-alt" type="button">Excluir</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

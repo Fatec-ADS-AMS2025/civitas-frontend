@@ -1,0 +1,76 @@
+
+> civitas-frontend@0.1.0 dev
+> next dev --turbopack --port 3000
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.100.47:3000
+
+ ✓ Starting...
+Creating turbopack project {
+  dir: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend',
+  testMode: true
+}
+ ✓ Ready in 3.1s
+ ○ Compiling / ...
+ ✓ Compiled / in 15s
+ GET / 200 in 16922ms
+ GET / 200 in 1349ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.4s
+ GET /favicon.ico?favicon.0b3bf435.ico 200 in 4070ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 6.3s
+ GET /dashboard 200 in 7232ms
+ GET /dashboard 200 in 417ms
+ GET /dashboard 200 in 427ms
+ GET /dashboard 200 in 441ms
+ GET /dashboard 200 in 427ms
+ GET /dashboard 200 in 362ms
+ GET /dashboard 200 in 385ms
+ GET /dashboard 200 in 401ms
+ GET /dashboard 200 in 389ms
+ GET /dashboard 200 in 359ms
+ ○ Compiling /dashboard/instituicoes ...
+ ✓ Compiled /dashboard/instituicoes in 2s
+ GET /dashboard/instituicoes 200 in 2309ms
+ ○ Compiling /dashboard/despesas ...
+ ✓ Compiled /dashboard/despesas in 1640ms
+ GET /dashboard/despesas 200 in 1924ms
+ ○ Compiling /dashboard/financeiro ...
+ ✓ Compiled /dashboard/financeiro in 2.9s
+ GET /dashboard/financeiro 200 in 3275ms
+ ○ Compiling /dashboard/orcamentos ...
+ ✓ Compiled /dashboard/orcamentos in 1548ms
+ GET /dashboard/orcamentos 200 in 1840ms
+ GET /dashboard/despesas 200 in 473ms
+ ○ Compiling /_not-found/page ...
+ ✓ Compiled /_not-found/page in 3.6s
+ GET /dashboard/despesas 404 in 4592ms
+ GET /dashboard/despesas 404 in 378ms
+ GET /dashboard/despesas 404 in 1016ms
+ GET /dashboard/despesas 404 in 1474ms
+ GET /favicon.ico?favicon.0b3bf435.ico 200 in 1188ms
+ ✓ Compiled in 3s
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 15.2s
+ GET /dashboard/despesas 500 in 19155ms
+ GET /dashboard/despesas 500 in 970ms
+ GET /dashboard/despesas 500 in 591ms
+ GET /favicon.ico 500 in 678ms
+ ✓ Compiled in 2.1s
+ GET /dashboard/despesas 404 in 2151ms
+ GET /favicon.ico?favicon.0b3bf435.ico 200 in 973ms
+ GET /dashboard/despesas 404 in 1063ms
+ GET /favicon.ico?favicon.0b3bf435.ico 200 in 940ms
+ GET /dashboard/despesas 500 in 6411ms
+ GET /dashboard/despesas 500 in 1285ms
+ GET /dashboard/despesas 500 in 538ms
+ GET /favicon.ico 500 in 440ms
+ ✓ Compiled in 1715ms
+ ○ Compiling /dashboard/despesas ...
+ ✓ Compiled /dashboard/despesas in 1319ms
+ GET /dashboard/despesas 200 in 4958ms
+ GET /favicon.ico?favicon.0b3bf435.ico 200 in 878ms
+Deseja finalizar o arquivo em lotes (S/N)? 
+[?25h

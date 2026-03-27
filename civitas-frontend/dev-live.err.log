@@ -1,0 +1,233 @@
+ ⨯ ./src/app/dashboard/despesas/page.tsx:933:16
+Parsing ecmascript source code failed
+[0m [90m 931 |[39m       [33m<[39m[33m/[39m[33msection[39m[33m>[39m
+ [90m 932 |[39m
+[31m[1m>[22m[39m[90m 933 |[39m       [33m<[39m[33msection[39m className[33m=[39m[32m"grid gap-5 xl:grid-cols-[minmax(0,1.12fr)_minmax(340px,0.88fr)]"[39m[33m>[39m
+ [90m     |[39m                [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 934 |[39m         [33m<[39m[33marticle[39m className[33m=[39m[32m"rounded-[36px] border border-[#CFE4E5] bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFB_100%)] p-6 shadow-[0_24px_48px_rgba(13,77,88,0.06)]"[39m[33m>[39m
+ [90m 935 |[39m           [33m<[39m[33mdiv[39m className[33m=[39m[32m"inline-flex items-center gap-2 rounded-full bg-[#E6F4F3] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#0D4D58]"[39m[33m>[39m
+ [90m 936 |[39m             [33m<[39m[33mspan[39m className[33m=[39m[32m"material-symbols-outlined !text-[16px]"[39m[33m>[39mtune[33m<[39m[33m/[39m[33mspan[39m[33m>[39m[0m
+
+Expected ';', '}' or <eof>
+
+Import traces:
+  Client Component Browser:
+    ./src/app/dashboard/despesas/page.tsx [Client Component Browser]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/dashboard/despesas/page.tsx [Client Component SSR]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+
+ ⨯ ./src/app/dashboard/despesas/page.tsx:933:16
+Parsing ecmascript source code failed
+[0m [90m 931 |[39m       [33m<[39m[33m/[39m[33msection[39m[33m>[39m
+ [90m 932 |[39m
+[31m[1m>[22m[39m[90m 933 |[39m       [33m<[39m[33msection[39m className[33m=[39m[32m"grid gap-5 xl:grid-cols-[minmax(0,1.12fr)_minmax(340px,0.88fr)]"[39m[33m>[39m
+ [90m     |[39m                [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 934 |[39m         [33m<[39m[33marticle[39m className[33m=[39m[32m"rounded-[36px] border border-[#CFE4E5] bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFB_100%)] p-6 shadow-[0_24px_48px_rgba(13,77,88,0.06)]"[39m[33m>[39m
+ [90m 935 |[39m           [33m<[39m[33mdiv[39m className[33m=[39m[32m"inline-flex items-center gap-2 rounded-full bg-[#E6F4F3] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#0D4D58]"[39m[33m>[39m
+ [90m 936 |[39m             [33m<[39m[33mspan[39m className[33m=[39m[32m"material-symbols-outlined !text-[16px]"[39m[33m>[39mtune[33m<[39m[33m/[39m[33mspan[39m[33m>[39m[0m
+
+Expected ';', '}' or <eof>
+
+Import traces:
+  Client Component Browser:
+    ./src/app/dashboard/despesas/page.tsx [Client Component Browser]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/dashboard/despesas/page.tsx [Client Component SSR]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+
+ ⨯ ./src/app/dashboard/despesas/page.tsx:933:16
+Parsing ecmascript source code failed
+[0m [90m 931 |[39m       [33m<[39m[33m/[39m[33msection[39m[33m>[39m
+ [90m 932 |[39m
+[31m[1m>[22m[39m[90m 933 |[39m       [33m<[39m[33msection[39m className[33m=[39m[32m"grid gap-5 xl:grid-cols-[minmax(0,1.12fr)_minmax(340px,0.88fr)]"[39m[33m>[39m
+ [90m     |[39m                [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 934 |[39m         [33m<[39m[33marticle[39m className[33m=[39m[32m"rounded-[36px] border border-[#CFE4E5] bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFB_100%)] p-6 shadow-[0_24px_48px_rgba(13,77,88,0.06)]"[39m[33m>[39m
+ [90m 935 |[39m           [33m<[39m[33mdiv[39m className[33m=[39m[32m"inline-flex items-center gap-2 rounded-full bg-[#E6F4F3] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#0D4D58]"[39m[33m>[39m
+ [90m 936 |[39m             [33m<[39m[33mspan[39m className[33m=[39m[32m"material-symbols-outlined !text-[16px]"[39m[33m>[39mtune[33m<[39m[33m/[39m[33mspan[39m[33m>[39m[0m
+
+Expected ';', '}' or <eof>
+
+Import traces:
+  Client Component Browser:
+    ./src/app/dashboard/despesas/page.tsx [Client Component Browser]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/dashboard/despesas/page.tsx [Client Component SSR]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+
+ ⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/shared/lib/router/router.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/shared/lib/router/router.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/despesas/page.tsx:627:1
+Parsing ecmascript source code failed
+[0m [90m 625 |[39m         [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m 626 |[39m       [33m<[39m[33m/[39m[33msection[39m[33m>[39m
+[31m[1m>[22m[39m[90m 627 |[39m
+ [90m     |[39m [31m[1m^[22m[39m[0m
+
+Unexpected eof
+
+Import traces:
+  Client Component Browser:
+    ./src/app/dashboard/despesas/page.tsx [Client Component Browser]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/dashboard/despesas/page.tsx [Client Component SSR]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+
+ ⨯ ./src/app/dashboard/despesas/page.tsx:627:1
+Parsing ecmascript source code failed
+[0m [90m 625 |[39m         [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m 626 |[39m       [33m<[39m[33m/[39m[33msection[39m[33m>[39m
+[31m[1m>[22m[39m[90m 627 |[39m
+ [90m     |[39m [31m[1m^[22m[39m[0m
+
+Unexpected eof
+
+Import traces:
+  Client Component Browser:
+    ./src/app/dashboard/despesas/page.tsx [Client Component Browser]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/dashboard/despesas/page.tsx [Client Component SSR]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+
+ ⨯ ./src/app/dashboard/despesas/page.tsx:627:1
+Parsing ecmascript source code failed
+[0m [90m 625 |[39m         [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m 626 |[39m       [33m<[39m[33m/[39m[33msection[39m[33m>[39m
+[31m[1m>[22m[39m[90m 627 |[39m
+ [90m     |[39m [31m[1m^[22m[39m[0m
+
+Unexpected eof
+
+Import traces:
+  Client Component Browser:
+    ./src/app/dashboard/despesas/page.tsx [Client Component Browser]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/dashboard/despesas/page.tsx [Client Component SSR]
+    ./src/app/dashboard/despesas/page.tsx [Server Component]
+
+
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.4bchb0zqo9e'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.4bchb0zqo9e'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.3gxeba8133x'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.3gxeba8133x'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.4bchb0zqo9e'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.4bchb0zqo9e'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.ob2a9s9sgpo'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.ob2a9s9sgpo'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.5y7uvlso995'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.5y7uvlso995'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.kxgjxyhmh8c'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.kxgjxyhmh8c'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.rtl995yuvrq'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.rtl995yuvrq'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.vvqe8nfmktd'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.vvqe8nfmktd'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.rtl995yuvrq'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.rtl995yuvrq'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.ha1r8fv885o'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.ha1r8fv885o'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.afjq5x88n1j'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.afjq5x88n1j'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.ygrjdhfxh7i'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.ygrjdhfxh7i'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.oph5ipraz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.oph5ipraz'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.cspph4a8bh'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.cspph4a8bh'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.oph5ipraz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.oph5ipraz'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.3mt883jb7hq'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.3mt883jb7hq'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.c95j15ewbde'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.c95j15ewbde'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\guilh\Downloads\civitas-frontend\civitas-frontend\.next\static\development\_buildManifest.js.tmp.jw2zg2v0188'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\guilh\\Downloads\\civitas-frontend\\civitas-frontend\\.next\\static\\development\\_buildManifest.js.tmp.jw2zg2v0188'
+}
