@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Despesas – Civitas</title>
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Material Symbols -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="layout">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" aria-label="Sidebar">
+        <!-- Top: logo + nav -->
+        <div class="sidebar-top">
+          <div class="sidebar-logo">
+            <div class="logo-img-wrapper">
+              <!-- Fallback: teal circle when logo.png is unavailable -->
+              <svg
+                viewBox="0 0 40 40"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                style="width:100%;height:100%"
+              >
+                <circle cx="20" cy="20" r="20" fill="#58AFAE" />
+                <text
+                  x="50%"
+                  y="54%"
+                  dominant-baseline="middle"
+                  text-anchor="middle"
+                  font-family="Inter,sans-serif"
+                  font-size="16"
+                  font-weight="700"
+                  fill="#004C57"
+                >C</text>
+              </svg>
+            </div>
+            <span class="sidebar-brand">Civitas</span>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+              <span class="material-symbols-outlined">home</span>
+              <span class="nav-label">Home</span>
+            </a>
+
+            <a href="/dashboard/secretaria" class="nav-item">
+              <span class="material-symbols-outlined">account_balance</span>
+              <span class="nav-label">Secretaria</span>
+            </a>
+
+            <a href="/dashboard/instituicoes" class="nav-item">
+              <span class="material-symbols-outlined">flowchart</span>
+              <span class="nav-label">Instituição</span>
+            </a>
+
+            <a href="/dashboard/fornecedor" class="nav-item">
+              <span class="material-symbols-outlined">box</span>
+              <span class="nav-label">Fornecedor</span>
+            </a>
+
+            <a href="/dashboard/orcamentos" class="nav-item">
+              <span class="material-symbols-outlined">request_quote</span>
+              <span class="nav-label">Orçamento</span>
+            </a>
+
+            <!-- Active page -->
+            <a href="/dashboard/despesas" class="nav-item active">
+              <span class="material-symbols-outlined filled">sell</span>
+              <span class="nav-label">Despesas</span>
+            </a>
+
+            <a href="/dashboard/usuarios" class="nav-item">
+              <span class="material-symbols-outlined">group</span>
+              <span class="nav-label">Usuários</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Bottom: profile -->
+        <div class="sidebar-bottom">
+          <button class="profile-btn" onclick="window.location='/perfil'">
+            <div class="profile-icon">
+              <span class="material-symbols-outlined">person</span>
+            </div>
+            <span class="profile-label">Perfil</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <main class="main-content">
+        <!-- Page header (breadcrumb + title) -->
+        <div class="page-header">
+          <h1>Despesas</h1>
+          <div class="breadcrumb">
+            <span onclick="window.location='/dashboard'">dashboard</span>
+            <span>&nbsp;&gt;&nbsp;</span>
+            <span>despesas</span>
+          </div>
+        </div>
+
+        <!-- SearchBar -->
+        <div class="searchbar">
+          <div class="searchbar-header">
+            <p>Busca:</p>
+            <p class="searchbar-subtitle">Aqui você busca e filtra</p>
+          </div>
+
+          <div class="searchbar-row">
+            <input
+              id="searchDescricao"
+              type="text"
+              placeholder="Descrição"
+              class="search-input"
+              oninput="filterTable()"
+            />
+
+            <div class="searchbar-buttons">
+              <button class="btn-cadastrar" onclick="openModal('create')">
+                <span class="material-symbols-outlined">add</span>
+                Cadastrar
+              </button>
+              <button class="btn-filtrar" onclick="toggleAdvancedFilters()">
+                <span class="material-symbols-outlined">filter_alt</span>
+                <span id="filterBtnLabel">Filtrar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Advanced filters -->
+          <div id="advancedFilters" class="advanced-filters">
+            <input
+              id="searchCategoria"
+              type="text"
+              placeholder="Categoria"
+              class="search-input"
+              oninput="filterTable()"
+            />
+            <select
+              id="searchSituacao"
+              class="search-input"
+              onchange="filterTable()"
+              style="cursor:pointer"
+            >
+              <option value="">Situação</option>
+              <option value="1">Ativo</option>
+              <option value="0">Inativo</option>
+            </select>
+            <button class="btn-limpar" onclick="clearFilters()">Limpar</button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table class="data-table" id="despesasTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Descrição</th>
+                  <th>Valor</th>
+                  <th>Data</th>
+                  <th>Categoria</th>
+                  <th>Situação</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <!-- Rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <div id="modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeModal()" aria-label="Fechar modal">&times;</button>
+
+        <form id="modalForm" onsubmit="handleFormSubmit(event)">
+          <h2 class="form-title" id="modalTitle">Criar despesas</h2>
+          <p class="form-subtitle">Vamos lá, preencha os campos abaixo:</p>
+
+          <div class="form-body">
+            <div class="form-image">
+              <img id="modalImage" src="" alt="Ação" onerror="this.style.display='none'" />
+            </div>
+
+            <div class="form-fields" id="formFields">
+              <!-- Fields injected by JS -->
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+            <button type="submit" class="btn-confirm" id="confirmBtn">Confirmar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      /* =============================================
+         Sample data – replace with API call as needed
+         ============================================= */
+      let allDespesas = [
+        { id: 1, descricao: "Manutenção elétrica", valor: 1500.00, data: "2024-01-15", categoria: "Infraestrutura", situacao: 1 },
+        { id: 2, descricao: "Compra de material de escritório", valor: 320.50, data: "2024-02-03", categoria: "Administrativo", situacao: 1 },
+        { id: 3, descricao: "Reforma banheiros", valor: 8700.00, data: "2024-02-20", categoria: "Infraestrutura", situacao: 0 },
+        { id: 4, descricao: "Serviço de limpeza", valor: 2400.00, data: "2024-03-01", categoria: "Serviços", situacao: 1 },
+        { id: 5, descricao: "Aquisição de computadores", valor: 15000.00, data: "2024-03-10", categoria: "Tecnologia", situacao: 1 },
+        { id: 6, descricao: "Treinamento de pessoal", valor: 5000.00, data: "2024-03-22", categoria: "Recursos Humanos", situacao: 0 },
+      ];
+
+      let filteredDespesas = [...allDespesas];
+      let currentModalType = "create";
+      let currentEditId = null;
+
+      /* ---- render table ---- */
+      function renderTable(data) {
+        const tbody = document.getElementById("tableBody");
+        if (data.length === 0) {
+          tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Nenhum dado encontrado.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map(d => `
+          <tr>
+            <td>${d.id}</td>
+            <td>${d.descricao}</td>
+            <td>${formatCurrency(d.valor)}</td>
+            <td>${formatDate(d.data)}</td>
+            <td>${d.categoria}</td>
+            <td>${d.situacao === 1 ? "Ativo" : "Inativo"}</td>
+            <td>
+              <div class="actions-cell">
+                <button class="action-btn" title="Visualizar" onclick="openModal('view', ${d.id})">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="action-btn" title="Editar" onclick="openModal('edit', ${d.id})">
+                  <span class="material-symbols-outlined">edit_square</span>
+                </button>
+                <button class="action-btn" title="Excluir" onclick="openModal('delete', ${d.id})">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join("");
+      }
+
+      /* ---- filter ---- */
+      function normalizeText(text) {
+        return String(text)
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9\s]/g, "")
+          .trim();
+      }
+
+      function filterTable() {
+        const descVal = normalizeText(document.getElementById("searchDescricao").value);
+        const catVal  = normalizeText(document.getElementById("searchCategoria").value);
+        const sitVal  = document.getElementById("searchSituacao").value;
+
+        filteredDespesas = allDespesas.filter(d => {
+          const matchDesc = !descVal || normalizeText(d.descricao).includes(descVal);
+          const matchCat  = !catVal  || normalizeText(d.categoria).includes(catVal);
+          const matchSit  = !sitVal  || String(d.situacao) === sitVal;
+          return matchDesc && matchCat && matchSit;
+        });
+        renderTable(filteredDespesas);
+      }
+
+      function clearFilters() {
+        document.getElementById("searchDescricao").value = "";
+        document.getElementById("searchCategoria").value = "";
+        document.getElementById("searchSituacao").value  = "";
+        filteredDespesas = [...allDespesas];
+        renderTable(filteredDespesas);
+      }
+
+      /* ---- advanced filters toggle ---- */
+      function toggleAdvancedFilters() {
+        const panel = document.getElementById("advancedFilters");
+        const label = document.getElementById("filterBtnLabel");
+        const isVisible = panel.classList.toggle("visible");
+        label.textContent = isVisible ? "Ocultar" : "Filtrar";
+      }
+
+      /* ---- modal ---- */
+      const modalLabels = { create: "Criar", edit: "Editar", view: "Visualizar", delete: "Deletar" };
+      const modalImages = {
+        create: "/imgsForm/image-add.svg",
+        edit:   "/imgsForm/image-edit.svg",
+        view:   "/imgsForm/image-view.svg",
+        delete: "/imgsForm/image-delete.svg",
+      };
+
+      const despesaFields = [
+        { key: "descricao", label: "Descrição", type: "text" },
+        { key: "valor",     label: "Valor",     type: "number" },
+        { key: "data",      label: "Data",       type: "date" },
+        { key: "categoria", label: "Categoria",  type: "text" },
+        { key: "situacao",  label: "Situação",   type: "number" },
+      ];
+
+      function openModal(type, id) {
+        currentModalType = type;
+        currentEditId    = id || null;
+
+        const despesa = id ? allDespesas.find(d => d.id === id) : null;
+        const label   = modalLabels[type] || "Criar";
+
+        document.getElementById("modalTitle").textContent = `${label} despesas`;
+        document.getElementById("modalImage").src         = modalImages[type] || "";
+
+        const isReadOnly = type === "view" || type === "delete";
+        const confirmBtn = document.getElementById("confirmBtn");
+        confirmBtn.style.display = type === "view" ? "none" : "block";
+        confirmBtn.textContent   = type === "delete" ? "Excluir" : "Confirmar";
+
+        const fieldsContainer = document.getElementById("formFields");
+        fieldsContainer.innerHTML = despesaFields.map(f => {
+          const value = despesa ? (despesa[f.key] !== undefined ? despesa[f.key] : "") : "";
+          return `
+            <div class="form-field">
+              <label for="field_${f.key}">${f.label}</label>
+              <input
+                id="field_${f.key}"
+                name="${f.key}"
+                type="${f.type}"
+                value="${value}"
+                placeholder="${f.label}"
+                ${isReadOnly ? "disabled" : "required"}
+              />
+            </div>
+          `;
+        }).join("");
+
+        document.getElementById("modal").classList.add("open");
+      }
+
+      function closeModal() {
+        document.getElementById("modal").classList.remove("open");
+        currentEditId    = null;
+        currentModalType = "create";
+      }
+
+      function handleFormSubmit(e) {
+        e.preventDefault();
+        const form = document.getElementById("modalForm");
+        const data = Object.fromEntries(new FormData(form));
+
+        if (currentModalType === "delete" && currentEditId !== null) {
+          if (confirm("Tem certeza que deseja excluir esta despesa?")) {
+            allDespesas = allDespesas.filter(d => d.id !== currentEditId);
+            filteredDespesas = [...allDespesas];
+            renderTable(filteredDespesas);
+            closeModal();
+          }
+          return;
+        }
+
+        if (currentModalType === "edit" && currentEditId !== null) {
+          allDespesas = allDespesas.map(d =>
+            d.id === currentEditId
+              ? { ...d, ...data, id: d.id, valor: parseFloat(data.valor), situacao: parseInt(data.situacao) }
+              : d
+          );
+        } else if (currentModalType === "create") {
+          const newId = allDespesas.length > 0 ? Math.max(...allDespesas.map(d => d.id)) + 1 : 1;
+          allDespesas.push({
+            id: newId,
+            descricao: data.descricao,
+            valor: parseFloat(data.valor) || 0,
+            data: data.data,
+            categoria: data.categoria,
+            situacao: parseInt(data.situacao) || 1,
+          });
+        }
+
+        filteredDespesas = [...allDespesas];
+        renderTable(filteredDespesas);
+        closeModal();
+      }
+
+      /* ---- helpers ---- */
+      function formatCurrency(val) {
+        return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val);
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return "";
+        const [y, m, d] = dateStr.split("-");
+        return `${d}/${m}/${y}`;
+      }
+
+      /* ---- close modal on overlay click ---- */
+      document.getElementById("modal").addEventListener("click", function (e) {
+        if (e.target === this) closeModal();
+      });
+
+      /* ---- initial render ---- */
+      renderTable(allDespesas);
+    </script>
+  </body>
+</html>
