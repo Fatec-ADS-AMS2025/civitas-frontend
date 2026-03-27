@@ -8,12 +8,24 @@ import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { usuarioService } from "@/hooks/usuario";
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import UsuarioDTO from "@/models/usuario";
+import type { ListQuery, PaginatedResult } from "@/hooks/generic";
 
 type User = UsuarioDTO;
 type UserRow = User & {
   tipoUsuarioLabel: string;
   situacaoLabel: string;
 };
+type PaginationState = Pick<
+  PaginatedResult<UserRow>,
+  "currentPage" | "pageSize" | "totalPages" | "totalRecords"
+>;
+
+const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
+  page: 1,
+  size: 10,
+};
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 const TIPO_USUARIO_OPTIONS = [
   { value: 1, label: "Visitante" },
@@ -138,6 +150,29 @@ const mapUsuarioToRow = (api: Partial<User>): UserRow => {
   };
 };
 
+const toUsuarioPageResult = (pageResult: PaginatedResult<User>): PaginatedResult<UserRow> => {
+  return {
+    ...pageResult,
+    items: pageResult.items.map(mapUsuarioToRow),
+  };
+};
+
+const shouldLoadPreviousPage = (pageResult: PaginatedResult<UserRow>): boolean => {
+  return (
+    pageResult.totalRecords > 0 &&
+    pageResult.totalPages > 0 &&
+    pageResult.items.length === 0 &&
+    pageResult.currentPage > pageResult.totalPages
+  );
+};
+
+const emptyPaginationState: PaginationState = {
+  currentPage: DEFAULT_PAGE_QUERY.page,
+  pageSize: DEFAULT_PAGE_QUERY.size,
+  totalPages: 0,
+  totalRecords: 0,
+};
+
 const toApiUsuarioPayload = (data: Partial<User>, base?: Partial<User>): User => {
   return {
     id: Number(data.id ?? base?.id ?? 0),
@@ -164,35 +199,63 @@ const Page = () => {
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paginationState, setPaginationState] = useState<PaginationState>(emptyPaginationState);
+  const [currentPage, setCurrentPage] = useState(DEFAULT_PAGE_QUERY.page);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_QUERY.size);
 
-  const loadUsuarios = async () => {
+  const applyUsuarioPage = (pageResult: PaginatedResult<UserRow>) => {
+    setUsuarios(pageResult.items);
+    setFilteredData(pageResult.items);
+    setPaginationState({
+      currentPage: pageResult.currentPage,
+      pageSize: pageResult.pageSize,
+      totalPages: pageResult.totalPages,
+      totalRecords: pageResult.totalRecords,
+    });
+    setCurrentPage(pageResult.currentPage);
+    setPageSize(pageResult.pageSize);
+  };
+
+  const loadUsuarios = async (
+    query: ListQuery = { page: currentPage, size: pageSize }
+  ) => {
     try {
       setLoading(true);
-      const list = await usuarioService.getAll();
-      const rows = list.map(mapUsuarioToRow);
-      setUsuarios(rows);
-      setFilteredData(rows);
+
+      const initialPage = toUsuarioPageResult(await usuarioService.getPage(query));
+      const resolvedPage = shouldLoadPreviousPage(initialPage)
+        ? toUsuarioPageResult(
+            await usuarioService.getPage({
+              ...query,
+              page: initialPage.totalPages,
+              size: initialPage.pageSize,
+            })
+          )
+        : initialPage;
+
+      applyUsuarioPage(resolvedPage);
       setError(null);
-      return rows;
+      return resolvedPage;
     } catch (err) {
       console.error("Erro ao carregar usuarios:", err);
       setUsuarios([]);
       setFilteredData([]);
+      setPaginationState(emptyPaginationState);
       setError("Nao foi possivel carregar usuarios.");
-      return [];
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    void loadUsuarios();
+    void loadUsuarios(DEFAULT_PAGE_QUERY);
   }, []);
 
   const handleCreate = async (novoUsuarioData: Omit<User, "id">) => {
     const payload = toApiUsuarioPayload(novoUsuarioData);
     await usuarioService.create(payload);
-    await loadUsuarios();
+    await loadUsuarios({ page: currentPage, size: pageSize });
   };
 
   const handleUpdate = async (id: number, dadosAtualizados: Partial<User>) => {
@@ -200,12 +263,28 @@ const Page = () => {
     const payload = toApiUsuarioPayload({ ...dadosAtualizados, id }, current);
 
     await usuarioService.update(id, payload);
-    await loadUsuarios();
+    await loadUsuarios({ page: currentPage, size: pageSize });
   };
 
   const handleDelete = async (id: number) => {
-    await usuarioService.delete(id);
-    await loadUsuarios();
+    await usuarioService.alterarSituacao(id);
+    await loadUsuarios({ page: currentPage, size: pageSize });
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage < 1 || nextPage === currentPage) {
+      return;
+    }
+
+    void loadUsuarios({ page: nextPage, size: pageSize });
+  };
+
+  const handlePageSizeChange = (nextSize: number) => {
+    if (nextSize < 1 || nextSize === pageSize) {
+      return;
+    }
+
+    void loadUsuarios({ page: DEFAULT_PAGE_QUERY.page, size: nextSize });
   };
 
   if (loading) {
@@ -234,6 +313,16 @@ const Page = () => {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={usuarioFormFields}
+        paginationEnabled={true}
+        pagination={{
+          currentPage: paginationState.currentPage,
+          totalPages: paginationState.totalPages,
+          totalRecords: paginationState.totalRecords,
+          pageSize: paginationState.pageSize,
+          pageSizeOptions: PAGE_SIZE_OPTIONS,
+          onPageChange: handlePageChange,
+          onPageSizeChange: handlePageSizeChange,
+        }}
       />
     </>
   );
