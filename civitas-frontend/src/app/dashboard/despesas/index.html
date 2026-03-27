@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Civitas — Despesas</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar">
+    <div class="sidebar__top">
+      <!-- Logo -->
+      <div class="sidebar__logo">
+        <div class="sidebar__logo-icon">
+          <img src="/logo.png" alt="Logo Civitas" onerror="this.style.display='none'" />
+          <span class="sidebar__logo-fallback material-symbols-outlined">account_balance</span>
+        </div>
+        <span class="sidebar__logo-text">Civitas</span>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar__nav">
+        <a href="/dashboard" class="sidebar__item">
+          <span class="material-symbols-outlined sidebar__icon">home</span>
+          <span class="sidebar__label">Home</span>
+        </a>
+        <a href="/dashboard/secretaria" class="sidebar__item">
+          <span class="material-symbols-outlined sidebar__icon">account_balance</span>
+          <span class="sidebar__label">Secretaria</span>
+        </a>
+        <a href="/dashboard/instituicoes" class="sidebar__item">
+          <span class="material-symbols-outlined sidebar__icon">flowchart</span>
+          <span class="sidebar__label">Instituição</span>
+        </a>
+        <a href="/dashboard/fornecedor" class="sidebar__item">
+          <span class="material-symbols-outlined sidebar__icon">box</span>
+          <span class="sidebar__label">Fornecedor</span>
+        </a>
+        <a href="/dashboard/orcamentos" class="sidebar__item">
+          <span class="material-symbols-outlined sidebar__icon">request_quote</span>
+          <span class="sidebar__label">Orçamento</span>
+        </a>
+        <a href="/dashboard/despesas" class="sidebar__item sidebar__item--active">
+          <span class="material-symbols-outlined sidebar__icon sidebar__icon--filled">sell</span>
+          <span class="sidebar__label">Despesas</span>
+        </a>
+        <a href="/dashboard/usuarios" class="sidebar__item">
+          <span class="material-symbols-outlined sidebar__icon">group</span>
+          <span class="sidebar__label">Usuários</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Profile Button -->
+    <div class="sidebar__bottom">
+      <button class="sidebar__profile">
+        <div class="sidebar__avatar">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+        <span class="sidebar__profile-label">Perfil</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main">
+    <!-- Page Header -->
+    <header class="page-header">
+      <h1 class="page-header__title">Despesas</h1>
+      <div class="page-header__breadcrumb">
+        <span class="page-header__crumb">dashboard</span>
+        <span class="page-header__separator"> &gt; </span>
+        <span class="page-header__crumb page-header__crumb--current">despesas</span>
+      </div>
+    </header>
+
+    <!-- Search Bar -->
+    <section class="searchbar">
+      <div class="searchbar__header">
+        <p class="searchbar__title">Busca:</p>
+        <p class="searchbar__subtitle">Aqui você busca e filtra</p>
+      </div>
+
+      <!-- Main search row -->
+      <div class="searchbar__row">
+        <input
+          type="text"
+          id="searchDescricao"
+          class="searchbar__input"
+          placeholder="Descrição"
+          oninput="filterTable()"
+        />
+        <input
+          type="text"
+          id="searchFornecedor"
+          class="searchbar__input"
+          placeholder="Fornecedor"
+          oninput="filterTable()"
+        />
+
+        <div class="searchbar__actions">
+          <button class="btn btn--primary" onclick="openModal('create', null)">
+            <span class="material-symbols-outlined">add</span>
+            Cadastrar
+          </button>
+          <button class="btn btn--outline" id="btnFiltrar" onclick="toggleFilters()">
+            <span class="material-symbols-outlined">filter_alt</span>
+            Filtrar
+          </button>
+        </div>
+      </div>
+
+      <!-- Advanced filters -->
+      <div class="searchbar__filters" id="advancedFilters" hidden>
+        <input
+          type="date"
+          id="searchData"
+          class="searchbar__input"
+          placeholder="Data"
+          oninput="filterTable()"
+        />
+        <select id="searchCategoria" class="searchbar__input searchbar__select" onchange="filterTable()">
+          <option value="">Categoria</option>
+          <option value="Infraestrutura">Infraestrutura</option>
+          <option value="Saúde">Saúde</option>
+          <option value="Educação">Educação</option>
+          <option value="Administrativo">Administrativo</option>
+          <option value="Tecnologia">Tecnologia</option>
+        </select>
+        <select id="searchSituacao" class="searchbar__input searchbar__select" onchange="filterTable()">
+          <option value="">Situação</option>
+          <option value="Pago">Pago</option>
+          <option value="Pendente">Pendente</option>
+          <option value="Cancelado">Cancelado</option>
+        </select>
+        <button class="btn btn--outline" onclick="clearFilters()">Limpar</button>
+      </div>
+    </section>
+
+    <!-- Table -->
+    <section class="table-wrapper">
+      <div class="table-scroll">
+        <table class="data-table" id="despesasTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Descrição</th>
+              <th>Valor</th>
+              <th>Data</th>
+              <th>Categoria</th>
+              <th>Fornecedor</th>
+              <th>Situação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td>1</td>
+              <td>Compra de materiais de escritório</td>
+              <td>R$ 1.250,00</td>
+              <td>10/01/2025</td>
+              <td>Administrativo</td>
+              <td>Alpha Tech</td>
+              <td><span class="badge badge--pago">Pago</span></td>
+              <td class="table-actions">
+                <button class="action-btn" title="Visualizar" onclick="openModal('view', 0)">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="action-btn" title="Editar" onclick="openModal('edit', 0)">
+                  <span class="material-symbols-outlined">edit_square</span>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Reforma do telhado</td>
+              <td>R$ 15.800,00</td>
+              <td>15/01/2025</td>
+              <td>Infraestrutura</td>
+              <td>Construmax</td>
+              <td><span class="badge badge--pago">Pago</span></td>
+              <td class="table-actions">
+                <button class="action-btn" title="Visualizar" onclick="openModal('view', 1)">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="action-btn" title="Editar" onclick="openModal('edit', 1)">
+                  <span class="material-symbols-outlined">edit_square</span>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Aquisição de medicamentos</td>
+              <td>R$ 5.320,50</td>
+              <td>20/01/2025</td>
+              <td>Saúde</td>
+              <td>Global Farma</td>
+              <td><span class="badge badge--pendente">Pendente</span></td>
+              <td class="table-actions">
+                <button class="action-btn" title="Visualizar" onclick="openModal('view', 2)">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="action-btn" title="Editar" onclick="openModal('edit', 2)">
+                  <span class="material-symbols-outlined">edit_square</span>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Equipamentos de informática</td>
+              <td>R$ 8.900,00</td>
+              <td>25/01/2025</td>
+              <td>Tecnologia</td>
+              <td>Alpha Tech</td>
+              <td><span class="badge badge--pago">Pago</span></td>
+              <td class="table-actions">
+                <button class="action-btn" title="Visualizar" onclick="openModal('view', 3)">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="action-btn" title="Editar" onclick="openModal('edit', 3)">
+                  <span class="material-symbols-outlined">edit_square</span>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Material didático escolar</td>
+              <td>R$ 3.450,00</td>
+              <td>02/02/2025</td>
+              <td>Educação</td>
+              <td>Eco Verde</td>
+              <td><span class="badge badge--pendente">Pendente</span></td>
+              <td class="table-actions">
+                <button class="action-btn" title="Visualizar" onclick="openModal('view', 4)">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="action-btn" title="Editar" onclick="openModal('edit', 4)">
+                  <span class="material-symbols-outlined">edit_square</span>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Combustível para veículos</td>
+              <td>R$ 2.100,00</td>
+              <td>10/02/2025</td>
+              <td>Administrativo</td>
+              <td>Log Brasil</td>
+              <td><span class="badge badge--cancelado">Cancelado</span></td>
+              <td class="table-actions">
+                <button class="action-btn" title="Visualizar" onclick="openModal('view', 5)">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="action-btn" title="Editar" onclick="openModal('edit', 5)">
+                  <span class="material-symbols-outlined">edit_square</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="table-empty" id="tableEmpty" hidden>Nenhum dado encontrado.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== MODAL ===================== -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal__header">
+        <h2 class="modal__title" id="modalTitle">Despesa</h2>
+        <button class="modal__close" onclick="closeModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form class="modal__form" id="modalForm" onsubmit="submitModal(event)">
+        <div class="form-group">
+          <label class="form-label" for="formDescricao">Descrição</label>
+          <input type="text" id="formDescricao" class="form-input" placeholder="Descrição da despesa" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="formValor">Valor (R$)</label>
+            <input type="number" id="formValor" class="form-input" placeholder="0,00" step="0.01" min="0" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="formData">Data</label>
+            <input type="date" id="formData" class="form-input" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="formCategoria">Categoria</label>
+            <select id="formCategoria" class="form-input" required>
+              <option value="">Selecione...</option>
+              <option value="Infraestrutura">Infraestrutura</option>
+              <option value="Saúde">Saúde</option>
+              <option value="Educação">Educação</option>
+              <option value="Administrativo">Administrativo</option>
+              <option value="Tecnologia">Tecnologia</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="formFornecedor">Fornecedor</label>
+            <input type="text" id="formFornecedor" class="form-input" placeholder="Nome do fornecedor" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="formSituacao">Situação</label>
+          <select id="formSituacao" class="form-input" required>
+            <option value="Pago">Pago</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--outline" onclick="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn--primary" id="btnConfirm">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* ---- data ---- */
+    const despesas = [
+      { id: 1, descricao: "Compra de materiais de escritório", valor: "R$ 1.250,00", data: "10/01/2025", categoria: "Administrativo", fornecedor: "Alpha Tech", situacao: "Pago" },
+      { id: 2, descricao: "Reforma do telhado", valor: "R$ 15.800,00", data: "15/01/2025", categoria: "Infraestrutura", fornecedor: "Construmax", situacao: "Pago" },
+      { id: 3, descricao: "Aquisição de medicamentos", valor: "R$ 5.320,50", data: "20/01/2025", categoria: "Saúde", fornecedor: "Global Farma", situacao: "Pendente" },
+      { id: 4, descricao: "Equipamentos de informática", valor: "R$ 8.900,00", data: "25/01/2025", categoria: "Tecnologia", fornecedor: "Alpha Tech", situacao: "Pago" },
+      { id: 5, descricao: "Material didático escolar", valor: "R$ 3.450,00", data: "02/02/2025", categoria: "Educação", fornecedor: "Eco Verde", situacao: "Pendente" },
+      { id: 6, descricao: "Combustível para veículos", valor: "R$ 2.100,00", data: "10/02/2025", categoria: "Administrativo", fornecedor: "Log Brasil", situacao: "Cancelado" },
+    ];
+
+    /* ---- modal ---- */
+    let currentMode = null;
+
+    function openModal(mode, rowIndex) {
+      currentMode = mode;
+      const backdrop = document.getElementById("modalBackdrop");
+      const title = document.getElementById("modalTitle");
+      const btn = document.getElementById("btnConfirm");
+      const inputs = document.querySelectorAll(".form-input");
+
+      if (mode === "create") {
+        title.textContent = "Cadastrar Despesa";
+        btn.textContent = "Cadastrar";
+        inputs.forEach(el => { el.value = ""; el.disabled = false; });
+      } else if (mode === "view" && rowIndex !== null) {
+        const d = despesas[rowIndex];
+        title.textContent = "Visualizar Despesa";
+        btn.textContent = "Fechar";
+        document.getElementById("formDescricao").value = d.descricao;
+        document.getElementById("formValor").value = parseFloat(d.valor.replace(/[^\d,]/g, "").replace(",", "."));
+        document.getElementById("formData").value = d.data.split("/").reverse().join("-");
+        document.getElementById("formCategoria").value = d.categoria;
+        document.getElementById("formFornecedor").value = d.fornecedor;
+        document.getElementById("formSituacao").value = d.situacao;
+        inputs.forEach(el => { el.disabled = true; });
+      } else if (mode === "edit" && rowIndex !== null) {
+        const d = despesas[rowIndex];
+        title.textContent = "Editar Despesa";
+        btn.textContent = "Salvar";
+        document.getElementById("formDescricao").value = d.descricao;
+        document.getElementById("formValor").value = parseFloat(d.valor.replace(/[^\d,]/g, "").replace(",", "."));
+        document.getElementById("formData").value = d.data.split("/").reverse().join("-");
+        document.getElementById("formCategoria").value = d.categoria;
+        document.getElementById("formFornecedor").value = d.fornecedor;
+        document.getElementById("formSituacao").value = d.situacao;
+        inputs.forEach(el => { el.disabled = false; });
+      }
+
+      backdrop.hidden = false;
+    }
+
+    function closeModal() {
+      document.getElementById("modalBackdrop").hidden = true;
+      currentMode = null;
+    }
+
+    function submitModal(e) {
+      e.preventDefault();
+      if (currentMode === "view") { closeModal(); return; }
+      alert(currentMode === "create" ? "Despesa cadastrada com sucesso!" : "Despesa atualizada com sucesso!");
+      closeModal();
+    }
+
+    /* ---- filters ---- */
+    function normalize(text) {
+      return text.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, "").trim();
+    }
+
+    function filterTable() {
+      const desc = normalize(document.getElementById("searchDescricao").value);
+      const forn = normalize(document.getElementById("searchFornecedor").value);
+      const data = document.getElementById("searchData").value;
+      const cat  = document.getElementById("searchCategoria").value;
+      const sit  = document.getElementById("searchSituacao").value;
+
+      const rows = document.querySelectorAll("#tableBody tr");
+      let visible = 0;
+
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const rowDesc = normalize(cells[1].textContent);
+        const rowForn = normalize(cells[5].textContent);
+        const rowCat  = cells[4].textContent.trim();
+        const rowSit  = cells[6].querySelector(".badge").textContent.trim();
+
+        const matchDesc = !desc || rowDesc.includes(desc);
+        const matchForn = !forn || rowForn.includes(forn);
+        const matchCat  = !cat  || rowCat === cat;
+        const matchSit  = !sit  || rowSit === sit;
+
+        const show = matchDesc && matchForn && matchCat && matchSit;
+        row.hidden = !show;
+        if (show) visible++;
+      });
+
+      document.getElementById("tableEmpty").hidden = visible > 0;
+    }
+
+    function toggleFilters() {
+      const panel = document.getElementById("advancedFilters");
+      const btn   = document.getElementById("btnFiltrar");
+      panel.hidden = !panel.hidden;
+      btn.querySelector("span:last-child") || (btn.lastChild.textContent = panel.hidden ? "Filtrar" : "Ocultar");
+
+      // update button text
+      const textNode = Array.from(btn.childNodes).find(n => n.nodeType === 3);
+      if (textNode) textNode.textContent = panel.hidden ? " Filtrar" : " Ocultar";
+    }
+
+    function clearFilters() {
+      document.getElementById("searchDescricao").value = "";
+      document.getElementById("searchFornecedor").value = "";
+      document.getElementById("searchData").value = "";
+      document.getElementById("searchCategoria").value = "";
+      document.getElementById("searchSituacao").value = "";
+      filterTable();
+    }
+  </script>
+</body>
+</html>
