@@ -69,6 +69,13 @@ const defaultItems: SidebarItem[] = [
     href: "/dashboard/financeiro",
   },
   {
+    key: "configuracoes",
+    label: "Configurações",
+    icon: "tune",
+    active: false,
+    href: "/dashboard/configuracoes",
+  },
+  {
     key: "usuarios",
     label: "Usuários",
     icon: "group",
@@ -165,6 +172,10 @@ export default function Sidebar({
           router.push("/dashboard/financeiro");
           break;
         case "8":
+          e.preventDefault();
+          router.push("/dashboard/configuracoes");
+          break;
+        case "9":
           e.preventDefault();
           router.push("/dashboard/usuarios");
           break;
