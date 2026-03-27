@@ -28,17 +28,11 @@ export default function RootLayout({
         >
           Pular para o conteúdo principal
         </a>
-
         <AccessibilityMenu />
-
-        <main
-          id="conteudo-principal"
-          className="w-full min-h-screen lg:pr-[78px] 2xl:pr-[86px]"
-        >
-          {children}
-        </main>
-
         <Toaster />
+        <main id="conteudo-principal" className="w-full min-h-screen lg:pr-[78px] 2xl:pr-[86px]">
+  {children}
+</main>
       </body>
     </html>
   );
