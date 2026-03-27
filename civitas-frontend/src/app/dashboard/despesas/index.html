@@ -432,7 +432,6 @@
       const panel = document.getElementById("advancedFilters");
       const btn   = document.getElementById("btnFiltrar");
       panel.hidden = !panel.hidden;
-      btn.querySelector("span:last-child") || (btn.lastChild.textContent = panel.hidden ? "Filtrar" : "Ocultar");
 
       // update button text
       const textNode = Array.from(btn.childNodes).find(n => n.nodeType === 3);
