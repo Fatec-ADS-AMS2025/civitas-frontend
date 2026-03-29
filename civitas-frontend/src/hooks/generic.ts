@@ -1,3 +1,5 @@
+import { showToast } from "@/hooks/useToast";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
 
 export interface ResponseEnvelope<T> {
@@ -81,17 +83,46 @@ export class GenericService<T> {
   }
 
   protected async handleResponse<R = unknown>(response: Response): Promise<R> {
-    if (!response.ok) {
-      const errorText = await response.text();
-      const parsedMessage = parseApiMessageFromErrorText(errorText);
-      throw new Error(`HTTP ${response.status}: ${parsedMessage}`);
-    }
-
     if (response.status === 204) return undefined as R;
 
     const contentType = response.headers.get("content-type");
+
+    if (!response.ok) {
+      let errorText = "";
+      let errorJson: any = null;
+
+      try {
+        if (contentType && contentType.includes("application/json")) {
+          errorJson = await response.json();
+        } else {
+          errorText = await response.text();
+        }
+      } catch {
+        errorText = "Erro ao processar resposta do servidor.";
+      }
+
+      const message =
+        errorJson?.message ||
+        errorText ||
+        `Erro na requisição (${response.status})`;
+
+      showToast(message, "error");
+
+      throw new Error(`HTTP ${response.status}: ${message}`);
+    }
+
     if (contentType && contentType.includes("application/json")) {
-      return (await response.json()) as R;
+      const json = (await response.json()) as R;
+
+      if (
+        isRecord(json) &&
+        typeof json.message === "string" &&
+        json.message.trim() !== ""
+      ) {
+        showToast(json.message, "success");
+      }
+
+      return json;
     }
 
     return (await response.text()) as R;
