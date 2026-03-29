@@ -50,6 +50,10 @@ export default function Layout({
       title: "Financeiro",
       breadcrumbs: ["Home", "Financeiro"],
     },
+    configuracoes: {
+      title: "Configuracoes",
+      breadcrumbs: ["Home", "Configuracoes"],
+    },
     usuarios: {
       title: "Usuarios",
       breadcrumbs: ["Home", "Usuarios"],

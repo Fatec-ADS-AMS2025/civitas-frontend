@@ -3,7 +3,7 @@ import { showToast } from "@/hooks/useToast";
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
 
 export interface ResponseEnvelope<T> {
-  code?: string;
+  code?: string | number;
   message?: string;
   data?: T | null;
 }
@@ -37,6 +37,17 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 
 const isResponseEnvelope = <T>(value: unknown): value is ResponseEnvelope<T> => {
   return isRecord(value) && "data" in value;
+};
+
+const parseApiMessageFromErrorText = (errorText: string): string => {
+  try {
+    const parsed = JSON.parse(errorText) as ResponseEnvelope<unknown>;
+    if (parsed?.message) return parsed.message;
+  } catch {
+    // Keep fallback behavior when body is not a JSON envelope.
+  }
+
+  return errorText;
 };
 
 const isPaginatedResult = <T>(value: unknown): value is PaginatedResult<T> => {
@@ -117,6 +128,16 @@ export class GenericService<T> {
     return (await response.text()) as R;
   }
 
+  protected toEnvelope<R>(payload: unknown): ResponseEnvelope<R> {
+    if (isResponseEnvelope<R>(payload)) {
+      return payload;
+    }
+
+    return {
+      data: payload as R,
+    };
+  }
+
   protected unwrapItem<R>(payload: unknown): R {
     if (isResponseEnvelope<R>(payload)) {
       return payload.data as R;
@@ -151,6 +172,34 @@ export class GenericService<T> {
     const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
     const payload = await this.handleResponse(response);
     return this.unwrapCollection<T>(payload);
+  }
+
+  async getAllEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
+    const payload = await this.handleResponse(response);
+    const envelope = this.toEnvelope<unknown>(payload);
+
+    return {
+      ...envelope,
+      data: this.unwrapCollection<T>(payload),
+    };
+  }
+
+  async getInactive(query?: ListQuery): Promise<T[]> {
+    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
+    const payload = await this.handleResponse(response);
+    return this.unwrapCollection<T>(payload);
+  }
+
+  async getInactiveEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
+    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
+    const payload = await this.handleResponse(response);
+    const envelope = this.toEnvelope<unknown>(payload);
+
+    return {
+      ...envelope,
+      data: this.unwrapCollection<T>(payload),
+    };
   }
 
   async getAllData(query?: ListQuery): Promise<T[]> {
@@ -194,6 +243,24 @@ export class GenericService<T> {
     return this.unwrapItem<T>(payload);
   }
 
+  async createEnvelope(data: unknown): Promise<ResponseEnvelope<T>> {
+    const response = await fetch(this.getUrlEndpoint(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const payload = await this.handleResponse(response);
+    const envelope = this.toEnvelope<unknown>(payload);
+
+    return {
+      ...envelope,
+      data: this.unwrapItem<T>(payload),
+    };
+  }
+
   async createData(data: any): Promise<T> {
     try {
       const payload = await this.create(data);
@@ -215,6 +282,24 @@ export class GenericService<T> {
 
     const payload = await this.handleResponse(response);
     return this.unwrapItem<T>(payload);
+  }
+
+  async updateEnvelope(id: number, data: Partial<T>): Promise<ResponseEnvelope<T>> {
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const payload = await this.handleResponse(response);
+    const envelope = this.toEnvelope<unknown>(payload);
+
+    return {
+      ...envelope,
+      data: this.unwrapItem<T>(payload),
+    };
   }
 
   async updateData(id: number, data: Partial<T>): Promise<T> {
@@ -264,5 +349,14 @@ export class GenericService<T> {
     });
 
     await this.handleResponse(response);
+  }
+
+  async alterarSituacaoEnvelope(id: number): Promise<ResponseEnvelope<unknown>> {
+    const response = await fetch(`${this.getUrlEndpoint()}/situacao/${id}`, {
+      method: "PATCH",
+    });
+
+    const payload = await this.handleResponse(response);
+    return this.toEnvelope<unknown>(payload);
   }
 }
