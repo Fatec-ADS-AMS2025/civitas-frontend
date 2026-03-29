@@ -380,6 +380,7 @@ export default function Page() {
         onDelete={handleDelete}
         formFields={instituicaoFormFields}
         formHiddenFields={["id"]}
+        paginationEnabled={false}
       />
     </>
   );

@@ -17,12 +17,24 @@ import {
   SITUACAO_OPTIONS,
 } from "@/global/situacao";
 import { fornecedorService } from "@/hooks/fornecedor";
+import type { ListQuery, PaginatedResult } from "@/hooks/generic";
 import FornecedorDTO from "@/models/fornecedor";
 import { SkeletonTable } from "@/components/skeleton";
 // Usando o tipo do service
 
 type Fornecedor = FornecedorDTO;
 type FornecedorRow = Fornecedor & { situacaoLabel: string };
+type PaginationState = Pick<
+  PaginatedResult<FornecedorRow>,
+  "currentPage" | "pageSize" | "totalPages" | "totalRecords"
+>;
+
+const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
+  page: 1,
+  size: 20,
+};
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const novoFornecedor = {
   idFornecedor: 0,
@@ -155,9 +167,29 @@ const mapFornecedorRows = (items: Fornecedor[]): FornecedorRow[] => {
   }));
 };
 
-const fetchFornecedorRows = async (): Promise<FornecedorRow[]> => {
-  const items = await fornecedorService.getAll();
-  return mapFornecedorRows(items);
+const toFornecedorPageResult = (
+  pageResult: PaginatedResult<Fornecedor>
+): PaginatedResult<FornecedorRow> => {
+  return {
+    ...pageResult,
+    items: mapFornecedorRows(pageResult.items),
+  };
+};
+
+const shouldLoadPreviousPage = (pageResult: PaginatedResult<FornecedorRow>): boolean => {
+  return (
+    pageResult.totalRecords > 0 &&
+    pageResult.totalPages > 0 &&
+    pageResult.items.length === 0 &&
+    pageResult.currentPage > pageResult.totalPages
+  );
+};
+
+const emptyPaginationState: PaginationState = {
+  currentPage: DEFAULT_PAGE_QUERY.page,
+  pageSize: DEFAULT_PAGE_QUERY.size,
+  totalPages: 0,
+  totalRecords: 0,
 };
 
 export default function Page() {
@@ -166,37 +198,64 @@ export default function Page() {
   const [campos, setCampos] = useState<FieldConfig[]>(camposConst);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paginationState, setPaginationState] = useState<PaginationState>(emptyPaginationState);
+  const [currentPage, setCurrentPage] = useState(DEFAULT_PAGE_QUERY.page);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_QUERY.size);
 
-  const refreshFornecedores = async () => {
-    const rows = await fetchFornecedorRows();
-    setFornecedores(rows);
-    setFilteredData(rows);
+  const applyFornecedorPage = (pageResult: PaginatedResult<FornecedorRow>) => {
+    setFornecedores(pageResult.items);
+    setFilteredData(pageResult.items);
+    setPaginationState({
+      currentPage: pageResult.currentPage,
+      pageSize: pageResult.pageSize,
+      totalPages: pageResult.totalPages,
+      totalRecords: pageResult.totalRecords,
+    });
+    setCurrentPage(pageResult.currentPage);
+    setPageSize(pageResult.pageSize);
+  };
+
+  const loadFornecedorPage = async (
+    query: ListQuery = { page: currentPage, size: pageSize }
+  ) => {
+    try {
+      setLoading(true);
+
+      const initialPage = toFornecedorPageResult(await fornecedorService.getPage(query));
+      const resolvedPage = shouldLoadPreviousPage(initialPage)
+        ? toFornecedorPageResult(
+            await fornecedorService.getPage({
+              ...query,
+              page: initialPage.totalPages,
+              size: initialPage.pageSize,
+            })
+          )
+        : initialPage;
+
+      applyFornecedorPage(resolvedPage);
+      setError(null);
+      return resolvedPage;
+    } catch (err) {
+      console.error("Erro ao carregar fornecedores:", err);
+      setFornecedores([]);
+      setFilteredData([]);
+      setPaginationState(emptyPaginationState);
+      setError(
+        "Nao foi possivel carregar os fornecedores. Verifique o backend e tente novamente."
+      );
+      return null;
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    const loadFornecedores = async () => {
-      try {
-        setLoading(true);
-        await refreshFornecedores();
-        setError(null);
-      } catch (err) {
-        console.error("Erro ao carregar fornecedores:", err);
-        setFornecedores([]);
-        setFilteredData([]);
-        setError(
-          "Nao foi possivel carregar os fornecedores. Verifique o backend e tente novamente."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void loadFornecedores();
+    void loadFornecedorPage(DEFAULT_PAGE_QUERY);
   }, []);
 
   const handleCreate = async (novoFornecedorData: Omit<Fornecedor, "idFornecedor">) => {
     await fornecedorService.create(normalizeFornecedorPayload(novoFornecedorData));
-    await refreshFornecedores();
+    await loadFornecedorPage({ page: currentPage, size: pageSize });
   };
 
   const handleUpdate = async (id: number, dadosAtualizados: Partial<Fornecedor>) => {
@@ -204,17 +263,33 @@ export default function Page() {
       id,
       normalizeFornecedorPayload(dadosAtualizados)
     );
-    await refreshFornecedores();
+    await loadFornecedorPage({ page: currentPage, size: pageSize });
   };
 
   const handleDelete = async (id: number) => {
     await fornecedorService.alterarSituacao(id);
-    await refreshFornecedores();
+    await loadFornecedorPage({ page: currentPage, size: pageSize });
   };
 
- if (loading) {
-  return <SkeletonTable rows={5} cols={4} />;
-}
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage < 1 || nextPage === currentPage) {
+      return;
+    }
+
+    void loadFornecedorPage({ page: nextPage, size: pageSize });
+  };
+
+  const handlePageSizeChange = (nextSize: number) => {
+    if (nextSize < 1 || nextSize === pageSize) {
+      return;
+    }
+
+    void loadFornecedorPage({ page: DEFAULT_PAGE_QUERY.page, size: nextSize });
+  };
+
+  if (loading) {
+    return <SkeletonTable rows={5} cols={4} />;
+  }
 
   return (
     <>
@@ -240,6 +315,16 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={fornecedorFormFields}
+        paginationEnabled={true}
+        pagination={{
+          currentPage: paginationState.currentPage,
+          totalPages: paginationState.totalPages,
+          totalRecords: paginationState.totalRecords,
+          pageSize: paginationState.pageSize,
+          pageSizeOptions: PAGE_SIZE_OPTIONS,
+          onPageChange: handlePageChange,
+          onPageSizeChange: handlePageSizeChange,
+        }}
       />
     </>
   );
