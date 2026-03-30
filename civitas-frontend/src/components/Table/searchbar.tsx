@@ -2,10 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import Form, {
-  type FormFieldConfig,
-  type ValidationFn,
-} from "../Form/form";
+import Form, { type FormFieldConfig, type ValidationFn } from "../Form/form";
 import Modal from "../modal";
 import {
   applySearchFilters,
@@ -63,6 +60,14 @@ const SearchBar = ({
       ? `Buscar em ${principalFields.map((field) => field.placeholder).join(", ")}`
       : "Busca global";
 
+  const applyCurrentFilters = (
+    query: string = globalQuery,
+    filters: Record<string, string> = advancedFilters
+  ) => {
+    const filteredData = applySearchFilters(dados, campos, query, filters);
+    setDados(filteredData);
+  };
+
   useEffect(() => {
     setAdvancedFilters((prev) => {
       const next: Record<string, string> = {};
@@ -74,9 +79,15 @@ const SearchBar = ({
   }, [campos]);
 
   useEffect(() => {
-    const filteredData = applySearchFilters(dados, campos, globalQuery, advancedFilters);
-    setDados(filteredData);
-  }, [dados, campos, globalQuery, advancedFilters, setDados]);
+    applyCurrentFilters();
+    // Reaplica filtros ativos quando a fonte de dados muda (ex.: apos CRUD).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dados]);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    applyCurrentFilters();
+  };
 
   const handleAdvancedChange = (key: string, value: string) => {
     setAdvancedFilters((prev) => ({ ...prev, [key]: value }));
@@ -86,31 +97,10 @@ const SearchBar = ({
     );
   };
 
-  const handleFieldKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const form = e.currentTarget.form ?? e.currentTarget.closest("form, div");
-      if (!form) return;
-
-      const selectors =
-        "input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])";
-      const focusables = Array.from(form.querySelectorAll<HTMLElement>(selectors)).filter(
-        (el) => el.offsetParent !== null
-      );
-      const index = focusables.indexOf(e.currentTarget as HTMLElement);
-      const next = focusables[index + 1];
-      if (next) {
-        next.focus();
-      }
-    }
-  };
-
   const toggleAdvanced = () => setShowAdvanced((prev) => !prev);
 
   const clearFilters = () => {
-    setGlobalQuery("");
+    const clearedQuery = "";
 
     const clearedAdvanced = Object.keys(advancedFilters).reduce<Record<string, string>>(
       (acc, key) => {
@@ -120,8 +110,10 @@ const SearchBar = ({
       {}
     );
 
+    setGlobalQuery(clearedQuery);
     setAdvancedFilters(clearedAdvanced);
     setCampos((prevCampos) => prevCampos.map((campo) => ({ ...campo, value: "" })));
+    applyCurrentFilters(clearedQuery, clearedAdvanced);
   };
 
   const renderField = (field: FieldConfig) => {
@@ -133,8 +125,8 @@ const SearchBar = ({
           key={field.key}
           value={fieldValue}
           onChange={(e) => handleAdvancedChange(field.key, e.target.value)}
-          className="w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
-          onKeyDown={handleFieldKeyDown}
+          aria-label={field.placeholder}
+          className="h-[46px] w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
         >
           <option value="">{field.placeholder}</option>
           {field.options.map((option) => (
@@ -153,8 +145,8 @@ const SearchBar = ({
         value={fieldValue}
         placeholder={field.placeholder}
         onChange={(e) => handleAdvancedChange(field.key, e.target.value)}
-        onKeyDown={handleFieldKeyDown}
-        className="w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] placeholder-[#97A6AE] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
+        aria-label={field.placeholder}
+        className="h-[46px] w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 text-sm text-[#1F2A32] placeholder-[#97A6AE] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
       />
     );
   };
@@ -166,54 +158,65 @@ const SearchBar = ({
         <p className="-mt-1 text-sm text-[#8FA0A8]">Busca global + filtros avancados</p>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
-        <input
-          type="text"
-          value={globalQuery}
-          placeholder={globalPlaceholder}
-          onChange={(e) => setGlobalQuery(e.target.value)}
-          className="w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] placeholder-[#97A6AE] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
-        />
+      <form className="space-y-4" onSubmit={handleSubmit} aria-label={`Busca de ${nomePagina}`}>
+        <div className="flex w-full flex-col gap-3 md:flex-row md:items-center">
+          <input
+            type="text"
+            value={globalQuery}
+            placeholder={globalPlaceholder}
+            onChange={(e) => setGlobalQuery(e.target.value)}
+            aria-label="Busca global"
+            className="h-[46px] w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 text-sm text-[#1F2A32] placeholder-[#97A6AE] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
+          />
 
-        <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
-          {showCadastrarButton && (
+          <div className="flex w-full flex-col gap-3 sm:flex-row md:ml-auto md:w-auto">
+            {showCadastrarButton && (
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className="flex h-[46px] w-full items-center justify-center gap-2 rounded-2xl bg-[#58AFAE] px-5 font-semibold text-white transition hover:brightness-95 sm:w-auto"
+              >
+                <span className="material-symbols-outlined text-base text-white">add</span>
+                Cadastrar
+              </button>
+            )}
+
+            {hasAnyField && (
+              <button
+                type="button"
+                onClick={toggleAdvanced}
+                className="flex h-[46px] w-full items-center justify-center gap-2 rounded-2xl border border-[#D5E3E6] bg-white px-5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
+              >
+                <span className="material-symbols-outlined text-base text-[#1F2A32]">
+                  filter_alt
+                </span>
+                {showAdvanced ? "Ocultar" : "Filtrar"}
+              </button>
+            )}
+
+            <button
+              type="submit"
+              className="flex h-[46px] w-full items-center justify-center gap-2 rounded-2xl bg-[#004C57] px-5 font-semibold text-white transition hover:brightness-95 sm:w-auto"
+            >
+              <span className="material-symbols-outlined text-base text-white">search</span>
+              Buscar
+            </button>
+          </div>
+        </div>
+
+        {showAdvanced && hasAnyField && (
+          <div className="animate-fadeIn flex flex-col gap-3 border-t border-[#E5EEF0] pt-4 md:flex-row md:items-center">
+            {campos.map((field) => renderField(field))}
             <button
               type="button"
-              onClick={() => setModalOpen(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#58AFAE] px-5 py-2.5 font-semibold text-white transition hover:brightness-95 sm:w-auto"
+              onClick={clearFilters}
+              className="h-[46px] w-full rounded-2xl border border-[#D5E3E6] bg-white px-5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] md:w-auto"
             >
-              <span className="material-symbols-outlined text-white text-base">add</span>
-              Cadastrar
+              Limpar
             </button>
-          )}
-
-          {hasAnyField && (
-            <button
-              type="button"
-              onClick={toggleAdvanced}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
-            >
-              <span className="material-symbols-outlined text-[#1F2A32] text-base">
-                filter_alt
-              </span>
-              {showAdvanced ? "Ocultar" : "Filtrar"}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {showAdvanced && hasAnyField && (
-        <div className="animate-fadeIn flex flex-col gap-3 border-t border-[#E5EEF0] pt-4 md:flex-row md:items-center">
-          {campos.map((field) => renderField(field))}
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="w-full rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] md:w-auto"
-          >
-            Limpar
-          </button>
-        </div>
-      )}
+          </div>
+        )}
+      </form>
 
       {modalOpen && (
         <Modal setValue={() => setModalOpen(false)} value={modalOpen}>

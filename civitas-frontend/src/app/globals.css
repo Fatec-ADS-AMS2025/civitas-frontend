@@ -46,6 +46,35 @@ html {
   scroll-behavior: smooth;
 }
 
+.civitas-surface {
+  border: 1px solid #e4eef0;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+}
+
+.civitas-control {
+  height: 46px;
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid #d5e3e6;
+  background: #fff;
+  padding: 0 16px;
+  font-size: 0.875rem;
+  color: #1f2a32;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.civitas-control::placeholder {
+  color: #97a6ae;
+}
+
+.civitas-control:focus {
+  border-color: #58afae;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(88, 175, 174, 0.2);
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   font-size: 22px;
@@ -112,107 +141,169 @@ html {
    ALTO CONTRASTE LIMPO
 ========================= */
 
-body.high-contrast {
+.high-contrast-shell {
+  background: #000 !important;
+}
+
+.high-contrast-shell .dashboard-shell,
+.high-contrast-shell [data-contrast-target="content"] {
+  background: #000 !important;
+}
+
+.high-contrast {
   background: #000 !important;
   color: #fff !important;
 }
 
-/* estrutura principal */
-body.high-contrast main,
-body.high-contrast section,
-body.high-contrast article,
-body.high-contrast header,
-body.high-contrast footer,
-body.high-contrast nav {
-  background-color: #000 !important;
-}
-
-/* cards e fundos claros */
-body.high-contrast .bg-white,
-body.high-contrast .bg-gray-50,
-body.high-contrast .bg-gray-100,
-body.high-contrast .bg-\[\#FFFDFB\],
-body.high-contrast .bg-\[\#F8F4EC\],
-body.high-contrast .bg-\[\#F7F4EF\],
-body.high-contrast .bg-\[\#FFF0DD\],
-body.high-contrast .bg-\[\#FFF1DB\],
-body.high-contrast .bg-\[\#F3E7D5\],
-body.high-contrast .bg-\[\#F5F3EF\],
-body.high-contrast .bg-\[\#EFF5FF\],
-body.high-contrast .bg-\[\#FFF7E8\],
-body.high-contrast .bg-\[\#F8F8F8\],
-body.high-contrast .bg-\[\#EAF4F5\],
-body.high-contrast .bg-\[\#FFF3F3\],
-body.high-contrast .bg-\[\#FFF6E8\],
-body.high-contrast .bg-\[\#EAF9EF\],
-body.high-contrast .bg-\[\#393939\] {
+/* superficies claras devem virar fundo escuro no modo HC */
+.high-contrast .bg-white,
+.high-contrast .bg-white\/95,
+.high-contrast [class*="bg-white/"],
+.high-contrast .bg-gray-50,
+.high-contrast .bg-gray-100,
+.high-contrast .bg-\[\#FCFCFB\],
+.high-contrast .bg-\[\#F8FAFA\],
+.high-contrast .bg-\[\#FFFDFB\],
+.high-contrast .bg-\[\#F8F4EC\],
+.high-contrast .bg-\[\#F7F4EF\],
+.high-contrast .bg-\[\#FFF0DD\],
+.high-contrast .bg-\[\#FFF1DB\],
+.high-contrast .bg-\[\#F3E7D5\],
+.high-contrast .bg-\[\#F5F3EF\],
+.high-contrast .bg-\[\#EFF5FF\],
+.high-contrast .bg-\[\#FFF7E8\],
+.high-contrast .bg-\[\#F8F8F8\],
+.high-contrast .bg-\[\#EAF4F5\],
+.high-contrast .bg-\[\#FFF3F3\],
+.high-contrast .bg-\[\#FFF6E8\],
+.high-contrast .bg-\[\#EAF9EF\],
+.high-contrast .bg-\[\#FCFCFC\],
+.high-contrast .bg-\[\#F8FCFC\],
+.high-contrast .bg-\[\#F1F8F9\],
+.high-contrast .bg-\[\#FBFDFD\],
+.high-contrast .bg-\[\#F5FAFA\],
+.high-contrast .bg-\[\#FFF9F9\],
+.high-contrast .bg-\[\#FFF7F7\],
+.high-contrast .bg-\[\#F3F9FA\],
+.high-contrast .bg-\[\#F4F6F8\],
+.high-contrast .bg-yellow-50,
+.high-contrast .bg-amber-50,
+.high-contrast .bg-orange-50,
+.high-contrast .bg-red-50,
+.high-contrast .bg-emerald-50,
+.high-contrast .bg-green-50,
+.high-contrast .bg-blue-50,
+.high-contrast .bg-sky-50,
+.high-contrast .bg-cyan-50,
+.high-contrast .bg-teal-50,
+.high-contrast .bg-lime-50,
+.high-contrast .bg-\[\#393939\],
+.high-contrast .civitas-surface,
+.high-contrast .skeleton-card {
   background: #000 !important;
 }
 
-/* texto */
-body.high-contrast,
-body.high-contrast p,
-body.high-contrast span,
-body.high-contrast small,
-body.high-contrast strong,
-body.high-contrast label,
-body.high-contrast td,
-body.high-contrast th,
-body.high-contrast li,
-body.high-contrast h1,
-body.high-contrast h2,
-body.high-contrast h3,
-body.high-contrast h4,
-body.high-contrast h5,
-body.high-contrast h6,
-body.high-contrast .text-gray-400,
-body.high-contrast .text-gray-500,
-body.high-contrast .text-gray-600,
-body.high-contrast .text-gray-700,
-body.high-contrast .text-gray-900,
-body.high-contrast .text-white,
-body.high-contrast .text-black,
-body.high-contrast .text-teal-700,
-body.high-contrast .text-tertialy-1,
-body.high-contrast .text-secundary-1,
-body.high-contrast .text-\[\#1F1F1F\],
-body.high-contrast .text-\[\#232323\],
-body.high-contrast .text-\[\#212121\],
-body.high-contrast .text-\[\#B0ACA5\],
-body.high-contrast .text-\[\#A9A29A\],
-body.high-contrast .text-\[\#8E8E8E\],
-body.high-contrast .text-\[\#A8A29A\] {
+/* texto: prioriza legibilidade real */
+.high-contrast,
+.high-contrast div,
+.high-contrast p,
+.high-contrast span,
+.high-contrast small,
+.high-contrast strong,
+.high-contrast em,
+.high-contrast label,
+.high-contrast td,
+.high-contrast th,
+.high-contrast li,
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast h5,
+.high-contrast h6,
+.high-contrast .text-gray-400,
+.high-contrast .text-gray-500,
+.high-contrast .text-gray-600,
+.high-contrast .text-gray-700,
+.high-contrast .text-gray-900,
+.high-contrast .text-white,
+.high-contrast .text-black,
+.high-contrast .text-teal-700,
+.high-contrast .text-tertialy-1,
+.high-contrast .text-secundary-1,
+.high-contrast .text-\[\#1F1F1F\],
+.high-contrast .text-\[\#232323\],
+.high-contrast .text-\[\#212121\],
+.high-contrast .text-\[\#B0ACA5\],
+.high-contrast .text-\[\#A9A29A\],
+.high-contrast .text-\[\#8E8E8E\],
+.high-contrast .text-\[\#A8A29A\] {
   color: #fff !important;
 }
 
-/* bordas */
-body.high-contrast .border,
-body.high-contrast [class*="border-"],
-body.high-contrast .ring-1 {
+/* utilitarios de texto arbitrario do Tailwind */
+.high-contrast [class*="text-"] {
+  color: #fff !important;
+}
+
+/* bordas e contornos */
+.high-contrast .border,
+.high-contrast [class*="border-"],
+.high-contrast .ring-1,
+.high-contrast .civitas-surface,
+.high-contrast .civitas-control {
   border-color: #fff !important;
 }
 
-/* remove só sombra */
-body.high-contrast * {
+/* remove sombras que pioram leitura no modo HC */
+.high-contrast * {
   box-shadow: none !important;
 }
 
-/* botões e links */
-body.high-contrast a,
-body.high-contrast button {
+/* links permanecem destacados */
+.high-contrast a {
   color: #ffeb3b !important;
+  text-decoration: underline;
+}
+
+/* botoes e elementos clicaveis ficam previsiveis e legiveis */
+.high-contrast button,
+.high-contrast [role="button"] {
+  background: #000 !important;
+  color: #fff !important;
+  border: 1px solid #fff !important;
+}
+
+.high-contrast button *,
+.high-contrast [role="button"] * {
+  color: inherit !important;
 }
 
 /* inputs */
-body.high-contrast input,
-body.high-contrast select,
-body.high-contrast textarea {
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
   background: #000 !important;
   color: #fff !important;
   border: 2px solid #fff !important;
 }
 
-body.high-contrast .skeleton-line {
+.high-contrast input::placeholder,
+.high-contrast textarea::placeholder {
+  color: #d7dde1 !important;
+  opacity: 1 !important;
+}
+
+.high-contrast .civitas-control {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+.high-contrast .civitas-control::placeholder {
+  color: #d7dde1 !important;
+}
+
+.high-contrast .skeleton-line {
   background-image: linear-gradient(
     100deg,
     #2b2b2b 20%,
@@ -223,64 +314,67 @@ body.high-contrast .skeleton-line {
 }
 
 /* imagens bitmap */
-body.high-contrast img {
+.high-contrast img {
   filter: grayscale(100%) contrast(120%);
 }
 
-/* IMPORTANTE: não aplicar filtro global no svg */
-body.high-contrast svg {
+/* IMPORTANTE: nao aplicar filtro global no svg */
+.high-contrast svg {
   filter: none !important;
 }
 
-/* manter textos e números do svg visíveis */
-body.high-contrast svg text,
-body.high-contrast svg tspan {
+/* manter textos e numeros do svg visiveis */
+.high-contrast svg text,
+.high-contrast svg tspan {
   fill: #fff !important;
   color: #fff !important;
 }
 
-/* não destruir linhas e formas do gráfico */
-body.high-contrast svg path,
-body.high-contrast svg line,
-body.high-contrast svg circle,
-body.high-contrast svg rect {
-  filter: none !important;
+/* mantem tracos de graficos e SVG legiveis */
+.high-contrast svg path[stroke],
+.high-contrast svg line[stroke],
+.high-contrast svg circle[stroke],
+.high-contrast svg rect[stroke] {
+  stroke: #fff !important;
 }
 
-/* correção dos cards com gradiente */
-body.high-contrast button[style*="linear-gradient"] {
+/* icones/material symbols respeitam a cor herdada no HC */
+.high-contrast .material-symbols-outlined {
+  color: inherit !important;
+}
+
+/* alinhamento visual da tela de despesas com o padrao do dashboard no HC */
+.high-contrast .despesas-top-card {
+  background: #000 !important;
   border: 1px solid #fff !important;
-}
-
-body.high-contrast button[style*="linear-gradient"] * {
-  background: transparent !important;
-}
-
-body.high-contrast button[style*="linear-gradient"] div,
-body.high-contrast button[style*="linear-gradient"] span {
   color: #fff !important;
 }
 
-/* card laranja do topo */
-body.high-contrast button[style*="linear-gradient(135deg,#FF961F"] div,
-body.high-contrast button[style*="linear-gradient(135deg,#FF961F"] span {
-  color: #2b1a00 !important;
+.high-contrast .despesas-top-card * {
+  color: inherit !important;
 }
 
-/* faixa inferior dos cards */
-body.high-contrast button[style*="linear-gradient"] .bg-black\/12 {
+.high-contrast .despesas-top-card-eyebar {
   background: rgba(0, 0, 0, 0.22) !important;
 }
 
+.high-contrast .despesas-table-footer {
+  background: #000 !important;
+  color: #fff !important;
+  border-top-color: #fff !important;
+}
+
 /* menu de acessibilidade */
-body.high-contrast aside[aria-label="Menu de acessibilidade"],
-body.high-contrast div[aria-label="Menu de acessibilidade"] {
+.high-contrast aside[aria-label="Menu de acessibilidade"],
+.high-contrast div[aria-label="Menu de acessibilidade"] {
   background: #fff !important;
   border: 2px solid #000 !important;
 }
 
-body.high-contrast aside[aria-label="Menu de acessibilidade"] button,
-body.high-contrast div[aria-label="Menu de acessibilidade"] button {
+.high-contrast aside[aria-label="Menu de acessibilidade"] button,
+.high-contrast div[aria-label="Menu de acessibilidade"] button {
+  background: transparent !important;
+  border: none !important;
   color: #000 !important;
 }
 

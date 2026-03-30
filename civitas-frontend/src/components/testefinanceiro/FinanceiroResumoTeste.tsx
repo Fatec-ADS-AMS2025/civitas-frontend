@@ -15,30 +15,30 @@ const formatCurrency = (value: number): string => {
 
 export default function FinanceiroResumoTeste({ resumo, loading }: FinanceiroResumoTesteProps) {
   if (loading) {
-    return <div className="rounded-lg border border-gray-200 bg-white p-4">Carregando resumo financeiro...</div>;
+    return <div className="rounded-2xl border border-[#E4EEF0] bg-white p-4">Carregando resumo financeiro...</div>;
   }
 
   if (!resumo) {
-    return <div className="rounded-lg border border-gray-200 bg-white p-4">Sem resumo disponível.</div>;
+    return <div className="rounded-2xl border border-[#E4EEF0] bg-white p-4">Sem resumo disponivel.</div>;
   }
 
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <p className="text-sm text-gray-500">Total de Despesas</p>
-        <p className="text-xl font-semibold text-red-700">{formatCurrency(resumo.totalDespesas)}</p>
+      <div className="rounded-2xl border border-[#E4EEF0] bg-white p-4">
+        <p className="text-sm text-[#72808A]">Total de despesas</p>
+        <p className="text-xl font-semibold text-[#D14343]">{formatCurrency(resumo.totalDespesas)}</p>
       </div>
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <p className="text-sm text-gray-500">Total de Orçamentos</p>
-        <p className="text-xl font-semibold text-emerald-700">{formatCurrency(resumo.totalOrcamentos)}</p>
+      <div className="rounded-2xl border border-[#E4EEF0] bg-white p-4">
+        <p className="text-sm text-[#72808A]">Total de orcamentos</p>
+        <p className="text-xl font-semibold text-[#2E8F63]">{formatCurrency(resumo.totalOrcamentos)}</p>
       </div>
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <p className="text-sm text-gray-500">Saldo</p>
-        <p className="text-xl font-semibold text-blue-700">{formatCurrency(resumo.saldo)}</p>
+      <div className="rounded-2xl border border-[#E4EEF0] bg-white p-4">
+        <p className="text-sm text-[#72808A]">Saldo</p>
+        <p className="text-xl font-semibold text-[#0B6470]">{formatCurrency(resumo.saldo)}</p>
       </div>
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <p className="text-sm text-gray-500">Transações</p>
-        <p className="text-xl font-semibold text-gray-900">{resumo.totalTransacoes}</p>
+      <div className="rounded-2xl border border-[#E4EEF0] bg-white p-4">
+        <p className="text-sm text-[#72808A]">Transacoes</p>
+        <p className="text-xl font-semibold text-[#1F2A32]">{resumo.totalTransacoes}</p>
       </div>
     </div>
   );

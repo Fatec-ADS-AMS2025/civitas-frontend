@@ -104,12 +104,12 @@ export default function Dashboard() {
   const othersPercentage = Math.max(0, 100 - healthPercentage - secretariaPercentage - reformasPercentage);
 
   return (
-    <div className="min-h-screen w-full bg-[#FCFCFB] font-sans">
+    <div className="min-h-full w-full bg-[#FCFCFB] font-sans">
       {/* Header */}
       <div className="border-b w-full border-[#F0EEE9] bg-white/95 pb-10 pt-2">
         <div className="mx-auto flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           <div className="flex-1">
-            <h1 className="text-[40px] font-semibold leading-tight text-[#004C57] skeleton sm:text-[48px]">
+            <h1 className="text-[34px] font-semibold leading-tight text-[#004C57] skeleton sm:text-[42px]">
               Bem-Vindo {"{user}"}
             </h1>
 
@@ -120,9 +120,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="w-full pb-14 pt-8">
-        <div className="mx-auto w-full px-1">
-          <p className="mb-6 pt-2 text-center text-[24px] font-bold text-[#1F1F1F]">
+      <div className="w-full pb-12 pt-6 sm:pt-7">
+        <div className="mx-auto w-full px-0">
+          <p className="mb-6 pt-2 text-center text-[20px] font-bold text-[#1F1F1F] sm:text-[24px]">
             14 dias até a reposição da verba.
           </p>
 
@@ -526,7 +526,7 @@ function TopCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative h-[164px] w-full overflow-hidden rounded-[20px] p-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
+      className="relative min-h-[164px] w-full overflow-hidden rounded-[22px] p-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
       style={{ background: gradient }}
     >
       <div className={`absolute right-4 top-4 opacity-70 ${dark ? 'text-white/60' : accent ? 'text-white/55' : 'text-white/55'}`}>

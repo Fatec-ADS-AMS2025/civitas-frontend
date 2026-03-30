@@ -10,9 +10,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className = '', id, ...props }, ref) => {
     const autoId = useId();
     const stableInputId = id ?? autoId;
-    const errorId = typeof props['aria-describedby'] === 'string'
+    const describedBy = typeof props['aria-describedby'] === 'string'
       ? props['aria-describedby']
       : undefined;
+    const errorId = describedBy ?? `${stableInputId}-error`;
 
     return (
       <div className="w-full">
@@ -30,10 +31,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           id={stableInputId}
           className={`
             w-full
+            min-h-[46px]
             rounded-2xl
             border border-[#CFE3E3]
             bg-white
-            px-4 py-3.5
+            px-4 py-3
             text-[15px] text-[#22313A]
             shadow-[0_2px_10px_rgba(0,0,0,0.03)]
             focus:border-[#58AFAE]
@@ -48,6 +50,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ${error ? 'border-red-400 bg-red-50 focus:border-red-500 focus:bg-red-50 focus:ring-red-200' : ''}
             ${className}
           `.trim().replace(/\s+/g, ' ')}
+          aria-describedby={error ? errorId : describedBy}
           {...props}
         />
         {error && (

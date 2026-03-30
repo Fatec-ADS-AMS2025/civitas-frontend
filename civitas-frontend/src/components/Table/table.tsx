@@ -190,7 +190,7 @@ const Table = <T extends TableRow,>({
     const pageSizeOptions = resolvePageSizeOptions(pagination);
 
     return (
-      <div className="border-t border-[#E5EEF0] px-5 py-4 lg:px-6">
+      <div className="border-t border-[#E5EEF0] px-4 py-4 sm:px-5 lg:px-6">
         <div className="flex flex-col gap-3 text-sm text-[#6B7280] md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
             <span>{pagination.totalRecords} registros</span>
@@ -221,7 +221,7 @@ const Table = <T extends TableRow,>({
               type="button"
               onClick={() => pagination.onPageChange(displayCurrentPage - 1)}
               disabled={!canGoPrevious}
-              className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-[42px] rounded-2xl border border-[#D5E3E6] bg-white px-4 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Anterior
             </button>
@@ -229,7 +229,7 @@ const Table = <T extends TableRow,>({
               type="button"
               onClick={() => pagination.onPageChange(displayCurrentPage + 1)}
               disabled={!canGoNext}
-              className="rounded-2xl bg-[#58AFAE] px-4 py-2 font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-[42px] rounded-2xl bg-[#58AFAE] px-4 font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Proxima
             </button>
@@ -240,18 +240,18 @@ const Table = <T extends TableRow,>({
   };
 
   return (
-    <div className="mt-5 w-full overflow-hidden rounded-[30px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+    <div className="mt-5 w-full overflow-hidden rounded-[28px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
       <div className="hidden md:block">
-        <div className="w-full overflow-x-auto px-5 py-5 lg:px-6">
-          <table className="w-full border-separate border-spacing-y-[16px] text-left text-black">
+        <div className="w-full overflow-x-auto px-4 py-5 sm:px-5 lg:px-6">
+          <table className="min-w-[920px] w-full border-separate border-spacing-y-[14px] text-left text-black">
             <thead>
               <tr className="text-[13px] font-semibold uppercase tracking-[0.04em] text-[#95A5AA]">
                 {columns.map((column) => (
-                  <th key={column.id} className="px-6 py-2">
+                  <th key={column.id} className="px-5 py-2">
                     {column.label}
                   </th>
                 ))}
-                {hasActions && <th className="px-6 py-2 text-center">Acoes</th>}
+                {hasActions && <th className="px-5 py-2 text-center">Acoes</th>}
               </tr>
             </thead>
 
@@ -274,7 +274,7 @@ const Table = <T extends TableRow,>({
                     {columns.map((column, columnIndex) => (
                       <td
                         key={column.id}
-                        className={`px-6 py-[18px] align-middle text-[15px] font-medium text-[#333333] ${
+                        className={`break-words px-5 py-[16px] align-middle text-[15px] font-medium text-[#333333] ${
                           columnIndex === 0 ? "rounded-l-[20px]" : ""
                         }`}
                       >
@@ -283,13 +283,13 @@ const Table = <T extends TableRow,>({
                     ))}
 
                     {hasActions && (
-                      <td className="rounded-r-[20px] px-6 py-[18px] align-middle">
+                      <td className="rounded-r-[20px] px-5 py-[16px] align-middle">
                         <div className="flex items-center justify-center gap-2">
                           {resolvedActions.includes("view") && (
                             <button
                               type="button"
                               onClick={() => openModal("view", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
                             >
                               <span className="material-symbols-outlined !text-[22px]">visibility</span>
                             </button>
@@ -299,7 +299,7 @@ const Table = <T extends TableRow,>({
                             <button
                               type="button"
                               onClick={() => openModal("edit", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
                             >
                               <span className="material-symbols-outlined !text-[22px]">edit</span>
                             </button>
@@ -309,7 +309,7 @@ const Table = <T extends TableRow,>({
                             <button
                               type="button"
                               onClick={() => openModal("delete", objeto)}
-                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF8A8A]/20"
                             >
                               <span className="material-symbols-outlined !text-[22px]">delete</span>
                             </button>
@@ -341,7 +341,9 @@ const Table = <T extends TableRow,>({
                   className="rounded-[20px] border border-[#DDEEEF] bg-white p-4 shadow-sm"
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">
-                    <div>{columns[0] && renderCellValue(objeto, columns[0])}</div>
+                    <div className="min-w-0 flex-1 break-words">
+                      {columns[0] && renderCellValue(objeto, columns[0])}
+                    </div>
                     <div>{statusColumn && renderCellValue(objeto, statusColumn)}</div>
                   </div>
 
@@ -354,7 +356,7 @@ const Table = <T extends TableRow,>({
                           <span className="text-xs font-semibold uppercase tracking-wide text-[#B8B8B8]">
                             {column.label}
                           </span>
-                          <span className="text-[15px] font-medium text-[#1F1F1F]">
+                          <span className="break-words text-[15px] font-medium text-[#1F1F1F]">
                             {renderCellValue(objeto, column)}
                           </span>
                         </div>
@@ -367,7 +369,7 @@ const Table = <T extends TableRow,>({
                         <button
                           type="button"
                           onClick={() => openModal("view", objeto)}
-                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
                         >
                           <span className="material-symbols-outlined !text-[22px]">visibility</span>
                         </button>
@@ -377,7 +379,7 @@ const Table = <T extends TableRow,>({
                         <button
                           type="button"
                           onClick={() => openModal("edit", objeto)}
-                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
                         >
                           <span className="material-symbols-outlined !text-[22px]">edit</span>
                         </button>
@@ -387,7 +389,7 @@ const Table = <T extends TableRow,>({
                         <button
                           type="button"
                           onClick={() => openModal("delete", objeto)}
-                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF8A8A]/20"
                         >
                           <span className="material-symbols-outlined !text-[22px]">delete</span>
                         </button>

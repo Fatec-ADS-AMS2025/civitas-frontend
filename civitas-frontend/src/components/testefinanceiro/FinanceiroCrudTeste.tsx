@@ -41,6 +41,9 @@ const toOptionalPositiveNumber = (value: string): number | undefined => {
   return numericValue > 0 ? numericValue : undefined;
 };
 
+const controlClassName =
+  'h-[46px] rounded-2xl border border-[#D5E3E6] bg-white px-4 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20';
+
 type FinanceiroCrudTesteProps = {
   transacoes: FinanceiroTransacaoDTO[];
   instituicoes: InstituicaoDTO[];
@@ -81,19 +84,19 @@ export default function FinanceiroCrudTeste({
     const idTipoDespesa = toPositiveNumber(form.idTipoDespesa);
 
     if (valor <= 0) return 'Valor deve ser maior que 0.';
-    if (idInstituicao <= 0) return 'Selecione uma instituição válida.';
-    if (idTipoDespesa <= 0) return 'Selecione um tipo de despesa válido.';
+    if (idInstituicao <= 0) return 'Selecione uma instituicao valida.';
+    if (idTipoDespesa <= 0) return 'Selecione um tipo de despesa valido.';
 
     if (tipo === 'despesa') {
       const idOrcamento = toPositiveNumber(form.idOrcamento);
-      if (!form.uc.trim()) return 'UC é obrigatória para despesa.';
-      if (!form.data) return 'Data é obrigatória para despesa.';
-      if (idOrcamento <= 0) return 'Selecione um orçamento válido para despesa.';
+      if (!form.uc.trim()) return 'UC e obrigatoria para despesa.';
+      if (!form.data) return 'Data e obrigatoria para despesa.';
+      if (idOrcamento <= 0) return 'Selecione um orcamento valido para despesa.';
       return null;
     }
 
     const anoOrcamento = toPositiveNumber(form.anoOrcamento);
-    if (anoOrcamento <= 0) return 'Ano do orçamento deve ser maior que 0.';
+    if (anoOrcamento <= 0) return 'Ano do orcamento deve ser maior que 0.';
     return null;
   };
 
@@ -181,8 +184,9 @@ export default function FinanceiroCrudTeste({
       <input
         value={form.descricao}
         onChange={(event) => setForm((prev) => ({ ...prev, descricao: event.target.value }))}
-        placeholder="Descrição"
-        className="rounded border border-gray-300 px-3 py-2"
+        placeholder="Descricao"
+        aria-label="Descricao"
+        className={controlClassName}
       />
 
       {tipo === 'despesa' ? (
@@ -190,21 +194,24 @@ export default function FinanceiroCrudTeste({
           <input
             value={form.uc}
             onChange={(event) => setForm((prev) => ({ ...prev, uc: event.target.value }))}
-            placeholder="UC (obrigatória)"
-            className="rounded border border-gray-300 px-3 py-2"
+            placeholder="UC (obrigatoria)"
+            aria-label="UC"
+            className={controlClassName}
           />
           <input
             value={form.data}
             onChange={(event) => setForm((prev) => ({ ...prev, data: event.target.value }))}
             type="date"
-            className="rounded border border-gray-300 px-3 py-2"
+            aria-label="Data"
+            className={controlClassName}
           />
           <select
             value={form.idOrcamento}
             onChange={(event) => setForm((prev) => ({ ...prev, idOrcamento: event.target.value }))}
-            className="rounded border border-gray-300 px-3 py-2"
+            aria-label="Orcamento"
+            className={controlClassName}
           >
-            <option value="">Orçamento (obrigatório)</option>
+            <option value="">Orcamento (obrigatorio)</option>
             {orcamentos.map((item) => (
               <option key={item.idOrcamento} value={String(item.idOrcamento)}>
                 {`${item.idOrcamento} - Ano ${item.anoOrcamento ?? item.ano}`}
@@ -215,22 +222,28 @@ export default function FinanceiroCrudTeste({
           <select
             value={form.idFornecedor}
             onChange={(event) => setForm((prev) => ({ ...prev, idFornecedor: event.target.value }))}
-            className="rounded border border-gray-300 px-3 py-2"
+            aria-label="Fornecedor"
+            className={controlClassName}
           >
             <option value="">Fornecedor (opcional)</option>
             {fornecedores.map((item) => (
-              <option key={item.idFornecedor} value={String(item.idFornecedor)}>{`${item.idFornecedor} - ${item.nomeFantasia}`}</option>
+              <option key={item.idFornecedor} value={String(item.idFornecedor)}>
+                {`${item.idFornecedor} - ${item.nomeFantasia}`}
+              </option>
             ))}
           </select>
 
           <select
             value={form.idUsuario}
             onChange={(event) => setForm((prev) => ({ ...prev, idUsuario: event.target.value }))}
-            className="rounded border border-gray-300 px-3 py-2"
+            aria-label="Usuario"
+            className={controlClassName}
           >
-            <option value="">Usuário (opcional)</option>
+            <option value="">Usuario (opcional)</option>
             {usuarios.map((item) => (
-              <option key={item.id} value={String(item.id)}>{`${item.id} - ${item.nome}`}</option>
+              <option key={item.id} value={String(item.id)}>
+                {`${item.id} - ${item.nome}`}
+              </option>
             ))}
           </select>
         </>
@@ -239,8 +252,9 @@ export default function FinanceiroCrudTeste({
           value={form.anoOrcamento}
           onChange={(event) => setForm((prev) => ({ ...prev, anoOrcamento: event.target.value }))}
           type="number"
-          placeholder="Ano do orçamento"
-          className="rounded border border-gray-300 px-3 py-2"
+          placeholder="Ano do orcamento"
+          aria-label="Ano do orcamento"
+          className={controlClassName}
         />
       )}
 
@@ -249,13 +263,15 @@ export default function FinanceiroCrudTeste({
         onChange={(event) => setForm((prev) => ({ ...prev, valor: event.target.value }))}
         type="number"
         placeholder="Valor"
-        className="rounded border border-gray-300 px-3 py-2"
+        aria-label="Valor"
+        className={controlClassName}
       />
 
       <select
         value={form.situacao}
         onChange={(event) => setForm((prev) => ({ ...prev, situacao: event.target.value }))}
-        className="rounded border border-gray-300 px-3 py-2"
+        aria-label="Situacao"
+        className={controlClassName}
       >
         <option value="1">Ativo</option>
         <option value="2">Inativo</option>
@@ -264,57 +280,76 @@ export default function FinanceiroCrudTeste({
       <select
         value={form.idInstituicao}
         onChange={(event) => setForm((prev) => ({ ...prev, idInstituicao: event.target.value }))}
-        className="rounded border border-gray-300 px-3 py-2"
+        aria-label="Instituicao"
+        className={controlClassName}
       >
-        <option value="">Instituição</option>
+        <option value="">Instituicao</option>
         {instituicoes.map((item) => (
-          <option key={item.id} value={String(item.id)}>{`${item.id} - ${item.nome}`}</option>
+          <option key={item.id} value={String(item.id)}>
+            {`${item.id} - ${item.nome}`}
+          </option>
         ))}
       </select>
 
       <select
         value={form.idTipoDespesa}
         onChange={(event) => setForm((prev) => ({ ...prev, idTipoDespesa: event.target.value }))}
-        className="rounded border border-gray-300 px-3 py-2"
+        aria-label="Tipo de despesa"
+        className={controlClassName}
       >
-        <option value="">Tipo de Despesa</option>
+        <option value="">Tipo de despesa</option>
         {tiposDespesa.map((item) => (
-          <option key={item.id} value={String(item.id)}>{`${item.id} - ${item.descricao}`}</option>
+          <option key={item.id} value={String(item.id)}>
+            {`${item.id} - ${item.descricao}`}
+          </option>
         ))}
       </select>
     </div>
   );
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
-      <h2 className="mb-3 text-lg font-semibold text-gray-900">Financeiro - Cadastro e Atualização</h2>
+    <div className="rounded-2xl border border-[#E4EEF0] bg-white p-4">
+      <h2 className="mb-3 text-lg font-semibold text-[#1F2A32]">Financeiro - cadastro e atualizacao</h2>
 
-      <div className="rounded border border-gray-200 p-3">
-        <h3 className="mb-2 text-base font-semibold text-gray-900">Cadastro</h3>
+      <form
+        className="rounded-2xl border border-[#E4EEF0] p-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleCreate();
+        }}
+      >
+        <h3 className="mb-2 text-base font-semibold text-[#1F2A32]">Cadastro</h3>
         <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
           <select
             value={createTipo}
             onChange={(event) => setCreateTipo(event.target.value as 'despesa' | 'orcamento')}
-            className="rounded border border-gray-300 px-3 py-2"
+            className={controlClassName}
+            aria-label="Tipo de cadastro"
           >
-            <option value="despesa">Cadastrar Despesa</option>
-            <option value="orcamento">Cadastrar Orçamento</option>
+            <option value="despesa">Cadastrar despesa</option>
+            <option value="orcamento">Cadastrar orcamento</option>
           </select>
         </div>
 
         {renderFormFields(createTipo, createForm, setCreateForm)}
 
         <div className="mt-3 flex gap-2">
-          <button className="rounded bg-emerald-700 px-4 py-2 text-white" onClick={() => void handleCreate()}>
+          <button type="submit" className="h-[46px] rounded-2xl bg-[#2E8F63] px-4 font-semibold text-white transition hover:brightness-95">
             Cadastrar
           </button>
         </div>
 
         {createError && <p className="mt-2 text-sm text-red-600">{createError}</p>}
-      </div>
+      </form>
 
-      <div className="mt-4 rounded border border-gray-200 p-3">
-        <h3 className="mb-2 text-base font-semibold text-gray-900">Atualização</h3>
+      <form
+        className="mt-4 rounded-2xl border border-[#E4EEF0] p-3"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleUpdate();
+        }}
+      >
+        <h3 className="mb-2 text-base font-semibold text-[#1F2A32]">Atualizacao</h3>
         <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
           <select
             value={updateTipo}
@@ -322,16 +357,18 @@ export default function FinanceiroCrudTeste({
               setUpdateTipo(event.target.value as 'despesa' | 'orcamento');
               setIdEditar('');
             }}
-            className="rounded border border-gray-300 px-3 py-2"
+            className={controlClassName}
+            aria-label="Tipo de atualizacao"
           >
-            <option value="despesa">Atualizar Despesa</option>
-            <option value="orcamento">Atualizar Orçamento</option>
+            <option value="despesa">Atualizar despesa</option>
+            <option value="orcamento">Atualizar orcamento</option>
           </select>
 
           <select
             value={idEditar}
             onChange={(event) => setIdEditar(event.target.value)}
-            className="rounded border border-gray-300 px-3 py-2"
+            className={controlClassName}
+            aria-label="Registro para atualizar"
           >
             <option value="">Selecione o ID para atualizar</option>
             {transacoesAtualizacao.map((item) => (
@@ -345,15 +382,15 @@ export default function FinanceiroCrudTeste({
         {renderFormFields(updateTipo, updateForm, setUpdateForm)}
 
         <div className="mt-3 flex gap-2">
-          <button className="rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void handleUpdate()}>
+          <button type="submit" className="h-[46px] rounded-2xl bg-[#0B6470] px-4 font-semibold text-white transition hover:brightness-95">
             Atualizar
           </button>
         </div>
 
         {updateError && <p className="mt-2 text-sm text-red-600">{updateError}</p>}
-      </div>
+      </form>
 
-      <p className="mt-3 text-sm text-gray-500">Registros carregados: {transacoes.length}</p>
+      <p className="mt-3 text-sm text-[#72808A]">Registros carregados: {transacoes.length}</p>
     </div>
   );
 }
