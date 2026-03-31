@@ -73,6 +73,27 @@ const filterByPeriodo = (
     const itemDate = parseDate(item.data);
     if (Number.isNaN(itemDate)) return false;
 
+    // Budgets are annual by nature, so compare by year instead of strict month window.
+    if (item.tipo === 'orcamento') {
+      if (Number.isNaN(inicio) && Number.isNaN(fim)) {
+        return true;
+      }
+
+      const itemYear = new Date(itemDate).getFullYear();
+
+      if (!Number.isNaN(inicio)) {
+        const startYear = new Date(inicio).getFullYear();
+        if (itemYear < startYear) return false;
+      }
+
+      if (!Number.isNaN(fim)) {
+        const endYear = new Date(fim).getFullYear();
+        if (itemYear > endYear) return false;
+      }
+
+      return true;
+    }
+
     if (!Number.isNaN(inicio) && itemDate < inicio) return false;
     if (!Number.isNaN(fim) && itemDate > fim) return false;
 
