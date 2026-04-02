@@ -65,7 +65,7 @@ const isHttpNotFoundError = (error: unknown): boolean => {
 
 const toQueryString = (
   query: ListQuery | undefined,
-  defaults: Required<Pick<ListQuery, "page" | "size">>
+  defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY
 ): string => {
   const params = new URLSearchParams();
   const mergedQuery = { ...defaults, ...query };

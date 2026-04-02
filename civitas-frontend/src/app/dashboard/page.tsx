@@ -1,610 +1,398 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Input from "@/components/Input";
+import PaginationControls from "@/components/PaginationControls";
+import { EmptyState, ErrorState, LoadingState } from "@/components/feedback-states";
+import { useClientPagination } from "@/hooks/useClientPagination";
+import { showToast } from "@/hooks/useToast";
+
+type QuickAction = {
+  title: string;
+  subtitle: string;
+  button: string;
+  tone: "amber" | "blue" | "slate";
+  icon: string;
+  onClick: () => void;
+};
+
+type DashboardExpense = {
+  id: number;
+  value: number;
+  label: string;
+  category: string;
+  date: string;
+  time: string;
+};
+
+const dashboardExpensesSeed: DashboardExpense[] = [
+  { id: 1, value: -539, label: "Area da saude", category: "Saude", date: "2026-03-17", time: "08:17" },
+  { id: 2, value: -777, label: "Secretaria municipal", category: "Administrativo", date: "2026-03-17", time: "08:17" },
+  { id: 3, value: -4000, label: "Reformas", category: "Infraestrutura", date: "2026-03-16", time: "08:15" },
+  { id: 4, value: -777.07, label: "Sabesp", category: "Utilidades", date: "2026-03-16", time: "06:10" },
+  { id: 5, value: 777777.77, label: "Recebimento de verba", category: "Receita", date: "2026-03-15", time: "06:09" },
+  { id: 6, value: -1280.35, label: "Material escolar", category: "Educacao", date: "2026-03-14", time: "10:32" },
+  { id: 7, value: -950, label: "Transporte escolar", category: "Transporte", date: "2026-03-13", time: "09:41" },
+];
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value));
 
 export default function Dashboard() {
   const router = useRouter();
+  const [showMoneyValues, setShowMoneyValues] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [expenses, setExpenses] = useState<DashboardExpense[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [showAvailable, setShowAvailable] = React.useState(true);
-  const [showExpenses, setShowExpenses] = React.useState(true);
-  const [monthIndex, setMonthIndex] = React.useState(0);
-  const [showMoneyValues, setShowMoneyValues] = React.useState(false);
-
-  const months = ["Julho / 2026", "Agosto / 2026", "Setembro / 2026"];
-
-  const quickActions = [
-    { title: "Área da Saúde (45%)", subtitle: "Área de Saúde (45%)", button: "Ver Detalhes", tone: "amber", onClick: () => router.push("/dashboard/despesas"), icon: "warning" },
-    { title: "3 Solicitações de Verba", subtitle: "Aguardando sua aprovação", button: "Revisar", tone: "blue", onClick: () => router.push("/dashboard/orcamentos"), icon: "check_circle" },
-    { title: "Adicionar novo gasto", subtitle: "Aguardando sua aprovação", button: "Lançar", tone: "slate", onClick: () => router.push("/dashboard/despesas"), icon: "add" },
-  ];
-
-  const expenses = [
-    { value: "- R$ 539", numeric: -539, label: "Área da saúde", date: "17/07/2026", time: "08:17", tone: "red" },
-    { value: "- R$ 777", numeric: -777, label: "Secretaria", date: "17/07/2026", time: "08:17", tone: "red" },
-    { value: "- R$ 4.000", numeric: -4000, label: "Reformas", date: "16/07/2026", time: "08:15", tone: "red" },
-    { value: "- R$ 777,07", numeric: -777.07, label: "Sabesp", date: "16/07/2026", time: "06:10", tone: "red" },
-    { value: "+ R$ 777.777,77", numeric: 777777.77, label: "Verba", date: "15/07/2026", time: "06:09", tone: "green" },
-  ];
-
-  const actionButtonClasses = {
-    amber: "bg-[#FFAA17] text-white hover:brightness-95",
-    blue: "bg-[#4A8FF7] text-white hover:brightness-95",
-    slate: "bg-[#1D2940] text-white hover:brightness-95",
-  } as const;
-
-  const totalAvailable = expenses
-    .filter((item) => item.numeric > 0)
-    .reduce((acc, item) => acc + item.numeric, 0);
-
-  const totalExpenses = Math.abs(
-    expenses
-      .filter((item) => item.numeric < 0)
-      .reduce((acc, item) => acc + item.numeric, 0)
+  const quickActions: QuickAction[] = useMemo(
+    () => [
+      {
+        title: "Areas com maior consumo",
+        subtitle: "Acompanhe os gastos mais sensiveis da semana.",
+        button: "Ver despesas",
+        tone: "amber",
+        icon: "warning",
+        onClick: () => router.push("/dashboard/despesas"),
+      },
+      {
+        title: "Solicitacoes de verba",
+        subtitle: "Revise os orcamentos pendentes em um unico fluxo.",
+        button: "Revisar",
+        tone: "blue",
+        icon: "fact_check",
+        onClick: () => router.push("/dashboard/orcamentos"),
+      },
+      {
+        title: "Painel financeiro",
+        subtitle: "Compare entradas, saidas e saldo consolidado.",
+        button: "Abrir",
+        tone: "slate",
+        icon: "bar_chart",
+        onClick: () => router.push("/dashboard/financeiro"),
+      },
+    ],
+    [router]
   );
 
-  const balanceValue = totalAvailable - totalExpenses;
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      maximumFractionDigits: 2,
-    }).format(value);
-
-  const hiddenValue = "* * * * * *";
-
-  const availableDisplay = showMoneyValues ? formatCurrency(totalAvailable) : hiddenValue;
-  const expenseDisplay = showMoneyValues ? formatCurrency(totalExpenses) : hiddenValue;
-  const balanceDisplay = showMoneyValues ? formatCurrency(balanceValue) : hiddenValue;
-
-  const renderTopValue = (text: string) => {
-    const masked = text === hiddenValue;
-
-    return (
-      <div
-        className={
-          masked
-            ? "text-6xl font-bold tracking-widest relative top-[25px]"
-            : "text-[28px] sm:text-[32px] font-bold tracking-tight relative top-[12px]"
-        }
-      >
-        {text}
-      </div>
-    );
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      setExpenses(dashboardExpensesSeed);
+    } catch (loadError) {
+      const message =
+        loadError instanceof Error ? loadError.message : "Nao foi possivel carregar o extrato da dashboard.";
+      setError(message);
+      setExpenses([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const chartSeries = [
-    {
-      availableLine: "M30 245 C 82 236, 118 190, 156 138 C 186 98, 210 40, 246 44 C 282 48, 315 120, 352 180 C 382 226, 418 166, 454 132 C 498 92, 548 66, 604 78 C 656 88, 690 98, 716 104",
-      expenseLine: "M30 196 C 92 184, 140 174, 182 160 C 220 148, 272 118, 322 110 C 362 104, 402 200, 438 206 C 478 212, 522 128, 574 120 C 626 112, 674 132, 716 146",
-      availableMarker: { x: 219, y: 44, labelX: 135, labelY: -2, textX: 219, textY: 24, text: "15/07/2026" },
-      expenseMarker: { x: 411, y: 206, labelX: 328, labelY: 220, textX: 412, textY: 246, text: "16/07/2026" }
-    },
-    {
-      availableLine: "M30 236 C 84 226, 126 176, 162 122 C 190 82, 214 52, 250 58 C 292 66, 330 138, 360 184 C 390 226, 428 186, 460 144 C 498 98, 546 74, 604 86 C 654 96, 688 110, 716 118",
-      expenseLine: "M30 210 C 92 194, 138 168, 182 144 C 226 122, 278 130, 318 174 C 350 208, 394 188, 430 156 C 474 116, 520 104, 576 114 C 628 122, 676 142, 716 156",
-      availableMarker: { x: 250, y: 58, labelX: 166, labelY: 12, textX: 250, textY: 38, text: "10/08/2026" },
-      expenseMarker: { x: 318, y: 174, labelX: 235, labelY: 188, textX: 319, textY: 214, text: "14/08/2026" }
-    },
-    {
-      availableLine: "M30 252 C 88 238, 124 204, 158 156 C 188 114, 214 74, 250 70 C 286 66, 318 112, 350 154 C 382 196, 420 176, 460 140 C 504 102, 554 92, 610 110 C 658 126, 692 140, 716 150",
-      expenseLine: "M30 214 C 86 200, 132 186, 176 164 C 220 142, 272 110, 314 118 C 356 126, 394 204, 430 214 C 470 224, 516 152, 570 140 C 626 128, 674 144, 716 160",
-      availableMarker: { x: 250, y: 70, labelX: 166, labelY: 24, textX: 250, textY: 50, text: "08/09/2026" },
-      expenseMarker: { x: 430, y: 214, labelX: 347, labelY: 228, textX: 431, textY: 254, text: "16/09/2026" }
+  useEffect(() => {
+    void loadDashboardData();
+  }, []);
+
+  const filteredExpenses = useMemo(() => {
+    const normalizedQuery = searchTerm.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return expenses;
     }
-  ];
 
-  const currentSeries = chartSeries[monthIndex];
+    return expenses.filter((item) => {
+      return (
+        item.label.toLowerCase().includes(normalizedQuery) ||
+        item.category.toLowerCase().includes(normalizedQuery)
+      );
+    });
+  }, [expenses, searchTerm]);
 
-  const totalMovements = totalAvailable + totalExpenses;
-  const healthPercentage = totalMovements > 0 ? Math.round((539 / totalMovements) * 100) : 45;
-  const secretariaPercentage = totalMovements > 0 ? Math.round((777 / totalMovements) * 100) : 25;
-  const reformasPercentage = totalMovements > 0 ? Math.round((4000 / totalMovements) * 100) : 20;
-  const othersPercentage = Math.max(0, 100 - healthPercentage - secretariaPercentage - reformasPercentage);
+  const {
+    currentPage,
+    pageSize,
+    totalPages,
+    totalRecords,
+    paginatedItems,
+    isPending,
+    goToPage,
+    changePageSize,
+    resetPagination,
+  } = useClientPagination(filteredExpenses, { initialPageSize: 4 });
+
+  useEffect(() => {
+    resetPagination();
+  }, [searchTerm, resetPagination]);
+
+  const totalAvailable = expenses.filter((item) => item.value > 0).reduce((acc, item) => acc + item.value, 0);
+  const totalExpenses = Math.abs(expenses.filter((item) => item.value < 0).reduce((acc, item) => acc + item.value, 0));
+  const balance = totalAvailable - totalExpenses;
+  const hiddenValue = "* * * * * *";
+
+  const categoryHighlights = useMemo(() => {
+    const grouped = filteredExpenses
+      .filter((item) => item.value < 0)
+      .reduce<Record<string, number>>((acc, item) => {
+        acc[item.category] = (acc[item.category] ?? 0) + Math.abs(item.value);
+        return acc;
+      }, {});
+
+    return Object.entries(grouped)
+      .sort(([, previous], [, next]) => next - previous)
+      .slice(0, 4);
+  }, [filteredExpenses]);
 
   return (
-    <div className="min-h-screen w-full bg-[#FCFCFB] font-sans">
-      {/* Header */}
-      <div className="border-b w-full border-[#F0EEE9] bg-white/95 pb-10 pt-2">
-        <div className="mx-auto flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
-          <div className="flex-1">
-            <h1 className="text-[40px] font-semibold leading-tight text-[#004C57] skeleton sm:text-[48px]">
-              Bem-Vindo {"{user}"}
-            </h1>
-
-            <p className="mt-1 text-sm text-gray-600 skeleton sm:text-base">
-              Vamos ao gerenciamento?
+    <div className="space-y-6">
+      <section className="rounded-[30px] bg-[linear-gradient(135deg,#0D7A7C_0%,#63B6B2_45%,#EAF5F5_100%)] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
+              Visao geral
+            </span>
+            <h1 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">Painel central de acompanhamento</h1>
+            <p className="mt-3 max-w-2xl text-sm text-white/85 sm:text-base">
+              Consolide saldo, gastos recentes e atalhos operacionais em uma mesma experiencia visual.
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setShowMoneyValues((previous) => !previous)}
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
+          >
+            <span className="material-symbols-outlined !text-[18px]">
+              {showMoneyValues ? "visibility_off" : "visibility"}
+            </span>
+            {showMoneyValues ? "Ocultar valores" : "Exibir valores"}
+          </button>
         </div>
-      </div>
+      </section>
 
-      <div className="w-full pb-14 pt-8">
-        <div className="mx-auto w-full px-1">
-          <p className="mb-6 pt-2 text-center text-[24px] font-bold text-[#1F1F1F]">
-            14 dias até a reposição da verba.
-          </p>
+      <section className="grid gap-5 xl:grid-cols-3">
+        <MetricCard title="Valor disponivel" subtitle="Saldo consolidado para operacao" value={showMoneyValues ? formatCurrency(totalAvailable) : hiddenValue} gradient="linear-gradient(135deg, #0D7C7C 0%, #66B8B7 100%)" icon="account_balance" />
+        <MetricCard title="Balanca" subtitle="Entradas menos saidas acumuladas" value={showMoneyValues ? formatCurrency(balance) : hiddenValue} gradient="linear-gradient(135deg, #1D1D1D 0%, #555555 100%)" icon="balance" />
+        <MetricCard title="Gastos totais" subtitle="Movimentacoes negativas do periodo" value={showMoneyValues ? formatCurrency(totalExpenses) : hiddenValue} gradient="linear-gradient(135deg, #F18B1B 0%, #FFB354 100%)" icon="monetization_on" />
+      </section>
 
-          <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            <TopCard
-              title="Valor Disponível"
-              subtitle="Saldo Atualizado:"
-              value={renderTopValue(availableDisplay)}
-              gradient="linear-gradient(135deg,#0D7A7C 0%,#62B8B2 55%,#65C4D1 100%)"
-              icon="account_balance"
-              showMoneyValues={showMoneyValues}
-              onClick={() => setShowMoneyValues((prev) => !prev)}
-            />
-
-            <TopCard
-              title="Balança"
-              subtitle="Valor disponível - Gastos totais:"
-              value={renderTopValue(balanceDisplay)}
-              gradient="linear-gradient(135deg,#181818 0%,#4F4F4F 50%,#1F2126 100%)"
-              icon="balance"
-              showMoneyValues={showMoneyValues}
-              dark
-              onClick={() => router.push('/dashboard')}
-            />
-
-            <TopCard
-              title="Gastos Totais"
-              subtitle="Nos últimos 30 dias:"
-              value={renderTopValue(expenseDisplay)}
-              gradient="linear-gradient(135deg,#FF961F 0%,#F4AA39 48%,#F8BF68 100%)"
-              icon="monetization_on"
-              showMoneyValues={showMoneyValues}
-              accent
-              onClick={() => setShowMoneyValues((prev) => !prev)}
-            />
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#F0A126]">
+                Acoes rapidas
+              </span>
+              <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">Fluxos mais usados da sprint</h2>
+              <p className="mt-2 text-sm text-[#72808A]">Atalhos para navegar entre analise, despesas e financeiro sem perder contexto.</p>
+            </div>
           </div>
 
-          <div className="mt-8 grid w-full grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-            <section className="rounded-[28px] bg-[#FFFDFB] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] ring-1 ring-[#EFE8DE]">
-              <div className="mb-3 flex items-center justify-between">
-                <div className="flex gap-1 text-[#C8C1B6]">
-                  <span className="h-2 w-2 rounded-full bg-current" />
-                  <span className="h-2 w-2 rounded-full bg-current" />
-                  <span className="h-2 w-2 rounded-full bg-current" />
+          <div className="mt-5 space-y-3">
+            {quickActions.map((action) => (
+              <ActionCard key={action.title} action={action} />
+            ))}
+          </div>
+        </article>
+
+        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+          <span className="inline-flex rounded-full bg-[#EAF4F5] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0B6470]">
+            Destaques do periodo
+          </span>
+          <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">Categorias com maior impacto</h2>
+          <p className="mt-2 text-sm text-[#72808A]">As categorias abaixo usam os mesmos dados exibidos no extrato recente.</p>
+
+          <div className="mt-6 space-y-4">
+            {categoryHighlights.length > 0 ? (
+              categoryHighlights.map(([category, value], index) => (
+                <div key={category}>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <span className="text-sm font-semibold text-[#1F2A32]">
+                      {index + 1}. {category}
+                    </span>
+                    <span className="text-sm font-semibold text-[#0B6470]">{formatCurrency(value)}</span>
+                  </div>
+                  <div className="h-3 rounded-full bg-[#EEF4F5]">
+                    <div
+                      className="h-3 rounded-full bg-[linear-gradient(90deg,#0D7C7C_0%,#64B7B3_100%)]"
+                      style={{ width: `${Math.min((value / Math.max(totalExpenses, 1)) * 100, 100)}%` }}
+                    />
+                  </div>
                 </div>
+              ))
+            ) : (
+              <EmptyState
+                title="Sem categorias para exibir"
+                description="Ajuste o filtro do extrato para visualizar outro recorte das movimentacoes."
+              />
+            )}
+          </div>
+        </article>
+      </section>
+
+      <section className="overflow-hidden rounded-[28px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+        <div className="border-b border-[#EAF1F2] px-5 py-5 lg:px-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <span className="inline-flex rounded-full bg-[#F3F9FA] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0B6470]">
+                Extrato recente
+              </span>
+              <h2 className="mt-4 text-[28px] font-bold text-[#1F2A32]">Ultimas movimentacoes</h2>
+              <p className="mt-2 text-sm text-[#72808A]">Filtro, paginacao e estados visuais seguem o mesmo padrao das outras telas da sprint.</p>
+            </div>
+
+            <div className="w-full xl:max-w-[360px]">
+              <Input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Filtrar por descricao ou categoria"
+                className="!mb-0 !border-[#D5E3E6] !py-3 text-sm"
+                aria-label="Filtrar movimentacoes do extrato"
+              />
+            </div>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="p-5 lg:p-6">
+            <LoadingState title="Carregando extrato da Home" description="Preparando as ultimas movimentacoes para consulta rapida." />
+          </div>
+        ) : error ? (
+          <div className="p-5 lg:p-6">
+            <ErrorState description={error} onRetry={() => void loadDashboardData()} />
+          </div>
+        ) : filteredExpenses.length === 0 ? (
+          <div className="p-5 lg:p-6">
+            <EmptyState
+              title="Nenhuma movimentacao encontrada"
+              description="Tente outro termo de busca para localizar uma categoria ou despesa especifica."
+            />
+          </div>
+        ) : (
+          <>
+            <div className="space-y-3 p-5 lg:p-6">
+              {paginatedItems.map((item) => (
                 <button
+                  key={item.id}
                   type="button"
-                  onClick={() => router.push('/dashboard/orcamentos')}
-                  className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FFAA17] text-[11px] font-bold text-white"
+                  onClick={() => showToast(`${item.label} selecionado para consulta rapida.`, "info")}
+                  className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4 text-left transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#58AFAE]/15 sm:grid-cols-[1fr_auto_auto]"
                 >
-                  3
-                </button>
-              </div>
-              <h3 className="text-[18px] font-semibold text-[#1E1E1E]">Ações Rápidas & Pendências</h3>
-              <div className="mt-4 space-y-3">
-                {quickActions.map((item, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center gap-3 rounded-[18px] border px-4 py-4 ${
-                      index === 0
-                        ? 'bg-[#FFF7E8] border-[#F6E2BA]'
-                        : index === 1
-                        ? 'bg-[#EFF5FF] border-[#D9E8FF]'
-                        : 'bg-[#F8F8F8] border-[#ECECEC]'
+                  <div>
+                    <p className={`text-[15px] font-bold ${item.value > 0 ? "text-[#32A95A]" : "text-[#1F2A32]"}`}>
+                      {showMoneyValues ? formatCurrency(item.value) : hiddenValue}
+                    </p>
+                    <p className="mt-1 text-sm text-[#5B6770]">{item.label}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#90A0A8]">{item.category}</p>
+                  </div>
+
+                  <div className="text-right text-sm text-[#6B7280]">
+                    <div>{formatDate(item.date)}</div>
+                    <div>{item.time}</div>
+                  </div>
+
+                  <span
+                    className={`hidden self-center rounded-full px-4 py-2 text-xs font-semibold sm:inline-flex ${
+                      item.value > 0 ? "bg-[#EAF9EF] text-[#32A95A]" : "bg-[#FFF1DB] text-[#F0A126]"
                     }`}
                   >
-                    <div
-                      className={`flex h-9 w-9 items-center justify-center rounded-full ${
-                        index === 0 ? 'text-[#F5A623]' : index === 1 ? 'text-[#4A8FF7]' : 'text-[#9C9C9C]'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined">{item.icon}</span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[15px] font-semibold text-[#1F1F1F]">{item.title}</p>
-                      <p className="truncate text-[12px] text-[#A8A29A]">{item.subtitle}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={item.onClick}
-                      className={`rounded-full px-5 py-2 text-[13px] font-bold transition ${actionButtonClasses[item.tone as keyof typeof actionButtonClasses]}`}
-                    >
-                      {item.button}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="rounded-[28px] bg-[#FFFDFB] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.06)] ring-1 ring-[#EFE8DE]">
-              <h3 className="mt-2 text-center text-[18px] font-semibold text-[#222]">Gastos por Categoria</h3>
-
-              <div className="mx-auto mt-4 flex max-w-[330px] items-center justify-center">
-                <div className="relative h-[200px] w-[200px] sm:h-[230px] sm:w-[230px] md:h-[250px] md:w-[250px]">
-                  <div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: `conic-gradient(
-                        #4B88F8 0 ${healthPercentage}%,
-                        #FF7E22 ${healthPercentage}% ${healthPercentage + secretariaPercentage}%,
-                        #26BFB1 ${healthPercentage + secretariaPercentage}% ${healthPercentage + secretariaPercentage + reformasPercentage}%,
-                        #F4C61D ${healthPercentage + secretariaPercentage + reformasPercentage}% 100%
-                      )`
-                    }}
-                  />
-                  <div className="absolute inset-[32px] rounded-full bg-[#FFFDFB]" />
-                </div>
-              </div>
-
-              <div className="mt-1 grid grid-cols-2 gap-x-6 gap-y-2 px-4 pb-1 text-[13px] text-[#8E8E8E]">
-                <Legend color="#4B88F8" text={`Área da Saúde (${healthPercentage}%)`} />
-                <Legend color="#FF7E22" text={`Secretaria (${secretariaPercentage}%)`} />
-                <Legend color="#26BFB1" text={`Reformas (${reformasPercentage}%)`} />
-                <Legend color="#F4C61D" text={`Outros (${othersPercentage}%)`} />
-              </div>
-            </section>
-          </div>
-
-          <div className="mt-8 grid w-full grid-cols-1 gap-6 xl:grid-cols-2">
-            <InfoCard
-              badge="PREVISÃO DO MÊS"
-              title="Gastos previstos para esse mês:"
-              subtitle="Se não houver imprevistos, esse é o valor dos gastos totais."
-              value={showMoneyValues ? formatCurrency(totalExpenses) : "{Cálculo de gastos previstos}"}
-              icon="account_balance_wallet"
-              onClick={() => window.alert('Resumo de gastos previstos')}
-            />
-            <InfoCard
-              badge="ALERTA DE GASTOS"
-              title="Instituições desbalanceadas"
-              subtitle="Estão gastando bem mais que a média."
-              value="{Nome da Instituição}"
-              icon="bar_chart"
-              onClick={() => router.push('/dashboard/instituicoes')}
-            />
-          </div>
-
-          <div className="mt-8 grid w-full grid-cols-1 gap-6 xl:grid-cols-2">
-            <article className="relative overflow-hidden rounded-[30px] bg-[#FFFDFB] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.06)] ring-1 ring-[#ECE6DD]">
-              <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#F7F4EF]" />
-              <div className="relative z-10 flex gap-1 text-[#C9C2B7]">
-                <span className="h-2 w-2 rounded-full bg-current" />
-                <span className="h-2 w-2 rounded-full bg-current" />
-                <span className="h-2 w-2 rounded-full bg-current" />
-              </div>
-
-              <div className="relative z-10 mt-1 text-center">
-                <h3 className="text-[28px] font-extrabold leading-[1.05] text-[#212121] md:text-[36px]">
-                  Gráfico
-                  <br />
-                  Financeiro
-                </h3>
-              </div>
-
-              <div className="relative z-10 mt-2 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <span className="inline-flex w-fit rounded-full bg-[#FFF0DD] px-5 py-1.5 text-[13px] font-extrabold uppercase tracking-[0.02em] text-[#FF980E]">
-                  VISÃO GERAL
-                </span>
-                <p className="max-w-[300px] text-right text-[16px] leading-[1.1] text-[#B0ACA5]">
-                  Comparativo: Valor Disponível vs
-                  <br />
-                  Gastos
-                </p>
-              </div>
-
-              <div className="relative z-10 mt-2 h-[220px] rounded-[16px] px-2 pb-8 pt-2 sm:h-[260px] lg:h-[300px]">
-                <svg viewBox="0 0 740 300" className="h-full w-full" preserveAspectRatio="none" aria-label="Gráfico financeiro comparativo">
-                  <defs>
-                    <linearGradient id="tealFillExact" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#0A5F6B" stopOpacity={showAvailable ? 0.16 : 0.02} />
-                      <stop offset="100%" stopColor="#0A5F6B" stopOpacity="0.02" />
-                    </linearGradient>
-                    <linearGradient id="redFillExact" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF5757" stopOpacity={showExpenses ? 0.10 : 0.02} />
-                      <stop offset="100%" stopColor="#FF5757" stopOpacity="0.02" />
-                    </linearGradient>
-                  </defs>
-
-                  {showAvailable && (
-                    <>
-                      <path
-                        d={`${currentSeries.availableLine} L 716 286 L 30 286 Z`}
-                        fill="url(#tealFillExact)"
-                      />
-                      <path
-                        d={currentSeries.availableLine}
-                        fill="none"
-                        stroke="#075E69"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <line
-                        x1={currentSeries.availableMarker.x}
-                        y1={currentSeries.availableMarker.y}
-                        x2={currentSeries.availableMarker.x}
-                        y2="286"
-                        stroke="#B7CCD1"
-                        strokeWidth="2"
-                        strokeDasharray="7 7"
-                      />
-                      <circle
-                        cx={currentSeries.availableMarker.x}
-                        cy={currentSeries.availableMarker.y}
-                        r="7"
-                        fill="#FFF"
-                        stroke="#075E69"
-                        strokeWidth="4"
-                      />
-                      <rect
-                        x={currentSeries.availableMarker.labelX}
-                        y={currentSeries.availableMarker.labelY}
-                        rx="14"
-                        ry="14"
-                        width="168"
-                        height="40"
-                        fill="#075E69"
-                      />
-                      <text
-                        x={currentSeries.availableMarker.textX}
-                        y={currentSeries.availableMarker.textY}
-                        textAnchor="middle"
-                        fontSize="18"
-                        fontWeight="700"
-                        fill="#FFFFFF"
-                      >
-                        {currentSeries.availableMarker.text}
-                      </text>
-                    </>
-                  )}
-
-                  {showExpenses && (
-                    <>
-                      <path
-                        d={`${currentSeries.expenseLine} L 716 286 L 30 286 Z`}
-                        fill="url(#redFillExact)"
-                      />
-                      <path
-                        d={currentSeries.expenseLine}
-                        fill="none"
-                        stroke="#FF5555"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <line
-                        x1={currentSeries.expenseMarker.x}
-                        y1={currentSeries.expenseMarker.y}
-                        x2={currentSeries.expenseMarker.x}
-                        y2="286"
-                        stroke="#F2B0B0"
-                        strokeWidth="2"
-                        strokeDasharray="7 7"
-                      />
-                      <circle
-                        cx={currentSeries.expenseMarker.x}
-                        cy={currentSeries.expenseMarker.y}
-                        r="7"
-                        fill="#FFF"
-                        stroke="#FF5555"
-                        strokeWidth="4"
-                      />
-                      <rect
-                        x={currentSeries.expenseMarker.labelX}
-                        y={currentSeries.expenseMarker.labelY}
-                        rx="14"
-                        ry="14"
-                        width="168"
-                        height="40"
-                        fill="#FF5757"
-                      />
-                      <text
-                        x={currentSeries.expenseMarker.textX}
-                        y={currentSeries.expenseMarker.textY}
-                        textAnchor="middle"
-                        fontSize="18"
-                        fontWeight="700"
-                        fill="#FFFFFF"
-                      >
-                        {currentSeries.expenseMarker.text}
-                      </text>
-                    </>
-                  )}
-
-                  <g fill="#B3B3B3" fontSize="13" fontWeight="500">
-                    <text x="58" y="310">10/07</text>
-                    <text x="164" y="310">12/07</text>
-                    <text x="271" y="310">14/07</text>
-                    <text x="363" y="310">16/07</text>
-                    <text x="470" y="310">18/07</text>
-                    <text x="578" y="310">20/07</text>
-                    <text x="658" y="310">22/07</text>
-                  </g>
-                </svg>
-              </div>
-
-              <div className="relative z-10 mt-3 flex flex-col gap-3 lg:flex-row">
-                <button
-                  type="button"
-                  onClick={() => setShowAvailable((v) => !v)}
-                  className={`inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-[18px] border px-4 py-3 text-[16px] font-bold shadow-sm transition hover:brightness-[0.98] lg:flex-1 ${
-                    showAvailable ? 'border-[#B9D0D3] bg-[#EAF4F5] text-[#075E69]' : 'border-[#D8E2E3] bg-[#F5FAFA] text-[#8AA8AC]'
-                  }`}
-                >
-                  <span className="relative h-4 w-8">
-                    <span className={`absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 rounded-full ${showAvailable ? 'bg-[#075E69]' : 'bg-[#8AA8AC]'}`} />
-                    <span className={`absolute left-[8px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-[3px] bg-white ${showAvailable ? 'border-[#075E69]' : 'border-[#8AA8AC]'}`} />
+                    {item.value > 0 ? "Entrada" : "Saida"}
                   </span>
-                  Valor disponível
                 </button>
+              ))}
+            </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowExpenses((v) => !v)}
-                  className={`inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-[18px] border px-4 py-3 text-[16px] font-bold shadow-sm transition hover:brightness-[0.98] lg:flex-1 ${
-                    showExpenses ? 'border-[#F2B7B7] bg-[#FFF3F3] text-[#FF5555]' : 'border-[#E7D4D4] bg-[#FFF9F9] text-[#D59A9A]'
-                  }`}
-                >
-                  <span className="relative h-4 w-8">
-                    <span className={`absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 rounded-full ${showExpenses ? 'bg-[#FF5555]' : 'bg-[#D59A9A]'}`} />
-                    <span className={`absolute left-[8px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-[3px] bg-white ${showExpenses ? 'border-[#FF5555]' : 'border-[#D59A9A]'}`} />
-                  </span>
-                  Gastos totais
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setMonthIndex((prev) => (prev + 1) % months.length)}
-                  className="inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-[18px] border border-[#F0CFA4] bg-[#FFF6E8] px-4 py-3 text-[16px] font-bold text-[#F0A126] shadow-sm transition hover:brightness-[0.98] lg:flex-1"
-                >
-                  <span className="material-symbols-outlined !text-[18px]">calendar_month</span>
-                  {months[monthIndex]}
-                </button>
-              </div>
-            </article>
-
-            <article className="relative overflow-hidden rounded-[30px] bg-[#FFFDFB] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.06)] ring-1 ring-[#ECE6DD]">
-              <div className="absolute -right-10 top-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFF0DD] text-[#F0A126]">
-                <span className="material-symbols-outlined">receipt_long</span>
-              </div>
-              <span className="inline-flex rounded-full bg-[#FFF0DD] px-4 py-1 text-[11px] font-bold uppercase tracking-[0.05em] text-[#F0A126]">
-                EXTRATO RECENTE
-              </span>
-              <h3 className="mt-4 text-center text-[28px] font-bold text-[#232323]">Últimos Gastos:</h3>
-              <p className="mt-1 text-center text-[13px] text-[#B0ACA5]">Aqui você pode ver onde está indo os fundos.</p>
-              <div className="mt-6 space-y-3">
-                {expenses.map((item, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[16px] border border-[#F0ECE5] bg-white px-3 py-3 sm:grid-cols-[1fr_auto_auto]">
-                    <div>
-                      <p className={`text-[15px] font-bold ${item.tone === 'green' ? 'text-[#35B86B]' : 'text-[#3B3B3B]'}`}>
-                        {showMoneyValues ? item.value : "* * * * * *"}
-                      </p>
-                      <p className="text-[12px] text-[#A9A29A]">{item.label}</p>
-                    </div>
-                    <div className="text-right text-[12px] text-[#8E8E8E]">
-                      <div>{item.date}</div>
-                      <div>{item.time}</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => window.alert(`${item.label} - ${item.value}`)}
-                      className={`hidden sm:inline-flex rounded-full px-4 py-2 text-[12px] font-bold ${
-                        item.tone === 'green' ? 'bg-[#EAF9EF] text-[#35B86B]' : 'bg-[#FFF1DB] text-[#F0A126]'
-                      }`}
-                    >
-                      Ver mais +
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalRecords={totalRecords}
+              pageSize={pageSize}
+              pageSizeOptions={[4, 6, 8]}
+              disabled={isPending}
+              onPageChange={goToPage}
+              onPageSizeChange={changePageSize}
+            />
+          </>
+        )}
+      </section>
     </div>
   );
 }
 
-function TopCard({
+function MetricCard({
   title,
   subtitle,
   value,
   gradient,
   icon,
-  onClick,
-  showMoneyValues = false,
-  dark = false,
-  accent = false
 }: {
-  title: string;
-  subtitle: string;
-  value: React.ReactNode;
-  gradient: string;
-  icon: string;
-  onClick: () => void;
-  showMoneyValues?: boolean;
-  dark?: boolean;
-  accent?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="relative h-[164px] w-full overflow-hidden rounded-[20px] p-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
-      style={{ background: gradient }}
-    >
-      <div className={`absolute right-4 top-4 opacity-70 ${dark ? 'text-white/60' : accent ? 'text-white/55' : 'text-white/55'}`}>
-        <span className="material-symbols-outlined !text-[42px]">{icon}</span>
-      </div>
-
-      <div className={`text-[14px] font-semibold ${dark ? 'text-white' : accent ? 'text-[#5E3000]' : 'text-white'}`}>
-        Conta Digital
-      </div>
-
-      <div className={`mt-2 text-[26px] font-bold leading-tight ${dark ? 'text-white' : accent ? 'text-[#5E3000]' : 'text-white'}`}>
-        {title}
-      </div>
-
-      <div className={`mt-1 h-[18px] text-[12px] ${dark ? 'text-white/70' : accent ? 'text-[#7A4C15]' : 'text-white/80'}`}>
-        {subtitle}
-      </div>
-
-      <div className={`${dark ? 'text-white' : accent ? 'text-[#5E3000]' : 'text-white'}`}>
-        {value}
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-end bg-black/12 px-4 py-2">
-        <span className="material-symbols-outlined !text-[22px] text-white">
-          {showMoneyValues ? "visibility" : "visibility_off"}
-        </span>
-      </div>
-    </button>
-  )
-}
-
-function Legend({ color, text }: { color: string; text: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
-      <span>{text}</span>
-    </div>
-  )
-}
-
-function InfoCard({
-  badge,
-  title,
-  subtitle,
-  value,
-  icon,
-  onClick
-}: {
-  badge: string;
   title: string;
   subtitle: string;
   value: string;
+  gradient: string;
   icon: string;
-  onClick: () => void;
 }) {
   return (
-    <article className="relative overflow-hidden rounded-[28px] bg-[#FFFDFB] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] ring-1 ring-[#EFE8DE]">
-      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#F8F4EC]" />
-      <div className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF1DB] text-[#F0A126]">
-        <span className="material-symbols-outlined">{icon}</span>
+    <article
+      className="relative overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
+      style={{ background: gradient }}
+    >
+      <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full border border-white/25" />
+      <div className="absolute -bottom-8 right-8 h-24 w-24 rounded-full bg-white/10" />
+      <div className="relative z-10 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/75">Conta digital</p>
+          <h2 className="mt-5 text-[28px] font-semibold leading-none">{title}</h2>
+          <p className="mt-2 text-sm text-white/80">{subtitle}</p>
+        </div>
+        <span className="material-symbols-outlined !text-[42px] opacity-60">{icon}</span>
       </div>
-      <div className="flex gap-1 text-[#C9C2B7]">
-        <span className="h-2 w-2 rounded-full bg-current" />
-        <span className="h-2 w-2 rounded-full bg-current" />
-        <span className="h-2 w-2 rounded-full bg-current" />
+
+      <div className="relative z-10 mt-6 rounded-2xl bg-black/20 px-4 py-3 text-lg font-semibold tracking-[0.08em] backdrop-blur-sm">
+        {value}
       </div>
-      <span className="mt-4 inline-flex rounded-full bg-[#FFF0DD] px-4 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-[#F0A126]">
-        {badge}
-      </span>
-      <h3 className="mt-5 text-[24px] font-bold leading-tight text-[#232323]">{title}</h3>
-      <p className="mt-2 text-[13px] text-[#B0ACA5]">{subtitle}</p>
+    </article>
+  );
+}
+
+function ActionCard({ action }: { action: QuickAction }) {
+  const toneClasses = {
+    amber: "border-[#F6E2BA] bg-[#FFF7E8] text-[#A56300]",
+    blue: "border-[#D9E8FF] bg-[#EFF5FF] text-[#2D6FD2]",
+    slate: "border-[#D9E2E6] bg-[#F5F8F9] text-[#31424C]",
+  } as const;
+
+  const buttonClasses = {
+    amber: "bg-[#FFAA17] text-white",
+    blue: "bg-[#4A8FF7] text-white",
+    slate: "bg-[#1D2940] text-white",
+  } as const;
+
+  return (
+    <div className={`flex items-center gap-4 rounded-[20px] border px-4 py-4 ${toneClasses[action.tone]}`}>
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/70">
+        <span className="material-symbols-outlined !text-[22px]">{action.icon}</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[15px] font-semibold text-[#1F2A32]">{action.title}</p>
+        <p className="mt-1 text-sm text-[#72808A]">{action.subtitle}</p>
+      </div>
       <button
         type="button"
-        onClick={onClick}
-        className="mt-8 flex w-full items-center justify-center rounded-[16px] bg-[#F3E7D5] px-4 py-4 text-[15px] font-semibold text-[#6E604E] transition hover:brightness-[0.98]"
+        onClick={action.onClick}
+        className={`rounded-full px-5 py-2 text-sm font-bold transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-black/5 ${buttonClasses[action.tone]}`}
       >
-        {value}
+        {action.button}
       </button>
-    </article>
-  )
+    </div>
+  );
 }
