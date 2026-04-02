@@ -31,6 +31,53 @@ export const digitsOnly = (value: unknown): string => {
   return toTrimmedString(value).replace(/\D/g, "");
 };
 
+export const toTrimmedText = (value: unknown): string => {
+  return toTrimmedString(value);
+};
+
+export const toNumberOrUndefined = (value: unknown): number | undefined => {
+  return toOptionalNumber(value);
+};
+
+const padDateSegment = (value: number): string => {
+  return String(value).padStart(2, "0");
+};
+
+export const normalizeDateInput = (value: unknown): string | undefined => {
+  const normalizedValue = toTrimmedString(value);
+
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  const isoMatch = normalizedValue.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    return `${year}-${month}-${day}`;
+  }
+
+  const brMatch = normalizedValue.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+  if (brMatch) {
+    const [, day, month, year] = brMatch;
+    return `${year}-${month}-${day}`;
+  }
+
+  const parsedDate = new Date(normalizedValue);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return undefined;
+  }
+
+  return `${parsedDate.getFullYear()}-${padDateSegment(parsedDate.getMonth() + 1)}-${padDateSegment(parsedDate.getDate())}`;
+};
+
+const toDateTimestamp = (value: unknown): number => {
+  const normalizedDate = normalizeDateInput(value);
+  if (!normalizedDate) return Number.NaN;
+
+  const [year, month, day] = normalizedDate.split("-").map(Number);
+  return new Date(year, month - 1, day).getTime();
+};
+
 export const normalizeUf = (value: unknown): string => {
   return toTrimmedString(value).toUpperCase();
 };
@@ -160,5 +207,63 @@ export const normalizeOrcamentoPayload = <T extends FormPayload>(data: T): T => 
     valorOrcamento: toOptionalNumber(data.valorOrcamento),
     idInstituicao: toOptionalNumber(data.idInstituicao),
     idTipoDespesa: toOptionalNumber(data.idTipoDespesa),
+  } as T;
+};
+
+export const validateRequiredUc = (
+  value: unknown,
+  requiresUc: boolean
+): string | undefined => {
+  if (!requiresUc) {
+    return undefined;
+  }
+
+  if (!toTrimmedString(value)) {
+    return "UC e obrigatoria para o tipo de despesa selecionado.";
+  }
+
+  return undefined;
+};
+
+export const validateDespesaDateRange = (
+  dataEmicao: unknown,
+  dataVencimento: unknown
+): string | undefined => {
+  const emissaoTimestamp = toDateTimestamp(dataEmicao);
+  const vencimentoTimestamp = toDateTimestamp(dataVencimento);
+
+  if (!Number.isNaN(emissaoTimestamp) && emissaoTimestamp > Date.now()) {
+    return "Data de emissao nao pode ser futura.";
+  }
+
+  if (
+    !Number.isNaN(emissaoTimestamp) &&
+    !Number.isNaN(vencimentoTimestamp) &&
+    vencimentoTimestamp < emissaoTimestamp
+  ) {
+    return "Data de vencimento nao pode ser anterior a data de emissao.";
+  }
+
+  return undefined;
+};
+
+export const normalizeDespesaPayload = <T extends FormPayload>(data: T): T => {
+  return {
+    ...data,
+    numeroDocumento: digitsOnly(data.numeroDocumento),
+    uc: toTrimmedString(data.uc),
+    dataEmicao: normalizeDateInput(data.dataEmicao),
+    consumoPrevisto: toOptionalNumber(data.consumoPrevisto ?? data.valor),
+    dataVencimento: normalizeDateInput(data.dataVencimento ?? data.data),
+    situacao: toOptionalNumber(data.situacao),
+    idTipoDespesa: toOptionalNumber(data.idTipoDespesa),
+    idOrcamento: toOptionalNumber(data.idOrcamento),
+    idInstituicao: toOptionalNumber(data.idInstituicao),
+    idFornecedor: toOptionalNumber(data.idFornecedor ?? data.fornecedorId),
+    idUsuario: toOptionalNumber(data.idUsuario),
+    descricao: toTrimmedString(data.descricao),
+    valor: toOptionalNumber(data.valor),
+    data: normalizeDateInput(data.data),
+    categoria: toTrimmedString(data.categoria),
   } as T;
 };

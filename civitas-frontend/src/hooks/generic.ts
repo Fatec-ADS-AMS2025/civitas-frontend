@@ -55,6 +55,52 @@ const parseApiMessageFromErrorText = (errorText: string): string => {
   return errorText;
 };
 
+const extractValidationMessages = (payload: unknown): string[] => {
+  if (Array.isArray(payload)) {
+    return payload
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+  }
+
+  if (isRecord(payload)) {
+    return Object.values(payload)
+      .flatMap((value) => {
+        if (typeof value === "string") {
+          return [value.trim()];
+        }
+
+        if (Array.isArray(value)) {
+          return value
+            .map((item) => (typeof item === "string" ? item.trim() : ""))
+            .filter((item) => item.length > 0);
+        }
+
+        return [];
+      })
+      .filter((item) => item.length > 0);
+  }
+
+  return [];
+};
+
+const buildDetailedApiErrorMessage = (
+  errorJson: ResponseEnvelope<unknown> | null,
+  errorText: string,
+  status: number
+): string => {
+  const validationMessages = extractValidationMessages(errorJson?.data);
+  const primaryMessage =
+    errorJson?.message?.trim() ||
+    parseApiMessageFromErrorText(errorText).trim() ||
+    `Erro na requisicao (${status})`;
+
+  if (validationMessages.length === 0) {
+    return primaryMessage;
+  }
+
+  return `${primaryMessage}: ${Array.from(new Set(validationMessages)).join(" | ")}`;
+};
+
 const isPaginatedResult = <T>(value: unknown): value is PaginatedResult<T> => {
   return isRecord(value) && Array.isArray(value.items);
 };
@@ -65,7 +111,7 @@ const isHttpNotFoundError = (error: unknown): boolean => {
 
 const toQueryString = (
   query: ListQuery | undefined,
-  defaults: Required<Pick<ListQuery, "page" | "size">>
+  defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY
 ): string => {
   const params = new URLSearchParams();
   const mergedQuery = { ...defaults, ...query };
@@ -109,10 +155,11 @@ export class GenericService<T> {
         errorText = "Erro ao processar resposta do servidor.";
       }
 
-      const message =
-        errorJson?.message ||
-        errorText ||
-        `Erro na requisição (${response.status})`;
+      const message = buildDetailedApiErrorMessage(
+        errorJson,
+        errorText,
+        response.status
+      );
 
       showToast(message, "error");
 

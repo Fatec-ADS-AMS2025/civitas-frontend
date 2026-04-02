@@ -1,4 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  digitsOnly,
+  normalizeDespesaPayload,
+  validateDespesaDateRange,
+} from '@/global/formPayload';
 import { despesaService } from '@/hooks/despesa';
 import { fornecedorService } from '@/hooks/fornecedor';
 import { instituicaoService } from '@/hooks/instituicao';
@@ -128,9 +133,17 @@ const safeListRequest = async <T>(request: () => Promise<T[] | null | undefined>
 };
 
 const buildNumeroDocumento = (payload: FinanceiroPayloadDTO): string => {
-  const candidate = payload.numeroDocumento?.trim() ?? payload.descricao?.trim() ?? 'DESPESA';
-  const base = candidate.replace(/\s+/g, '-').toUpperCase();
-  return `${base}-${Date.now()}`;
+  const providedDigits = digitsOnly(payload.numeroDocumento);
+  if (providedDigits) {
+    return providedDigits;
+  }
+
+  const descriptionDigits = digitsOnly(payload.descricao);
+  if (descriptionDigits) {
+    return descriptionDigits;
+  }
+
+  return String(Date.now());
 };
 
 export class FinanceiroService {
@@ -237,7 +250,7 @@ export class FinanceiroService {
       throw new Error('Despesa exige UC preenchida.');
     }
 
-    const body = {
+    const body = normalizeDespesaPayload({
       id: 0,
       numeroDocumento: buildNumeroDocumento(payload),
       uc: payload.uc?.trim(),
@@ -250,7 +263,16 @@ export class FinanceiroService {
       idInstituicao: payload.idInstituicao,
       idFornecedor: payload.idFornecedor ?? payload.fornecedorId,
       idUsuario: payload.idUsuario,
-    };
+    }) as DespesaDTO;
+
+    if (!body.numeroDocumento) {
+      throw new Error('Despesa exige numero de documento numerico.');
+    }
+
+    const dateRangeError = validateDespesaDateRange(body.dataEmicao, body.dataVencimento);
+    if (dateRangeError) {
+      throw new Error(dateRangeError);
+    }
 
     return despesaService.createData(body);
   }
@@ -287,7 +309,12 @@ export class FinanceiroService {
       throw new Error(`Despesa ${id} nao encontrada.`);
     }
 
-    const numeroDocumento = payload.numeroDocumento?.trim() || current.numeroDocumento || `DESPESA-${id}`;
+    const numeroDocumento =
+      buildNumeroDocumento({
+        ...payload,
+        numeroDocumento: payload.numeroDocumento ?? current.numeroDocumento,
+        descricao: payload.descricao ?? current.descricao,
+      }) || String(Date.now());
     const uc = payload.uc?.trim() || current.uc || '';
     const dataVencimento = payload.dataVencimento ?? payload.data ?? current.dataVencimento ?? current.data;
     const dataEmicao = payload.dataEmicao ?? payload.data ?? current.dataEmicao ?? current.data ?? dataVencimento;
@@ -310,7 +337,7 @@ export class FinanceiroService {
       throw new Error('Despesa exige UC preenchida.');
     }
 
-    const body = {
+    const body = normalizeDespesaPayload({
       id,
       numeroDocumento,
       uc,
@@ -323,7 +350,16 @@ export class FinanceiroService {
       idInstituicao,
       idFornecedor,
       idUsuario,
-    };
+    }) as DespesaDTO;
+
+    if (!body.numeroDocumento) {
+      throw new Error('Despesa exige numero de documento numerico.');
+    }
+
+    const dateRangeError = validateDespesaDateRange(body.dataEmicao, body.dataVencimento);
+    if (dateRangeError) {
+      throw new Error(dateRangeError);
+    }
 
     return despesaService.updateData(id, body);
   }
