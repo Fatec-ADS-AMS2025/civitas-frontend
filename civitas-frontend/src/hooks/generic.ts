@@ -26,6 +26,10 @@ export interface ListQuery {
   sortDirection?: "asc" | "desc";
 }
 
+interface HandleResponseOptions {
+  showSuccessToast?: boolean;
+}
+
 const DEFAULT_LIST_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
   page: 1,
   size: 100,
@@ -136,7 +140,10 @@ export class GenericService<T> {
     return `${BASE_URL}/${this.endpoint}`;
   }
 
-  protected async handleResponse<R = unknown>(response: Response): Promise<R> {
+  protected async handleResponse<R = unknown>(
+    response: Response,
+    options: HandleResponseOptions = {}
+  ): Promise<R> {
     if (response.status === 204) return undefined as R;
 
     const contentType = response.headers.get("content-type");
@@ -170,6 +177,7 @@ export class GenericService<T> {
       const json = (await response.json()) as R;
 
       if (
+        options.showSuccessToast &&
         isRecord(json) &&
         typeof json.message === "string" &&
         json.message.trim() !== ""
@@ -391,7 +399,7 @@ export class GenericService<T> {
       body: JSON.stringify(data),
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     return this.unwrapItem<T>(payload);
   }
 
@@ -404,7 +412,7 @@ export class GenericService<T> {
       body: JSON.stringify(data),
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     const envelope = this.toEnvelope<unknown>(payload);
 
     return {
@@ -432,7 +440,7 @@ export class GenericService<T> {
       body: JSON.stringify(data),
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     return this.unwrapItem<T>(payload);
   }
 
@@ -469,7 +477,7 @@ export class GenericService<T> {
       method: "DELETE",
     });
 
-    await this.handleResponse(response);
+    await this.handleResponse(response, { showSuccessToast: true });
   }
 
   async patch(id: number, data: Partial<T>): Promise<T> {
@@ -481,7 +489,7 @@ export class GenericService<T> {
       body: JSON.stringify(data),
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     return this.unwrapItem<T>(payload);
   }
 
@@ -500,7 +508,7 @@ export class GenericService<T> {
       method: "PATCH",
     });
 
-    await this.handleResponse(response);
+    await this.handleResponse(response, { showSuccessToast: true });
   }
 
   async alterarSituacaoEnvelope(id: number): Promise<ResponseEnvelope<unknown>> {
@@ -508,7 +516,7 @@ export class GenericService<T> {
       method: "PATCH",
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     return this.toEnvelope<unknown>(payload);
   }
 }

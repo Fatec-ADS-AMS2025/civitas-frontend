@@ -215,7 +215,7 @@ export default function Page() {
     clearFilters,
     createDespesa,
     updateDespesa,
-    inactivateDespesa,
+    removeDespesa,
     refetch,
   } = useDespesasDashboard();
 
@@ -533,8 +533,9 @@ export default function Page() {
   };
 
   const handleDelete = async (despesa: DespesaDashboardRow) => {
+    const actionLabel = despesa.situacao === SITUACAO_ATIVO ? "inativar" : "reativar";
     const confirmed = window.confirm(
-      `Deseja inativar a despesa ${despesa.registro} - ${despesa.descricao}?`
+      `Deseja ${actionLabel} a despesa ${despesa.registro} - ${despesa.descricao}?`
     );
 
     if (!confirmed) {
@@ -542,10 +543,12 @@ export default function Page() {
     }
 
     try {
-      await inactivateDespesa(despesa.id);
+      await removeDespesa(despesa.id);
     } catch (submitError) {
       showToast(
-        submitError instanceof Error ? submitError.message : "Erro ao inativar despesa.",
+        submitError instanceof Error
+          ? submitError.message
+          : `Erro ao ${actionLabel} despesa.`,
         "error"
       );
     }
@@ -896,7 +899,9 @@ export default function Page() {
                           type="button"
                           onClick={() => void handleDelete(despesa)}
                           className="flex h-9 w-9 items-center justify-center rounded-full border border-[#F1D8D8] bg-white text-[#D16565] transition hover:bg-[#FFF4F4]"
-                          aria-label={`Inativar ${despesa.registro}`}
+                          aria-label={`${
+                            despesa.situacao === SITUACAO_ATIVO ? "Inativar" : "Reativar"
+                          } ${despesa.registro}`}
                         >
                           <span className="material-symbols-outlined !text-[18px]">delete</span>
                         </button>

@@ -191,6 +191,30 @@ const toErrorMessage = (error: unknown): string => {
   return "Nao foi possivel carregar os dados de despesas.";
 };
 
+const isHttpNotFoundError = (error: unknown): boolean => {
+  return error instanceof Error && error.message.includes("HTTP 404");
+};
+
+const isHttpBadRequestError = (error: unknown): boolean => {
+  return error instanceof Error && error.message.includes("HTTP 400");
+};
+
+const isHttpMethodNotAllowedError = (error: unknown): boolean => {
+  return error instanceof Error && error.message.includes("HTTP 405");
+};
+
+const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
+  try {
+    return (await despesaService.getInactive()) ?? [];
+  } catch (error) {
+    if (!isHttpNotFoundError(error) && !isHttpBadRequestError(error)) {
+      console.error("Erro ao carregar despesas inativas:", error);
+    }
+
+    return [];
+  }
+};
+
 const buildDespesaRows = (
   despesas: DespesaDTO[],
   tiposDespesaMap: Map<number, TipoDespesaDTO>
@@ -451,7 +475,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     usuarios,
   ] = await Promise.all([
     despesaService.getAllData(),
-    despesaService.getInactive(),
+    safeLoadInactiveDespesas(),
     tipoDespesaService.getAllData(),
     orcamentoService.getAllData(),
     instituicaoService.getAllData(),
@@ -568,9 +592,21 @@ export const useDespesasDashboard = () => {
     [dashboardData, refetch]
   );
 
-  const inactivateDespesa = useCallback(
+  const removeDespesa = useCallback(
     async (id: number) => {
-      await despesaService.alterarSituacao(id);
+      try {
+        await despesaService.delete(id);
+      } catch (error) {
+        if (
+          isHttpNotFoundError(error) ||
+          isHttpMethodNotAllowedError(error)
+        ) {
+          await despesaService.alterarSituacao(id);
+        } else {
+          throw error;
+        }
+      }
+
       await refetch();
     },
     [refetch]
@@ -596,7 +632,7 @@ export const useDespesasDashboard = () => {
       refetch,
       createDespesa,
       updateDespesa,
-      inactivateDespesa,
+      removeDespesa,
     }),
     [
       filters,
@@ -616,7 +652,7 @@ export const useDespesasDashboard = () => {
       refetch,
       createDespesa,
       updateDespesa,
-      inactivateDespesa,
+      removeDespesa,
     ]
   );
 };
