@@ -24,6 +24,10 @@ export interface ListQuery {
   sortDirection?: "asc" | "desc";
 }
 
+interface HandleResponseOptions {
+  showSuccessToast?: boolean;
+}
+
 const DEFAULT_LIST_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
   page: 1,
   size: 100,
@@ -48,6 +52,52 @@ const parseApiMessageFromErrorText = (errorText: string): string => {
   return errorText;
 };
 
+const extractValidationMessages = (payload: unknown): string[] => {
+  if (Array.isArray(payload)) {
+    return payload
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+  }
+
+  if (isRecord(payload)) {
+    return Object.values(payload)
+      .flatMap((value) => {
+        if (typeof value === "string") {
+          return [value.trim()];
+        }
+
+        if (Array.isArray(value)) {
+          return value
+            .map((item) => (typeof item === "string" ? item.trim() : ""))
+            .filter((item) => item.length > 0);
+        }
+
+        return [];
+      })
+      .filter((item) => item.length > 0);
+  }
+
+  return [];
+};
+
+const buildDetailedApiErrorMessage = (
+  errorJson: ResponseEnvelope<unknown> | null,
+  errorText: string,
+  status: number
+): string => {
+  const validationMessages = extractValidationMessages(errorJson?.data);
+  const primaryMessage =
+    errorJson?.message?.trim() ||
+    parseApiMessageFromErrorText(errorText).trim() ||
+    `Erro na requisicao (${status})`;
+
+  if (validationMessages.length === 0) {
+    return primaryMessage;
+  }
+
+  return `${primaryMessage}: ${Array.from(new Set(validationMessages)).join(" | ")}`;
+};
+
 const isPaginatedResult = <T>(value: unknown): value is PaginatedResult<T> => {
   return isRecord(value) && Array.isArray(value.items);
 };
@@ -56,14 +106,10 @@ const isHttpNotFoundError = (error: unknown): boolean => {
   return error instanceof Error && error.message.includes("HTTP 404");
 };
 
-<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
 const toQueryString = (
   query: ListQuery | undefined,
   defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY
 ): string => {
-=======
-const toQueryString = (query?: ListQuery): string => {
->>>>>>> dev
   const params = new URLSearchParams();
   const mergedQuery = { ...DEFAULT_LIST_QUERY, ...query };
 
@@ -87,14 +133,50 @@ export class GenericService<T> {
     return `${BASE_URL}/${this.endpoint}`;
   }
 
-  protected async handleResponse<R = unknown>(response: Response): Promise<R> {
+  protected async handleResponse<R = unknown>(
+    response: Response,
+    options: HandleResponseOptions = {}
+  ): Promise<R> {
+    if (response.status === 204) return undefined as R;
+
+    const contentType = response.headers.get("content-type");
+
     if (!response.ok) {
-      const errorText = await response.text();
-      const parsedMessage = parseApiMessageFromErrorText(errorText);
-      throw new Error(`HTTP ${response.status}: ${parsedMessage}`);
+      let errorText = "";
+      let errorJson: any = null;
+
+      try {
+        if (contentType && contentType.includes("application/json")) {
+          errorJson = await response.json();
+        } else {
+          errorText = await response.text();
+        }
+      } catch {
+        errorText = "Erro ao processar resposta do servidor.";
+      }
+
+      const message = buildDetailedApiErrorMessage(
+        errorJson,
+        errorText,
+        response.status
+      );
+
+      showToast(message, "error");
+
+      throw new Error(`HTTP ${response.status}: ${message}`);
     }
 
-    if (response.status === 204) return undefined as R;
+    if (contentType && contentType.includes("application/json")) {
+      const json = (await response.json()) as R;
+
+      if (
+        options.showSuccessToast &&
+        isRecord(json) &&
+        typeof json.message === "string" &&
+        json.message.trim() !== ""
+      ) {
+        showToast(json.message, "success");
+      }
 
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
@@ -215,7 +297,7 @@ export class GenericService<T> {
       body: JSON.stringify(data),
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     return this.unwrapItem<T>(payload);
   }
 
@@ -228,7 +310,7 @@ export class GenericService<T> {
       body: JSON.stringify(data),
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     const envelope = this.toEnvelope<unknown>(payload);
 
     return {
@@ -256,7 +338,7 @@ export class GenericService<T> {
       body: JSON.stringify(data),
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     return this.unwrapItem<T>(payload);
   }
 
@@ -293,7 +375,7 @@ export class GenericService<T> {
       method: "DELETE",
     });
 
-    await this.handleResponse(response);
+    await this.handleResponse(response, { showSuccessToast: true });
   }
 
   async patch(id: number, data: Partial<T>): Promise<T> {
@@ -305,7 +387,7 @@ export class GenericService<T> {
       body: JSON.stringify(data),
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     return this.unwrapItem<T>(payload);
   }
 
@@ -324,7 +406,7 @@ export class GenericService<T> {
       method: "PATCH",
     });
 
-    await this.handleResponse(response);
+    await this.handleResponse(response, { showSuccessToast: true });
   }
 
   async alterarSituacaoEnvelope(id: number): Promise<ResponseEnvelope<unknown>> {
@@ -332,7 +414,7 @@ export class GenericService<T> {
       method: "PATCH",
     });
 
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showSuccessToast: true });
     return this.toEnvelope<unknown>(payload);
   }
 }
