@@ -1,31 +1,984 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+import Input from "@/components/Input";
+import PaginationControls from "@/components/PaginationControls";
+import { EmptyState, ErrorState, LoadingState } from "@/components/feedback-states";
+import { useClientPagination } from "@/hooks/useClientPagination";
+import { showToast } from "@/hooks/useToast";
+=======
+import { FinanceiroService } from "@/hooks/financeiro";
+import { FinanceiroResumoDTO, FinanceiroTransacaoDTO } from "@/models/financeiro";
+import InstituicaoDTO from "@/models/instituicao";
+import OrcamentoDTO from "@/models/orcamento";
+import UsuarioDTO from "@/models/usuario";
+
+type ActionTone = "amber" | "blue" | "slate";
+>>>>>>> dev
+
+type QuickAction = {
+  title: string;
+  subtitle: string;
+  button: string;
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+  tone: "amber" | "blue" | "slate";
+  icon: string;
+  onClick: () => void;
+};
+
+type DashboardExpense = {
+  id: number;
+  value: number;
+  label: string;
+  category: string;
+  date: string;
+  time: string;
+};
+
+const dashboardExpensesSeed: DashboardExpense[] = [
+  { id: 1, value: -539, label: "Area da saude", category: "Saude", date: "2026-03-17", time: "08:17" },
+  { id: 2, value: -777, label: "Secretaria municipal", category: "Administrativo", date: "2026-03-17", time: "08:17" },
+  { id: 3, value: -4000, label: "Reformas", category: "Infraestrutura", date: "2026-03-16", time: "08:15" },
+  { id: 4, value: -777.07, label: "Sabesp", category: "Utilidades", date: "2026-03-16", time: "06:10" },
+  { id: 5, value: 777777.77, label: "Recebimento de verba", category: "Receita", date: "2026-03-15", time: "06:09" },
+  { id: 6, value: -1280.35, label: "Material escolar", category: "Educacao", date: "2026-03-14", time: "10:32" },
+  { id: 7, value: -950, label: "Transporte escolar", category: "Transporte", date: "2026-03-13", time: "09:41" },
+];
+=======
+  tone: ActionTone;
+  onClick: () => void;
+  icon: string;
+};
+
+type ExpenseRow = {
+  id: number;
+  value: string;
+  label: string;
+  date: string;
+  time: string;
+  tone: "red" | "green";
+  detail: string;
+};
+
+type CategoryLegend = {
+  color: string;
+  name: string;
+  percentage: number;
+  amount: number;
+};
+
+type ChartMarker = {
+  x: number;
+  y: number;
+  labelX: number;
+  labelY: number;
+  textX: number;
+  textY: number;
+  text: string;
+};
+
+type ChartPoint = {
+  x: number;
+  y: number;
+  value: number;
+  day: number;
+};
+
+type ChartTick = {
+  y: number;
+  value: number;
+  label: string;
+};
+
+type ChartData = {
+  availableLine: string;
+  availableArea: string;
+  expenseLine: string;
+  expenseArea: string;
+  availableMarker: ChartMarker;
+  expenseMarker: ChartMarker;
+  xTicks: Array<{ x: number; label: string }>;
+  yTicks: ChartTick[];
+  zeroY: number;
+  availablePoints: ChartPoint[];
+  expensePoints: ChartPoint[];
+  availableSeries: number[];
+  expenseSeries: number[];
+  daysInMonth: number;
+  month: number;
+  year: number;
+};
+
+const DEFAULT_RESUMO: FinanceiroResumoDTO = {
+  totalDespesas: 0,
+  totalOrcamentos: 0,
+  saldo: 0,
+  balanca: 0,
+  totalTransacoes: 0,
+};
+
+const HIDDEN_VALUE = "* * * * * *";
+
+const categoryColors = ["#4B88F8", "#FF7E22", "#26BFB1", "#F4C61D"];
+const CHART_VIEWBOX_WIDTH = 740;
+const CHART_VIEWBOX_HEIGHT = 300;
+const CHART_LEFT = 72;
+const CHART_RIGHT = 716;
+const CHART_BOTTOM = 278;
+const CHART_TOP = 38;
+const CHART_TOP_PADDING = 26;
+const CHART_BOTTOM_PADDING = 22;
+const MARKER_LABEL_WIDTH = 168;
+const MARKER_LABEL_HEIGHT = 40;
+const Y_TICK_COUNT = 6;
+const TOOLTIP_WIDTH = 186;
+const TOOLTIP_HEIGHT = 94;
+const TOOLTIP_GAP = 10;
+const TOOLTIP_EDGE = 8;
+const MARKER_COLLISION_GAP = 8;
+>>>>>>> dev
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+  }).format(value);
+
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value));
 
 export default function Dashboard() {
   const router = useRouter();
+  const [showMoneyValues, setShowMoneyValues] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [expenses, setExpenses] = useState<DashboardExpense[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [showAvailable, setShowAvailable] = React.useState(true);
-  const [showExpenses, setShowExpenses] = React.useState(true);
-  const [monthIndex, setMonthIndex] = React.useState(0);
-  const [showMoneyValues, setShowMoneyValues] = React.useState(false);
+  const quickActions: QuickAction[] = useMemo(
+    () => [
+      {
+        title: "Areas com maior consumo",
+        subtitle: "Acompanhe os gastos mais sensiveis da semana.",
+        button: "Ver despesas",
+        tone: "amber",
+        icon: "warning",
+        onClick: () => router.push("/dashboard/despesas"),
+      },
+      {
+        title: "Solicitacoes de verba",
+        subtitle: "Revise os orcamentos pendentes em um unico fluxo.",
+        button: "Revisar",
+        tone: "blue",
+        icon: "fact_check",
+        onClick: () => router.push("/dashboard/orcamentos"),
+      },
+      {
+        title: "Painel financeiro",
+        subtitle: "Compare entradas, saidas e saldo consolidado.",
+        button: "Abrir",
+        tone: "slate",
+        icon: "bar_chart",
+        onClick: () => router.push("/dashboard/financeiro"),
+      },
+    ],
+    [router]
+  );
 
-  const months = ["Julho / 2026", "Agosto / 2026", "Setembro / 2026"];
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      setExpenses(dashboardExpensesSeed);
+    } catch (loadError) {
+      const message =
+        loadError instanceof Error ? loadError.message : "Nao foi possivel carregar o extrato da dashboard.";
+      setError(message);
+      setExpenses([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const quickActions = [
-    { title: "Área da Saúde (45%)", subtitle: "Área de Saúde (45%)", button: "Ver Detalhes", tone: "amber", onClick: () => router.push("/dashboard/despesas"), icon: "warning" },
-    { title: "3 Solicitações de Verba", subtitle: "Aguardando sua aprovação", button: "Revisar", tone: "blue", onClick: () => router.push("/dashboard/orcamentos"), icon: "check_circle" },
-    { title: "Adicionar novo gasto", subtitle: "Aguardando sua aprovação", button: "Lançar", tone: "slate", onClick: () => router.push("/dashboard/despesas"), icon: "add" },
+  useEffect(() => {
+    void loadDashboardData();
+  }, []);
+
+  const filteredExpenses = useMemo(() => {
+    const normalizedQuery = searchTerm.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return expenses;
+    }
+
+    return expenses.filter((item) => {
+      return (
+        item.label.toLowerCase().includes(normalizedQuery) ||
+        item.category.toLowerCase().includes(normalizedQuery)
+      );
+    });
+  }, [expenses, searchTerm]);
+
+  const {
+    currentPage,
+    pageSize,
+    totalPages,
+    totalRecords,
+    paginatedItems,
+    isPending,
+    goToPage,
+    changePageSize,
+    resetPagination,
+  } = useClientPagination(filteredExpenses, { initialPageSize: 4 });
+
+  useEffect(() => {
+    resetPagination();
+  }, [searchTerm, resetPagination]);
+
+  const totalAvailable = expenses.filter((item) => item.value > 0).reduce((acc, item) => acc + item.value, 0);
+  const totalExpenses = Math.abs(expenses.filter((item) => item.value < 0).reduce((acc, item) => acc + item.value, 0));
+  const balance = totalAvailable - totalExpenses;
+  const hiddenValue = "* * * * * *";
+
+  const categoryHighlights = useMemo(() => {
+    const grouped = filteredExpenses
+      .filter((item) => item.value < 0)
+      .reduce<Record<string, number>>((acc, item) => {
+        acc[item.category] = (acc[item.category] ?? 0) + Math.abs(item.value);
+        return acc;
+      }, {});
+
+    return Object.entries(grouped)
+      .sort(([, previous], [, next]) => next - previous)
+      .slice(0, 4);
+  }, [filteredExpenses]);
+
+  return (
+    <div className="space-y-6">
+      <section className="rounded-[30px] bg-[linear-gradient(135deg,#0D7A7C_0%,#63B6B2_45%,#EAF5F5_100%)] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
+              Visao geral
+            </span>
+            <h1 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">Painel central de acompanhamento</h1>
+            <p className="mt-3 max-w-2xl text-sm text-white/85 sm:text-base">
+              Consolide saldo, gastos recentes e atalhos operacionais em uma mesma experiencia visual.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowMoneyValues((previous) => !previous)}
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
+          >
+            <span className="material-symbols-outlined !text-[18px]">
+              {showMoneyValues ? "visibility_off" : "visibility"}
+            </span>
+            {showMoneyValues ? "Ocultar valores" : "Exibir valores"}
+          </button>
+        </div>
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-3">
+        <MetricCard title="Valor disponivel" subtitle="Saldo consolidado para operacao" value={showMoneyValues ? formatCurrency(totalAvailable) : hiddenValue} gradient="linear-gradient(135deg, #0D7C7C 0%, #66B8B7 100%)" icon="account_balance" />
+        <MetricCard title="Balanca" subtitle="Entradas menos saidas acumuladas" value={showMoneyValues ? formatCurrency(balance) : hiddenValue} gradient="linear-gradient(135deg, #1D1D1D 0%, #555555 100%)" icon="balance" />
+        <MetricCard title="Gastos totais" subtitle="Movimentacoes negativas do periodo" value={showMoneyValues ? formatCurrency(totalExpenses) : hiddenValue} gradient="linear-gradient(135deg, #F18B1B 0%, #FFB354 100%)" icon="monetization_on" />
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#F0A126]">
+                Acoes rapidas
+              </span>
+              <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">Fluxos mais usados da sprint</h2>
+              <p className="mt-2 text-sm text-[#72808A]">Atalhos para navegar entre analise, despesas e financeiro sem perder contexto.</p>
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-3">
+            {quickActions.map((action) => (
+              <ActionCard key={action.title} action={action} />
+            ))}
+          </div>
+        </article>
+
+        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+          <span className="inline-flex rounded-full bg-[#EAF4F5] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0B6470]">
+            Destaques do periodo
+          </span>
+          <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">Categorias com maior impacto</h2>
+          <p className="mt-2 text-sm text-[#72808A]">As categorias abaixo usam os mesmos dados exibidos no extrato recente.</p>
+
+          <div className="mt-6 space-y-4">
+            {categoryHighlights.length > 0 ? (
+              categoryHighlights.map(([category, value], index) => (
+                <div key={category}>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <span className="text-sm font-semibold text-[#1F2A32]">
+                      {index + 1}. {category}
+                    </span>
+                    <span className="text-sm font-semibold text-[#0B6470]">{formatCurrency(value)}</span>
+                  </div>
+                  <div className="h-3 rounded-full bg-[#EEF4F5]">
+                    <div
+                      className="h-3 rounded-full bg-[linear-gradient(90deg,#0D7C7C_0%,#64B7B3_100%)]"
+                      style={{ width: `${Math.min((value / Math.max(totalExpenses, 1)) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <EmptyState
+                title="Sem categorias para exibir"
+                description="Ajuste o filtro do extrato para visualizar outro recorte das movimentacoes."
+              />
+            )}
+=======
+    maximumFractionDigits: 2,
+  }).format(value);
+
+const formatAxisCurrency = (value: number) => {
+  const signal = value < 0 ? "-" : "";
+  const abs = Math.abs(value);
+
+  if (abs < 1000) {
+    return `${signal}R$ ${Math.round(abs).toLocaleString("pt-BR")}`;
+  }
+
+  if (abs < 1_000_000) {
+    const mil = abs / 1000;
+    const formatted = mil >= 100 ? Math.round(mil).toString() : mil.toFixed(1).replace(".", ",");
+    return `${signal}R$ ${formatted} mil`;
+  }
+
+  const mi = abs / 1_000_000;
+  const formatted = mi >= 100 ? Math.round(mi).toString() : mi.toFixed(1).replace(".", ",");
+  return `${signal}R$ ${formatted} mi`;
+};
+
+const niceStep = (minValue: number, maxValue: number, tickCount: number) => {
+  const rawStep = Math.abs(maxValue - minValue) / Math.max(1, tickCount - 1);
+  if (rawStep <= 0 || Number.isNaN(rawStep)) return 1;
+
+  const power = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const normalized = rawStep / power;
+
+  if (normalized <= 1) return power;
+  if (normalized <= 2) return 2 * power;
+  if (normalized <= 5) return 5 * power;
+  return 10 * power;
+};
+
+const toApiDate = (date: Date) => {
+  const y = date.getFullYear();
+  const m = `${date.getMonth() + 1}`.padStart(2, "0");
+  const d = `${date.getDate()}`.padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const getMonthBounds = (date: Date) => {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1);
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  return {
+    start: toApiDate(start),
+    end: toApiDate(end),
+  };
+};
+
+const getMonthLabel = (date: Date) =>
+  new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    year: "numeric",
+  })
+    .format(date)
+    .replace(/^./, (letter) => letter.toUpperCase());
+
+const getDateAndTime = (value: string) => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return { date: "--/--/----", time: "--:--" };
+  }
+
+  return {
+    date: new Intl.DateTimeFormat("pt-BR").format(date),
+    time: new Intl.DateTimeFormat("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date),
+  };
+};
+
+const buildPath = (points: Array<{ x: number; y: number }>): string => {
+  if (points.length === 0) {
+    return `M${CHART_LEFT} ${CHART_BOTTOM}`;
+  }
+
+  const first = points[0];
+  const segments = points.slice(1).map((point) => `L ${point.x} ${point.y}`);
+  return [`M${first.x} ${first.y}`, ...segments].join(" ");
+};
+
+const buildSmoothPath = (points: Array<{ x: number; y: number }>): string => {
+  if (points.length < 3) {
+    return buildPath(points);
+  }
+
+  const path: string[] = [`M${points[0].x} ${points[0].y}`];
+
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const p0 = points[Math.max(0, index - 1)];
+    const p1 = points[index];
+    const p2 = points[index + 1];
+    const p3 = points[Math.min(points.length - 1, index + 2)];
+
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    path.push(`C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`);
+  }
+
+  return path.join(" ");
+};
+
+const buildAreaPath = (linePath: string, points: Array<{ x: number; y: number }>, baselineY: number) => {
+  if (points.length === 0) {
+    return `M${CHART_LEFT} ${baselineY} L ${CHART_RIGHT} ${baselineY} Z`;
+  }
+
+  return `${linePath} L ${points[points.length - 1].x} ${baselineY} L ${points[0].x} ${baselineY} Z`;
+};
+
+const buildSeries = (
+  transacoes: FinanceiroTransacaoDTO[],
+  year: number,
+  month: number,
+  daysInMonth: number,
+  totalAvailable: number
+) => {
+  const expensesByDay = Array.from({ length: daysInMonth }, () => 0);
+
+  transacoes.forEach((item) => {
+    if (item.tipo !== "despesa") return;
+
+    const itemDate = new Date(item.data);
+    if (Number.isNaN(itemDate.getTime())) return;
+    if (itemDate.getFullYear() !== year || itemDate.getMonth() !== month) return;
+
+    const index = itemDate.getDate() - 1;
+    expensesByDay[index] += Number(item.valor) || 0;
+  });
+
+  const cumulativeExpenses: number[] = [];
+  const budgetSeries: number[] = [];
+
+  let spentSoFar = 0;
+  for (let day = 0; day < daysInMonth; day += 1) {
+    spentSoFar += expensesByDay[day];
+    cumulativeExpenses.push(spentSoFar);
+    budgetSeries.push(totalAvailable);
+  }
+
+  return { cumulativeExpenses, budgetSeries };
+};
+
+const calculateScale = (
+  values: number[],
+  usableTop: number,
+  usableBottom: number,
+  tickCount = Y_TICK_COUNT
+) => {
+  const safeValues = values.filter((value) => Number.isFinite(value));
+  const baseValues = safeValues.length > 0 ? safeValues : [0, 1];
+
+  let minValue = Math.min(...baseValues);
+  let maxValue = Math.max(...baseValues);
+
+  if (minValue > 0) minValue = 0;
+  if (maxValue < 0) maxValue = 0;
+
+  const initialRange = maxValue - minValue;
+  if (initialRange === 0) {
+    const fallback = Math.max(1, Math.abs(maxValue) || 1);
+    minValue -= fallback / 2;
+    maxValue += fallback / 2;
+  }
+
+  const paddedRange = maxValue - minValue;
+  const padding = paddedRange * 0.1;
+  minValue -= padding;
+  maxValue += padding;
+
+  const nonZeroAbs = baseValues
+    .map((value) => Math.abs(value))
+    .filter((value) => value > 0)
+    .sort((a, b) => a - b);
+
+  const minAbs = nonZeroAbs[0] ?? 1;
+  const maxAbs = Math.max(Math.abs(minValue), Math.abs(maxValue));
+  const useLogScale = maxAbs / Math.max(1, minAbs) > 1000;
+
+  const toDomain = (value: number) => {
+    if (!useLogScale) return value;
+    return Math.sign(value) * Math.log10(Math.abs(value) + 1);
+  };
+
+  const fromDomain = (value: number) => {
+    if (!useLogScale) return value;
+    return Math.sign(value) * (Math.pow(10, Math.abs(value)) - 1);
+  };
+
+  let domainMin = toDomain(minValue);
+  let domainMax = toDomain(maxValue);
+  if (domainMin === domainMax) {
+    domainMin -= 1;
+    domainMax += 1;
+  }
+
+  const height = usableBottom - usableTop;
+  const getY = (value: number) => {
+    const normalized = (toDomain(value) - domainMin) / (domainMax - domainMin);
+    return Number((usableBottom - normalized * height).toFixed(2));
+  };
+
+  const tickStep = niceStep(minValue, maxValue, tickCount);
+  const tickStart = Math.ceil(minValue / tickStep) * tickStep;
+  const yTicks: ChartTick[] = [];
+
+  for (let value = tickStart; value <= maxValue + tickStep / 2; value += tickStep) {
+    yTicks.push({
+      y: getY(value),
+      value,
+      label: formatAxisCurrency(value),
+    });
+  }
+
+  if (yTicks.length < 4) {
+    const fallbackTicks = Array.from({ length: tickCount }, (_, index) => {
+      const progress = tickCount <= 1 ? 0 : index / (tickCount - 1);
+      const domainValue = domainMin + progress * (domainMax - domainMin);
+      const tickValue = fromDomain(domainValue);
+      return {
+        y: Number((usableBottom - progress * height).toFixed(2)),
+        value: tickValue,
+        label: formatAxisCurrency(tickValue),
+      };
+    });
+
+    return {
+      minValue,
+      maxValue,
+      getY,
+      yTicks: fallbackTicks,
+      zeroY: getY(0),
+    };
+  }
+
+  return {
+    minValue,
+    maxValue,
+    getY,
+    yTicks,
+    zeroY: getY(0),
+  };
+};
+
+const buildPaths = (points: ChartPoint[], baselineY: number) => {
+  const line = buildSmoothPath(points);
+  const area = buildAreaPath(line, points, baselineY);
+
+  return { line, area };
+};
+
+const toChartData = (
+  transacoes: FinanceiroTransacaoDTO[],
+  selectedMonthDate: Date,
+  totalAvailable: number
+): ChartData => {
+  const year = selectedMonthDate.getFullYear();
+  const month = selectedMonthDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const { cumulativeExpenses, budgetSeries } = buildSeries(
+    transacoes,
+    year,
+    month,
+    daysInMonth,
+    totalAvailable
+  );
+
+  const width = CHART_RIGHT - CHART_LEFT;
+  const usableTop = CHART_TOP + CHART_TOP_PADDING;
+  const usableBottom = CHART_BOTTOM - CHART_BOTTOM_PADDING;
+
+  const scale = calculateScale(
+    [...cumulativeExpenses, ...budgetSeries, totalAvailable],
+    usableTop,
+    usableBottom
+  );
+
+  const pointsFromSeries = (series: number[]) =>
+    series.map((value, index) => {
+      const x = daysInMonth <= 1 ? CHART_LEFT : CHART_LEFT + (index / (daysInMonth - 1)) * width;
+      const y = scale.getY(value);
+      return { x: Number(x.toFixed(2)), y, value, day: index + 1 };
+    });
+
+  const availablePoints = pointsFromSeries(budgetSeries);
+  const expensePoints = pointsFromSeries(cumulativeExpenses);
+
+  const buildMarker = (points: ChartPoint[]) => {
+    const index = Math.max(0, points.length - 1);
+    const point = points[index] ?? { x: CHART_LEFT, y: CHART_BOTTOM, value: 0, day: 1 };
+    const day = String(index + 1).padStart(2, "0");
+    const monthLabel = String(month + 1).padStart(2, "0");
+    const text = `${day}/${monthLabel} • ${formatAxisCurrency(point.value)}`;
+
+    const labelX = Math.max(
+      CHART_LEFT,
+      Math.min(CHART_RIGHT - MARKER_LABEL_WIDTH, point.x - MARKER_LABEL_WIDTH / 2)
+    );
+    const labelY = Math.max(0, point.y - (MARKER_LABEL_HEIGHT + 8));
+    const labelCenter = labelX + MARKER_LABEL_WIDTH / 2;
+
+    return {
+      x: point.x,
+      y: point.y,
+      labelX,
+      labelY,
+      textX: labelCenter,
+      textY: labelY + 26,
+      text,
+    };
+  };
+
+  const dayTicks = [1, 5, 10, 15, 20, 25, daysInMonth]
+    .filter((day, index, arr) => day >= 1 && day <= daysInMonth && arr.indexOf(day) === index)
+    .sort((a, b) => a - b);
+
+  const xTicks = dayTicks.map((day) => {
+    const x = daysInMonth <= 1 ? CHART_LEFT : CHART_LEFT + ((day - 1) / (daysInMonth - 1)) * width;
+    const monthLabel = String(month + 1).padStart(2, "0");
+    return { x: Number(x.toFixed(0)), label: `${String(day).padStart(2, "0")}/${monthLabel}` };
+  });
+
+  const availableLine = buildPath(availablePoints);
+  const availableArea = buildAreaPath(availableLine, availablePoints, scale.zeroY);
+  const expensePaths = buildPaths(expensePoints, scale.zeroY);
+
+  return {
+    availableLine,
+    availableArea,
+    expenseLine: expensePaths.line,
+    expenseArea: expensePaths.area,
+    availableMarker: buildMarker(availablePoints),
+    expenseMarker: buildMarker(expensePoints),
+    xTicks,
+    yTicks: scale.yTicks,
+    zeroY: scale.zeroY,
+    availablePoints,
+    expensePoints,
+    availableSeries: budgetSeries,
+    expenseSeries: cumulativeExpenses,
+    daysInMonth,
+    month,
+    year,
+  };
+};
+
+const getDaysUntilNextMonth = () => {
+  const now = new Date();
+  const firstDayNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const diffMs = firstDayNextMonth.getTime() - now.getTime();
+  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+};
+
+const getInstitutionName = (instituicoes: InstituicaoDTO[], instituicaoId?: number) => {
+  if (!instituicaoId) return "Sem Instituição";
+  return instituicoes.find((item) => item.id === instituicaoId)?.nome ?? `Instituição #${instituicaoId}`;
+};
+
+const getPendingRequestsCount = (orcamentos: OrcamentoDTO[]) => {
+  const pending = orcamentos.filter((item) => item.situacao === 1).length;
+  if (pending > 0) return pending;
+
+  const pendingAlt = orcamentos.filter((item) => item.situacao === 0).length;
+  if (pendingAlt > 0) return pendingAlt;
+
+  return orcamentos.length;
+};
+
+const buildCategoryLegends = (
+  transacoes: FinanceiroTransacaoDTO[],
+  instituicoes: InstituicaoDTO[]
+): CategoryLegend[] => {
+  const byInstitution = new Map<string, number>();
+
+  transacoes
+    .filter((item) => item.tipo === "despesa")
+    .forEach((item) => {
+      const name = getInstitutionName(instituicoes, item.instituicaoId);
+      const previous = byInstitution.get(name) ?? 0;
+      byInstitution.set(name, previous + Math.abs(item.valor));
+    });
+
+  const total = Array.from(byInstitution.values()).reduce((acc, current) => acc + current, 0);
+
+  if (total <= 0) {
+    return [
+      { color: categoryColors[0], name: "Sem dados", percentage: 100, amount: 0 },
+      { color: categoryColors[1], name: "Sem dados", percentage: 0, amount: 0 },
+      { color: categoryColors[2], name: "Sem dados", percentage: 0, amount: 0 },
+      { color: categoryColors[3], name: "Outros", percentage: 0, amount: 0 },
+    ];
+  }
+
+  const sorted = Array.from(byInstitution.entries())
+    .map(([name, amount]) => ({ name, amount }))
+    .sort((a, b) => b.amount - a.amount);
+
+  const topThree = sorted.slice(0, 3).map((item, index) => ({
+    color: categoryColors[index],
+    name: item.name,
+    amount: item.amount,
+    percentage: Math.round((item.amount / total) * 100),
+  }));
+
+  const otherAmount = sorted.slice(3).reduce((acc, item) => acc + item.amount, 0);
+
+  const legends = [
+    ...topThree,
+    {
+      color: categoryColors[3],
+      name: "Outros",
+      amount: otherAmount,
+      percentage: Math.max(0, 100 - topThree.reduce((acc, item) => acc + item.percentage, 0)),
+    },
   ];
 
-  const expenses = [
-    { value: "- R$ 539", numeric: -539, label: "Área da saúde", date: "17/07/2026", time: "08:17", tone: "red" },
-    { value: "- R$ 777", numeric: -777, label: "Secretaria", date: "17/07/2026", time: "08:17", tone: "red" },
-    { value: "- R$ 4.000", numeric: -4000, label: "Reformas", date: "16/07/2026", time: "08:15", tone: "red" },
-    { value: "- R$ 777,07", numeric: -777.07, label: "Sabesp", date: "16/07/2026", time: "06:10", tone: "red" },
-    { value: "+ R$ 777.777,77", numeric: 777777.77, label: "Verba", date: "15/07/2026", time: "06:09", tone: "green" },
-  ];
+  while (legends.length < 4) {
+    legends.splice(legends.length - 1, 0, {
+      color: categoryColors[legends.length - 1],
+      name: "Sem dados",
+      amount: 0,
+      percentage: 0,
+    });
+  }
+
+  return legends;
+};
+
+export default function Dashboard() {
+  const router = useRouter();
+  const financeiroService = useMemo(() => new FinanceiroService(), []);
+
+  const [showAvailable, setShowAvailable] = useState(true);
+  const [showExpenses, setShowExpenses] = useState(true);
+  const [monthIndex, setMonthIndex] = useState(0);
+  const [showMoneyValues, setShowMoneyValues] = useState(false);
+  const [hoveredDayIndex, setHoveredDayIndex] = useState<number | null>(null);
+  const [hoveredCursor, setHoveredCursor] = useState<{ x: number; y: number } | null>(null);
+
+  const [resumo, setResumo] = useState<FinanceiroResumoDTO>(DEFAULT_RESUMO);
+  const [transacoes, setTransacoes] = useState<FinanceiroTransacaoDTO[]>([]);
+  const [instituicoes, setInstituicoes] = useState<InstituicaoDTO[]>([]);
+  const [orcamentos, setOrcamentos] = useState<OrcamentoDTO[]>([]);
+  const [usuarios, setUsuarios] = useState<UsuarioDTO[]>([]);
+
+  const [isLoadingHome, setIsLoadingHome] = useState(true);
+  const [homeError, setHomeError] = useState<string | null>(null);
+
+  const monthOptions = useMemo(() => {
+    const today = new Date();
+    return [0, -1, -2].map((offset) => new Date(today.getFullYear(), today.getMonth() + offset, 1));
+  }, []);
+
+  const selectedMonthDate = monthOptions[monthIndex] ?? monthOptions[0];
+
+  useEffect(() => {
+    const selectedMonth = monthOptions[monthIndex] ?? monthOptions[0];
+    const { start, end } = getMonthBounds(selectedMonth);
+    let active = true;
+
+    const loadHome = async () => {
+      try {
+        setIsLoadingHome(true);
+        setHomeError(null);
+
+        const [resumoData, transacoesData, instituicoesData, orcamentosData, usuariosData] =
+          await Promise.all([
+            financeiroService.getResumo({ dataInicio: start, dataFim: end, pageSize: 200 }),
+            financeiroService.listarTransacoes({ dataInicio: start, dataFim: end, pageSize: 200 }),
+            financeiroService.getInstituicoes(),
+            financeiroService.getOrcamentos(),
+            financeiroService.getUsuarios(),
+          ]);
+
+        if (!active) return;
+
+        setResumo(resumoData);
+        setTransacoes(transacoesData);
+        setInstituicoes(instituicoesData);
+        setOrcamentos(orcamentosData);
+        setUsuarios(usuariosData);
+      } catch (error) {
+        if (!active) return;
+
+        console.error("Erro ao carregar dados da Home:", error);
+        setHomeError("Não foi possível carregar os dados da Home.");
+        setResumo(DEFAULT_RESUMO);
+        setTransacoes([]);
+      } finally {
+        if (active) setIsLoadingHome(false);
+      }
+    };
+
+    void loadHome();
+
+    return () => {
+      active = false;
+    };
+  }, [financeiroService, monthIndex, monthOptions]);
+
+  const daysUntilRefill = useMemo(() => getDaysUntilNextMonth(), []);
+
+  const currentUserName = useMemo(() => {
+    const firstUser = usuarios[0]?.nome?.trim();
+    return firstUser && firstUser.length > 0 ? firstUser : "Gestor";
+  }, [usuarios]);
+
+  const selectedYear = selectedMonthDate.getFullYear();
+
+  const totalAvailable = useMemo(() => {
+    const annualBudget = orcamentos
+      .filter((item) => (item.anoOrcamento ?? item.ano) === selectedYear)
+      .reduce((acc, item) => acc + Number(item.valorOrcamento ?? item.valor ?? 0), 0);
+
+    return annualBudget > 0 ? annualBudget : resumo.totalOrcamentos;
+  }, [orcamentos, resumo.totalOrcamentos, selectedYear]);
+
+  const totalExpenses = resumo.totalDespesas;
+  const balanceValue = totalAvailable - totalExpenses;
+
+  const categoryLegends = useMemo(
+    () => buildCategoryLegends(transacoes, instituicoes),
+    [transacoes, instituicoes]
+  );
+
+  const [healthCategory, secretariaCategory, reformasCategory, othersCategory] = categoryLegends;
+
+  const topInstitution = useMemo(() => {
+    const categoriesWithValue = categoryLegends.filter((item) => item.amount > 0);
+    if (categoriesWithValue.length === 0) return null;
+    return categoriesWithValue.sort((a, b) => b.amount - a.amount)[0] ?? null;
+  }, [categoryLegends]);
+
+  const pendingRequests = useMemo(() => getPendingRequestsCount(orcamentos), [orcamentos]);
+
+  const quickActions = useMemo<QuickAction[]>(
+    () => [
+      {
+        title: topInstitution
+          ? `${topInstitution.name} (${topInstitution.percentage}%)`
+          : "Sem concentração de gastos",
+        subtitle: "Maior participação no mês selecionado",
+        button: "Ver Detalhes",
+        tone: "amber",
+        onClick: () => router.push("/dashboard/instituicoes"),
+        icon: "warning",
+      },
+      {
+        title: `${pendingRequests} solicitações de verba`,
+        subtitle: "Aguardando sua aprovação",
+        button: "Revisar",
+        tone: "blue",
+        onClick: () => router.push("/dashboard/orcamentos"),
+        icon: "check_circle",
+      },
+      {
+        title: "Adicionar novo gasto",
+        subtitle: "Ir para lançamentos de despesas",
+        button: "Lançar",
+        tone: "slate",
+        onClick: () => router.push("/dashboard/despesas"),
+        icon: "add",
+      },
+      {
+        title: "Documentos",
+        subtitle: "Módulo em evolução nesta sprint",
+        button: "Abrir",
+        tone: "slate",
+        onClick: () => router.push("/dashboard/configuracoes"),
+        icon: "description",
+      },
+    ],
+    [pendingRequests, router, topInstitution]
+  );
+
+  const recentMovements = useMemo<ExpenseRow[]>(
+    () =>
+      transacoes.slice(0, 5).map((item) => {
+        const value = Math.abs(item.valor);
+        const prefix = item.tipo === "orcamento" ? "+" : "-";
+        const tone = item.tipo === "orcamento" ? "green" : "red";
+        const { date, time } = getDateAndTime(item.data);
+
+        return {
+          id: item.id,
+          value: `${prefix} ${formatCurrency(value)}`,
+          label: getInstitutionName(instituicoes, item.instituicaoId),
+          date,
+          time,
+          tone,
+          detail: item.descricao,
+        };
+      }),
+    [instituicoes, transacoes]
+  );
+
+  const availableDisplay =
+    homeError !== null
+      ? "Sem dados"
+      : showMoneyValues
+        ? formatCurrency(totalAvailable)
+        : HIDDEN_VALUE;
+
+  const expenseDisplay =
+    homeError !== null
+      ? "Sem dados"
+      : showMoneyValues
+        ? formatCurrency(totalExpenses)
+        : HIDDEN_VALUE;
+
+  const balanceDisplay =
+    homeError !== null
+      ? "Sem dados"
+      : showMoneyValues
+        ? formatCurrency(balanceValue)
+        : HIDDEN_VALUE;
+
+  const forecastValue =
+    homeError !== null
+      ? "Sem dados"
+      : showMoneyValues
+        ? formatCurrency(totalExpenses)
+        : HIDDEN_VALUE;
+
+  const unbalancedInstitutionText =
+    homeError !== null
+      ? "Sem dados"
+      : topInstitution && topInstitution.percentage >= 45
+        ? `${topInstitution.name} (${topInstitution.percentage}%)`
+        : "Nenhuma fora da média";
 
   const actionButtonClasses = {
     amber: "bg-[#FFAA17] text-white hover:brightness-95",
@@ -33,89 +986,115 @@ export default function Dashboard() {
     slate: "bg-[#1D2940] text-white hover:brightness-95",
   } as const;
 
-  const totalAvailable = expenses
-    .filter((item) => item.numeric > 0)
-    .reduce((acc, item) => acc + item.numeric, 0);
-
-  const totalExpenses = Math.abs(
-    expenses
-      .filter((item) => item.numeric < 0)
-      .reduce((acc, item) => acc + item.numeric, 0)
-  );
-
-  const balanceValue = totalAvailable - totalExpenses;
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      maximumFractionDigits: 2,
-    }).format(value);
-
-  const hiddenValue = "* * * * * *";
-
-  const availableDisplay = showMoneyValues ? formatCurrency(totalAvailable) : hiddenValue;
-  const expenseDisplay = showMoneyValues ? formatCurrency(totalExpenses) : hiddenValue;
-  const balanceDisplay = showMoneyValues ? formatCurrency(balanceValue) : hiddenValue;
-
   const renderTopValue = (text: string) => {
-    const masked = text === hiddenValue;
-
     return (
-      <div
-        className={
-          masked
-            ? "text-6xl font-bold tracking-widest relative top-[25px]"
-            : "text-[28px] sm:text-[32px] font-bold tracking-tight relative top-[12px]"
-        }
-      >
+      <div className="text-[22px] font-bold leading-none tracking-tight tabular-nums sm:text-[24px]">
         {text}
       </div>
     );
   };
 
-  const chartSeries = [
-    {
-      availableLine: "M30 245 C 82 236, 118 190, 156 138 C 186 98, 210 40, 246 44 C 282 48, 315 120, 352 180 C 382 226, 418 166, 454 132 C 498 92, 548 66, 604 78 C 656 88, 690 98, 716 104",
-      expenseLine: "M30 196 C 92 184, 140 174, 182 160 C 220 148, 272 118, 322 110 C 362 104, 402 200, 438 206 C 478 212, 522 128, 574 120 C 626 112, 674 132, 716 146",
-      availableMarker: { x: 219, y: 44, labelX: 135, labelY: -2, textX: 219, textY: 24, text: "15/07/2026" },
-      expenseMarker: { x: 411, y: 206, labelX: 328, labelY: 220, textX: 412, textY: 246, text: "16/07/2026" }
-    },
-    {
-      availableLine: "M30 236 C 84 226, 126 176, 162 122 C 190 82, 214 52, 250 58 C 292 66, 330 138, 360 184 C 390 226, 428 186, 460 144 C 498 98, 546 74, 604 86 C 654 96, 688 110, 716 118",
-      expenseLine: "M30 210 C 92 194, 138 168, 182 144 C 226 122, 278 130, 318 174 C 350 208, 394 188, 430 156 C 474 116, 520 104, 576 114 C 628 122, 676 142, 716 156",
-      availableMarker: { x: 250, y: 58, labelX: 166, labelY: 12, textX: 250, textY: 38, text: "10/08/2026" },
-      expenseMarker: { x: 318, y: 174, labelX: 235, labelY: 188, textX: 319, textY: 214, text: "14/08/2026" }
-    },
-    {
-      availableLine: "M30 252 C 88 238, 124 204, 158 156 C 188 114, 214 74, 250 70 C 286 66, 318 112, 350 154 C 382 196, 420 176, 460 140 C 504 102, 554 92, 610 110 C 658 126, 692 140, 716 150",
-      expenseLine: "M30 214 C 86 200, 132 186, 176 164 C 220 142, 272 110, 314 118 C 356 126, 394 204, 430 214 C 470 224, 516 152, 570 140 C 626 128, 674 144, 716 160",
-      availableMarker: { x: 250, y: 70, labelX: 166, labelY: 24, textX: 250, textY: 50, text: "08/09/2026" },
-      expenseMarker: { x: 430, y: 214, labelX: 347, labelY: 228, textX: 431, textY: 254, text: "16/09/2026" }
+  const monthLabel = getMonthLabel(selectedMonthDate);
+  const chartData = useMemo(
+    () => toChartData(transacoes, selectedMonthDate, totalAvailable),
+    [selectedMonthDate, totalAvailable, transacoes]
+  );
+
+  const markerVisuals = useMemo(() => {
+    const available = {
+      ...chartData.availableMarker,
+      pointX: chartData.availableMarker.x,
+      pointY: chartData.availableMarker.y,
+    };
+    const expense = {
+      ...chartData.expenseMarker,
+      pointX: chartData.expenseMarker.x,
+      pointY: chartData.expenseMarker.y,
+    };
+
+    const closeX = Math.abs(available.pointX - expense.pointX) < 14;
+    const closeY = Math.abs(available.pointY - expense.pointY) < 14;
+
+    if (closeX && closeY) {
+      available.pointX -= 4;
+      expense.pointX += 4;
+      available.labelY = Math.max(6, available.labelY - 22);
+      expense.labelY = Math.min(CHART_BOTTOM - MARKER_LABEL_HEIGHT - 6, expense.labelY + 22);
+    } else if (closeY) {
+      available.pointY = Math.max(CHART_TOP + 4, available.pointY - 4);
+      expense.pointY = Math.min(CHART_BOTTOM - 4, expense.pointY + 4);
     }
-  ];
 
-  const currentSeries = chartSeries[monthIndex];
+    available.labelY = Math.max(6, available.labelY);
+    expense.labelY = Math.max(6, expense.labelY);
 
-  const totalMovements = totalAvailable + totalExpenses;
-  const healthPercentage = totalMovements > 0 ? Math.round((539 / totalMovements) * 100) : 45;
-  const secretariaPercentage = totalMovements > 0 ? Math.round((777 / totalMovements) * 100) : 25;
-  const reformasPercentage = totalMovements > 0 ? Math.round((4000 / totalMovements) * 100) : 20;
-  const othersPercentage = Math.max(0, 100 - healthPercentage - secretariaPercentage - reformasPercentage);
+    return { available, expense };
+  }, [chartData.availableMarker, chartData.expenseMarker]);
+
+  useEffect(() => {
+    setHoveredDayIndex(null);
+    setHoveredCursor(null);
+  }, [monthIndex]);
+
+  const handleChartMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
+    if (chartData.daysInMonth <= 1) {
+      setHoveredDayIndex(0);
+      setHoveredCursor({ x: CHART_LEFT, y: CHART_TOP });
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const xInViewBox = ((event.clientX - rect.left) / rect.width) * CHART_VIEWBOX_WIDTH;
+    const yInViewBox = ((event.clientY - rect.top) / rect.height) * CHART_VIEWBOX_HEIGHT;
+    const clampedX = Math.max(CHART_LEFT, Math.min(CHART_RIGHT, xInViewBox));
+    const clampedY = Math.max(CHART_TOP, Math.min(CHART_BOTTOM, yInViewBox));
+    const ratio = (clampedX - CHART_LEFT) / (CHART_RIGHT - CHART_LEFT);
+    const nearest = Math.round(ratio * (chartData.daysInMonth - 1));
+    setHoveredDayIndex(Math.max(0, Math.min(chartData.daysInMonth - 1, nearest)));
+    setHoveredCursor({ x: clampedX, y: clampedY });
+  };
+
+  const hoveredTooltip = useMemo(() => {
+    if (hoveredDayIndex === null || hoveredCursor === null) return null;
+
+    const day = hoveredDayIndex + 1;
+    const dayLabel = String(day).padStart(2, "0");
+    const month = String(chartData.month + 1).padStart(2, "0");
+
+    const availableValue = chartData.availableSeries[hoveredDayIndex] ?? 0;
+    const expenseValue = chartData.expenseSeries[hoveredDayIndex] ?? 0;
+    const diffValue = availableValue - expenseValue;
+
+    const anchorX = hoveredCursor.x;
+    const clampX = (value: number) =>
+      Math.max(CHART_LEFT + TOOLTIP_EDGE, Math.min(CHART_VIEWBOX_WIDTH - TOOLTIP_WIDTH - TOOLTIP_EDGE, value));
+    const clampY = (value: number) =>
+      Math.max(TOOLTIP_EDGE, Math.min(CHART_VIEWBOX_HEIGHT - TOOLTIP_HEIGHT - TOOLTIP_EDGE, value));
+
+    const tooltipX = clampX(hoveredCursor.x + 14);
+    const tooltipY = clampY(hoveredCursor.y - TOOLTIP_HEIGHT - 10);
+
+    return {
+      x: tooltipX,
+      y: tooltipY,
+      lineX: anchorX,
+      dateLabel: `${dayLabel}/${month}/${chartData.year}`,
+      availableText: formatCurrency(availableValue),
+      expenseText: formatCurrency(expenseValue),
+      diffText: formatCurrency(diffValue),
+    };
+  }, [chartData, hoveredCursor, hoveredDayIndex]);
 
   return (
     <div className="min-h-screen w-full bg-[#FCFCFB] font-sans">
-      {/* Header */}
       <div className="border-b w-full border-[#F0EEE9] bg-white/95 pb-10 pt-2">
         <div className="mx-auto flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
           <div className="flex-1">
-            <h1 className="text-[40px] font-semibold leading-tight text-[#004C57] skeleton sm:text-[48px]">
-              Bem-Vindo {"{user}"}
+            <h1 className="text-[40px] font-semibold leading-tight text-[#004C57] sm:text-[48px]">
+              Bem-Vindo {currentUserName}
             </h1>
-
-            <p className="mt-1 text-sm text-gray-600 skeleton sm:text-base">
-              Vamos ao gerenciamento?
-            </p>
+            <p className="mt-1 text-sm text-gray-600 sm:text-base">Vamos ao gerenciamento?</p>
+            {homeError && <p className="mt-2 text-sm text-[#B45454]">{homeError}</p>}
           </div>
         </div>
       </div>
@@ -123,39 +1102,42 @@ export default function Dashboard() {
       <div className="w-full pb-14 pt-8">
         <div className="mx-auto w-full px-1">
           <p className="mb-6 pt-2 text-center text-[24px] font-bold text-[#1F1F1F]">
-            14 dias até a reposição da verba.
+            {daysUntilRefill} dias até a reposição da verba.
           </p>
 
           <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             <TopCard
               title="Valor Disponível"
-              subtitle="Saldo Atualizado:"
+              subtitle="Saldo atualizado"
               value={renderTopValue(availableDisplay)}
               gradient="linear-gradient(135deg,#0D7A7C 0%,#62B8B2 55%,#65C4D1 100%)"
               icon="account_balance"
               showMoneyValues={showMoneyValues}
+              isLoading={isLoadingHome}
               onClick={() => setShowMoneyValues((prev) => !prev)}
             />
 
             <TopCard
               title="Balança"
-              subtitle="Valor disponível - Gastos totais:"
+              subtitle="Valor disponível - gastos totais"
               value={renderTopValue(balanceDisplay)}
               gradient="linear-gradient(135deg,#181818 0%,#4F4F4F 50%,#1F2126 100%)"
               icon="balance"
               showMoneyValues={showMoneyValues}
               dark
-              onClick={() => router.push('/dashboard')}
+              isLoading={isLoadingHome}
+              onClick={() => router.push("/dashboard/financeiro")}
             />
 
             <TopCard
               title="Gastos Totais"
-              subtitle="Nos últimos 30 dias:"
+              subtitle="No mês selecionado"
               value={renderTopValue(expenseDisplay)}
               gradient="linear-gradient(135deg,#FF961F 0%,#F4AA39 48%,#F8BF68 100%)"
               icon="monetization_on"
               showMoneyValues={showMoneyValues}
               accent
+              isLoading={isLoadingHome}
               onClick={() => setShowMoneyValues((prev) => !prev)}
             />
           </div>
@@ -170,29 +1152,28 @@ export default function Dashboard() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => router.push('/dashboard/orcamentos')}
+                  onClick={() => router.push("/dashboard/orcamentos")}
                   className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FFAA17] text-[11px] font-bold text-white"
+                  aria-label="Solicitações pendentes"
                 >
-                  3
+                  {isLoadingHome ? "..." : pendingRequests}
                 </button>
               </div>
               <h3 className="text-[18px] font-semibold text-[#1E1E1E]">Ações Rápidas & Pendências</h3>
               <div className="mt-4 space-y-3">
                 {quickActions.map((item, index) => (
                   <div
-                    key={index}
-                    className={`flex items-center gap-3 rounded-[18px] border px-4 py-4 ${
-                      index === 0
-                        ? 'bg-[#FFF7E8] border-[#F6E2BA]'
+                    key={`${item.title}-${index}`}
+                    className={`flex items-center gap-3 rounded-[18px] border px-4 py-4 ${index === 0
+                        ? "bg-[#FFF7E8] border-[#F6E2BA]"
                         : index === 1
-                        ? 'bg-[#EFF5FF] border-[#D9E8FF]'
-                        : 'bg-[#F8F8F8] border-[#ECECEC]'
-                    }`}
+                          ? "bg-[#EFF5FF] border-[#D9E8FF]"
+                          : "bg-[#F8F8F8] border-[#ECECEC]"
+                      }`}
                   >
                     <div
-                      className={`flex h-9 w-9 items-center justify-center rounded-full ${
-                        index === 0 ? 'text-[#F5A623]' : index === 1 ? 'text-[#4A8FF7]' : 'text-[#9C9C9C]'
-                      }`}
+                      className={`flex h-9 w-9 items-center justify-center rounded-full ${index === 0 ? "text-[#F5A623]" : index === 1 ? "text-[#4A8FF7]" : "text-[#9C9C9C]"
+                        }`}
                     >
                       <span className="material-symbols-outlined">{item.icon}</span>
                     </div>
@@ -203,7 +1184,8 @@ export default function Dashboard() {
                     <button
                       type="button"
                       onClick={item.onClick}
-                      className={`rounded-full px-5 py-2 text-[13px] font-bold transition ${actionButtonClasses[item.tone as keyof typeof actionButtonClasses]}`}
+                      className={`rounded-full px-5 py-2 text-[13px] font-bold transition ${actionButtonClasses[item.tone]
+                        }`}
                     >
                       {item.button}
                     </button>
@@ -221,11 +1203,13 @@ export default function Dashboard() {
                     className="absolute inset-0 rounded-full"
                     style={{
                       background: `conic-gradient(
-                        #4B88F8 0 ${healthPercentage}%,
-                        #FF7E22 ${healthPercentage}% ${healthPercentage + secretariaPercentage}%,
-                        #26BFB1 ${healthPercentage + secretariaPercentage}% ${healthPercentage + secretariaPercentage + reformasPercentage}%,
-                        #F4C61D ${healthPercentage + secretariaPercentage + reformasPercentage}% 100%
-                      )`
+                        #4B88F8 0 ${healthCategory.percentage}%,
+                        #FF7E22 ${healthCategory.percentage}% ${healthCategory.percentage + secretariaCategory.percentage}%,
+                        #26BFB1 ${healthCategory.percentage + secretariaCategory.percentage}% ${healthCategory.percentage + secretariaCategory.percentage + reformasCategory.percentage
+                        }%,
+                        #F4C61D ${healthCategory.percentage + secretariaCategory.percentage + reformasCategory.percentage
+                        }% 100%
+                      )`,
                     }}
                   />
                   <div className="absolute inset-[32px] rounded-full bg-[#FFFDFB]" />
@@ -233,36 +1217,93 @@ export default function Dashboard() {
               </div>
 
               <div className="mt-1 grid grid-cols-2 gap-x-6 gap-y-2 px-4 pb-1 text-[13px] text-[#8E8E8E]">
-                <Legend color="#4B88F8" text={`Área da Saúde (${healthPercentage}%)`} />
-                <Legend color="#FF7E22" text={`Secretaria (${secretariaPercentage}%)`} />
-                <Legend color="#26BFB1" text={`Reformas (${reformasPercentage}%)`} />
-                <Legend color="#F4C61D" text={`Outros (${othersPercentage}%)`} />
+                <Legend
+                  color={healthCategory.color}
+                  text={`${healthCategory.name} (${healthCategory.percentage}%)`}
+                />
+                <Legend
+                  color={secretariaCategory.color}
+                  text={`${secretariaCategory.name} (${secretariaCategory.percentage}%)`}
+                />
+                <Legend
+                  color={reformasCategory.color}
+                  text={`${reformasCategory.name} (${reformasCategory.percentage}%)`}
+                />
+                <Legend color={othersCategory.color} text={`${othersCategory.name} (${othersCategory.percentage}%)`} />
               </div>
             </section>
+>>>>>>> dev
           </div>
+        </article>
+      </section>
 
+      <section className="overflow-hidden rounded-[28px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+        <div className="border-b border-[#EAF1F2] px-5 py-5 lg:px-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <span className="inline-flex rounded-full bg-[#F3F9FA] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0B6470]">
+                Extrato recente
+              </span>
+              <h2 className="mt-4 text-[28px] font-bold text-[#1F2A32]">Ultimas movimentacoes</h2>
+              <p className="mt-2 text-sm text-[#72808A]">Filtro, paginacao e estados visuais seguem o mesmo padrao das outras telas da sprint.</p>
+            </div>
+
+            <div className="w-full xl:max-w-[360px]">
+              <Input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Filtrar por descricao ou categoria"
+                className="!mb-0 !border-[#D5E3E6] !py-3 text-sm"
+                aria-label="Filtrar movimentacoes do extrato"
+              />
+            </div>
+          </div>
+        </div>
+
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+        {isLoading ? (
+          <div className="p-5 lg:p-6">
+            <LoadingState title="Carregando extrato da Home" description="Preparando as ultimas movimentacoes para consulta rapida." />
+          </div>
+        ) : error ? (
+          <div className="p-5 lg:p-6">
+            <ErrorState description={error} onRetry={() => void loadDashboardData()} />
+          </div>
+        ) : filteredExpenses.length === 0 ? (
+          <div className="p-5 lg:p-6">
+            <EmptyState
+              title="Nenhuma movimentacao encontrada"
+              description="Tente outro termo de busca para localizar uma categoria ou despesa especifica."
+            />
+          </div>
+        ) : (
+          <>
+            <div className="space-y-3 p-5 lg:p-6">
+              {paginatedItems.map((item) => (
+=======
           <div className="mt-8 grid w-full grid-cols-1 gap-6 xl:grid-cols-2">
             <InfoCard
               badge="PREVISÃO DO MÊS"
-              title="Gastos previstos para esse mês:"
-              subtitle="Se não houver imprevistos, esse é o valor dos gastos totais."
-              value={showMoneyValues ? formatCurrency(totalExpenses) : "{Cálculo de gastos previstos}"}
+              title="Gastos previstos para esse mês"
+              subtitle="Estimativa baseada nas transações e despesas do período selecionado."
+              value={isLoadingHome ? "Carregando..." : forecastValue}
               icon="account_balance_wallet"
-              onClick={() => window.alert('Resumo de gastos previstos')}
+              onClick={() => router.push("/dashboard/financeiro")}
             />
             <InfoCard
               badge="ALERTA DE GASTOS"
               title="Instituições desbalanceadas"
-              subtitle="Estão gastando bem mais que a média."
-              value="{Nome da Instituição}"
+              subtitle="Instituições gastando acima da concentração média do período."
+              value={isLoadingHome ? "Carregando..." : unbalancedInstitutionText}
               icon="bar_chart"
-              onClick={() => router.push('/dashboard/instituicoes')}
+              onClick={() => router.push("/dashboard/instituicoes")}
             />
           </div>
 
           <div className="mt-8 grid w-full grid-cols-1 gap-6 xl:grid-cols-2">
-            <article className="relative overflow-hidden rounded-[30px] bg-[#FFFDFB] p-5 shadow-[0_12px_28px_rgba(0,0,0,0.06)] ring-1 ring-[#ECE6DD]">
-              <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#F7F4EF]" />
+            <article className="relative overflow-hidden rounded-[30px] bg-[radial-gradient(circle_at_15%_15%,#ffffff_0%,#FFFDFB_48%,#F7F8FA_100%)] p-5 shadow-[0_14px_34px_rgba(9,25,34,0.10)] ring-1 ring-[#EAE3D8]">
+              <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#F4F1EA]" />
+              <div className="absolute -left-10 bottom-14 h-24 w-24 rounded-full bg-[#EEF8F9]" />
               <div className="relative z-10 flex gap-1 text-[#C9C2B7]">
                 <span className="h-2 w-2 rounded-full bg-current" />
                 <span className="h-2 w-2 rounded-full bg-current" />
@@ -289,147 +1330,310 @@ export default function Dashboard() {
               </div>
 
               <div className="relative z-10 mt-2 h-[220px] rounded-[16px] px-2 pb-8 pt-2 sm:h-[260px] lg:h-[300px]">
-                <svg viewBox="0 0 740 300" className="h-full w-full" preserveAspectRatio="none" aria-label="Gráfico financeiro comparativo">
+                <svg
+                  viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_VIEWBOX_HEIGHT}`}
+                  className="h-full w-full"
+                  preserveAspectRatio="none"
+                  aria-label="Gráfico financeiro comparativo"
+                  onMouseMove={handleChartMouseMove}
+                  onMouseLeave={() => {
+                    setHoveredDayIndex(null);
+                    setHoveredCursor(null);
+                  }}
+                >
                   <defs>
                     <linearGradient id="tealFillExact" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#0A5F6B" stopOpacity={showAvailable ? 0.16 : 0.02} />
-                      <stop offset="100%" stopColor="#0A5F6B" stopOpacity="0.02" />
+                      <stop offset="0%" stopColor="#0A6B78" stopOpacity={showAvailable ? 0.1 : 0.01} />
+                      <stop offset="100%" stopColor="#0A6B78" stopOpacity="0.015" />
                     </linearGradient>
                     <linearGradient id="redFillExact" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF5757" stopOpacity={showExpenses ? 0.10 : 0.02} />
-                      <stop offset="100%" stopColor="#FF5757" stopOpacity="0.02" />
+                      <stop offset="0%" stopColor="#EE5151" stopOpacity={showExpenses ? 0.12 : 0.02} />
+                      <stop offset="100%" stopColor="#EE5151" stopOpacity="0.02" />
                     </linearGradient>
+                    <filter id="tealGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="0" stdDeviation="1.6" floodColor="#6A9298" floodOpacity="0.16" />
+                    </filter>
+                    <filter id="redGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor="#EE5151" floodOpacity="0.2" />
+                    </filter>
+                    <filter id="labelShadow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#1B2A38" floodOpacity="0.18" />
+                    </filter>
+                    <filter id="tooltipShadow" x="-30%" y="-30%" width="160%" height="160%">
+                      <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#101820" floodOpacity="0.16" />
+                    </filter>
                   </defs>
 
-                  {showAvailable && (
-                    <>
-                      <path
-                        d={`${currentSeries.availableLine} L 716 286 L 30 286 Z`}
-                        fill="url(#tealFillExact)"
-                      />
-                      <path
-                        d={currentSeries.availableLine}
-                        fill="none"
-                        stroke="#075E69"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                  <g stroke="#D9E2E8" strokeWidth="0.8" opacity="0.35">
+                    {chartData.yTicks.map((tick, index) => (
                       <line
-                        x1={currentSeries.availableMarker.x}
-                        y1={currentSeries.availableMarker.y}
-                        x2={currentSeries.availableMarker.x}
-                        y2="286"
-                        stroke="#B7CCD1"
-                        strokeWidth="2"
-                        strokeDasharray="7 7"
+                        key={`grid-${index}-${tick.y}`}
+                        x1={CHART_LEFT}
+                        y1={tick.y}
+                        x2={CHART_RIGHT}
+                        y2={tick.y}
                       />
-                      <circle
-                        cx={currentSeries.availableMarker.x}
-                        cy={currentSeries.availableMarker.y}
-                        r="7"
-                        fill="#FFF"
-                        stroke="#075E69"
-                        strokeWidth="4"
-                      />
-                      <rect
-                        x={currentSeries.availableMarker.labelX}
-                        y={currentSeries.availableMarker.labelY}
-                        rx="14"
-                        ry="14"
-                        width="168"
-                        height="40"
-                        fill="#075E69"
-                      />
-                      <text
-                        x={currentSeries.availableMarker.textX}
-                        y={currentSeries.availableMarker.textY}
-                        textAnchor="middle"
-                        fontSize="18"
-                        fontWeight="700"
-                        fill="#FFFFFF"
-                      >
-                        {currentSeries.availableMarker.text}
+                    ))}
+                  </g>
+
+                  <g fill="#7A8590" fontSize="10" fontWeight="500" opacity="0.82" textAnchor="end">
+                    {chartData.yTicks.map((tick, index) => (
+                      <text key={`label-${index}-${tick.y}`} x={CHART_LEFT - 18} y={tick.y + 3}>
+                        {tick.label}
                       </text>
-                    </>
-                  )}
+                    ))}
+                  </g>
+
+                  <line
+                    x1={CHART_LEFT}
+                    y1={chartData.zeroY}
+                    x2={CHART_RIGHT}
+                    y2={chartData.zeroY}
+                    stroke="#AAB7C2"
+                    strokeWidth="1.2"
+                    strokeDasharray="5 5"
+                    opacity="0.6"
+                  />
+
+                  {showAvailable && <path d={chartData.availableArea} fill="url(#tealFillExact)" />}
 
                   {showExpenses && (
                     <>
+                      <path d={chartData.expenseArea} fill="url(#redFillExact)" />
                       <path
-                        d={`${currentSeries.expenseLine} L 716 286 L 30 286 Z`}
-                        fill="url(#redFillExact)"
-                      />
-                      <path
-                        d={currentSeries.expenseLine}
+                        d={chartData.expenseLine}
                         fill="none"
-                        stroke="#FF5555"
-                        strokeWidth="4"
+                        stroke="#EE5151"
+                        strokeWidth="4.4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        filter="url(#redGlow)"
                       />
                       <line
-                        x1={currentSeries.expenseMarker.x}
-                        y1={currentSeries.expenseMarker.y}
-                        x2={currentSeries.expenseMarker.x}
-                        y2="286"
-                        stroke="#F2B0B0"
-                        strokeWidth="2"
+                        x1={markerVisuals.expense.pointX}
+                        y1={markerVisuals.expense.pointY}
+                        x2={markerVisuals.expense.pointX}
+                        y2={CHART_BOTTOM}
+                        stroke="#EFC3C3"
+                        strokeWidth="1"
                         strokeDasharray="7 7"
+                        opacity="0.45"
                       />
                       <circle
-                        cx={currentSeries.expenseMarker.x}
-                        cy={currentSeries.expenseMarker.y}
-                        r="7"
-                        fill="#FFF"
-                        stroke="#FF5555"
-                        strokeWidth="4"
+                        cx={markerVisuals.expense.pointX}
+                        cy={markerVisuals.expense.pointY}
+                        r="4"
+                        fill="#EE5151"
+                        stroke="#FFF1F1"
+                        strokeWidth="1.6"
                       />
-                      <rect
-                        x={currentSeries.expenseMarker.labelX}
-                        y={currentSeries.expenseMarker.labelY}
-                        rx="14"
-                        ry="14"
-                        width="168"
-                        height="40"
-                        fill="#FF5757"
-                      />
-                      <text
-                        x={currentSeries.expenseMarker.textX}
-                        y={currentSeries.expenseMarker.textY}
-                        textAnchor="middle"
-                        fontSize="18"
-                        fontWeight="700"
-                        fill="#FFFFFF"
-                      >
-                        {currentSeries.expenseMarker.text}
-                      </text>
                     </>
                   )}
 
-                  <g fill="#B3B3B3" fontSize="13" fontWeight="500">
-                    <text x="58" y="310">10/07</text>
-                    <text x="164" y="310">12/07</text>
-                    <text x="271" y="310">14/07</text>
-                    <text x="363" y="310">16/07</text>
-                    <text x="470" y="310">18/07</text>
-                    <text x="578" y="310">20/07</text>
-                    <text x="658" y="310">22/07</text>
+                  {showAvailable && (
+                    <>
+                      <>
+                        {/* CONTORNO */}
+                        <path
+                          d={chartData.availableLine}
+                          fill="none"
+                          stroke="#0A6B78"
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          opacity="0.9"
+                        />
+
+                        {/* LINHA PRINCIPAL */}
+                        <path
+                          d={chartData.availableLine}
+                          fill="none"
+                          stroke="#0A6B78"
+                          strokeWidth="4.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          filter="url(#tealGlow)"
+                        />
+                      </>
+                      <line
+                        x1={markerVisuals.available.pointX}
+                        y1={markerVisuals.available.pointY}
+                        x2={markerVisuals.available.pointX}
+                        y2={CHART_BOTTOM}
+                        stroke="#BDD2D7"
+                        strokeWidth="1"
+                        strokeDasharray="6 6"
+                        opacity="0.45"
+                      />
+                      <circle
+                        cx={markerVisuals.available.pointX}
+                        cy={markerVisuals.available.pointY}
+                        r="4.4"
+                        fill="#0A6B78"
+                        stroke="#EEF6F7"
+                        strokeWidth="1.8"
+                      />
+                    </>
+                  )}
+
+                  {hoveredTooltip && (
+                    <g>
+                      <line
+                        x1={hoveredTooltip.lineX}
+                        y1={CHART_TOP}
+                        x2={hoveredTooltip.lineX}
+                        y2={CHART_BOTTOM}
+                        stroke="#8DA2B4"
+                        strokeWidth="1"
+                        strokeDasharray="5 5"
+                        opacity="0.45"
+                      />
+                      <rect
+                        x={hoveredTooltip.x}
+                        y={hoveredTooltip.y}
+                        width={TOOLTIP_WIDTH}
+                        height={TOOLTIP_HEIGHT}
+                        rx="10"
+                        fill="#182734"
+                        opacity="0.95"
+                        filter="url(#tooltipShadow)"
+                      />
+
+                      <text x={hoveredTooltip.x + 12} y={hoveredTooltip.y + 16} fontSize="10" fill="#AFC2CF">
+                        {hoveredTooltip.dateLabel}
+                      </text>
+
+                      <circle cx={hoveredTooltip.x + 15} cy={hoveredTooltip.y + 34} r="3.2" fill="#EE5151" />
+                      <text x={hoveredTooltip.x + 24} y={hoveredTooltip.y + 37} fontSize="10" fill="#D4E1EA">
+                        Gastos
+                      </text>
+                      <text
+                        x={hoveredTooltip.x + TOOLTIP_WIDTH - 12}
+                        y={hoveredTooltip.y + 37}
+                        fontSize="11"
+                        fontWeight="700"
+                        fill="#FFEAEA"
+                        textAnchor="end"
+                      >
+                        {hoveredTooltip.expenseText}
+                      </text>
+
+                      <circle cx={hoveredTooltip.x + 15} cy={hoveredTooltip.y + 54} r="3.2" fill="#6A9298" />
+                      <text x={hoveredTooltip.x + 24} y={hoveredTooltip.y + 57} fontSize="10" fill="#D4E1EA">
+                        Disponível
+                      </text>
+                      <text
+                        x={hoveredTooltip.x + TOOLTIP_WIDTH - 12}
+                        y={hoveredTooltip.y + 57}
+                        fontSize="11"
+                        fontWeight="700"
+                        fill="#EAF9FB"
+                        textAnchor="end"
+                      >
+                        {hoveredTooltip.availableText}
+                      </text>
+
+                      <line
+                        x1={hoveredTooltip.x + 12}
+                        y1={hoveredTooltip.y + 66}
+                        x2={hoveredTooltip.x + TOOLTIP_WIDTH - 12}
+                        y2={hoveredTooltip.y + 66}
+                        stroke="#304556"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={hoveredTooltip.x + 12}
+                        y={hoveredTooltip.y + 81}
+                        fontSize="10"
+                        fill="#AFC2CF"
+                      >
+                        Diferença
+                      </text>
+                      <text
+                        x={hoveredTooltip.x + TOOLTIP_WIDTH - 12}
+                        y={hoveredTooltip.y + 81}
+                        fontSize="11"
+                        fontWeight="700"
+                        fill="#FFE4A7"
+                        textAnchor="end"
+                      >
+                        {hoveredTooltip.diffText}
+                      </text>
+                    </g>
+                  )}
+
+                  <g fill="#9FA8B0" fontSize="13" fontWeight="600">
+                    {chartData.xTicks.map((tick) => (
+                      <text key={tick.label} x={tick.x} y={CHART_VIEWBOX_HEIGHT - 2}>
+                        {tick.label}
+                      </text>
+                    ))}
                   </g>
                 </svg>
               </div>
 
               <div className="relative z-10 mt-3 flex flex-col gap-3 lg:flex-row">
+>>>>>>> dev
                 <button
+                  key={item.id}
                   type="button"
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+                  onClick={() => showToast(`${item.label} selecionado para consulta rapida.`, "info")}
+                  className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4 text-left transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#58AFAE]/15 sm:grid-cols-[1fr_auto_auto]"
+                >
+                  <div>
+                    <p className={`text-[15px] font-bold ${item.value > 0 ? "text-[#32A95A]" : "text-[#1F2A32]"}`}>
+                      {showMoneyValues ? formatCurrency(item.value) : hiddenValue}
+                    </p>
+                    <p className="mt-1 text-sm text-[#5B6770]">{item.label}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#90A0A8]">{item.category}</p>
+                  </div>
+
+                  <div className="text-right text-sm text-[#6B7280]">
+                    <div>{formatDate(item.date)}</div>
+                    <div>{item.time}</div>
+                  </div>
+
+                  <span
+                    className={`hidden self-center rounded-full px-4 py-2 text-xs font-semibold sm:inline-flex ${
+                      item.value > 0 ? "bg-[#EAF9EF] text-[#32A95A]" : "bg-[#FFF1DB] text-[#F0A126]"
+                    }`}
+                  >
+                    {item.value > 0 ? "Entrada" : "Saida"}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalRecords={totalRecords}
+              pageSize={pageSize}
+              pageSizeOptions={[4, 6, 8]}
+              disabled={isPending}
+              onPageChange={goToPage}
+              onPageSizeChange={changePageSize}
+            />
+          </>
+        )}
+      </section>
+=======
                   onClick={() => setShowAvailable((v) => !v)}
-                  className={`inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-[18px] border px-4 py-3 text-[16px] font-bold shadow-sm transition hover:brightness-[0.98] lg:flex-1 ${
-                    showAvailable ? 'border-[#B9D0D3] bg-[#EAF4F5] text-[#075E69]' : 'border-[#D8E2E3] bg-[#F5FAFA] text-[#8AA8AC]'
-                  }`}
+                  className={`inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-[18px] border px-4 py-3 text-[16px] font-bold shadow-sm transition hover:brightness-[0.98] lg:flex-1 ${showAvailable
+                      ? "border-[#B9D0D3] bg-[#EAF4F5] text-[#075E69]"
+                      : "border-[#D8E2E3] bg-[#F5FAFA] text-[#8AA8AC]"
+                    }`}
                 >
                   <span className="relative h-4 w-8">
-                    <span className={`absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 rounded-full ${showAvailable ? 'bg-[#075E69]' : 'bg-[#8AA8AC]'}`} />
-                    <span className={`absolute left-[8px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-[3px] bg-white ${showAvailable ? 'border-[#075E69]' : 'border-[#8AA8AC]'}`} />
+                    <span
+                      className={`absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 rounded-full ${showAvailable ? "bg-[#075E69]" : "bg-[#8AA8AC]"
+                        }`}
+                    />
+                    <span
+                      className={`absolute left-[8px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-[3px] bg-white ${showAvailable ? "border-[#075E69]" : "border-[#8AA8AC]"
+                        }`}
+                    />
                   </span>
                   Valor disponível
                 </button>
@@ -437,24 +1641,31 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setShowExpenses((v) => !v)}
-                  className={`inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-[18px] border px-4 py-3 text-[16px] font-bold shadow-sm transition hover:brightness-[0.98] lg:flex-1 ${
-                    showExpenses ? 'border-[#F2B7B7] bg-[#FFF3F3] text-[#FF5555]' : 'border-[#E7D4D4] bg-[#FFF9F9] text-[#D59A9A]'
-                  }`}
+                  className={`inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-[18px] border px-4 py-3 text-[16px] font-bold shadow-sm transition hover:brightness-[0.98] lg:flex-1 ${showExpenses
+                      ? "border-[#F2B7B7] bg-[#FFF3F3] text-[#FF5555]"
+                      : "border-[#E7D4D4] bg-[#FFF9F9] text-[#D59A9A]"
+                    }`}
                 >
                   <span className="relative h-4 w-8">
-                    <span className={`absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 rounded-full ${showExpenses ? 'bg-[#FF5555]' : 'bg-[#D59A9A]'}`} />
-                    <span className={`absolute left-[8px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-[3px] bg-white ${showExpenses ? 'border-[#FF5555]' : 'border-[#D59A9A]'}`} />
+                    <span
+                      className={`absolute left-0 top-1/2 h-[3px] w-full -translate-y-1/2 rounded-full ${showExpenses ? "bg-[#FF5555]" : "bg-[#D59A9A]"
+                        }`}
+                    />
+                    <span
+                      className={`absolute left-[8px] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-[3px] bg-white ${showExpenses ? "border-[#FF5555]" : "border-[#D59A9A]"
+                        }`}
+                    />
                   </span>
                   Gastos totais
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setMonthIndex((prev) => (prev + 1) % months.length)}
+                  onClick={() => setMonthIndex((prev) => (prev + 1) % monthOptions.length)}
                   className="inline-flex min-h-[56px] w-full items-center justify-center gap-3 rounded-[18px] border border-[#F0CFA4] bg-[#FFF6E8] px-4 py-3 text-[16px] font-bold text-[#F0A126] shadow-sm transition hover:brightness-[0.98] lg:flex-1"
                 >
                   <span className="material-symbols-outlined !text-[18px]">calendar_month</span>
-                  {months[monthIndex]}
+                  {monthLabel}
                 </button>
               </div>
             </article>
@@ -466,59 +1677,123 @@ export default function Dashboard() {
               <span className="inline-flex rounded-full bg-[#FFF0DD] px-4 py-1 text-[11px] font-bold uppercase tracking-[0.05em] text-[#F0A126]">
                 EXTRATO RECENTE
               </span>
-              <h3 className="mt-4 text-center text-[28px] font-bold text-[#232323]">Últimos Gastos:</h3>
-              <p className="mt-1 text-center text-[13px] text-[#B0ACA5]">Aqui você pode ver onde está indo os fundos.</p>
+              <h3 className="mt-4 text-center text-[28px] font-bold text-[#232323]">Últimos Lançamentos:</h3>
+              <p className="mt-1 text-center text-[13px] text-[#B0ACA5]">
+                Aqui você pode ver onde está indo os fundos.
+              </p>
               <div className="mt-6 space-y-3">
-                {expenses.map((item, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[16px] border border-[#F0ECE5] bg-white px-3 py-3 sm:grid-cols-[1fr_auto_auto]">
-                    <div>
-                      <p className={`text-[15px] font-bold ${item.tone === 'green' ? 'text-[#35B86B]' : 'text-[#3B3B3B]'}`}>
-                        {showMoneyValues ? item.value : "* * * * * *"}
-                      </p>
-                      <p className="text-[12px] text-[#A9A29A]">{item.label}</p>
-                    </div>
-                    <div className="text-right text-[12px] text-[#8E8E8E]">
-                      <div>{item.date}</div>
-                      <div>{item.time}</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => window.alert(`${item.label} - ${item.value}`)}
-                      className={`hidden sm:inline-flex rounded-full px-4 py-2 text-[12px] font-bold ${
-                        item.tone === 'green' ? 'bg-[#EAF9EF] text-[#35B86B]' : 'bg-[#FFF1DB] text-[#F0A126]'
-                      }`}
-                    >
-                      Ver mais +
-                    </button>
+                {isLoadingHome &&
+                  Array.from({ length: 3 }).map((_, index) => (
+                    <div
+                      key={`skeleton-${index}`}
+                      className="h-[74px] animate-pulse rounded-[16px] border border-[#F0ECE5] bg-[#F7F4EF]"
+                    />
+                  ))}
+
+                {!isLoadingHome && recentMovements.length === 0 && (
+                  <div className="rounded-[16px] border border-[#F0ECE5] bg-white px-3 py-6 text-center text-[13px] text-[#8E8E8E]">
+                    Sem dados para o período selecionado.
                   </div>
-                ))}
+                )}
+
+                {!isLoadingHome &&
+                  recentMovements.map((item) => (
+                    <div
+                      key={`${item.id}-${item.date}-${item.time}`}
+                      className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-[16px] border border-[#F0ECE5] bg-white px-3 py-3 sm:grid-cols-[1fr_auto_auto]"
+                    >
+                      <div>
+                        <p className={`text-[15px] font-bold ${item.tone === "green" ? "text-[#35B86B]" : "text-[#3B3B3B]"}`}>
+                          {showMoneyValues ? item.value : HIDDEN_VALUE}
+                        </p>
+                        <p className="text-[12px] text-[#A9A29A]">{item.label}</p>
+                      </div>
+                      <div className="text-right text-[12px] text-[#8E8E8E]">
+                        <div>{item.date}</div>
+                        <div>{item.time}</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => window.alert(item.detail)}
+                        className={`hidden sm:inline-flex rounded-full px-4 py-2 text-[12px] font-bold ${item.tone === "green" ? "bg-[#EAF9EF] text-[#35B86B]" : "bg-[#FFF1DB] text-[#F0A126]"
+                          }`}
+                      >
+                        Ver mais +
+                      </button>
+                    </div>
+                  ))}
               </div>
             </article>
           </div>
         </div>
       </div>
+>>>>>>> dev
     </div>
   );
 }
 
-function TopCard({
+function MetricCard({
   title,
   subtitle,
   value,
   gradient,
   icon,
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+=======
   onClick,
   showMoneyValues = false,
+  isLoading = false,
   dark = false,
-  accent = false
+  accent = false,
+>>>>>>> dev
 }: {
   title: string;
   subtitle: string;
-  value: React.ReactNode;
+  value: string;
   gradient: string;
   icon: string;
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+}) {
+  return (
+    <article
+      className="relative overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
+      style={{ background: gradient }}
+    >
+      <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full border border-white/25" />
+      <div className="absolute -bottom-8 right-8 h-24 w-24 rounded-full bg-white/10" />
+      <div className="relative z-10 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/75">Conta digital</p>
+          <h2 className="mt-5 text-[28px] font-semibold leading-none">{title}</h2>
+          <p className="mt-2 text-sm text-white/80">{subtitle}</p>
+        </div>
+        <span className="material-symbols-outlined !text-[42px] opacity-60">{icon}</span>
+      </div>
+
+      <div className="relative z-10 mt-6 rounded-2xl bg-black/20 px-4 py-3 text-lg font-semibold tracking-[0.08em] backdrop-blur-sm">
+        {value}
+      </div>
+    </article>
+  );
+}
+
+function ActionCard({ action }: { action: QuickAction }) {
+  const toneClasses = {
+    amber: "border-[#F6E2BA] bg-[#FFF7E8] text-[#A56300]",
+    blue: "border-[#D9E8FF] bg-[#EFF5FF] text-[#2D6FD2]",
+    slate: "border-[#D9E2E6] bg-[#F5F8F9] text-[#31424C]",
+  } as const;
+
+  const buttonClasses = {
+    amber: "bg-[#FFAA17] text-white",
+    blue: "bg-[#4A8FF7] text-white",
+    slate: "bg-[#1D2940] text-white",
+  } as const;
+
+=======
   onClick: () => void;
   showMoneyValues?: boolean;
+  isLoading?: boolean;
   dark?: boolean;
   accent?: boolean;
 }) {
@@ -526,36 +1801,41 @@ function TopCard({
     <button
       type="button"
       onClick={onClick}
-      className="relative h-[164px] w-full overflow-hidden rounded-[20px] p-4 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
+      className="relative h-[176px] w-full overflow-hidden rounded-[20px] p-5 pb-12 text-left shadow-[0_10px_24px_rgba(0,0,0,0.07)] transition hover:-translate-y-0.5"
       style={{ background: gradient }}
     >
-      <div className={`absolute right-4 top-4 opacity-70 ${dark ? 'text-white/60' : accent ? 'text-white/55' : 'text-white/55'}`}>
+      <div className={`absolute right-4 top-4 opacity-70 ${dark ? "text-white/60" : "text-white/55"}`}>
         <span className="material-symbols-outlined !text-[42px]">{icon}</span>
       </div>
 
-      <div className={`text-[14px] font-semibold ${dark ? 'text-white' : accent ? 'text-[#5E3000]' : 'text-white'}`}>
+      <div className={`text-[14px] font-semibold ${dark ? "text-white" : accent ? "text-[#5E3000]" : "text-white"}`}>
         Conta Digital
       </div>
 
-      <div className={`mt-2 text-[26px] font-bold leading-tight ${dark ? 'text-white' : accent ? 'text-[#5E3000]' : 'text-white'}`}>
+      <div className={`mt-2 text-[26px] font-bold leading-tight ${dark ? "text-white" : accent ? "text-[#5E3000]" : "text-white"}`}>
         {title}
       </div>
 
-      <div className={`mt-1 h-[18px] text-[12px] ${dark ? 'text-white/70' : accent ? 'text-[#7A4C15]' : 'text-white/80'}`}>
+      <div className={`mt-1 h-[18px] text-[12px] ${dark ? "text-white/70" : accent ? "text-[#7A4C15]" : "text-white/80"}`}>
         {subtitle}
       </div>
 
-      <div className={`${dark ? 'text-white' : accent ? 'text-[#5E3000]' : 'text-white'}`}>
-        {value}
-      </div>
-
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-end bg-black/12 px-4 py-2">
-        <span className="material-symbols-outlined !text-[22px] text-white">
+      <div className="absolute bottom-0 left-0 right-0 flex h-[48px] items-center justify-between border-t border-white/15 bg-black/12 px-4">
+        <div
+          className={`max-w-[calc(100%-40px)] truncate ${dark ? "text-white" : accent ? "text-[#5E3000]" : "text-white"
+            }`}
+        >
+          {isLoading ? <div className="h-6 w-36 animate-pulse rounded-full bg-white/30" /> : value}
+        </div>
+        <span
+          className={`material-symbols-outlined !text-[22px] ${dark ? "text-white" : accent ? "text-[#5E3000]" : "text-white"
+            }`}
+        >
           {showMoneyValues ? "visibility" : "visibility_off"}
         </span>
       </div>
     </button>
-  )
+  );
 }
 
 function Legend({ color, text }: { color: string; text: string }) {
@@ -564,7 +1844,7 @@ function Legend({ color, text }: { color: string; text: string }) {
       <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
       <span>{text}</span>
     </div>
-  )
+  );
 }
 
 function InfoCard({
@@ -573,7 +1853,7 @@ function InfoCard({
   subtitle,
   value,
   icon,
-  onClick
+  onClick,
 }: {
   badge: string;
   title: string;
@@ -582,29 +1862,27 @@ function InfoCard({
   icon: string;
   onClick: () => void;
 }) {
+>>>>>>> dev
   return (
-    <article className="relative overflow-hidden rounded-[28px] bg-[#FFFDFB] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.06)] ring-1 ring-[#EFE8DE]">
-      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#F8F4EC]" />
-      <div className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF1DB] text-[#F0A126]">
-        <span className="material-symbols-outlined">{icon}</span>
+    <div className={`flex items-center gap-4 rounded-[20px] border px-4 py-4 ${toneClasses[action.tone]}`}>
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/70">
+        <span className="material-symbols-outlined !text-[22px]">{action.icon}</span>
       </div>
-      <div className="flex gap-1 text-[#C9C2B7]">
-        <span className="h-2 w-2 rounded-full bg-current" />
-        <span className="h-2 w-2 rounded-full bg-current" />
-        <span className="h-2 w-2 rounded-full bg-current" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[15px] font-semibold text-[#1F2A32]">{action.title}</p>
+        <p className="mt-1 text-sm text-[#72808A]">{action.subtitle}</p>
       </div>
-      <span className="mt-4 inline-flex rounded-full bg-[#FFF0DD] px-4 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-[#F0A126]">
-        {badge}
-      </span>
-      <h3 className="mt-5 text-[24px] font-bold leading-tight text-[#232323]">{title}</h3>
-      <p className="mt-2 text-[13px] text-[#B0ACA5]">{subtitle}</p>
       <button
         type="button"
-        onClick={onClick}
-        className="mt-8 flex w-full items-center justify-center rounded-[16px] bg-[#F3E7D5] px-4 py-4 text-[15px] font-semibold text-[#6E604E] transition hover:brightness-[0.98]"
+        onClick={action.onClick}
+        className={`rounded-full px-5 py-2 text-sm font-bold transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-black/5 ${buttonClasses[action.tone]}`}
       >
-        {value}
+        {action.button}
       </button>
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+    </div>
+=======
     </article>
-  )
+>>>>>>> dev
+  );
 }

@@ -789,7 +789,6 @@ export default function Page() {
             </button>
           </div>
         </div>
-      </section>
 
       <section
         ref={listSectionRef}
@@ -913,6 +912,7 @@ export default function Page() {
             </tbody>
           </table>
         </div>
+      </section>
 
         <div className="flex flex-col gap-2 border-t border-[#E8F0F1] bg-[#FBFDFD] px-5 py-4 text-sm text-[#71868D] sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <span>{listResume}</span>
@@ -920,7 +920,7 @@ export default function Page() {
         </div>
       </section>
 
-      {isCreateModalOpen && (
+      {isCreateModalOpen ? (
         <Modal value={isCreateModalOpen} setValue={setIsCreateModalOpen}>
           <Form
             object={EMPTY_DESPESA_FORM}
