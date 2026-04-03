@@ -2,9 +2,9 @@
 
 import React from 'react';
 import FinanceiroCrudTeste from '@/components/testefinanceiro/FinanceiroCrudTeste';
-import FinanceiroFiltrosTeste from '@/components/testefinanceiro/FinanceiroFiltrosTeste';
-import FinanceiroListaTeste from '@/components/testefinanceiro/FinanceiroListaTeste';
-import FinanceiroResumoTeste from '@/components/testefinanceiro/FinanceiroResumoTeste';
+import FinanceiroFiltrosTeste from '@/components/testefinanceiro/FinanceiroFiltros';
+import FinanceiroListaTeste from '@/components/testefinanceiro/FinanceiroLista';
+import FinanceiroResumoTeste from '@/components/testefinanceiro/FinanceiroResumo';
 import { useFinanceiro } from '@/hooks/financeiro';
 
 export default function FinanceiroTestSuite() {
