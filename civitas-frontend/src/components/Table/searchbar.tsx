@@ -12,6 +12,7 @@ import {
   buildInitialAdvancedFilters,
   type SearchFieldConfig,
 } from "./search-utils";
+import { showToast } from "@/hooks/useToast";
 
 type FieldConfig = SearchFieldConfig;
 
@@ -234,7 +235,7 @@ const SearchBar = ({
               } catch (error) {
                 console.error("Erro ao cadastrar:", error);
                 const message = error instanceof Error ? error.message : "Erro ao cadastrar. Tente novamente.";
-                alert(message);
+                showToast(message, "error");
               }
             }}
           />

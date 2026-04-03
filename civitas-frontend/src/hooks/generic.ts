@@ -56,7 +56,14 @@ const isHttpNotFoundError = (error: unknown): boolean => {
   return error instanceof Error && error.message.includes("HTTP 404");
 };
 
+<<<<<<< 146-sprint-14---front-uxui---padronizar-componentes-compartilhados-e-estados-visuais-das-telas-home-despesa-e-financeiro
+const toQueryString = (
+  query: ListQuery | undefined,
+  defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY
+): string => {
+=======
 const toQueryString = (query?: ListQuery): string => {
+>>>>>>> dev
   const params = new URLSearchParams();
   const mergedQuery = { ...DEFAULT_LIST_QUERY, ...query };
 
