@@ -9,6 +9,7 @@ import { useFinanceiro } from '@/hooks/financeiro';
 
 export default function FinanceiroTestSuite() {
   const {
+    filtros,
     transacoes,
     resumo,
     instituicoes,
@@ -17,8 +18,6 @@ export default function FinanceiroTestSuite() {
     fornecedores,
     usuarios,
     loading,
-    error,
-    hasData,
     aplicarFiltros,
     cadastrar,
     atualizar,
@@ -30,8 +29,13 @@ export default function FinanceiroTestSuite() {
       <section className="rounded-[24px] border border-[#E4EEF0] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:p-5">
         <h3 className="mb-4 text-lg font-semibold text-[#1F2A32]">Resumo e filtros</h3>
         <div className="space-y-4">
-          <FinanceiroResumoTeste resumo={resumo} loading={loading} />
-          <FinanceiroFiltrosTeste instituicoes={instituicoes} onApply={aplicarFiltros} />
+          <FinanceiroResumoTeste resumo={resumo} />
+          <FinanceiroFiltrosTeste
+            instituicoes={instituicoes}
+            filtrosAtuais={filtros}
+            onApply={aplicarFiltros}
+            loading={loading}
+          />
         </div>
       </section>
 
@@ -53,8 +57,6 @@ export default function FinanceiroTestSuite() {
         <h3 className="mb-4 text-lg font-semibold text-[#1F2A32]">Transacoes</h3>
         <FinanceiroListaTeste
           loading={loading}
-          error={error}
-          hasData={hasData}
           transacoes={transacoes}
           onDelete={excluir}
         />

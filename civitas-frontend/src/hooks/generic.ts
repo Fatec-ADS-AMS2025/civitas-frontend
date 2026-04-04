@@ -1,3 +1,5 @@
+import { showToast } from "@/hooks/useToast";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
 
 export interface ResponseEnvelope<T> {
@@ -111,7 +113,7 @@ const toQueryString = (
   defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY
 ): string => {
   const params = new URLSearchParams();
-  const mergedQuery = { ...DEFAULT_LIST_QUERY, ...query };
+  const mergedQuery = { ...defaults, ...query };
 
   Object.entries(mergedQuery).forEach(([key, value]) => {
     if (value === undefined || value === null || value === "") return;
@@ -178,9 +180,7 @@ export class GenericService<T> {
         showToast(json.message, "success");
       }
 
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      return (await response.json()) as R;
+      return json;
     }
 
     return (await response.text()) as R;
@@ -218,6 +218,31 @@ export class GenericService<T> {
     return [];
   }
 
+  protected normalizePaginatedResult<R>(
+    payload: unknown,
+    query?: ListQuery
+  ): PaginatedResult<R> {
+    const data = isResponseEnvelope<unknown>(payload) ? payload.data : payload;
+    const page = query?.page ?? DEFAULT_LIST_QUERY.page;
+    const size = query?.size ?? DEFAULT_LIST_QUERY.size;
+
+    if (isPaginatedResult<R>(data)) {
+      return data;
+    }
+
+    const items = Array.isArray(data) ? (data as R[]) : [];
+    const totalRecords = items.length;
+    const totalPages = totalRecords === 0 ? 0 : Math.ceil(totalRecords / size);
+
+    return {
+      items,
+      totalRecords,
+      totalPages,
+      currentPage: totalPages === 0 ? 1 : Math.min(page, totalPages),
+      pageSize: size,
+    };
+  }
+
   protected extractData<R>(payload: unknown): R {
     if (isResponseEnvelope<R>(payload)) {
       return payload.data as R;
@@ -230,6 +255,12 @@ export class GenericService<T> {
     const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
     const payload = await this.handleResponse(response);
     return this.unwrapCollection<T>(payload);
+  }
+
+  async getPage(query?: ListQuery): Promise<PaginatedResult<T>> {
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
+    const payload = await this.handleResponse(response);
+    return this.normalizePaginatedResult<T>(payload, query);
   }
 
   async getAllEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
