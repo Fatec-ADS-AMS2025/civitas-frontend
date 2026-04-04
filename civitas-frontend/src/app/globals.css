@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #f8fafa;
   --foreground: #171717;
 
   --primary-1: #58AFAE;
@@ -44,6 +44,10 @@ body {
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+}
+
+[class*="rounded"] {
+  border-radius: 0.5rem !important;
 }
 
 .material-symbols-outlined {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/Input";
 import PaginationControls from "@/components/PaginationControls";
@@ -9,8 +9,12 @@ import {
   ErrorState,
   LoadingState,
 } from "@/components/feedback-states";
+import { SITUACAO_ATIVO } from "@/global/situacao";
 import { useClientPagination } from "@/hooks/useClientPagination";
-import { showToast } from "@/hooks/useToast";
+import {
+  type DespesaDashboardRow,
+  useDespesasDashboard,
+} from "@/hooks/useDespesasDashboard";
 
 type ActionTone = "amber" | "blue" | "slate";
 
@@ -23,24 +27,12 @@ type QuickAction = {
   onClick: () => void;
 };
 
-type DashboardMovement = {
-  id: number;
-  value: number;
+type RankedItem = {
+  id: string;
   label: string;
-  category: string;
-  date: string;
-  time: string;
+  value: number;
+  count?: number;
 };
-
-const dashboardMovementsSeed: DashboardMovement[] = [
-  { id: 1, value: -539, label: "Area da saude", category: "Saude", date: "2026-03-17", time: "08:17" },
-  { id: 2, value: -777, label: "Secretaria municipal", category: "Administrativo", date: "2026-03-17", time: "08:17" },
-  { id: 3, value: -4000, label: "Reformas", category: "Infraestrutura", date: "2026-03-16", time: "08:15" },
-  { id: 4, value: -777.07, label: "Sabesp", category: "Utilidades", date: "2026-03-16", time: "06:10" },
-  { id: 5, value: 777777.77, label: "Recebimento de verba", category: "Receita", date: "2026-03-15", time: "06:09" },
-  { id: 6, value: -1280.35, label: "Material escolar", category: "Educacao", date: "2026-03-14", time: "10:32" },
-  { id: 7, value: -950, label: "Transporte escolar", category: "Transporte", date: "2026-03-13", time: "09:41" },
-];
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", {
@@ -48,84 +40,161 @@ const formatCurrency = (value: number) =>
     currency: "BRL",
   }).format(value);
 
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat("pt-BR", {
+const formatCompactCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
+
+const formatDate = (value: string) => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(parsed);
+};
+
+const normalizeText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const getDaysUntilDate = (value: string): number | null => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  parsed.setHours(0, 0, 0, 0);
+
+  return Math.round((parsed.getTime() - today.getTime()) / 86_400_000);
+};
+
+const getDueSoonLabel = (daysUntilDue: number | null) => {
+  if (daysUntilDue === null) return "Sem vencimento";
+  if (daysUntilDue < 0) return `Atrasada ha ${Math.abs(daysUntilDue)} dia(s)`;
+  if (daysUntilDue === 0) return "Vence hoje";
+  return `Vence em ${daysUntilDue} dia(s)`;
+};
+
+const buildCategoryRanking = (despesas: DespesaDashboardRow[]): RankedItem[] => {
+  const grouped = despesas.reduce<Map<string, RankedItem>>((acc, item) => {
+    const current = acc.get(item.categoria) ?? {
+      id: item.categoria,
+      label: item.categoria,
+      value: 0,
+      count: 0,
+    };
+
+    current.value += item.valor;
+    current.count = (current.count ?? 0) + 1;
+    acc.set(item.categoria, current);
+    return acc;
+  }, new Map());
+
+  return Array.from(grouped.values()).sort((a, b) => b.value - a.value).slice(0, 5);
+};
+
+const buildInstitutionRanking = (
+  despesas: DespesaDashboardRow[],
+  instituicoes: Array<{ id: number; nome: string }>
+): RankedItem[] => {
+  const institutionMap = new Map(instituicoes.map((item) => [item.id, item.nome]));
+
+  const grouped = despesas.reduce<Map<number, RankedItem>>((acc, item) => {
+    const instituicaoId = item.raw.idInstituicao ?? 0;
+    const label =
+      institutionMap.get(instituicaoId) ??
+      (instituicaoId > 0 ? `Instituicao #${instituicaoId}` : "Nao vinculada");
+
+    const current = acc.get(instituicaoId) ?? {
+      id: String(instituicaoId),
+      label,
+      value: 0,
+      count: 0,
+    };
+
+    current.value += item.valor;
+    current.count = (current.count ?? 0) + 1;
+    acc.set(instituicaoId, current);
+    return acc;
+  }, new Map());
+
+  return Array.from(grouped.values()).sort((a, b) => b.value - a.value).slice(0, 5);
+};
 
 export default function Dashboard() {
   const router = useRouter();
   const [showMoneyValues, setShowMoneyValues] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [movements, setMovements] = useState<DashboardMovement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const {
+    despesas,
+    filteredDespesas,
+    orcamentos,
+    instituicoes,
+    fornecedores,
+    usuarios,
+    summary,
+    loading,
+    error,
+    refetch,
+  } = useDespesasDashboard();
 
   const quickActions = useMemo<QuickAction[]>(
     () => [
       {
-        title: "Areas com maior consumo",
-        subtitle: "Revise rapidamente as despesas com maior impacto.",
-        button: "Ver despesas",
+        title: `${filteredDespesas.length} despesas disponiveis`,
+        subtitle: "Acesse a listagem completa e aplique filtros operacionais.",
+        button: "Abrir despesas",
         tone: "amber",
-        icon: "warning",
+        icon: "receipt_long",
         onClick: () => router.push("/dashboard/despesas"),
       },
       {
-        title: "Solicitacoes de verba",
-        subtitle: "Acesse os orcamentos para revisar pendencias.",
-        button: "Revisar",
+        title: `${orcamentos.length} orcamentos carregados`,
+        subtitle: "Revise rapidamente previsao orcamentaria e cobertura.",
+        button: "Ver orcamentos",
         tone: "blue",
         icon: "fact_check",
         onClick: () => router.push("/dashboard/orcamentos"),
       },
       {
-        title: "Painel financeiro",
-        subtitle: "Compare entradas, saidas e saldo consolidado.",
-        button: "Abrir",
+        title: `${instituicoes.length} instituicoes cadastradas`,
+        subtitle: "Navegue para o painel financeiro consolidado do sistema.",
+        button: "Ir ao financeiro",
         tone: "slate",
         icon: "bar_chart",
         onClick: () => router.push("/dashboard/financeiro"),
       },
     ],
-    [router]
+    [filteredDespesas.length, instituicoes.length, orcamentos.length, router]
   );
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        setMovements(dashboardMovementsSeed);
-        setError(null);
-      } catch (loadError) {
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : "Nao foi possivel carregar a dashboard."
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const filteredMovements = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase();
+  const filteredRecentExpenses = useMemo(() => {
+    const query = normalizeText(searchTerm);
 
     if (!query) {
-      return movements;
+      return filteredDespesas;
     }
 
-    return movements.filter((item) => {
-      return (
-        item.label.toLowerCase().includes(query) ||
-        item.category.toLowerCase().includes(query)
-      );
+    return filteredDespesas.filter((item) => {
+      return normalizeText(
+        `${item.descricao} ${item.numeroDocumento} ${item.categoria} ${item.id}`
+      ).includes(query);
     });
-  }, [movements, searchTerm]);
+  }, [filteredDespesas, searchTerm]);
 
   const {
     currentPage,
@@ -136,99 +205,125 @@ export default function Dashboard() {
     isPending,
     goToPage,
     changePageSize,
-    resetPagination,
-  } = useClientPagination(filteredMovements, { initialPageSize: 4 });
+  } = useClientPagination(filteredRecentExpenses, { initialPageSize: 5 });
 
-  useEffect(() => {
-    resetPagination();
-  }, [searchTerm, resetPagination]);
-
-  const totalAvailable = movements
-    .filter((item) => item.value > 0)
-    .reduce((acc, item) => acc + item.value, 0);
-  const totalExpenses = Math.abs(
-    movements
-      .filter((item) => item.value < 0)
-      .reduce((acc, item) => acc + item.value, 0)
+  const categoryRanking = useMemo(
+    () => buildCategoryRanking(filteredDespesas),
+    [filteredDespesas]
   );
-  const balance = totalAvailable - totalExpenses;
+
+  const institutionRanking = useMemo(
+    () => buildInstitutionRanking(filteredDespesas, instituicoes),
+    [filteredDespesas, instituicoes]
+  );
+
+  const activeExpenses = useMemo(
+    () => despesas.filter((item) => item.situacao === SITUACAO_ATIVO).length,
+    [despesas]
+  );
+
+  const inactiveExpenses = useMemo(
+    () => despesas.filter((item) => item.situacao !== SITUACAO_ATIVO).length,
+    [despesas]
+  );
+
+  const dueSoonExpenses = useMemo(() => {
+    return filteredDespesas
+      .map((item) => ({
+        ...item,
+        daysUntilDue: getDaysUntilDate(item.raw.dataVencimento ?? item.data),
+      }))
+      .filter((item) => item.daysUntilDue !== null && item.daysUntilDue <= 7)
+      .sort((a, b) => (a.daysUntilDue ?? 999) - (b.daysUntilDue ?? 999))
+      .slice(0, 5);
+  }, [filteredDespesas]);
+
   const hiddenValue = "* * * * * *";
 
-  const categoryHighlights = useMemo(() => {
-    const grouped = filteredMovements
-      .filter((item) => item.value < 0)
-      .reduce<Record<string, number>>((acc, item) => {
-        acc[item.category] = (acc[item.category] ?? 0) + Math.abs(item.value);
-        return acc;
-      }, {});
-
-    return Object.entries(grouped)
-      .sort(([, previous], [, next]) => next - previous)
-      .slice(0, 4);
-  }, [filteredMovements]);
+  if (loading) {
+    return <LoadingState description="Carregando painel inicial com dados do backend..." />;
+  }
 
   if (error) {
     return (
       <ErrorState
         title="Nao foi possivel carregar a dashboard"
         description={error}
-        actionLabel="Fechar aviso"
-        onRetry={() => setError(null)}
+        actionLabel="Atualizar painel"
+        onRetry={() => void refetch()}
       />
     );
   }
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] bg-[linear-gradient(135deg,#0D7A7C_0%,#63B6B2_45%,#EAF5F5_100%)] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
+      <section className="rounded-[30px] bg-[linear-gradient(135deg,#0B6770_0%,#35A3A1_50%,#E9F7F5_100%)] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
-              Visao geral
+              Dashboard operacional
             </span>
             <h1 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">
-              Painel central de acompanhamento
+              Acompanhamento real de despesas e cobertura orcamentaria
             </h1>
-            <p className="mt-3 max-w-2xl text-sm text-white/85 sm:text-base">
-              Resumo visual das movimentacoes mais recentes e atalhos para os
-              modulos que dependem da API do backend.
+            <p className="mt-3 max-w-3xl text-sm text-white/85 sm:text-base">
+              Esta tela agora usa dados reais do backend para mostrar saldo, volume
+              de despesas, concentracao por categoria e vencimentos proximos.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowMoneyValues((previous) => !previous)}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
-          >
-            <span className="material-symbols-outlined !text-[18px]">
-              {showMoneyValues ? "visibility_off" : "visibility"}
-            </span>
-            {showMoneyValues ? "Ocultar valores" : "Exibir valores"}
-          </button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
+            >
+              <span className="material-symbols-outlined !text-[18px]">refresh</span>
+              Atualizar dados
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowMoneyValues((previous) => !previous)}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
+            >
+              <span className="material-symbols-outlined !text-[18px]">
+                {showMoneyValues ? "visibility_off" : "visibility"}
+              </span>
+              {showMoneyValues ? "Ocultar valores" : "Exibir valores"}
+            </button>
+          </div>
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-3">
+      <section className="grid gap-5 xl:grid-cols-4">
         <MetricCard
-          title="Valor disponivel"
-          subtitle="Saldo consolidado para operacao"
-          value={showMoneyValues ? formatCurrency(totalAvailable) : hiddenValue}
+          title="Saldo atual"
+          subtitle="Orcamentos menos despesas"
+          value={showMoneyValues ? formatCurrency(summary.saldoTotal) : hiddenValue}
           gradient="linear-gradient(135deg, #0D7C7C 0%, #66B8B7 100%)"
-          icon="account_balance"
+          icon="account_balance_wallet"
         />
         <MetricCard
-          title="Balanca"
-          subtitle="Entradas menos saidas acumuladas"
-          value={showMoneyValues ? formatCurrency(balance) : hiddenValue}
+          title="Total orcado"
+          subtitle="Base financeira carregada"
+          value={showMoneyValues ? formatCurrency(summary.entrada) : hiddenValue}
           gradient="linear-gradient(135deg, #1D1D1D 0%, #555555 100%)"
-          icon="balance"
+          icon="savings"
         />
         <MetricCard
-          title="Gastos totais"
-          subtitle="Movimentacoes negativas do periodo"
-          value={showMoneyValues ? formatCurrency(totalExpenses) : hiddenValue}
+          title="Total gasto"
+          subtitle="Despesas encontradas"
+          value={showMoneyValues ? formatCurrency(summary.saida) : hiddenValue}
           gradient="linear-gradient(135deg, #F18B1B 0%, #FFB354 100%)"
-          icon="monetization_on"
+          icon="payments"
+        />
+        <MetricCard
+          title="Cobertura"
+          subtitle="Despesa ativa x estoque cadastral"
+          value={`${activeExpenses} ativas / ${inactiveExpenses} inativas`}
+          gradient="linear-gradient(135deg, #28455A 0%, #5B7D91 100%)"
+          icon="inventory"
         />
       </section>
 
@@ -238,10 +333,10 @@ export default function Dashboard() {
             Acoes rapidas
           </span>
           <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-            Fluxos mais usados
+            Entradas diretas para operacao
           </h2>
           <p className="mt-2 text-sm text-[#72808A]">
-            Atalhos para navegar entre despesas, orcamentos e financeiro.
+            Atalhos baseados no volume real atualmente carregado pela API.
           </p>
 
           <div className="mt-5 space-y-3">
@@ -253,144 +348,169 @@ export default function Dashboard() {
 
         <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
           <span className="inline-flex rounded-full bg-[#EAF4F5] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0B6470]">
-            Categorias
+            Panorama
           </span>
           <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-            Maiores impactos
+            Leitura rapida do cadastro
           </h2>
-          <p className="mt-2 text-sm text-[#72808A]">
-            Destaques calculados com base no extrato atual da pagina.
-          </p>
 
-          <div className="mt-6 space-y-4">
-            {categoryHighlights.length === 0 ? (
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <OverviewCard
+              label="Instituicoes"
+              value={instituicoes.length}
+              icon="corporate_fare"
+            />
+            <OverviewCard
+              label="Fornecedores"
+              value={fornecedores.length}
+              icon="storefront"
+            />
+            <OverviewCard
+              label="Usuarios"
+              value={usuarios.length}
+              icon="group"
+            />
+            <OverviewCard
+              label="Despesas filtradas"
+              value={filteredDespesas.length}
+              icon="receipt"
+            />
+          </div>
+        </article>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-2">
+        <RankingCard
+          title="Categorias com maior impacto"
+          subtitle="Soma das despesas por categoria."
+          emptyTitle="Nenhuma categoria encontrada"
+          emptyDescription="Ainda nao ha despesas suficientes para montar o ranking."
+          items={categoryRanking}
+          totalBase={summary.saida}
+        />
+
+        <RankingCard
+          title="Instituicoes com maior gasto"
+          subtitle="Acumulado de despesas por instituicao."
+          emptyTitle="Nenhuma instituicao ranqueada"
+          emptyDescription="As despesas atuais nao possuem agrupamento suficiente."
+          items={institutionRanking}
+          totalBase={summary.saida}
+        />
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <span className="inline-flex rounded-full bg-[#F4F8F9] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#7A8B94]">
+                Ultimos registros
+              </span>
+              <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
+                Despesas recentes
+              </h2>
+              <p className="mt-2 text-sm text-[#72808A]">
+                Busca local por descricao, documento ou categoria dentro das
+                despesas carregadas pelo backend.
+              </p>
+            </div>
+
+            <div className="w-full max-w-md">
+              <Input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Buscar por descricao, documento ou categoria"
+                className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F7FAFB] !px-4 !py-3 shadow-none"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6">
+            {paginatedItems.length === 0 ? (
               <EmptyState
-                title="Sem categorias para exibir"
-                description="Ajuste a busca para visualizar outro recorte."
+                title="Nenhuma despesa encontrada"
+                description="A busca atual nao retornou despesas para exibir."
               />
             ) : (
-              categoryHighlights.map(([category, value], index) => (
-                <div key={category}>
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <span className="text-sm font-semibold text-[#1F2A32]">
-                      {index + 1}. {category}
-                    </span>
-                    <span className="text-sm font-semibold text-[#0B6470]">
-                      {formatCurrency(value)}
+              <>
+                <div className="grid gap-3">
+                  {paginatedItems.map((item) => (
+                    <RecentExpenseCard
+                      key={item.id}
+                      item={item}
+                      showMoneyValues={showMoneyValues}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-5">
+                  <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalRecords={totalRecords}
+                    pageSize={pageSize}
+                    pageSizeOptions={[5, 10, 15]}
+                    disabled={isPending}
+                    onPageChange={goToPage}
+                    onPageSizeChange={changePageSize}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </article>
+
+        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+          <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#F0A126]">
+            Prioridades
+          </span>
+          <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
+            Vencimentos proximos
+          </h2>
+          <p className="mt-2 text-sm text-[#72808A]">
+            Despesas com vencimento em ate 7 dias, calculadas a partir dos dados
+            recebidos.
+          </p>
+
+          <div className="mt-6 space-y-3">
+            {dueSoonExpenses.length === 0 ? (
+              <EmptyState
+                title="Sem vencimentos proximos"
+                description="Nenhuma despesa filtrada vence nos proximos 7 dias."
+              />
+            ) : (
+              dueSoonExpenses.map((item) => (
+                <div
+                  key={`due-${item.id}`}
+                  className="rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[#1F2A32]">
+                        {item.descricao}
+                      </p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#90A0A8]">
+                        {item.categoria}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#C97900]">
+                      {getDueSoonLabel(item.daysUntilDue)}
                     </span>
                   </div>
-                  <div className="h-3 rounded-full bg-[#EEF4F5]">
-                    <div
-                      className="h-3 rounded-full bg-[linear-gradient(90deg,#0D7C7C_0%,#64B7B3_100%)]"
-                      style={{
-                        width: `${Math.min(
-                          (value / Math.max(totalExpenses, 1)) * 100,
-                          100
-                        )}%`,
-                      }}
-                    />
+
+                  <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+                    <span className="text-[#72808A]">
+                      Vencimento: {formatDate(item.raw.dataVencimento ?? item.data)}
+                    </span>
+                    <span className="font-semibold text-[#0B6470]">
+                      {showMoneyValues ? formatCurrency(item.valor) : hiddenValue}
+                    </span>
                   </div>
                 </div>
               ))
             )}
           </div>
         </article>
-      </section>
-
-      <section className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <span className="inline-flex rounded-full bg-[#F4F8F9] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#7A8B94]">
-              Extrato recente
-            </span>
-            <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-              Movimentacoes mais recentes
-            </h2>
-            <p className="mt-2 text-sm text-[#72808A]">
-              Pesquise por categoria ou descricao e navegue pela listagem.
-            </p>
-          </div>
-
-          <div className="w-full max-w-md">
-            <Input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Filtrar por categoria ou descricao"
-              className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F7FAFB] !px-4 !py-3 shadow-none"
-            />
-          </div>
-        </div>
-
-        <div className="mt-6">
-          {isLoading ? (
-            <LoadingState description="Carregando dados da dashboard..." />
-          ) : paginatedItems.length === 0 ? (
-            <EmptyState
-              title="Nenhuma movimentacao encontrada"
-              description="Tente outro termo para localizar despesas ou receitas."
-            />
-          ) : (
-            <>
-              <div className="grid gap-3">
-                {paginatedItems.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() =>
-                      showToast(
-                        `${item.label} selecionado para consulta rapida.`,
-                        "info"
-                      )
-                    }
-                    className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4 text-left transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#58AFAE]/15 sm:grid-cols-[1fr_auto_auto]"
-                  >
-                    <div>
-                      <p
-                        className={`text-[15px] font-bold ${
-                          item.value > 0 ? "text-[#32A95A]" : "text-[#1F2A32]"
-                        }`}
-                      >
-                        {showMoneyValues ? formatCurrency(item.value) : hiddenValue}
-                      </p>
-                      <p className="mt-1 text-sm text-[#5B6770]">{item.label}</p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#90A0A8]">
-                        {item.category}
-                      </p>
-                    </div>
-
-                    <div className="text-right text-sm text-[#6B7280]">
-                      <div>{formatDate(item.date)}</div>
-                      <div>{item.time}</div>
-                    </div>
-
-                    <span
-                      className={`hidden self-center rounded-full px-4 py-2 text-xs font-semibold sm:inline-flex ${
-                        item.value > 0
-                          ? "bg-[#EAF9EF] text-[#32A95A]"
-                          : "bg-[#FFF1DB] text-[#F0A126]"
-                      }`}
-                    >
-                      {item.value > 0 ? "Entrada" : "Saida"}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-5">
-                <PaginationControls
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalRecords={totalRecords}
-                  pageSize={pageSize}
-                  pageSizeOptions={[4, 6, 8]}
-                  disabled={isPending}
-                  onPageChange={goToPage}
-                  onPageSizeChange={changePageSize}
-                />
-              </div>
-            </>
-          )}
-        </div>
       </section>
     </div>
   );
@@ -421,7 +541,7 @@ function MetricCard({
           <p className="text-[11px] uppercase tracking-[0.14em] text-white/75">
             Conta digital
           </p>
-          <h2 className="mt-5 text-[28px] font-semibold leading-none">{title}</h2>
+          <h2 className="mt-5 text-[26px] font-semibold leading-none">{title}</h2>
           <p className="mt-2 text-sm text-white/80">{subtitle}</p>
         </div>
         <span className="material-symbols-outlined !text-[42px] opacity-60">
@@ -429,10 +549,125 @@ function MetricCard({
         </span>
       </div>
 
-      <div className="relative z-10 mt-6 rounded-2xl bg-black/20 px-4 py-3 text-lg font-semibold tracking-[0.08em] backdrop-blur-sm">
+      <div className="relative z-10 mt-6 rounded-2xl bg-black/20 px-4 py-3 text-lg font-semibold tracking-[0.04em] backdrop-blur-sm">
         {value}
       </div>
     </article>
+  );
+}
+
+function OverviewCard({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: number;
+  icon: string;
+}) {
+  return (
+    <div className="rounded-[20px] border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium text-[#6F7E87]">{label}</span>
+        <span className="material-symbols-outlined !text-[20px] text-[#0B6470]">
+          {icon}
+        </span>
+      </div>
+      <p className="mt-3 text-[28px] font-bold leading-none text-[#1F2A32]">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function RankingCard({
+  title,
+  subtitle,
+  emptyTitle,
+  emptyDescription,
+  items,
+  totalBase,
+}: {
+  title: string;
+  subtitle: string;
+  emptyTitle: string;
+  emptyDescription: string;
+  items: RankedItem[];
+  totalBase: number;
+}) {
+  return (
+    <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+      <h2 className="text-[24px] font-bold text-[#1F2A32]">{title}</h2>
+      <p className="mt-2 text-sm text-[#72808A]">{subtitle}</p>
+
+      <div className="mt-6 space-y-4">
+        {items.length === 0 ? (
+          <EmptyState title={emptyTitle} description={emptyDescription} />
+        ) : (
+          items.map((item, index) => (
+            <div key={item.id}>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-sm font-semibold text-[#1F2A32]">
+                    {index + 1}. {item.label}
+                  </span>
+                  <p className="mt-1 text-xs text-[#7B8A93]">
+                    {item.count ?? 0} registro(s)
+                  </p>
+                </div>
+                <span className="text-sm font-semibold text-[#0B6470]">
+                  {formatCompactCurrency(item.value)}
+                </span>
+              </div>
+              <div className="h-3 rounded-full bg-[#EEF4F5]">
+                <div
+                  className="h-3 rounded-full bg-[linear-gradient(90deg,#0D7C7C_0%,#64B7B3_100%)]"
+                  style={{
+                    width: `${Math.min(
+                      (item.value / Math.max(totalBase, 1)) * 100,
+                      100
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </article>
+  );
+}
+
+function RecentExpenseCard({
+  item,
+  showMoneyValues,
+}: {
+  item: DespesaDashboardRow;
+  showMoneyValues: boolean;
+}) {
+  return (
+    <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4 sm:grid-cols-[1fr_auto_auto]">
+      <div>
+        <p className="text-[15px] font-bold text-[#1F2A32]">
+          {showMoneyValues ? formatCurrency(item.valor) : "* * * * * *"}
+        </p>
+        <p className="mt-1 text-sm text-[#5B6770]">{item.descricao}</p>
+        <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#90A0A8]">
+          {item.categoria} • {item.registro}
+        </p>
+      </div>
+
+      <div className="text-right text-sm text-[#6B7280]">
+        <div>{item.dataFormatada}</div>
+        <div>{item.situacaoLabel}</div>
+      </div>
+
+      <div className="hidden self-center sm:flex sm:flex-col sm:items-end sm:gap-2">
+        <span className="rounded-full bg-[#FFF1DB] px-4 py-2 text-xs font-semibold text-[#F0A126]">
+          Documento {item.numeroDocumento || "-"}
+        </span>
+      </div>
+    </div>
   );
 }
 
