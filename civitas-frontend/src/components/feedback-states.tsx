@@ -47,7 +47,7 @@ function StateContainer({ children, tone = "neutral" }: StateContainerProps) {
 
 export function LoadingState({
   title = "Carregando dados",
-  description = "Aguarde enquanto atualizamos as informacoes desta tela.",
+  description = "Aguarde enquanto atualizamos as informações desta tela.",
   rows = 5,
   cols = 4,
 }: LoadingStateProps) {
@@ -70,7 +70,7 @@ export function LoadingState({
 
 export function EmptyState({
   title = "Nenhum resultado encontrado",
-  description = "Ajuste os filtros ou cadastre um novo item para preencher esta area.",
+  description = "Ajuste os filtros ou cadastre um novo item para preencher esta área.",
   action,
 }: EmptyStateProps) {
   return (
@@ -88,8 +88,8 @@ export function EmptyState({
 }
 
 export function ErrorState({
-  title = "Nao foi possivel carregar os dados",
-  description = "Tente novamente em instantes. Se o problema continuar, revise os filtros ou a conexao.",
+  title = "Não foi possível carregar os dados",
+  description = "Tente novamente em instantes. Se o problema continuar, revise os filtros ou a conexão.",
   actionLabel = "Tentar novamente",
   onRetry,
 }: ErrorStateProps) {

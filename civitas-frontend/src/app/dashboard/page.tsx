@@ -83,7 +83,7 @@ const getDaysUntilDate = (value: string): number | null => {
 
 const getDueSoonLabel = (daysUntilDue: number | null) => {
   if (daysUntilDue === null) return "Sem vencimento";
-  if (daysUntilDue < 0) return `Atrasada ha ${Math.abs(daysUntilDue)} dia(s)`;
+  if (daysUntilDue < 0) return `Atrasada há ${Math.abs(daysUntilDue)} dia(s)`;
   if (daysUntilDue === 0) return "Vence hoje";
   return `Vence em ${daysUntilDue} dia(s)`;
 };
@@ -116,7 +116,7 @@ const buildInstitutionRanking = (
     const instituicaoId = item.raw.idInstituicao ?? 0;
     const label =
       institutionMap.get(instituicaoId) ??
-      (instituicaoId > 0 ? `Instituicao #${instituicaoId}` : "Nao vinculada");
+      (instituicaoId > 0 ? `Instituição #${instituicaoId}` : "Não vinculada");
 
     const current = acc.get(instituicaoId) ?? {
       id: String(instituicaoId),
@@ -155,7 +155,7 @@ export default function Dashboard() {
   const quickActions = useMemo<QuickAction[]>(
     () => [
       {
-        title: `${filteredDespesas.length} despesas disponiveis`,
+        title: `${filteredDespesas.length} despesas disponíveis`,
         subtitle: "Acesse a listagem completa e aplique filtros operacionais.",
         button: "Abrir despesas",
         tone: "amber",
@@ -163,15 +163,15 @@ export default function Dashboard() {
         onClick: () => router.push("/dashboard/despesas"),
       },
       {
-        title: `${orcamentos.length} orcamentos carregados`,
-        subtitle: "Revise rapidamente previsao orcamentaria e cobertura.",
-        button: "Ver orcamentos",
+        title: `${orcamentos.length} orçamentos carregados`,
+        subtitle: "Revise rapidamente previsão orçamentária e cobertura.",
+        button: "Ver orçamentos",
         tone: "blue",
         icon: "fact_check",
         onClick: () => router.push("/dashboard/orcamentos"),
       },
       {
-        title: `${instituicoes.length} instituicoes cadastradas`,
+        title: `${instituicoes.length} instituições cadastradas`,
         subtitle: "Navegue para o painel financeiro consolidado do sistema.",
         button: "Ir ao financeiro",
         tone: "slate",
@@ -247,7 +247,7 @@ export default function Dashboard() {
   if (error) {
     return (
       <ErrorState
-        title="Nao foi possivel carregar a dashboard"
+        title="Não foi possível carregar a dashboard"
         description={error}
         actionLabel="Atualizar painel"
         onRetry={() => void refetch()}
@@ -299,7 +299,7 @@ export default function Dashboard() {
       <section className="grid gap-5 xl:grid-cols-4">
         <MetricCard
           title="Saldo atual"
-          subtitle="Orcamentos menos despesas"
+          subtitle="Orçamentos menos despesas"
           value={showMoneyValues ? formatCurrency(summary.saldoTotal) : hiddenValue}
           gradient="linear-gradient(135deg, #0D7C7C 0%, #66B8B7 100%)"
           icon="account_balance_wallet"
@@ -330,10 +330,10 @@ export default function Dashboard() {
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
           <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#F0A126]">
-            Acoes rapidas
+            Ações rápidas
           </span>
           <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-            Entradas diretas para operacao
+            Entradas diretas para operação
           </h2>
           <p className="mt-2 text-sm text-[#72808A]">
             Atalhos baseados no volume real atualmente carregado pela API.
@@ -351,12 +351,12 @@ export default function Dashboard() {
             Panorama
           </span>
           <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-            Leitura rapida do cadastro
+            Leitura rápida do cadastro
           </h2>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <OverviewCard
-              label="Instituicoes"
+              label="Instituições"
               value={instituicoes.length}
               icon="corporate_fare"
             />
@@ -366,7 +366,7 @@ export default function Dashboard() {
               icon="storefront"
             />
             <OverviewCard
-              label="Usuarios"
+              label="Usuários"
               value={usuarios.length}
               icon="group"
             />
@@ -384,16 +384,16 @@ export default function Dashboard() {
           title="Categorias com maior impacto"
           subtitle="Soma das despesas por categoria."
           emptyTitle="Nenhuma categoria encontrada"
-          emptyDescription="Ainda nao ha despesas suficientes para montar o ranking."
+          emptyDescription="Ainda não há despesas suficientes para montar o ranking."
           items={categoryRanking}
           totalBase={summary.saida}
         />
 
         <RankingCard
-          title="Instituicoes com maior gasto"
-          subtitle="Acumulado de despesas por instituicao."
-          emptyTitle="Nenhuma instituicao ranqueada"
-          emptyDescription="As despesas atuais nao possuem agrupamento suficiente."
+          title="Instituições com maior gasto"
+          subtitle="Acumulado de despesas por instituição."
+          emptyTitle="Nenhuma instituição ranqueada"
+          emptyDescription="As despesas atuais não possuem agrupamento suficiente."
           items={institutionRanking}
           totalBase={summary.saida}
         />
@@ -404,13 +404,13 @@ export default function Dashboard() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <span className="inline-flex rounded-full bg-[#F4F8F9] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#7A8B94]">
-                Ultimos registros
+                Últimos registros
               </span>
               <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
                 Despesas recentes
               </h2>
               <p className="mt-2 text-sm text-[#72808A]">
-                Busca local por descricao, documento ou categoria dentro das
+                Busca local por descrição, documento ou categoria dentro das
                 despesas carregadas pelo backend.
               </p>
             </div>
@@ -419,7 +419,7 @@ export default function Dashboard() {
               <Input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Buscar por descricao, documento ou categoria"
+                placeholder="Buscar por descrição, documento ou categoria"
                 className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F7FAFB] !px-4 !py-3 shadow-none"
               />
             </div>
@@ -429,7 +429,7 @@ export default function Dashboard() {
             {paginatedItems.length === 0 ? (
               <EmptyState
                 title="Nenhuma despesa encontrada"
-                description="A busca atual nao retornou despesas para exibir."
+                description="A busca atual não retornou despesas para exibir."
               />
             ) : (
               <>

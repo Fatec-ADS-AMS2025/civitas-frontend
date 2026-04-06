@@ -105,7 +105,7 @@ export const validateDigitsLength =
     }
 
     if (digits.length !== expectedLength) {
-      return `${label} deve ter ${expectedLength} digitos.`;
+      return `${label} deve ter ${expectedLength} dígitos.`;
     }
 
     return undefined;
@@ -121,7 +121,7 @@ export const validateMaxLength =
     }
 
     if (normalizedValue.length > maxLength) {
-      return `${label} deve ter no maximo ${maxLength} caracteres.`;
+      return `${label} deve ter no máximo ${maxLength} caracteres.`;
     }
 
     return undefined;
@@ -219,7 +219,7 @@ export const validateRequiredUc = (
   }
 
   if (!toTrimmedString(value)) {
-    return "UC e obrigatoria para o tipo de despesa selecionado.";
+    return "UC é obrigatória para o tipo de despesa selecionado.";
   }
 
   return undefined;
@@ -233,7 +233,7 @@ export const validateDespesaDateRange = (
   const vencimentoTimestamp = toDateTimestamp(dataVencimento);
 
   if (!Number.isNaN(emissaoTimestamp) && emissaoTimestamp > Date.now()) {
-    return "Data de emissao nao pode ser futura.";
+    return "Data de emissão não pode ser futura.";
   }
 
   if (
@@ -241,7 +241,7 @@ export const validateDespesaDateRange = (
     !Number.isNaN(vencimentoTimestamp) &&
     vencimentoTimestamp < emissaoTimestamp
   ) {
-    return "Data de vencimento nao pode ser anterior a data de emissao.";
+    return "Data de vencimento não pode ser anterior à data de emissão.";
   }
 
   return undefined;

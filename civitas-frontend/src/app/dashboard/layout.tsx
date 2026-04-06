@@ -30,10 +30,10 @@ export default function Layout({
       title: "Secretaria",
       breadcrumbs: ["Home", "Secretaria"],
     },
-    instituicoes: {
-      title: "Instituicoes",
-      breadcrumbs: ["Home", "Instituicoes"],
-    },
+  instituicoes: {
+    title: "Instituições",
+    breadcrumbs: ["Home", "Instituições"],
+  },
     fornecedor: {
       title: "Fornecedor",
       breadcrumbs: ["Home", "Fornecedor"],
@@ -42,22 +42,22 @@ export default function Layout({
       title: "Fornecedores",
       breadcrumbs: ["Home", "Fornecedores"],
     },
-    orcamentos: {
-      title: "Orcamentos",
-      breadcrumbs: ["Home", "Orcamentos"],
-    },
+  orcamentos: {
+    title: "Orçamentos",
+    breadcrumbs: ["Home", "Orçamentos"],
+  },
     financeiro: {
       title: "Financeiro",
       breadcrumbs: ["Home", "Financeiro"],
     },
-    configuracoes: {
-      title: "Configuracoes",
-      breadcrumbs: ["Home", "Configuracoes"],
-    },
-    usuarios: {
-      title: "Usuarios",
-      breadcrumbs: ["Home", "Usuarios"],
-    },
+  configuracoes: {
+    title: "Configurações",
+    breadcrumbs: ["Home", "Configurações"],
+  },
+  usuarios: {
+    title: "Usuários",
+    breadcrumbs: ["Home", "Usuários"],
+  },
   };
 
   const currentMeta = pageMeta[currentPage] ?? {

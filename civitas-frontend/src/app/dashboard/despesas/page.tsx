@@ -25,7 +25,7 @@ type SelectOption = {
 
 const SOLICITA_UC_OPTIONS: SelectOption[] = [
   { value: "1", label: "Sim" },
-  { value: "2", label: "Nao" },
+  { value: "2", label: "Não" },
 ];
 
 const INITIAL_FILTER_FORM: DespesasDashboardFilters = {
@@ -276,8 +276,8 @@ export default function Page() {
       instituicaoOptions,
       activeModalDespesa?.raw.idInstituicao,
       activeModalDespesa?.raw.idInstituicao
-        ? `Instituicao #${activeModalDespesa.raw.idInstituicao}`
-        : "Instituicao atual"
+        ? `Instituição #${activeModalDespesa.raw.idInstituicao}`
+        : "Instituição atual"
     );
   }, [activeModalDespesa, instituicaoOptions]);
 
@@ -286,8 +286,8 @@ export default function Page() {
       orcamentoOptions,
       activeModalDespesa?.raw.idOrcamento,
       activeModalDespesa?.raw.idOrcamento
-        ? `Orcamento #${activeModalDespesa.raw.idOrcamento}`
-        : "Orcamento atual"
+        ? `Orçamento #${activeModalDespesa.raw.idOrcamento}`
+        : "Orçamento atual"
     );
   }, [activeModalDespesa, orcamentoOptions]);
 
@@ -306,8 +306,8 @@ export default function Page() {
       usuarioOptions,
       activeModalDespesa?.raw.idUsuario,
       activeModalDespesa?.raw.idUsuario
-        ? `Usuario #${activeModalDespesa.raw.idUsuario}`
-        : "Usuario atual"
+        ? `Usuário #${activeModalDespesa.raw.idUsuario}`
+        : "Usuário atual"
     );
   }, [activeModalDespesa, usuarioOptions]);
 
@@ -321,18 +321,18 @@ export default function Page() {
       { key: "id", hidden: true },
       {
         key: "numeroDocumento",
-        label: "Numero do documento",
-        placeholder: "Somente numeros",
+        label: "Número do documento",
+        placeholder: "Somente números",
         required: true,
         validate: (value) => {
           const normalizedValue = digitsOnly(value);
 
           if (!normalizedValue) {
-            return "Numero do documento deve conter apenas numeros.";
+            return "Número do documento deve conter apenas números.";
           }
 
           if (normalizedValue.length > 100) {
-            return "Numero do documento deve ter no maximo 100 caracteres.";
+            return "Número do documento deve ter no máximo 100 caracteres.";
           }
 
           return undefined;
@@ -347,7 +347,7 @@ export default function Page() {
         options: resolvedTipoDespesaOptions,
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
-            return "Selecione um tipo de despesa valido.";
+            return "Selecione um tipo de despesa válido.";
           }
 
           return undefined;
@@ -372,7 +372,7 @@ export default function Page() {
           const numericValue = Number(value);
 
           if (Number.isNaN(numericValue) || numericValue < 0) {
-            return "Valor da despesa nao pode ser negativo.";
+            return "Valor da despesa não pode ser negativo.";
           }
 
           return undefined;
@@ -380,13 +380,13 @@ export default function Page() {
       },
       {
         key: "dataEmicao",
-        label: "Data de emissao",
+        label: "Data de emissão",
         type: "date",
         required: true,
         validate: (value, formData) => {
           const normalizedDate = normalizeDateInput(value);
           if (!normalizedDate) {
-            return "Data de emissao invalida.";
+            return "Data de emissão inválida.";
           }
 
           return validateDespesaDateRange(normalizedDate, formData.dataVencimento);
@@ -400,7 +400,7 @@ export default function Page() {
         validate: (value, formData) => {
           const normalizedDate = normalizeDateInput(value);
           if (!normalizedDate) {
-            return "Data de vencimento invalida.";
+            return "Data de vencimento inválida.";
           }
 
           return validateDespesaDateRange(formData.dataEmicao, normalizedDate);
@@ -408,14 +408,14 @@ export default function Page() {
       },
       {
         key: "idInstituicao",
-        label: "Instituicao",
-        placeholder: "Selecione a instituicao",
+        label: "Instituição",
+        placeholder: "Selecione a instituição",
         type: "select",
         required: true,
         options: resolvedInstituicaoOptions,
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
-            return "Selecione uma instituicao valida.";
+            return "Selecione uma instituição válida.";
           }
 
           return undefined;
@@ -423,14 +423,14 @@ export default function Page() {
       },
       {
         key: "idOrcamento",
-        label: "Orcamento",
-        placeholder: "Selecione o orcamento",
+        label: "Orçamento",
+        placeholder: "Selecione o orçamento",
         type: "select",
         required: true,
         options: resolvedOrcamentoOptions,
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
-            return "Selecione um orcamento valido.";
+            return "Selecione um orçamento válido.";
           }
 
           return undefined;
@@ -453,14 +453,14 @@ export default function Page() {
       },
       {
         key: "idUsuario",
-        label: "Usuario responsavel",
-        placeholder: "Selecione o usuario",
+        label: "Usuário responsável",
+        placeholder: "Selecione o usuário",
         type: "select",
         required: true,
         options: resolvedUsuarioOptions,
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
-            return "Selecione um usuario valido.";
+            return "Selecione um usuário válido.";
           }
 
           return undefined;
@@ -468,8 +468,8 @@ export default function Page() {
       },
       {
         key: "situacao",
-        label: "Situacao",
-        placeholder: "Selecione a situacao",
+        label: "Situação",
+        placeholder: "Selecione a situação",
         type: "select",
         required: true,
         options: SITUACAO_OPTIONS,
@@ -569,11 +569,11 @@ export default function Page() {
             Home &gt; Cadastros &gt; Listagem
           </p>
           <h2 className="mt-3 text-[42px] font-bold leading-[0.95] text-[#0B4D57] sm:text-[56px]">
-            Acompanhe despesas, aplique filtros e mantenha tudo em um unico painel.
+            Acompanhe despesas, aplique filtros e mantenha tudo em um único painel.
           </h2>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-[#67828A] sm:text-base">
             Visualize o resumo local, aplique filtros com mais clareza e gerencie os
-            registros de despesas com integracao real ao backend.
+            registros de despesas com integração real ao backend.
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -620,7 +620,7 @@ export default function Page() {
         />
         <SummaryCard
           title="Entrada"
-          subtitle="Orcamentos compativeis com o painel"
+          subtitle="Orçamentos compatíveis com o painel"
           value={summary.entrada}
           visible={valuesVisible}
           background="linear-gradient(135deg, #1A1F28 0%, #2E3642 48%, #11161F 100%)"
@@ -675,7 +675,7 @@ export default function Page() {
                   search: event.target.value,
                 }))
               }
-              placeholder="Busque por descricao, categoria ou ID"
+              placeholder="Busque por descrição, categoria ou ID"
               className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F6FAFA] !px-4 !py-3 shadow-none"
             />
           </div>
@@ -689,7 +689,7 @@ export default function Page() {
                 dataInicio: event.target.value,
               }))
             }
-            label="Inicio do periodo"
+            label="Início do período"
             className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F6FAFA] !px-4 !py-3 shadow-none"
           />
 
@@ -702,7 +702,7 @@ export default function Page() {
                 dataFim: event.target.value,
               }))
             }
-            label="Fim do periodo"
+            label="Fim do período"
             className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F6FAFA] !px-4 !py-3 shadow-none"
           />
 
@@ -728,7 +728,7 @@ export default function Page() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-[#4D5A63]">Situacao</label>
+            <label className="block text-sm font-semibold text-[#4D5A63]">Situação</label>
             <select
               value={filterForm.situacao}
               onChange={(event) =>
