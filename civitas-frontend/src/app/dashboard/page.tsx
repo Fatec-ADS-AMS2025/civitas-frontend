@@ -257,14 +257,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] bg-[linear-gradient(135deg,#0B6770_0%,#35A3A1_50%,#E9F7F5_100%)] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
+      <section className="rounded-[30px] bg-primary-1 px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
               Dashboard operacional
             </span>
             <h1 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">
-              Acompanhamento real de despesas e cobertura orcamentaria
+              Acompanhamento real de despesas e cobertura orçamentária
             </h1>
             <p className="mt-3 max-w-3xl text-sm text-white/85 sm:text-base">
               Esta tela agora usa dados reais do backend para mostrar saldo, volume
@@ -305,7 +305,7 @@ export default function Dashboard() {
           icon="account_balance_wallet"
         />
         <MetricCard
-          title="Total orcado"
+          title="Total orçado"
           subtitle="Base financeira carregada"
           value={showMoneyValues ? formatCurrency(summary.entrada) : hiddenValue}
           gradient="linear-gradient(135deg, #1D1D1D 0%, #555555 100%)"
