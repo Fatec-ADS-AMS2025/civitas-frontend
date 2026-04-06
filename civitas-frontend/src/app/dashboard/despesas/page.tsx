@@ -25,7 +25,7 @@ type SelectOption = {
 
 const SOLICITA_UC_OPTIONS: SelectOption[] = [
   { value: "1", label: "Sim" },
-  { value: "2", label: "Não" },
+  { value: "2", label: "Nao" },
 ];
 
 const INITIAL_FILTER_FORM: DespesasDashboardFilters = {
@@ -53,7 +53,7 @@ const EMPTY_DESPESA_FORM = {
 };
 
 const filterFieldClassName =
-  "w-full rounded-[18px] border border-[#D7E5E8] bg-[#F6FAFA] px-4 py-3 text-sm text-[#23404A] outline-none transition focus:border-[#0D6A74] focus:ring-4 focus:ring-[#0D6A74]/15";
+  "despesas-filter-field w-full rounded-[18px] border border-[#D7E5E8] bg-[#F6FAFA] px-4 py-3 text-sm text-[#23404A] outline-none transition focus:border-[#0D6A74] focus:ring-4 focus:ring-[#0D6A74]/15";
 
 const iconButtonClassName =
   "flex h-9 w-9 items-center justify-center rounded-full border border-[#D7E5E8] bg-white text-[#0D6A74] transition hover:bg-[#F3FAFA]";
@@ -143,11 +143,10 @@ const SummaryCard = ({
 }) => {
   return (
     <article
-      className="relative overflow-hidden rounded-[24px] p-5 text-white shadow-[0_18px_32px_rgba(0,0,0,0.10)]"
+      className="despesas-summary-card relative overflow-hidden rounded-[24px] p-5 text-white shadow-[0_18px_32px_rgba(0,0,0,0.10)]"
       style={{ background }}
     >
-      <div className="absolute -right-10 -top-8 h-28 w-28 rounded-full border border-white/20" />
-      <div className="absolute bottom-0 right-8 h-16 w-16 rounded-full bg-white/10 blur-sm" />
+      <div className="despesas-summary-card__sheen absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_56%)]" />
 
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div>
@@ -158,12 +157,14 @@ const SummaryCard = ({
           <p className="mt-2 text-sm text-white/75">{subtitle}</p>
         </div>
 
-        <span className="material-symbols-outlined !text-[38px] text-white/70">
-          {icon}
+        <span className="despesas-summary-card__icon flex h-16 w-16 items-center justify-center rounded-[18px] border border-white/20 bg-white/10">
+          <span className="material-symbols-outlined !text-[34px] text-white/80">
+            {icon}
+          </span>
         </span>
       </div>
 
-      <div className="relative z-10 mt-5 rounded-[18px] bg-black/20 px-4 py-3 backdrop-blur-sm">
+      <div className="despesas-summary-card__value relative z-10 mt-5 rounded-[18px] border border-white/10 bg-white/14 px-4 py-3">
         <p className="text-xs uppercase tracking-[0.18em] text-white/60">Valor atual</p>
         <p className="mt-2 text-[28px] font-semibold leading-none">
           {visible ? formatCurrency(value) : "* * * * * *"}
@@ -276,8 +277,8 @@ export default function Page() {
       instituicaoOptions,
       activeModalDespesa?.raw.idInstituicao,
       activeModalDespesa?.raw.idInstituicao
-        ? `Instituição #${activeModalDespesa.raw.idInstituicao}`
-        : "Instituição atual"
+        ? `Instituicao #${activeModalDespesa.raw.idInstituicao}`
+        : "Instituicao atual"
     );
   }, [activeModalDespesa, instituicaoOptions]);
 
@@ -286,8 +287,8 @@ export default function Page() {
       orcamentoOptions,
       activeModalDespesa?.raw.idOrcamento,
       activeModalDespesa?.raw.idOrcamento
-        ? `Orçamento #${activeModalDespesa.raw.idOrcamento}`
-        : "Orçamento atual"
+        ? `Orcamento #${activeModalDespesa.raw.idOrcamento}`
+        : "Orcamento atual"
     );
   }, [activeModalDespesa, orcamentoOptions]);
 
@@ -306,8 +307,8 @@ export default function Page() {
       usuarioOptions,
       activeModalDespesa?.raw.idUsuario,
       activeModalDespesa?.raw.idUsuario
-        ? `Usuário #${activeModalDespesa.raw.idUsuario}`
-        : "Usuário atual"
+        ? `Usuario #${activeModalDespesa.raw.idUsuario}`
+        : "Usuario atual"
     );
   }, [activeModalDespesa, usuarioOptions]);
 
@@ -321,18 +322,18 @@ export default function Page() {
       { key: "id", hidden: true },
       {
         key: "numeroDocumento",
-        label: "Número do documento",
-        placeholder: "Somente números",
+        label: "Numero do documento",
+        placeholder: "Somente numeros",
         required: true,
         validate: (value) => {
           const normalizedValue = digitsOnly(value);
 
           if (!normalizedValue) {
-            return "Número do documento deve conter apenas números.";
+            return "Numero do documento deve conter apenas numeros.";
           }
 
           if (normalizedValue.length > 100) {
-            return "Número do documento deve ter no máximo 100 caracteres.";
+            return "Numero do documento deve ter no maximo 100 caracteres.";
           }
 
           return undefined;
@@ -347,7 +348,7 @@ export default function Page() {
         options: resolvedTipoDespesaOptions,
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
-            return "Selecione um tipo de despesa válido.";
+            return "Selecione um tipo de despesa valido.";
           }
 
           return undefined;
@@ -372,7 +373,7 @@ export default function Page() {
           const numericValue = Number(value);
 
           if (Number.isNaN(numericValue) || numericValue < 0) {
-            return "Valor da despesa não pode ser negativo.";
+            return "Valor da despesa nao pode ser negativo.";
           }
 
           return undefined;
@@ -380,13 +381,13 @@ export default function Page() {
       },
       {
         key: "dataEmicao",
-        label: "Data de emissão",
+        label: "Data de emissao",
         type: "date",
         required: true,
         validate: (value, formData) => {
           const normalizedDate = normalizeDateInput(value);
           if (!normalizedDate) {
-            return "Data de emissão inválida.";
+            return "Data de emissao invalida.";
           }
 
           return validateDespesaDateRange(normalizedDate, formData.dataVencimento);
@@ -400,7 +401,7 @@ export default function Page() {
         validate: (value, formData) => {
           const normalizedDate = normalizeDateInput(value);
           if (!normalizedDate) {
-            return "Data de vencimento inválida.";
+            return "Data de vencimento invalida.";
           }
 
           return validateDespesaDateRange(formData.dataEmicao, normalizedDate);
@@ -408,14 +409,14 @@ export default function Page() {
       },
       {
         key: "idInstituicao",
-        label: "Instituição",
-        placeholder: "Selecione a instituição",
+        label: "Instituicao",
+        placeholder: "Selecione a instituicao",
         type: "select",
         required: true,
         options: resolvedInstituicaoOptions,
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
-            return "Selecione uma instituição válida.";
+            return "Selecione uma instituicao valida.";
           }
 
           return undefined;
@@ -423,14 +424,14 @@ export default function Page() {
       },
       {
         key: "idOrcamento",
-        label: "Orçamento",
-        placeholder: "Selecione o orçamento",
+        label: "Orcamento",
+        placeholder: "Selecione o orcamento",
         type: "select",
         required: true,
         options: resolvedOrcamentoOptions,
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
-            return "Selecione um orçamento válido.";
+            return "Selecione um orcamento valido.";
           }
 
           return undefined;
@@ -453,14 +454,14 @@ export default function Page() {
       },
       {
         key: "idUsuario",
-        label: "Usuário responsável",
-        placeholder: "Selecione o usuário",
+        label: "Usuario responsavel",
+        placeholder: "Selecione o usuario",
         type: "select",
         required: true,
         options: resolvedUsuarioOptions,
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
-            return "Selecione um usuário válido.";
+            return "Selecione um usuario valido.";
           }
 
           return undefined;
@@ -468,8 +469,8 @@ export default function Page() {
       },
       {
         key: "situacao",
-        label: "Situação",
-        placeholder: "Selecione a situação",
+        label: "Situacao",
+        placeholder: "Selecione a situacao",
         type: "select",
         required: true,
         options: SITUACAO_OPTIONS,
@@ -560,20 +561,20 @@ export default function Page() {
 
   return (
     <div className="space-y-7">
-      <section className="relative overflow-hidden rounded-[32px] border border-[#E0ECEE] bg-white px-6 py-7 shadow-[0_12px_30px_rgba(0,0,0,0.05)] sm:px-8">
-        <div className="absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#EAF5F6]" />
-        <div className="absolute bottom-0 left-0 h-20 w-40 rounded-tr-[80px] bg-[#F7FBFB]" />
+      <section className="despesas-hero relative overflow-hidden rounded-[32px] border border-[#E0ECEE] bg-white px-6 py-7 shadow-[0_12px_30px_rgba(0,0,0,0.05)] sm:px-8">
+        <div className="despesas-hero__decor absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#EAF5F6]" />
+        <div className="despesas-hero__decor absolute bottom-0 left-0 h-20 w-40 rounded-tr-[80px] bg-[#F7FBFB]" />
 
         <div className="relative z-10 max-w-4xl">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#7B949B]">
             Home &gt; Cadastros &gt; Listagem
           </p>
           <h2 className="mt-3 text-[42px] font-bold leading-[0.95] text-[#0B4D57] sm:text-[56px]">
-            Acompanhe despesas, aplique filtros e mantenha tudo em um único painel.
+            Acompanhe despesas, aplique filtros e mantenha tudo em um unico painel.
           </h2>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-[#67828A] sm:text-base">
             Visualize o resumo local, aplique filtros com mais clareza e gerencie os
-            registros de despesas com integração real ao backend.
+            registros de despesas com integracao real ao backend.
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -620,7 +621,7 @@ export default function Page() {
         />
         <SummaryCard
           title="Entrada"
-          subtitle="Orçamentos compatíveis com o painel"
+          subtitle="Orcamentos compativeis com o painel"
           value={summary.entrada}
           visible={valuesVisible}
           background="linear-gradient(135deg, #1A1F28 0%, #2E3642 48%, #11161F 100%)"
@@ -636,7 +637,7 @@ export default function Page() {
         />
       </section>
 
-      <section className="rounded-[30px] border border-[#E0ECEE] bg-white p-5 shadow-[0_12px_30px_rgba(0,0,0,0.05)] sm:p-6">
+      <section className="despesas-filter-panel rounded-[30px] border border-[#E0ECEE] bg-white p-5 shadow-[0_12px_30px_rgba(0,0,0,0.05)] sm:p-6">
         <div className="flex flex-col gap-3 border-b border-[#E8F0F1] pb-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#D6E5E8] bg-[#F5FAFA] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6F8790]">
@@ -675,8 +676,8 @@ export default function Page() {
                   search: event.target.value,
                 }))
               }
-              placeholder="Busque por descrição, categoria ou ID"
-              className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F6FAFA] !px-4 !py-3 shadow-none"
+              placeholder="Busque por descricao, categoria ou ID"
+              className="despesas-filter-field"
             />
           </div>
 
@@ -689,8 +690,8 @@ export default function Page() {
                 dataInicio: event.target.value,
               }))
             }
-            label="Início do período"
-            className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F6FAFA] !px-4 !py-3 shadow-none"
+            label="Inicio do periodo"
+            className="despesas-filter-field"
           />
 
           <Input
@@ -702,12 +703,12 @@ export default function Page() {
                 dataFim: event.target.value,
               }))
             }
-            label="Fim do período"
-            className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F6FAFA] !px-4 !py-3 shadow-none"
+            label="Fim do periodo"
+            className="despesas-filter-field"
           />
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-[#4D5A63]">Categoria</label>
+            <label className="despesas-filter-label block text-sm font-semibold text-[#4D5A63]">Categoria</label>
             <select
               value={filterForm.idTipoDespesa}
               onChange={(event) =>
@@ -728,7 +729,7 @@ export default function Page() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-[#4D5A63]">Situação</label>
+            <label className="despesas-filter-label block text-sm font-semibold text-[#4D5A63]">Situacao</label>
             <select
               value={filterForm.situacao}
               onChange={(event) =>
@@ -749,7 +750,7 @@ export default function Page() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-[#4D5A63]">Solicita UC</label>
+            <label className="despesas-filter-label block text-sm font-semibold text-[#4D5A63]">Solicita UC</label>
             <select
               value={filterForm.solicitaUc}
               onChange={(event) =>

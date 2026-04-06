@@ -48,28 +48,28 @@ type ConfigDefinition = {
 
 const SOLICITA_UC_OPTIONS = [
   { value: 1, label: "Sim" },
-  { value: 2, label: "Não" },
+  { value: 2, label: "Nao" },
 ];
 
 const tipoInstituicaoColumns = [
   { id: "id", label: "ID" },
-  { id: "descricao", label: "Descrição" },
-  { id: "situacaoLabel", label: "Situação" },
+  { id: "descricao", label: "Descricao" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const tipoDespesaColumns = [
   { id: "id", label: "ID" },
-  { id: "descricao", label: "Descrição" },
+  { id: "descricao", label: "Descricao" },
   { id: "solicitaUcLabel", label: "Solicita UC" },
   { id: "unidadeMedidaLabel", label: "Unidade de Medida" },
-  { id: "situacaoLabel", label: "Situação" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const unidadeMedidaColumns = [
   { id: "id", label: "ID" },
-  { id: "descricao", label: "Descrição" },
+  { id: "descricao", label: "Descricao" },
   { id: "abreviatura", label: "Abreviatura" },
-  { id: "situacaoLabel", label: "Situação" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const normalizeText = (value: unknown): string => {
@@ -127,7 +127,7 @@ const mapTipoDespesaRows = (
   return items.map((item) => ({
     ...item,
     situacaoLabel: getSituacaoLabel(item.situacao),
-    solicitaUcLabel: item.solicitaUc === 1 ? "Sim" : "Não",
+    solicitaUcLabel: item.solicitaUc === 1 ? "Sim" : "Nao",
     unidadeMedidaLabel:
       unidadeMap.get(item.idUnidadeMedida) ?? `Unidade #${item.idUnidadeMedida}`,
   }));
@@ -136,29 +136,29 @@ const mapTipoDespesaRows = (
 const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
   tipoInstituicao: {
     key: "tipoInstituicao",
-    label: "Tipo de Instituição",
+    label: "Tipo de Instituicao",
     columns: tipoInstituicaoColumns,
     buildFields: () => [
       { key: "id", hidden: true },
       {
         key: "descricao",
-        label: "Descrição",
-        placeholder: "Informe a descrição",
+        label: "Descricao",
+        placeholder: "Informe a descricao",
         required: true,
       },
       {
         key: "situacao",
-        label: "Situação",
+        label: "Situacao",
         type: "select",
         options: SITUACAO_OPTIONS,
         required: true,
       },
     ],
     buildSearchFields: () => [
-      { key: "descricao", placeholder: "Descrição", local: "principal" },
+      { key: "descricao", placeholder: "Descricao", local: "principal" },
       {
         key: "situacaoLabel",
-        placeholder: "Situação",
+        placeholder: "Situacao",
         local: "filtro",
         type: "select",
         options: [
@@ -181,8 +181,8 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
       { key: "id", hidden: true },
       {
         key: "descricao",
-        label: "Descrição",
-        placeholder: "Informe a descrição",
+        label: "Descricao",
+        placeholder: "Informe a descricao",
         required: true,
       },
       {
@@ -205,17 +205,17 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
       },
       {
         key: "situacao",
-        label: "Situação",
+        label: "Situacao",
         type: "select",
         options: SITUACAO_OPTIONS,
         required: true,
       },
     ],
     buildSearchFields: () => [
-      { key: "descricao", placeholder: "Descrição", local: "principal" },
+      { key: "descricao", placeholder: "Descricao", local: "principal" },
       {
         key: "situacaoLabel",
-        placeholder: "Situação",
+        placeholder: "Situacao",
         local: "filtro",
         type: "select",
         options: [
@@ -240,8 +240,8 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
       { key: "id", hidden: true },
       {
         key: "descricao",
-        label: "Descrição",
-        placeholder: "Informe a descrição",
+        label: "Descricao",
+        placeholder: "Informe a descricao",
         required: true,
       },
       {
@@ -252,17 +252,17 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
       },
       {
         key: "situacao",
-        label: "Situação",
+        label: "Situacao",
         type: "select",
         options: SITUACAO_OPTIONS,
         required: true,
       },
     ],
     buildSearchFields: () => [
-      { key: "descricao", placeholder: "Descrição", local: "principal" },
+      { key: "descricao", placeholder: "Descricao", local: "principal" },
       {
         key: "situacaoLabel",
-        placeholder: "Situação",
+        placeholder: "Situacao",
         local: "filtro",
         type: "select",
         options: [
@@ -384,7 +384,7 @@ export default function ConfiguracoesPage() {
         setDadosFiltrados([]);
         setFeedback({
           type: "error",
-          message: asErrorMessage(error, "Não foi possível carregar os dados de configurações."),
+          message: asErrorMessage(error, "Nao foi possivel carregar os dados de configuracoes."),
         });
       }
     };
@@ -405,7 +405,7 @@ export default function ConfiguracoesPage() {
         const result = await tipoInstituicaoService.createEnvelope(payload);
         setFeedback({
           type: "success",
-          message: result.message ?? "Tipo de instituição cadastrado com sucesso.",
+          message: result.message ?? "Tipo de instituicao cadastrado com sucesso.",
         });
       }
 
@@ -442,7 +442,7 @@ export default function ConfiguracoesPage() {
     } catch (error) {
       setFeedback({
         type: "error",
-        message: asErrorMessage(error, "Não foi possível cadastrar o registro."),
+        message: asErrorMessage(error, "Nao foi possivel cadastrar o registro."),
       });
       throw error;
     }
@@ -462,7 +462,7 @@ export default function ConfiguracoesPage() {
         const result = await tipoInstituicaoService.updateEnvelope(id, payload);
         setFeedback({
           type: "success",
-          message: result.message ?? "Tipo de instituição atualizado com sucesso.",
+          message: result.message ?? "Tipo de instituicao atualizado com sucesso.",
         });
       }
 
@@ -501,7 +501,7 @@ export default function ConfiguracoesPage() {
     } catch (error) {
       setFeedback({
         type: "error",
-        message: asErrorMessage(error, "Não foi possível atualizar o registro."),
+        message: asErrorMessage(error, "Nao foi possivel atualizar o registro."),
       });
       throw error;
     }
@@ -515,7 +515,7 @@ export default function ConfiguracoesPage() {
         const result = await tipoInstituicaoService.alterarSituacaoEnvelope(id);
         setFeedback({
           type: "success",
-          message: result.message ?? "Situação alterada com sucesso.",
+          message: result.message ?? "Situacao alterada com sucesso.",
         });
       }
 
@@ -523,7 +523,7 @@ export default function ConfiguracoesPage() {
         const result = await tipoDespesaService.alterarSituacaoEnvelope(id);
         setFeedback({
           type: "success",
-          message: result.message ?? "Situação alterada com sucesso.",
+          message: result.message ?? "Situacao alterada com sucesso.",
         });
       }
 
@@ -531,7 +531,7 @@ export default function ConfiguracoesPage() {
         const result = await unidadeMedidaService.alterarSituacaoEnvelope(id);
         setFeedback({
           type: "success",
-          message: result.message ?? "Situação alterada com sucesso.",
+          message: result.message ?? "Situacao alterada com sucesso.",
         });
       }
 
@@ -541,7 +541,7 @@ export default function ConfiguracoesPage() {
         type: "error",
         message: asErrorMessage(
           error,
-          "Não foi possível alterar a situação. Verifique se existe vínculo ativo."
+          "Nao foi possivel alterar a situacao. Verifique se existe vinculo ativo."
         ),
       });
       throw error;
@@ -589,7 +589,7 @@ export default function ConfiguracoesPage() {
                 : "border-[#D5E3E6] bg-white text-[#1F2A32] hover:bg-[#F7FAFB]"
             }`}
           >
-            Tipo de Instituição
+            Tipo de Instituicao
           </button>
 
           <button

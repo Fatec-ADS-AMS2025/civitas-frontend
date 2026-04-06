@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import Checkbox from '@/components/checkbox'
 import { Input } from '@/components/Input'
 
@@ -16,60 +15,67 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    router.push('/dashboard')
+  const handleLogin = async (event) => {
+    event.preventDefault()
+    if (loading) return
+
+    setLoading(true)
+    try {
+      router.push('/dashboard')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="min-h-screen w-full">
-      <div className="mx-auto w-full h-full px-4 flex flex-1">
-        <div className="hidden lg:flex w-1/2 bg-white items-center justify-center p-8 rounded-3xl m-8">
-          <div className="w-full flex flex-col items-center">
+    <div className="min-h-screen w-full bg-[#F4F8F8]">
+      <div className="mx-auto flex h-full w-full max-w-[1320px] flex-1 px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+        <div className="m-0 hidden w-1/2 items-center justify-center rounded-[28px] border border-[#E4EEF0] bg-white p-8 shadow-[0_10px_24px_rgba(0,0,0,0.04)] lg:m-3 lg:flex">
+          <div className="flex w-full flex-col items-center">
             <div className="mb-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-900">
-                Bem-vindo ao <span className="text-teal-700">Civitas</span>
+              <h1 className="text-3xl font-bold text-[#1F2A32]">
+                Bem-vindo ao <span className="text-[#004C57]">Civitas</span>
               </h1>
             </div>
 
-            <div className="flex justify-center w-full">
+            <div className="flex w-full justify-center">
               <img
                 src="/mnote.png"
-                alt="Woman with laptop"
-                className="w-full max-w-md h-auto"
+                alt="Pessoa usando notebook"
+                className="h-auto w-full max-w-md"
               />
             </div>
           </div>
         </div>
 
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
-          <div className="w-full max-w-sm">
-            <div className="mb-12">
-              <div className="flex items-center gap-3 mb-6">
+        <div className="flex w-full items-center justify-center p-3 sm:p-4 lg:w-1/2 lg:p-6">
+          <div className="w-full max-w-md rounded-[28px] border border-[#E4EEF0] bg-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:p-8">
+            <div className="mb-10">
+              <div className="mb-6 flex items-center gap-3">
                 <img
                   src="/logo1.png"
                   alt="Civitas Logo"
-                  className="w-10 h-10 object-contain"
+                  className="h-10 w-10 object-contain"
                 />
-                <span className="text-teal-700 font-semibold">Civitas</span>
+                <span className="font-semibold text-[#004C57]">Civitas</span>
               </div>
 
-              <h2 className="text-5xl font-bold text-gray-900 mb-4">Login</h2>
+              <h2 className="mb-4 text-4xl font-bold text-[#1F2A32] sm:text-5xl">Login</h2>
 
-              <p className="text-gray-600 text-sm">
+              <p className="text-sm text-[#72808A]">
                 Sistema de <span className="font-semibold">Gerenciamento</span> da Prefeitura de Jales
               </p>
             </div>
 
-            <form onSubmit={handleLogin} noValidate className="space-y-5">
+            <form onSubmit={handleLogin} noValidate aria-busy={loading} className="space-y-5">
               {generalError && (
-                <div className="rounded-md bg-red-50 border border-red-200 text-red-700 px-3 py-2 text-sm">
+                <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
                   {generalError}
                 </div>
               )}
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
                   E-mail
                 </label>
                 <Input
@@ -77,14 +83,16 @@ export default function LoginPage() {
                   type="email"
                   placeholder="Digite o seu E-mail"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(event) => setEmail(event.target.value)}
                   disabled={loading}
                   autoComplete="email"
+                  aria-invalid={Boolean(errors.email)}
+                  error={errors.email}
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
                   Senha
                 </label>
                 <Input
@@ -92,23 +100,25 @@ export default function LoginPage() {
                   type="password"
                   placeholder="Digite a sua Senha"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(event) => setPassword(event.target.value)}
                   disabled={loading}
                   autoComplete="current-password"
+                  aria-invalid={Boolean(errors.password)}
+                  error={errors.password}
                 />
               </div>
 
-              <div className="flex items-center justify-between mt-6">
+              <div className="mt-6 flex items-center justify-between">
                 <Checkbox
                   id="rememberMe"
                   label="Lembrar-me"
                   checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  onChange={(event) => setRememberMe(event.target.checked)}
                   disabled={loading}
                 />
                 <Link
                   href="/forgot-password"
-                  className="text-gray-700 text-sm font-medium underline hover:text-teal-700"
+                  className="text-sm font-medium text-[#5D6A72] underline hover:text-[#004C57]"
                 >
                   Esqueci a senha
                 </Link>
@@ -116,18 +126,19 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-4 rounded-full transition duration-200 mt-8 text-base"
+                disabled={loading}
+                className="mt-8 w-full rounded-2xl bg-[#004C57] px-4 py-3 font-bold text-white transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Acessar Conta
+                {loading ? 'Entrando...' : 'Acessar Conta'}
               </button>
             </form>
 
-            <div className="mt-10 text-center">
-              <p className="text-gray-700 text-sm">
-                Ainda não tem conta?{' '}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-[#5D6A72]">
+                Ainda nao tem conta?{' '}
                 <Link
                   href="/signup"
-                  className="text-teal-700 font-bold underline hover:text-teal-800"
+                  className="font-bold text-[#004C57] underline hover:brightness-110"
                 >
                   Criar conta
                 </Link>
@@ -137,7 +148,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="h-10 fixed bottom-0 left-0 right-0 bg-teal-700"></div>
+      <div className="h-3 w-full bg-[#004C57]" />
     </div>
   )
 }

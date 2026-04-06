@@ -188,7 +188,7 @@ const toErrorMessage = (error: unknown): string => {
     return error.message;
   }
 
-  return "Não foi possível carregar os dados de despesas.";
+  return "Nao foi possivel carregar os dados de despesas.";
 };
 
 const isHttpNotFoundError = (error: unknown): boolean => {
@@ -236,7 +236,7 @@ const buildDespesaRows = (
         categoria:
           tipoDespesa?.descricao ??
           despesa.categoria?.trim() ??
-          "Categoria não informada",
+          "Categoria nao informada",
         descricao: resolveDespesaDescricao(despesa),
         valor: resolvedValue,
         valorFormatado: formatCurrency(resolvedValue),
@@ -245,7 +245,7 @@ const buildDespesaRows = (
         situacao,
         situacaoLabel: getSituacaoLabel(situacao),
         solicitaUc,
-        solicitaUcLabel: solicitaUc ? "Sim" : "Não",
+        solicitaUcLabel: solicitaUc ? "Sim" : "Nao",
         numeroDocumento: despesa.numeroDocumento ?? "",
         raw: despesa,
       };
@@ -347,12 +347,12 @@ const validateLookupRelationship = (
     (item) => item.idOrcamento === payload.idOrcamento
   );
   if (!orcamento) {
-    return "Selecione um orçamento válido.";
+    return "Selecione um orcamento valido.";
   }
 
   const instituicao = data.instituicoes.find((item) => item.id === payload.idInstituicao);
   if (!instituicao) {
-    return "Selecione uma instituição válida.";
+    return "Selecione uma instituicao valida.";
   }
 
   const fornecedor = data.fornecedores.find(
@@ -364,11 +364,11 @@ const validateLookupRelationship = (
 
   const usuario = data.usuarios.find((item) => item.id === payload.idUsuario);
   if (!usuario) {
-    return "Selecione um usuário válido.";
+    return "Selecione um usuario valido.";
   }
 
   if ((orcamento.idInstituicao ?? 0) !== payload.idInstituicao) {
-    return "O orçamento informado não pertence à instituição selecionada.";
+    return "O orcamento informado nao pertence a instituicao selecionada.";
   }
 
   if (
@@ -376,7 +376,7 @@ const validateLookupRelationship = (
     orcamento.idTipoDespesa > 0 &&
     orcamento.idTipoDespesa !== payload.idTipoDespesa
   ) {
-    return "O orçamento informado não está vinculado ao tipo de despesa selecionado.";
+    return "O orcamento informado nao esta vinculado ao tipo de despesa selecionado.";
   }
 
   const ucError = validateRequiredUc(payload.uc, tipoDespesa.solicitaUc === SOLICITA_UC_SIM);
@@ -421,11 +421,11 @@ const buildDespesaPayload = (
   }) as DespesaDTO;
 
   if (!normalizedPayload.numeroDocumento) {
-    throw new Error("Número do documento deve conter apenas números.");
+    throw new Error("Numero do documento deve conter apenas numeros.");
   }
 
   if (!normalizedPayload.dataEmicao) {
-    throw new Error("Data de emissão inválida.");
+    throw new Error("Data de emissao invalida.");
   }
 
   if (!normalizedPayload.dataVencimento) {
@@ -443,7 +443,7 @@ const buildDespesaPayload = (
 
   const consumoPrevisto = Number(normalizedPayload.consumoPrevisto ?? 0);
   if (Number.isNaN(consumoPrevisto) || consumoPrevisto < 0) {
-    throw new Error("Valor da despesa não pode ser negativo.");
+    throw new Error("Valor da despesa nao pode ser negativo.");
   }
 
   const lookupError = validateLookupRelationship(normalizedPayload, data);
@@ -579,7 +579,7 @@ export const useDespesasDashboard = () => {
     async (id: number, formData: Record<string, unknown>) => {
       const currentDespesa = dashboardData.despesas.find((despesa) => despesa.id === id);
       if (!currentDespesa) {
-      throw new Error(`Despesa ${id} não encontrada.`);
+        throw new Error(`Despesa ${id} nao encontrada.`);
       }
 
       const payload = buildDespesaPayload(formData, dashboardData, currentDespesa);
