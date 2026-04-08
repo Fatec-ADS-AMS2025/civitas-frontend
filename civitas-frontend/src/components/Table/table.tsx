@@ -183,20 +183,20 @@ const Table = <T extends TableRow,>({
   };
 
   return (
-    <div className="mt-5 w-full overflow-hidden rounded-[30px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+    <div className="civitas-table mt-5 w-full overflow-hidden rounded-[28px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
       {!isLoading && !errorMessage && data.length > 0 ? (
         <>
           <div className="hidden md:block">
-            <div className="w-full overflow-x-auto px-5 py-5 lg:px-6">
-              <table className="w-full border-separate border-spacing-y-[16px] text-left text-black">
+            <div className="w-full overflow-x-auto px-4 py-5 sm:px-5 lg:px-6">
+              <table className="min-w-[920px] w-full border-separate border-spacing-y-[14px] text-left text-black">
                 <thead>
-                  <tr className="text-[13px] font-semibold uppercase tracking-[0.04em] text-[#95A5AA]">
+                  <tr className="civitas-table__head text-[13px] font-semibold uppercase tracking-[0.04em] text-[#95A5AA]">
                     {columns.map((column) => (
-                      <th key={column.id} className="px-6 py-2">
+                      <th key={column.id} className="px-5 py-2">
                         {column.label}
                       </th>
                     ))}
-                    {hasActions ? <th className="px-6 py-2 text-center">Acoes</th> : null}
+                    {hasActions ? <th className="px-5 py-2 text-center">Acoes</th> : null}
                   </tr>
                 </thead>
 
@@ -204,12 +204,12 @@ const Table = <T extends TableRow,>({
                   {data.map((objeto, index) => (
                     <tr
                       key={index}
-                      className="overflow-hidden rounded-[20px] bg-white shadow-none ring-1 ring-[#D9EFF1] transition-colors hover:bg-[#FBFDFD]"
+                      className="civitas-table__row overflow-hidden rounded-[20px] bg-white shadow-none ring-1 ring-[#D9EFF1] transition-colors hover:bg-[#FBFDFD]"
                     >
                       {columns.map((column, columnIndex) => (
                         <td
                           key={column.id}
-                          className={`px-6 py-[18px] align-middle text-[15px] font-medium text-[#333333] ${
+                          className={`civitas-table__cell break-words px-5 py-[16px] align-middle text-[15px] font-medium text-[#333333] ${
                             columnIndex === 0 ? "rounded-l-[20px]" : ""
                           }`}
                         >
@@ -218,13 +218,13 @@ const Table = <T extends TableRow,>({
                       ))}
 
                       {hasActions ? (
-                        <td className="rounded-r-[20px] px-6 py-[18px] align-middle">
+                        <td className="rounded-r-[20px] px-5 py-[16px] align-middle">
                           <div className="flex items-center justify-center gap-2">
                             {resolvedActions.includes("view") ? (
                               <button
                                 type="button"
                                 onClick={() => openModal("view", objeto)}
-                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                                className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
                               >
                                 <span className="material-symbols-outlined !text-[22px]">visibility</span>
                               </button>
@@ -234,7 +234,7 @@ const Table = <T extends TableRow,>({
                               <button
                                 type="button"
                                 onClick={() => openModal("edit", objeto)}
-                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                                className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
                               >
                                 <span className="material-symbols-outlined !text-[22px]">edit</span>
                               </button>
@@ -244,7 +244,7 @@ const Table = <T extends TableRow,>({
                               <button
                                 type="button"
                                 onClick={() => openModal("delete", objeto)}
-                                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                                className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF8A8A]/20"
                               >
                                 <span className="material-symbols-outlined !text-[22px]">delete</span>
                               </button>
@@ -267,10 +267,12 @@ const Table = <T extends TableRow,>({
                 return (
                   <div
                     key={index}
-                    className="rounded-[20px] border border-[#DDEEEF] bg-white p-4 shadow-sm"
+                    className="civitas-table__card rounded-[20px] border border-[#DDEEEF] bg-white p-4 shadow-sm"
                   >
                     <div className="mb-3 flex items-start justify-between gap-3">
-                      <div>{columns[0] ? renderCellValue(objeto, columns[0]) : null}</div>
+                      <div className="min-w-0 flex-1 break-words">
+                        {columns[0] ? renderCellValue(objeto, columns[0]) : null}
+                      </div>
                       <div>{statusColumn ? renderCellValue(objeto, statusColumn) : null}</div>
                     </div>
 
@@ -280,10 +282,10 @@ const Table = <T extends TableRow,>({
                         .filter((column) => !isStatusColumn(column.id))
                         .map((column) => (
                           <div key={column.id} className="flex flex-col">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-[#B8B8B8]">
+                            <span className="civitas-table__meta text-xs font-semibold uppercase tracking-wide text-[#B8B8B8]">
                               {column.label}
                             </span>
-                            <span className="text-[15px] font-medium text-[#1F1F1F]">
+                            <span className="civitas-table__cell break-words text-[15px] font-medium text-[#1F1F1F]">
                               {renderCellValue(objeto, column)}
                             </span>
                           </div>
@@ -296,7 +298,7 @@ const Table = <T extends TableRow,>({
                           <button
                             type="button"
                             onClick={() => openModal("view", objeto)}
-                            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                            className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
                           >
                             <span className="material-symbols-outlined !text-[22px]">visibility</span>
                           </button>
@@ -306,7 +308,7 @@ const Table = <T extends TableRow,>({
                           <button
                             type="button"
                             onClick={() => openModal("edit", objeto)}
-                            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA]"
+                            className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
                           >
                             <span className="material-symbols-outlined !text-[22px]">edit</span>
                           </button>
@@ -316,7 +318,7 @@ const Table = <T extends TableRow,>({
                           <button
                             type="button"
                             onClick={() => openModal("delete", objeto)}
-                            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7]"
+                            className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF8A8A]/20"
                           >
                             <span className="material-symbols-outlined !text-[22px]">delete</span>
                           </button>

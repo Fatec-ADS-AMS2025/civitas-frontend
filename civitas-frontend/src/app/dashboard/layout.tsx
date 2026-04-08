@@ -30,10 +30,10 @@ export default function Layout({
       title: "Secretaria",
       breadcrumbs: ["Home", "Secretaria"],
     },
-  instituicoes: {
-    title: "Instituições",
-    breadcrumbs: ["Home", "Instituições"],
-  },
+    instituicoes: {
+      title: "Instituicoes",
+      breadcrumbs: ["Home", "Instituicoes"],
+    },
     fornecedor: {
       title: "Fornecedor",
       breadcrumbs: ["Home", "Fornecedor"],
@@ -42,22 +42,22 @@ export default function Layout({
       title: "Fornecedores",
       breadcrumbs: ["Home", "Fornecedores"],
     },
-  orcamentos: {
-    title: "Orçamentos",
-    breadcrumbs: ["Home", "Orçamentos"],
-  },
+    orcamentos: {
+      title: "Orcamentos",
+      breadcrumbs: ["Home", "Orcamentos"],
+    },
     financeiro: {
       title: "Financeiro",
       breadcrumbs: ["Home", "Financeiro"],
     },
-  configuracoes: {
-    title: "Configurações",
-    breadcrumbs: ["Home", "Configurações"],
-  },
-  usuarios: {
-    title: "Usuários",
-    breadcrumbs: ["Home", "Usuários"],
-  },
+    configuracoes: {
+      title: "Configuracoes",
+      breadcrumbs: ["Home", "Configuracoes"],
+    },
+    usuarios: {
+      title: "Usuarios",
+      breadcrumbs: ["Home", "Usuarios"],
+    },
   };
 
   const currentMeta = pageMeta[currentPage] ?? {
@@ -65,48 +65,38 @@ export default function Layout({
     breadcrumbs: parts.map((item) => item.charAt(0).toUpperCase() + item.slice(1)),
   };
 
-  const alterarPagina = (item: string) => {
-    const paths = pathname.split("/");
-    let novasRotas: any = []
-
-    for (let i = 0; i < (paths.length - 1); i++) {
-      novasRotas += (`${paths[i]}/`)
-    }
-
-    if (item == "dashboard") {
-      const novaRota = `${novasRotas}`
-      router.push(novaRota)
-    } else {
-      const novaRota = `${novasRotas}${item}`
-      router.push(novaRota)
-    }
+  const alterarPagina = (index: number) => {
+    const target = `/${parts.slice(0, index + 1).join("/")}`;
+    router.push(target);
   }
 
   return (
-    <div className="flex w-full min-h-screen bg-background">
+    <div className="dashboard-shell flex min-h-screen w-full bg-[#F8FAFA]">
 
       <Sidebar />
 
       <div
         ref={paiRef}
-        className="w-full flex-1 sm:ml-[82px]"
+        data-contrast-target="content"
+        className="w-full flex-1 sm:ml-[92px] lg:pr-[78px] 2xl:pr-[86px]"
       >
-        <div className="mx-auto w-full max-w-[1680px] px-4 pb-8 pt-6 lg:px-7 2xl:px-10">
-          <div className='mb-7'>
-            <h1 className='text-[34px] font-bold text-[#004D4D] capitalize lg:text-[38px]'>
+        <div className="mx-auto w-full max-w-[1680px] px-4 pb-8 pt-5 sm:px-5 lg:px-8 lg:pt-6 2xl:px-10">
+          <div className='mb-6 sm:mb-7'>
+            <h1 className='text-[30px] font-bold capitalize text-[#004D4D] sm:text-[34px] lg:text-[38px]'>
               {currentMeta.title}
             </h1>
 
-            <div className='mt-1 flex flex-wrap gap-1'>
+            <div className='mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1'>
               {parts.map((item, index) => (
-                <span
+                <button
                   key={index}
-                  onClick={() => alterarPagina(item)}
-                  className='text-sm text-gray-500 capitalize opacity-80 transition-all duration-300 cursor-pointer'
+                  type="button"
+                  onClick={() => alterarPagina(index)}
+                  className='cursor-pointer text-sm capitalize text-[#718089] opacity-90 transition-colors duration-200 hover:text-[#004D4D] hover:opacity-100'
                 >
                   {item}
-                  {index < parts.length - 1 && " > "}
-                </span>
+                  {index < parts.length - 1 && <span className="px-1 text-[#9AA8B0]">/</span>}
+                </button>
               ))}
             </div>
 

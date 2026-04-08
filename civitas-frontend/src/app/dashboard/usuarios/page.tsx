@@ -30,7 +30,7 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50];
 const TIPO_USUARIO_OPTIONS = [
   { value: 1, label: "Visitante" },
   { value: 2, label: "Administrador" },
-  { value: 3, label: "Funcionário" },
+  { value: 3, label: "Funcionario" },
 ];
 
 const getTipoUsuarioLabel = (value: number | null | undefined): string => {
@@ -59,18 +59,18 @@ const novoUsuario: User = {
 const columns = [
   { id: "nome", label: "Nome" },
   { id: "cpf", label: "CPF" },
-  { id: "matricula", label: "Matrícula" },
+  { id: "matricula", label: "Matricula" },
   { id: "cidade", label: "Cidade" },
   { id: "estado", label: "Estado" },
   { id: "email", label: "E-mail" },
   { id: "tipoUsuarioLabel", label: "Tipo" },
-  { id: "situacaoLabel", label: "Situação" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const camposConst: FieldConfig[] = [
   { key: "nome", placeholder: "Nome", local: "principal" },
   { key: "cpf", placeholder: "CPF", local: "principal" },
-  { key: "matricula", placeholder: "Matrícula", local: "filtro" },
+  { key: "matricula", placeholder: "Matricula", local: "filtro" },
   { key: "cidade", placeholder: "Cidade", local: "filtro" },
   { key: "email", placeholder: "E-mail", local: "filtro" },
   { key: "estado", placeholder: "Estado", local: "filtro" },
@@ -83,7 +83,7 @@ const camposConst: FieldConfig[] = [
   },
   {
     key: "situacao",
-    placeholder: "Situação",
+    placeholder: "Situacao",
     local: "filtro",
     type: "select",
     options: SITUACAO_OPTIONS,
@@ -95,9 +95,9 @@ const usuarioFormFields: ModalFieldConfig[] = [
   { key: "nome", label: "Nome", placeholder: "Nome completo", required: true },
   { key: "cpf", label: "CPF", placeholder: "000.000.000-00", required: true },
   { key: "rg", label: "RG", placeholder: "RG", required: true },
-  { key: "matricula", label: "Matrícula", placeholder: "MAT-0000", required: true },
+  { key: "matricula", label: "Matricula", placeholder: "MAT-0000", required: true },
   { key: "logradouro", label: "Logradouro", placeholder: "Rua / Avenida", required: true },
-  { key: "numero", label: "Número", placeholder: "Número", required: true },
+  { key: "numero", label: "Numero", placeholder: "Numero", required: true },
   { key: "bairro", label: "Bairro", placeholder: "Bairro", required: true },
   { key: "cep", label: "CEP", placeholder: "00000-000", required: true },
   { key: "cidade", label: "Cidade", placeholder: "Cidade", required: true },
@@ -113,7 +113,7 @@ const usuarioFormFields: ModalFieldConfig[] = [
   },
   {
     key: "situacao",
-    label: "Situação",
+    label: "Situacao",
     type: "select",
     required: true,
     options: SITUACAO_OPTIONS,
@@ -237,11 +237,11 @@ const Page = () => {
       setError(null);
       return resolvedPage;
     } catch (err) {
-      console.error("Erro ao carregar usuários:", err);
+      console.error("Erro ao carregar usuarios:", err);
       setUsuarios([]);
       setFilteredData([]);
       setPaginationState(emptyPaginationState);
-      setError("Não foi possível carregar usuários.");
+      setError("Nao foi possivel carregar usuarios.");
       return null;
     } finally {
       setLoading(false);

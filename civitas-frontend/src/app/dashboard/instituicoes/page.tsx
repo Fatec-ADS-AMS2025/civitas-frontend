@@ -60,13 +60,13 @@ const novaInstituicao = {
 
 const columns = [
   { id: "nome", label: "Nome" },
-  { id: "nomeRazaoSocial", label: "Razão Social" },
+  { id: "nomeRazaoSocial", label: "Razao Social" },
   { id: "cnpj", label: "CNPJ" },
-  { id: "tipoInstituicaoLabel", label: "Tipo de Instituição" },
+  { id: "tipoInstituicaoLabel", label: "Tipo de Instituicao" },
   { id: "secretariaLabel", label: "Secretaria" },
   { id: "cidade", label: "Cidade" },
   { id: "estado", label: "Estado" },
-  { id: "situacaoLabel", label: "Situação" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const buildInstituicaoCampos = (
@@ -78,7 +78,7 @@ const buildInstituicaoCampos = (
     { key: "cnpj", placeholder: "CNPJ", local: "principal" },
     {
       key: "idTipoInstituicao",
-      placeholder: "Tipo de Instituição",
+      placeholder: "Tipo de Instituicao",
       local: "filtro",
       type: "select",
       options: tipoInstituicaoOptions,
@@ -92,7 +92,7 @@ const buildInstituicaoCampos = (
     },
     {
       key: "situacao",
-      placeholder: "Situação",
+      placeholder: "Situacao",
       local: "filtro",
       type: "select",
       options: SITUACAO_OPTIONS,
@@ -133,11 +133,11 @@ const mapInstituicaoRows = (
       secretariaLabel:
         secretariaId !== undefined
           ? secretariaMap.get(secretariaId) ?? `Secretaria #${secretariaId}`
-          : "Secretaria não informada",
+          : "Secretaria nao informada",
       tipoInstituicaoLabel:
         tipoInstituicaoId !== undefined
           ? tipoMap.get(tipoInstituicaoId) ?? `Tipo #${tipoInstituicaoId}`
-          : "Tipo não informado",
+          : "Tipo nao informado",
     };
   });
 };
@@ -185,13 +185,13 @@ export default function Page() {
       {
         key: "nome",
         label: "Nome",
-        placeholder: "Nome da instituição",
+        placeholder: "Nome da instituicao",
         required: true,
       },
       {
         key: "nomeRazaoSocial",
-        label: "Razão Social",
-        placeholder: "Razão social da instituição",
+        label: "Razao Social",
+        placeholder: "Razao social da instituicao",
         required: true,
       },
       {
@@ -216,10 +216,10 @@ export default function Page() {
       },
       {
         key: "numero",
-        label: "Número",
-        placeholder: "Número",
+        label: "Numero",
+        placeholder: "Numero",
         required: true,
-        validate: validateMaxLength("Número", 4),
+        validate: validateMaxLength("Numero", 4),
       },
       {
         key: "bairro",
@@ -259,8 +259,8 @@ export default function Page() {
       },
       {
         key: "idTipoInstituicao",
-        label: "Tipo de Instituição",
-        placeholder: "Selecione o tipo de instituição",
+        label: "Tipo de Instituicao",
+        placeholder: "Selecione o tipo de instituicao",
         type: "select",
         required: true,
         options: tipoInstituicaoOptions,
@@ -275,7 +275,7 @@ export default function Page() {
       },
       {
         key: "situacao",
-        label: "Situação",
+        label: "Situacao",
         type: "select",
         required: true,
         options: SITUACAO_OPTIONS,
@@ -318,14 +318,14 @@ export default function Page() {
         setFilteredData(rows);
         setError(null);
       } catch (err) {
-        console.error("Erro ao carregar instituições:", err);
+        console.error("Erro ao carregar instituicoes:", err);
         setInstituicoes([]);
         setFilteredData([]);
         setSecretarias([]);
         setTiposInstituicao([]);
         setCampos([]);
         setError(
-          "Não foi possível carregar as instituições. Verifique o backend e tente novamente."
+          "Nao foi possivel carregar as instituicoes. Verifique o backend e tente novamente."
         );
       } finally {
         setLoading(false);

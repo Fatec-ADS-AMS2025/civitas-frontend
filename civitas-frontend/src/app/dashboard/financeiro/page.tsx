@@ -50,7 +50,7 @@ export default function FinanceiroPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="financeiro-root space-y-6">
       {/* Hero com indicadores principais */}
       <FinanceiroHero
         resumo={resumo}

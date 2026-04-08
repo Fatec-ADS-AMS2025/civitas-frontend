@@ -33,7 +33,7 @@ export default function RootLayout({
 
         <main
           id="conteudo-principal"
-          className="w-full min-h-screen bg-background lg:pr-[78px] 2xl:pr-[86px]"
+          className="w-full min-h-screen"
         >
           {children}
         </main>

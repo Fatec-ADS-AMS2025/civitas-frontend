@@ -42,23 +42,19 @@ const novaSecretaria = {
 
 const columns = [
   { id: "idSecretaria", label: "ID Secretaria" },
-  { id: "nome", label: "Nome" },
-  { id: "nomeRazaoSocial", label: "Razão Social" },
-  { id: "descricao", label: "Área / Descrição" },
+  { id: "descricao", label: "Descricao" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacaoLabel", label: "Situação" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const camposConst: FieldConfig[] = [
-  { key: "nome", placeholder: "Nome", local: "principal" },
-  { key: "nomeRazaoSocial", placeholder: "Razão Social", local: "principal" },
-  { key: "descricao", placeholder: "Área / Descrição", local: "filtro" },
+  { key: "descricao", placeholder: "Descricao", local: "principal" },
   { key: "cnpj", placeholder: "CNPJ", local: "principal" },
   { key: "telefone", placeholder: "Telefone", local: "filtro" },
   {
     key: "situacao",
-    placeholder: "Situação",
+    placeholder: "Situacao",
     local: "filtro",
     type: "select",
     options: SITUACAO_OPTIONS,
@@ -76,8 +72,8 @@ const secretariaFormFields: ModalFieldConfig[] = [
   },
   {
     key: "nomeRazaoSocial",
-    label: "Razão Social",
-    placeholder: "Razão social da secretaria",
+    label: "Razao Social",
+    placeholder: "Razao social da secretaria",
     required: true,
   },
   {
@@ -89,8 +85,8 @@ const secretariaFormFields: ModalFieldConfig[] = [
   },
   {
     key: "descricao",
-    label: "Descrição",
-    placeholder: "Descrição da secretaria",
+    label: "Descricao",
+    placeholder: "Descricao da secretaria",
     required: true,
   },
   {
@@ -101,10 +97,10 @@ const secretariaFormFields: ModalFieldConfig[] = [
   },
   {
     key: "numero",
-    label: "Número",
-    placeholder: "Número",
+    label: "Numero",
+    placeholder: "Numero",
     required: true,
-    validate: validateMaxLength("Número", 10),
+    validate: validateMaxLength("Numero", 10),
   },
   {
     key: "bairro",
@@ -148,7 +144,7 @@ const secretariaFormFields: ModalFieldConfig[] = [
   },
   {
     key: "situacao",
-    label: "Situação",
+    label: "Situacao",
     type: "select",
     required: true,
     options: SITUACAO_OPTIONS,
@@ -190,7 +186,7 @@ export default function Page() {
         console.error("Erro ao carregar secretarias:", err);
         setSecretarias([]);
         setFilteredData([]);
-        setError("Não foi possível carregar as secretarias. Verifique o backend e tente novamente.");
+        setError("Nao foi possivel carregar as secretarias. Verifique o backend e tente novamente.");
       } finally {
         setLoading(false);
       }

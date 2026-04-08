@@ -83,7 +83,7 @@ const getDaysUntilDate = (value: string): number | null => {
 
 const getDueSoonLabel = (daysUntilDue: number | null) => {
   if (daysUntilDue === null) return "Sem vencimento";
-  if (daysUntilDue < 0) return `Atrasada há ${Math.abs(daysUntilDue)} dia(s)`;
+  if (daysUntilDue < 0) return `Atrasada ha ${Math.abs(daysUntilDue)} dia(s)`;
   if (daysUntilDue === 0) return "Vence hoje";
   return `Vence em ${daysUntilDue} dia(s)`;
 };
@@ -116,7 +116,7 @@ const buildInstitutionRanking = (
     const instituicaoId = item.raw.idInstituicao ?? 0;
     const label =
       institutionMap.get(instituicaoId) ??
-      (instituicaoId > 0 ? `Instituição #${instituicaoId}` : "Não vinculada");
+      (instituicaoId > 0 ? `Instituicao #${instituicaoId}` : "Nao vinculada");
 
     const current = acc.get(instituicaoId) ?? {
       id: String(instituicaoId),
@@ -155,7 +155,7 @@ export default function Dashboard() {
   const quickActions = useMemo<QuickAction[]>(
     () => [
       {
-        title: `${filteredDespesas.length} despesas disponíveis`,
+        title: `${filteredDespesas.length} despesas disponiveis`,
         subtitle: "Acesse a listagem completa e aplique filtros operacionais.",
         button: "Abrir despesas",
         tone: "amber",
@@ -163,15 +163,15 @@ export default function Dashboard() {
         onClick: () => router.push("/dashboard/despesas"),
       },
       {
-        title: `${orcamentos.length} orçamentos carregados`,
-        subtitle: "Revise rapidamente previsão orçamentária e cobertura.",
-        button: "Ver orçamentos",
+        title: `${orcamentos.length} orcamentos carregados`,
+        subtitle: "Revise rapidamente previsao orcamentaria e cobertura.",
+        button: "Ver orcamentos",
         tone: "blue",
         icon: "fact_check",
         onClick: () => router.push("/dashboard/orcamentos"),
       },
       {
-        title: `${instituicoes.length} instituições cadastradas`,
+        title: `${instituicoes.length} instituicoes cadastradas`,
         subtitle: "Navegue para o painel financeiro consolidado do sistema.",
         button: "Ir ao financeiro",
         tone: "slate",
@@ -247,7 +247,7 @@ export default function Dashboard() {
   if (error) {
     return (
       <ErrorState
-        title="Não foi possível carregar a dashboard"
+        title="Nao foi possivel carregar a dashboard"
         description={error}
         actionLabel="Atualizar painel"
         onRetry={() => void refetch()}
@@ -257,14 +257,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] bg-primary-1 px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
+      <section className="rounded-[30px] bg-[#2B8F95] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
               Dashboard operacional
             </span>
             <h1 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">
-              Acompanhamento real de despesas e cobertura orçamentária
+              Acompanhamento real de despesas e cobertura orcamentaria
             </h1>
             <p className="mt-3 max-w-3xl text-sm text-white/85 sm:text-base">
               Esta tela agora usa dados reais do backend para mostrar saldo, volume
@@ -299,13 +299,13 @@ export default function Dashboard() {
       <section className="grid gap-5 xl:grid-cols-4">
         <MetricCard
           title="Saldo atual"
-          subtitle="Orçamentos menos despesas"
+          subtitle="Orcamentos menos despesas"
           value={showMoneyValues ? formatCurrency(summary.saldoTotal) : hiddenValue}
           gradient="linear-gradient(135deg, #0D7C7C 0%, #66B8B7 100%)"
           icon="account_balance_wallet"
         />
         <MetricCard
-          title="Total orçado"
+          title="Total orcado"
           subtitle="Base financeira carregada"
           value={showMoneyValues ? formatCurrency(summary.entrada) : hiddenValue}
           gradient="linear-gradient(135deg, #1D1D1D 0%, #555555 100%)"
@@ -330,10 +330,10 @@ export default function Dashboard() {
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
           <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#F0A126]">
-            Ações rápidas
+            Acoes rapidas
           </span>
           <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-            Entradas diretas para operação
+            Entradas diretas para operacao
           </h2>
           <p className="mt-2 text-sm text-[#72808A]">
             Atalhos baseados no volume real atualmente carregado pela API.
@@ -351,12 +351,12 @@ export default function Dashboard() {
             Panorama
           </span>
           <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-            Leitura rápida do cadastro
+            Leitura rapida do cadastro
           </h2>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <OverviewCard
-              label="Instituições"
+              label="Instituicoes"
               value={instituicoes.length}
               icon="corporate_fare"
             />
@@ -366,7 +366,7 @@ export default function Dashboard() {
               icon="storefront"
             />
             <OverviewCard
-              label="Usuários"
+              label="Usuarios"
               value={usuarios.length}
               icon="group"
             />
@@ -384,16 +384,16 @@ export default function Dashboard() {
           title="Categorias com maior impacto"
           subtitle="Soma das despesas por categoria."
           emptyTitle="Nenhuma categoria encontrada"
-          emptyDescription="Ainda não há despesas suficientes para montar o ranking."
+          emptyDescription="Ainda nao ha despesas suficientes para montar o ranking."
           items={categoryRanking}
           totalBase={summary.saida}
         />
 
         <RankingCard
-          title="Instituições com maior gasto"
-          subtitle="Acumulado de despesas por instituição."
-          emptyTitle="Nenhuma instituição ranqueada"
-          emptyDescription="As despesas atuais não possuem agrupamento suficiente."
+          title="Instituicoes com maior gasto"
+          subtitle="Acumulado de despesas por instituicao."
+          emptyTitle="Nenhuma instituicao ranqueada"
+          emptyDescription="As despesas atuais nao possuem agrupamento suficiente."
           items={institutionRanking}
           totalBase={summary.saida}
         />
@@ -404,13 +404,13 @@ export default function Dashboard() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <span className="inline-flex rounded-full bg-[#F4F8F9] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#7A8B94]">
-                Últimos registros
+                Ultimos registros
               </span>
               <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
                 Despesas recentes
               </h2>
               <p className="mt-2 text-sm text-[#72808A]">
-                Busca local por descrição, documento ou categoria dentro das
+                Busca local por descricao, documento ou categoria dentro das
                 despesas carregadas pelo backend.
               </p>
             </div>
@@ -419,8 +419,8 @@ export default function Dashboard() {
               <Input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Buscar por descrição, documento ou categoria"
-                className="!mb-0 !rounded-[18px] !border-[#D7E5E8] !bg-[#F7FAFB] !px-4 !py-3 shadow-none"
+                placeholder="Buscar por descricao, documento ou categoria"
+                className="dashboard-recent-search"
               />
             </div>
           </div>
@@ -429,7 +429,7 @@ export default function Dashboard() {
             {paginatedItems.length === 0 ? (
               <EmptyState
                 title="Nenhuma despesa encontrada"
-                description="A busca atual não retornou despesas para exibir."
+                description="A busca atual nao retornou despesas para exibir."
               />
             ) : (
               <>
@@ -531,11 +531,10 @@ function MetricCard({
 }) {
   return (
     <article
-      className="relative overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
+      className="dashboard-metric-card relative overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
       style={{ background: gradient }}
     >
-      <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full border border-white/25" />
-      <div className="absolute -bottom-8 right-8 h-24 w-24 rounded-full bg-white/10" />
+      <div className="dashboard-metric-card__sheen absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_56%)]" />
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] uppercase tracking-[0.14em] text-white/75">
@@ -544,12 +543,14 @@ function MetricCard({
           <h2 className="mt-5 text-[26px] font-semibold leading-none">{title}</h2>
           <p className="mt-2 text-sm text-white/80">{subtitle}</p>
         </div>
-        <span className="material-symbols-outlined !text-[42px] opacity-60">
-          {icon}
+        <span className="dashboard-metric-card__icon flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10">
+          <span className="material-symbols-outlined !text-[32px] opacity-80">
+            {icon}
+          </span>
         </span>
       </div>
 
-      <div className="relative z-10 mt-6 rounded-2xl bg-black/20 px-4 py-3 text-lg font-semibold tracking-[0.04em] backdrop-blur-sm">
+      <div className="dashboard-metric-card__value relative z-10 mt-6 rounded-2xl border border-white/10 bg-white/14 px-4 py-3 text-lg font-semibold tracking-[0.04em]">
         {value}
       </div>
     </article>

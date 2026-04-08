@@ -27,16 +27,16 @@ export default function FinanceiroHero({ resumo, filtros, instituicoesCount }: F
   const ultimaMovimentacao = formatDateBR();
 
   return (
-    <section className="relative overflow-hidden rounded-[24px] border border-[#E4EEF0] bg-gradient-to-br from-[#F1F8F9] via-[#F8FCFC] to-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)] lg:p-8">
+    <section className="financeiro-hero relative overflow-hidden rounded-[24px] border border-[#E4EEF0] bg-gradient-to-br from-[#F1F8F9] via-[#F8FCFC] to-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)] lg:p-8">
       {/* Decorative circles */}
-      <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[#E4EEF0] opacity-40" />
-      <div className="absolute -bottom-16 -left-16 h-32 w-32 rounded-full bg-[#58AFAE] opacity-10" />
+      <div className="financeiro-hero__decor absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[#E4EEF0] opacity-40" />
+      <div className="financeiro-hero__decor absolute -bottom-16 -left-16 h-32 w-32 rounded-full bg-[#58AFAE] opacity-10" />
 
       <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
         {/* Left content */}
         <div>
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#DCEBED] bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6C858E] backdrop-blur-sm">
+          <div className="financeiro-hero__badge inline-flex items-center gap-2 rounded-full border border-[#DCEBED] bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6C858E] backdrop-blur-sm">
             Módulo Financeiro
             <span className="h-2 w-2 rounded-full bg-[#D97706]" />
           </div>
@@ -55,13 +55,13 @@ export default function FinanceiroHero({ resumo, filtros, instituicoesCount }: F
 
           {/* Tags */}
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E4EEF0] px-3 py-1.5 text-[11px] font-medium text-[#1F2A32]">
+            <span className="financeiro-hero__tag inline-flex items-center gap-1.5 rounded-full bg-[#E4EEF0] px-3 py-1.5 text-[11px] font-medium text-[#1F2A32]">
               <svg className="h-3.5 w-3.5 text-[#58AFAE]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Última movimentação: {ultimaMovimentacao}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#004C57] px-3 py-1.5 text-[11px] font-semibold text-white">
+            <span className="financeiro-hero__tag inline-flex items-center gap-1.5 rounded-full bg-[#004C57] px-3 py-1.5 text-[11px] font-semibold text-white">
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -73,7 +73,7 @@ export default function FinanceiroHero({ resumo, filtros, instituicoesCount }: F
         {/* Right indicators */}
         <div className="flex flex-col gap-3">
           {/* Card 1 - Transações monitoradas */}
-          <div className="flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
+          <div className="financeiro-hero__stat flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
                 Transações monitoradas
@@ -88,7 +88,7 @@ export default function FinanceiroHero({ resumo, filtros, instituicoesCount }: F
           </div>
 
           {/* Card 2 - Instituições conectadas */}
-          <div className="flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
+          <div className="financeiro-hero__stat flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
                 Instituições conectadas
@@ -103,7 +103,7 @@ export default function FinanceiroHero({ resumo, filtros, instituicoesCount }: F
           </div>
 
           {/* Card 3 - Filtros ativos */}
-          <div className="flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
+          <div className="financeiro-hero__stat flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
                 Filtros ativos
