@@ -32,7 +32,7 @@ export default function PaginationControls({
   const sizeOptions = resolvePageSizeOptions(pageSize, pageSizeOptions);
 
   return (
-    <div className="border-t border-[#E5EEF0] px-5 py-4 lg:px-6">
+    <div className="despesas-table-footer border-t border-[#E5EEF0] px-4 py-4 sm:px-5 lg:px-6">
       <div className="flex flex-col gap-3 text-sm text-[#6B7280] md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
           <span>{totalRecords} registros</span>
@@ -48,7 +48,7 @@ export default function PaginationControls({
                 onChange={(event) => onPageSizeChange(Number(event.target.value))}
                 disabled={disabled}
                 aria-label="Selecionar quantidade de itens por pagina"
-                className="rounded-2xl border border-[#D5E3E6] bg-white px-3 py-2 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-[42px] rounded-2xl border border-[#D5E3E6] bg-white px-3 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {sizeOptions.map((option) => (
                   <option key={option} value={option}>
@@ -65,7 +65,7 @@ export default function PaginationControls({
             type="button"
             onClick={() => onPageChange(displayCurrentPage - 1)}
             disabled={!canGoPrevious}
-            className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-[42px] rounded-2xl border border-[#D5E3E6] bg-white px-4 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Anterior
           </button>
@@ -73,7 +73,7 @@ export default function PaginationControls({
             type="button"
             onClick={() => onPageChange(displayCurrentPage + 1)}
             disabled={!canGoNext}
-            className="rounded-2xl bg-[#58AFAE] px-4 py-2 font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-[42px] rounded-2xl bg-[#58AFAE] px-4 font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Proxima
           </button>

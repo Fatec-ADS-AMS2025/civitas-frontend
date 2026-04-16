@@ -38,10 +38,10 @@ const novoOrcamento = {
 };
 
 const columns = [
-  { id: "idOrcamento", label: "ID Orçamento" },
+  { id: "idOrcamento", label: "ID Orcamento" },
   { id: "anoOrcamento", label: "Ano" },
   { id: "valorOrcamento", label: "Valor" },
-  { id: "instituicaoLabel", label: "Instituição" },
+  { id: "instituicaoLabel", label: "Instituicao" },
   { id: "tipoDespesaLabel", label: "Tipo de Despesa" },
 ];
 
@@ -54,7 +54,7 @@ const buildOrcamentoCampos = (
     { key: "valorOrcamento", placeholder: "Valor", local: "principal" },
     {
       key: "idInstituicao",
-      placeholder: "Instituição",
+      placeholder: "Instituicao",
       local: "filtro",
       type: "select",
       options: instituicaoOptions,
@@ -113,11 +113,11 @@ const mapOrcamentoRows = (
       instituicaoLabel:
         instituicaoId !== undefined
           ? instituicaoMap.get(instituicaoId) ?? `Instituicao #${instituicaoId}`
-          : "Instituição não informada",
+          : "Instituicao nao informada",
       tipoDespesaLabel:
         tipoDespesaId !== undefined
           ? tipoDespesaMap.get(tipoDespesaId) ?? `Tipo #${tipoDespesaId}`
-          : "Tipo não informado",
+          : "Tipo nao informado",
     };
   });
 };
@@ -173,15 +173,15 @@ export default function Page() {
       {
         key: "valorOrcamento",
         label: "Valor",
-        placeholder: "Digite o valor do orçamento",
+        placeholder: "Digite o valor do orcamento",
         required: true,
         type: "number",
         validate: validatePositiveNumber("Valor"),
       },
       {
         key: "idInstituicao",
-        label: "Instituição",
-        placeholder: "Selecione a instituição",
+        label: "Instituicao",
+        placeholder: "Selecione a instituicao",
         type: "select",
         required: true,
         options: instituicaoOptions,
@@ -232,14 +232,14 @@ export default function Page() {
         setFilteredData(rows);
         setError(null);
       } catch (err) {
-        console.error("Erro ao carregar orçamentos:", err);
+        console.error("Erro ao carregar orcamentos:", err);
         setOrcamentos([]);
         setFilteredData([]);
         setInstituicoes([]);
         setTiposDespesa([]);
         setCampos([]);
         setError(
-          "Não foi possível carregar os orçamentos. Verifique o backend e tente novamente."
+          "Nao foi possivel carregar os orcamentos. Verifique o backend e tente novamente."
         );
       } finally {
         setLoading(false);

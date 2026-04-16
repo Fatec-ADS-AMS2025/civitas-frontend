@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 const MIN_FONT = 14
 const DEFAULT_FONT = 16
@@ -9,6 +10,22 @@ const MAX_FONT = 22
 export default function AccessibilityMenu() {
   const [fontSize, setFontSize] = useState(DEFAULT_FONT)
   const [highContrast, setHighContrast] = useState(false)
+  const pathname = usePathname()
+
+  const applyContrast = (enabled: boolean) => {
+    const mainTarget = document.getElementById('conteudo-principal')
+    const dashboardTarget = document.querySelector<HTMLElement>('[data-contrast-target="content"]')
+    const resolvedTarget = dashboardTarget ?? mainTarget
+
+    mainTarget?.classList.remove('high-contrast-shell')
+    mainTarget?.classList.remove('high-contrast')
+    dashboardTarget?.classList.remove('high-contrast')
+
+    if (enabled) {
+      mainTarget?.classList.add('high-contrast-shell')
+      resolvedTarget?.classList.add('high-contrast')
+    }
+  }
 
   useEffect(() => {
     const savedFont = localStorage.getItem('app-font-size')
@@ -22,9 +39,13 @@ export default function AccessibilityMenu() {
 
     if (savedContrast === 'true') {
       setHighContrast(true)
-      document.body.classList.add('high-contrast')
+      applyContrast(true)
     }
   }, [])
+
+  useEffect(() => {
+    applyContrast(highContrast)
+  }, [highContrast, pathname])
 
   const updateFontSize = (size: number) => {
     const next = Math.max(MIN_FONT, Math.min(MAX_FONT, size))
@@ -40,7 +61,6 @@ export default function AccessibilityMenu() {
   const toggleContrast = () => {
     const next = !highContrast
     setHighContrast(next)
-    document.body.classList.toggle('high-contrast', next)
     localStorage.setItem('app-high-contrast', String(next))
   }
 

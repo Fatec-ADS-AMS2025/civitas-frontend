@@ -197,7 +197,7 @@ export default function Sidebar({
         style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
       >
         <div className="pt-6 pb-4 px-3 flex flex-col gap-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center gap-0 xl:group-hover:justify-start xl:group-hover:gap-3">
             <div className="flex items-center justify-center w-12 h-10 rounded-md bg-transparent overflow-hidden flex-shrink-0">
               <img
                 src="/logo.png"
@@ -205,7 +205,7 @@ export default function Sidebar({
                 className="object-contain size-full"
               />
             </div>
-            <div className="ml-1 text-2xl font-semibold text-tertialy-1 opacity-0 xl:group-hover:opacity-100 transition-opacity duration-200">
+            <div className="w-0 overflow-hidden whitespace-nowrap text-2xl font-semibold text-tertialy-1 opacity-0 transition-all duration-200 xl:group-hover:ml-1 xl:group-hover:w-auto xl:group-hover:opacity-100">
               Civitas
             </div>
           </div>
@@ -226,7 +226,7 @@ export default function Sidebar({
                     }
                   }}
                   title={`Atalho: ${shortcutNumber}`}
-                  className={`group/item flex items-center gap-4 w-full px-3 py-2 rounded-md text-left transition-colors duration-150 outline-none cursor-pointer group
+                  className={`group/item flex w-full items-center justify-center gap-0 rounded-md px-3 py-2 text-left transition-colors duration-150 outline-none cursor-pointer xl:group-hover:justify-start xl:group-hover:gap-4
                     ${
                       isActive
                         ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white"
@@ -252,7 +252,7 @@ export default function Sidebar({
                   </div>
 
                   <div
-                    className={`flex-1 text-base truncate opacity-0 xl:group-hover:opacity-100 transition-opacity duration-200
+                    className={`w-0 overflow-hidden whitespace-nowrap text-base truncate opacity-0 transition-all duration-200 xl:group-hover:w-auto xl:group-hover:opacity-100
                       ${isActive ? "text-white opacity-100" : "font-semibold"}`}
                   >
                     {it.label}
@@ -265,7 +265,7 @@ export default function Sidebar({
 
         <div className="px-3 py-6">
           <button
-            className="flex items-center gap-3 w-full rounded-2xl px-3 py-2 bg-tertialy-1 text-secundary-1 font-semibold shadow-inner hover:shadow-md transition-shadow duration-150 cursor-pointer"
+            className="flex w-full items-center justify-center gap-0 rounded-2xl bg-tertialy-1 px-3 py-2 text-secundary-1 font-semibold shadow-inner transition-shadow duration-150 cursor-pointer hover:shadow-md xl:group-hover:justify-start xl:group-hover:gap-3"
             onClick={() => router.push("/perfil")}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
@@ -277,7 +277,7 @@ export default function Sidebar({
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-secundary-1">
               <span className="material-symbols-outlined">person</span>
             </div>
-            <div className="opacity-0 xl:group-hover:opacity-100 transition-opacity duration-200">
+            <div className="w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 xl:group-hover:w-auto xl:group-hover:opacity-100">
               Perfil
             </div>
           </button>

@@ -57,7 +57,7 @@ const columns = [
   { id: "nomeFantasia", label: "Nome Fantasia" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacaoLabel", label: "Situação" },
+  { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const camposConst: FieldConfig[] = [
@@ -66,7 +66,7 @@ const camposConst: FieldConfig[] = [
   { key: "telefone", placeholder: "Telefone", local: "filtro" },
   {
     key: "situacao",
-    placeholder: "Situação",
+    placeholder: "Situacao",
     local: "filtro",
     type: "select",
     options: SITUACAO_OPTIONS,
@@ -84,8 +84,8 @@ const fornecedorFormFields: ModalFieldConfig[] = [
   },
   {
     key: "nome",
-    label: "Razão Social / Nome",
-    placeholder: "Nome ou razão social do fornecedor",
+    label: "Razao Social / Nome",
+    placeholder: "Nome ou razao social do fornecedor",
     required: true,
   },
   {
@@ -103,10 +103,10 @@ const fornecedorFormFields: ModalFieldConfig[] = [
   },
   {
     key: "numero",
-    label: "Número",
-    placeholder: "Número",
+    label: "Numero",
+    placeholder: "Numero",
     required: true,
-    validate: validateMaxLength("Número", 10),
+    validate: validateMaxLength("Numero", 10),
   },
   {
     key: "bairro",
@@ -153,7 +153,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
   },
   {
     key: "situacao",
-    label: "Situação",
+    label: "Situacao",
     type: "select",
     required: true,
     options: SITUACAO_OPTIONS,
@@ -241,7 +241,7 @@ export default function Page() {
       setFilteredData([]);
       setPaginationState(emptyPaginationState);
       setError(
-        "Não foi possível carregar os fornecedores. Verifique o backend e tente novamente."
+        "Nao foi possivel carregar os fornecedores. Verifique o backend e tente novamente."
       );
       return null;
     } finally {
