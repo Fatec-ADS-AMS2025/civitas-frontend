@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Checkbox from '@/components/checkbox'
 import { Input } from '@/components/Input'
+import useAuth from '@/hooks/useAuth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -13,15 +14,43 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({ email: '', password: '' })
   const [generalError, setGeneralError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
   const router = useRouter()
 
   const handleLogin = async (event) => {
     event.preventDefault()
     if (loading) return
 
+    const nextErrors = { email: '', password: '' }
+
+    if (!email.trim()) {
+      nextErrors.email = 'Informe o e-mail'
+    }
+
+    if (!password.trim()) {
+      nextErrors.password = 'Informe a senha'
+    }
+
+    setErrors(nextErrors)
+    setGeneralError('')
+
+    if (nextErrors.email || nextErrors.password) {
+      return
+    }
+
     setLoading(true)
     try {
+      const result = await login(email.trim(), password)
+
+      if (!result.success) {
+        setGeneralError(result.message)
+        return
+      }
+
       router.push('/dashboard')
+    } catch (error) {
+      console.error('Erro inesperado no fluxo de login:', error)
+      setGeneralError('Erro ao conectar com o servidor')
     } finally {
       setLoading(false)
     }
