@@ -179,33 +179,33 @@ export default function FinanceiroFormulario({
   };
 
   const inputClass = `
-    w-full rounded-lg border border-[#E4EEF0] bg-white px-3 py-2
-    text-[12px] text-[#1F2A32] placeholder:text-[#9AABB2]
-    focus:border-[#004C57] focus:outline-none focus:ring-1 focus:ring-[#004C57]/20
+    w-full rounded-[16px] border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-3 py-2
+    text-[12px] text-[var(--foreground)] placeholder:text-[var(--foreground-soft)]
+    shadow-[var(--shadow-xs)] focus:border-[var(--secundary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)]
     disabled:cursor-not-allowed disabled:bg-[#F8FCFC] disabled:opacity-60
   `;
 
   const tabClass = (active: boolean) => `
-    flex-1 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors
+    flex-1 rounded-[14px] border px-3 py-1.5 text-[11px] font-semibold transition-all duration-[var(--motion-duration-fast)]
     ${active
-      ? 'bg-[#004C57] text-white'
-      : 'bg-[#F1F5F5] text-[#6C858E] hover:bg-[#E4EEF0]'
+      ? 'border-transparent bg-[linear-gradient(135deg,#0C7178_0%,#2A9B9F_42%,#58AFAE_100%)] text-white shadow-[var(--shadow-xs)]'
+      : 'border-[var(--border-soft)] bg-[var(--surface-subtle)] text-[var(--foreground-muted)] hover:bg-[#EAF3F4]'
     }
   `;
 
   const disabled = loading || createProcessing || updateProcessing;
 
   return (
-    <div className="rounded-[16px] border border-[#E4EEF0] bg-white p-5">
+    <div className="civitas-surface civitas-enter rounded-[20px] p-5">
       {/* Header */}
-      <div className="mb-4">
+      <div className="civitas-panel-header mb-4">
         <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#D97706]">
           Operação
         </span>
-        <h3 className="mt-1 text-[18px] font-bold text-[#1F2A32]">
+        <h3 className="mt-1 text-[18px] font-bold text-[var(--foreground)]">
           Cadastro e atualização
         </h3>
-        <p className="mt-1 text-[12px] leading-relaxed text-[#9AABB2]">
+        <p className="mt-1 text-[12px] leading-relaxed text-[var(--foreground-soft)]">
           Cadastre novos lançamentos e atualize registros existentes com mais praticidade.
         </p>
       </div>
@@ -216,8 +216,8 @@ export default function FinanceiroFormulario({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[#6C858E]">Novo Registro</p>
-              <p className="text-[14px] font-bold text-[#1F2A32]">Cadastrar</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--foreground-soft)]">Novo Registro</p>
+              <p className="text-[14px] font-bold text-[var(--foreground)]">Cadastrar</p>
             </div>
           </div>
 
@@ -243,7 +243,7 @@ export default function FinanceiroFormulario({
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Descrição</label>
+                <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Descrição</label>
                 <input
                   type="text"
                   value={createForm.descricao}
@@ -254,7 +254,7 @@ export default function FinanceiroFormulario({
                 />
               </div>
               <div>
-                <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Valor</label>
+                <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Valor</label>
                 <input
                   type="number"
                   value={createForm.valor}
@@ -270,7 +270,7 @@ export default function FinanceiroFormulario({
               <>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">UC</label>
+                    <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">UC</label>
                     <input
                       type="text"
                       value={createForm.uc}
@@ -281,7 +281,7 @@ export default function FinanceiroFormulario({
                     />
                   </div>
                   <div>
-                    <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Data</label>
+                    <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Data</label>
                     <input
                       type="date"
                       value={createForm.data}
@@ -292,7 +292,7 @@ export default function FinanceiroFormulario({
                   </div>
                 </div>
                 <div>
-                  <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Orçamento</label>
+                  <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Orçamento</label>
                   <select
                     value={createForm.idOrcamento}
                     onChange={(e) => setCreateForm((prev) => ({ ...prev, idOrcamento: e.target.value }))}
@@ -310,7 +310,7 @@ export default function FinanceiroFormulario({
               </>
             ) : (
               <div>
-                <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Ano</label>
+                <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Ano</label>
                 <input
                   type="number"
                   value={createForm.anoOrcamento}
@@ -324,7 +324,7 @@ export default function FinanceiroFormulario({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Instituição</label>
+                <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Instituição</label>
                 <select
                   value={createForm.idInstituicao}
                   onChange={(e) => setCreateForm((prev) => ({ ...prev, idInstituicao: e.target.value }))}
@@ -338,7 +338,7 @@ export default function FinanceiroFormulario({
                 </select>
               </div>
               <div>
-                <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Tipo Despesa</label>
+                <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Tipo Despesa</label>
                 <select
                   value={createForm.idTipoDespesa}
                   onChange={(e) => setCreateForm((prev) => ({ ...prev, idTipoDespesa: e.target.value }))}
@@ -357,20 +357,20 @@ export default function FinanceiroFormulario({
           <button
             onClick={() => void handleCreate()}
             disabled={disabled}
-            className="w-full rounded-lg bg-[#D97706] px-4 py-2.5 text-[12px] font-semibold text-white transition-colors hover:bg-[#B45309] disabled:cursor-not-allowed disabled:opacity-60"
+            className="civitas-action civitas-action--secondary w-full justify-center rounded-[16px] px-4 py-2.5 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {createProcessing ? 'Salvando...' : 'Salvar registro'}
           </button>
         </div>
 
         {/* Right column - Atualizar */}
-        <div className="space-y-3 border-t border-[#E4EEF0] pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+        <div className="space-y-3 border-t border-[var(--divider)] pt-4 lg:border-l lg:border-t-0 lg:border-l-[var(--divider)] lg:pl-4 lg:pt-0">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[#6C858E]">Manutenção</p>
-              <p className="text-[14px] font-bold text-[#1F2A32]">Atualizar</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--foreground-soft)]">Manutenção</p>
+              <p className="text-[14px] font-bold text-[var(--foreground)]">Atualizar</p>
             </div>
-            <button className="flex h-6 w-6 items-center justify-center rounded-full border border-[#E4EEF0] text-[#6C858E]">
+            <button className="flex h-6 w-6 items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--foreground-soft)]">
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
@@ -397,7 +397,7 @@ export default function FinanceiroFormulario({
 
           {/* Select registro */}
           <div>
-            <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Registro para editar</label>
+            <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Registro para editar</label>
             <select
               value={idEditar}
               onChange={(e) => setIdEditar(e.target.value)}
@@ -415,14 +415,14 @@ export default function FinanceiroFormulario({
 
           {/* Contexto atual */}
           {transacaoSelecionada && (
-            <div className="rounded-lg border border-[#E4EEF0] bg-[#F8FCFC] p-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[#6C858E]">
+            <div className="rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3 shadow-[var(--shadow-xs)]">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--foreground-soft)]">
                 Contexto atual
               </p>
-              <p className="mt-1 text-[13px] font-semibold text-[#004C57]">
+              <p className="mt-1 text-[13px] font-semibold text-[var(--secundary-1)]">
                 #{transacaoSelecionada.id} - {transacaoSelecionada.descricao}
               </p>
-              <p className="text-[11px] text-[#72808A]">
+              <p className="text-[11px] text-[var(--foreground-muted)]">
                 {transacaoSelecionada.tipo === 'despesa' ? 'Despesa' : 'Orçamento'}{' '}
                 {formatCurrency(transacaoSelecionada.valor)}
               </p>
@@ -433,7 +433,7 @@ export default function FinanceiroFormulario({
           {idEditar && (
             <div className="space-y-2">
               <div>
-                <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Nova descrição</label>
+                <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Nova descrição</label>
                 <input
                   type="text"
                   value={updateForm.descricao}
@@ -444,7 +444,7 @@ export default function FinanceiroFormulario({
                 />
               </div>
               <div>
-                <label className="mb-0.5 block text-[10px] font-medium text-[#6C858E]">Novo valor</label>
+                <label className="mb-0.5 block text-[10px] font-medium text-[var(--foreground-muted)]">Novo valor</label>
                 <input
                   type="number"
                   value={updateForm.valor}
@@ -460,7 +460,7 @@ export default function FinanceiroFormulario({
           <button
             onClick={() => void handleUpdate()}
             disabled={disabled || !idEditar}
-            className="w-full rounded-lg bg-[#D97706] px-4 py-2.5 text-[12px] font-semibold text-white transition-colors hover:bg-[#B45309] disabled:cursor-not-allowed disabled:opacity-60"
+            className="civitas-action civitas-action--secondary w-full justify-center rounded-[16px] px-4 py-2.5 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {updateProcessing ? 'Atualizando...' : 'Atualizar registro'}
           </button>

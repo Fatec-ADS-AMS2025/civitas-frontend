@@ -3,6 +3,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import Form, { type FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import Input from "@/components/Input";
+import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import Modal from "@/components/modal";
 import { showToast } from "@/hooks/useToast";
 import {
@@ -53,10 +54,10 @@ const EMPTY_DESPESA_FORM = {
 };
 
 const filterFieldClassName =
-  "despesas-filter-field w-full rounded-[18px] border border-[#D7E5E8] bg-[#F6FAFA] px-4 py-3 text-sm text-[#23404A] outline-none transition focus:border-[#0D6A74] focus:ring-4 focus:ring-[#0D6A74]/15";
+  "despesas-filter-field w-full rounded-[18px] border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-4 py-3 text-sm text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--secundary-1)] focus:ring-4 focus:ring-[var(--focus-ring)]";
 
 const iconButtonClassName =
-  "flex h-9 w-9 items-center justify-center rounded-full border border-[#D7E5E8] bg-white text-[#0D6A74] transition hover:bg-[#F3FAFA]";
+  "flex h-9 w-9 items-center justify-center rounded-[14px] border border-[var(--border-soft)] bg-[rgba(255,255,255,0.92)] text-[var(--secundary-1)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]";
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("pt-BR", {
@@ -219,6 +220,41 @@ export default function Page() {
     removeDespesa,
     refetch,
   } = useDespesasDashboard();
+
+  const headerConfig = useMemo(
+    () => ({
+      title: "Despesas",
+      eyebrow: "Operação",
+      subtitle:
+        "Centralize filtros, cadastro e manutenção das despesas com feedback rápido e leitura desktop consistente.",
+      breadcrumbs: [
+        { label: "Home", href: "/dashboard" },
+        { label: "Cadastros", href: "/dashboard/despesas" },
+        { label: "Despesas" },
+      ],
+      actions: [
+        {
+          label: "Cadastrar despesa",
+          icon: "add_circle",
+          variant: "primary" as const,
+          onClick: () => {
+            setIsCreateModalOpen(true);
+          },
+        },
+        {
+          label: "Atualizar dados",
+          icon: "refresh",
+          variant: "ghost" as const,
+          onClick: () => {
+            void refetch();
+          },
+        },
+      ],
+    }),
+    [refetch]
+  );
+
+  useDashboardHeader(headerConfig);
 
   const activeModalDespesa = editingDespesa ?? viewingDespesa;
 
@@ -561,14 +597,14 @@ export default function Page() {
 
   return (
     <div className="space-y-7">
-      <section className="despesas-hero relative overflow-hidden rounded-[32px] border border-[#E0ECEE] bg-white px-6 py-7 shadow-[0_12px_30px_rgba(0,0,0,0.05)] sm:px-8">
+      <section className="despesas-hero civitas-enter relative overflow-hidden rounded-[32px] border border-[#E0ECEE] bg-white px-6 py-7 shadow-[0_12px_30px_rgba(0,0,0,0.05)] sm:px-8">
         <div className="despesas-hero__decor absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#EAF5F6]" />
         <div className="despesas-hero__decor absolute bottom-0 left-0 h-20 w-40 rounded-tr-[80px] bg-[#F7FBFB]" />
 
         <div className="relative z-10 max-w-4xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#7B949B]">
-            Home &gt; Cadastros &gt; Listagem
-          </p>
+          <span className="inline-flex rounded-full border border-[#D7E6E8] bg-[#F4F9F9] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#6E8A92]">
+            Painel de acompanhamento
+          </span>
           <h2 className="mt-3 text-[42px] font-bold leading-[0.95] text-[#0B4D57] sm:text-[56px]">
             Acompanhe despesas, aplique filtros e mantenha tudo em um unico painel.
           </h2>
@@ -578,15 +614,6 @@ export default function Page() {
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0D6A74] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(13,106,116,0.28)] transition hover:brightness-95"
-            >
-              <span className="material-symbols-outlined !text-[18px]">add_circle</span>
-              Cadastrar despesa
-            </button>
-
             <button
               type="button"
               onClick={() => listSectionRef.current?.scrollIntoView({ behavior: "smooth" })}
@@ -637,19 +664,19 @@ export default function Page() {
         />
       </section>
 
-      <section className="despesas-filter-panel rounded-[30px] border border-[#E0ECEE] bg-white p-5 shadow-[0_12px_30px_rgba(0,0,0,0.05)] sm:p-6">
-        <div className="flex flex-col gap-3 border-b border-[#E8F0F1] pb-4 lg:flex-row lg:items-end lg:justify-between">
+      <section className="despesas-filter-panel civitas-surface civitas-enter rounded-[30px] p-5 sm:p-6">
+        <div className="flex flex-col gap-3 border-b border-[var(--divider)] pb-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#D6E5E8] bg-[#F5FAFA] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6F8790]">
-              <span className="material-symbols-outlined !text-[16px] text-[#0D6A74]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
+              <span className="material-symbols-outlined !text-[16px] text-[var(--secundary-1)]">
                 tune
               </span>
               Filtros
             </div>
-            <h3 className="mt-3 text-[28px] font-bold text-[#0B4D57]">
+            <h3 className="mt-3 text-[28px] font-bold text-[var(--secundary-1)]">
               Refina visao de despesas
             </h3>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-[#71868D]">
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
               Combine periodo, categoria, status e busca textual para encontrar
               rapidamente os registros que importam. A listagem responde em tempo real
               aos dados do backend.
@@ -659,7 +686,7 @@ export default function Page() {
           <button
             type="button"
             onClick={() => void refetch()}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-[#D6E5E8] bg-white px-4 py-2.5 text-sm font-semibold text-[#31505A] transition hover:bg-[#F6FAFA]"
+            className="civitas-action civitas-action--ghost rounded-full px-4 py-2.5 text-sm"
           >
             <span className="material-symbols-outlined !text-[18px]">refresh</span>
             Atualizar dados
@@ -708,7 +735,7 @@ export default function Page() {
           />
 
           <div className="space-y-2">
-            <label className="despesas-filter-label block text-sm font-semibold text-[#4D5A63]">Categoria</label>
+            <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">Categoria</label>
             <select
               value={filterForm.idTipoDespesa}
               onChange={(event) =>
@@ -729,7 +756,7 @@ export default function Page() {
           </div>
 
           <div className="space-y-2">
-            <label className="despesas-filter-label block text-sm font-semibold text-[#4D5A63]">Situacao</label>
+            <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">Situacao</label>
             <select
               value={filterForm.situacao}
               onChange={(event) =>
@@ -750,7 +777,7 @@ export default function Page() {
           </div>
 
           <div className="space-y-2">
-            <label className="despesas-filter-label block text-sm font-semibold text-[#4D5A63]">Solicita UC</label>
+            <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">Solicita UC</label>
             <select
               value={filterForm.solicitaUc}
               onChange={(event) =>
@@ -774,7 +801,7 @@ export default function Page() {
             <button
               type="button"
               onClick={handleApplyFilters}
-              className="inline-flex items-center justify-center gap-2 rounded-[18px] bg-[#0D6A74] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(13,106,116,0.24)] transition hover:brightness-95"
+              className="civitas-action civitas-action--primary rounded-[18px] px-5 py-3 text-sm"
             >
               <span className="material-symbols-outlined !text-[18px]">filter_alt</span>
               Aplicar filtros
@@ -783,7 +810,7 @@ export default function Page() {
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex items-center justify-center gap-2 rounded-[18px] border border-[#D6E5E8] bg-white px-5 py-3 text-sm font-semibold text-[#31505A] transition hover:bg-[#F6FAFA]"
+              className="civitas-action civitas-action--ghost rounded-[18px] px-5 py-3 text-sm"
             >
               <span className="material-symbols-outlined !text-[18px]">ink_eraser</span>
               Limpar painel
@@ -794,20 +821,20 @@ export default function Page() {
 
       <section
         ref={listSectionRef}
-        className="overflow-hidden rounded-[30px] border border-[#E0ECEE] bg-white shadow-[0_12px_30px_rgba(0,0,0,0.05)]"
+        className="civitas-table-shell civitas-enter overflow-hidden rounded-[30px]"
       >
-        <div className="border-b border-[#E8F0F1] px-5 py-5 sm:px-6">
-          <h3 className="text-[36px] font-bold leading-none text-[#0B4D57]">
+        <div className="border-b border-[var(--divider)] px-5 py-5 sm:px-6">
+          <h3 className="text-[36px] font-bold leading-none text-[var(--secundary-1)]">
             Listagem de despesas
           </h3>
-          <p className="mt-2 text-sm text-[#71868D]">
+          <p className="mt-2 text-sm text-[var(--foreground-muted)]">
             Painel com leitura rapida de categoria, valor, data, situacao e acoes
             de manutencao.
           </p>
         </div>
 
         {error && (
-          <div className="mx-5 mt-5 rounded-[20px] border border-[#F4C5C5] bg-[#FFF3F3] px-4 py-3 text-sm text-[#AA3A3A] sm:mx-6">
+          <div className="mx-5 mt-5 rounded-[20px] border border-[#F4C5C5] bg-[#FFF7F7] px-4 py-3 text-sm text-[#AA3A3A] sm:mx-6">
             {error}
           </div>
         )}
@@ -815,7 +842,7 @@ export default function Page() {
         <div className="overflow-x-auto px-4 py-5 sm:px-6">
           <table className="min-w-full border-separate border-spacing-y-3">
             <thead>
-              <tr className="text-left text-[12px] font-semibold uppercase tracking-[0.08em] text-[#90A2A8]">
+              <tr className="text-left text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 <th className="px-4 py-2">Registro</th>
                 <th className="px-4 py-2">Categoria</th>
                 <th className="px-4 py-2">Descricao</th>
@@ -847,30 +874,35 @@ export default function Page() {
                   </td>
                 </tr>
               ) : (
-                filteredDespesas.map((despesa) => (
+                filteredDespesas.map((despesa, index) => (
                   <tr
                     key={despesa.id}
-                    className="rounded-[22px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.04)] ring-1 ring-[#E2EFF1]"
+                    style={
+                      index < 6
+                        ? ({ ["--enter-delay" as string]: `${index * 45}ms` } as React.CSSProperties)
+                        : undefined
+                    }
+                    className={`${index < 6 ? "civitas-enter " : ""}rounded-[22px] bg-[rgba(255,255,255,0.96)] shadow-[var(--shadow-xs)] ring-1 ring-[#E2EFF1] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[#FCFEFE] hover:shadow-[var(--shadow-sm)]`}
                   >
                     <td className="rounded-l-[22px] px-4 py-5">
-                      <span className="inline-flex min-w-[84px] items-center justify-center rounded-full bg-[#F7D447] px-4 py-2 text-sm font-bold text-[#272727]">
+                      <span className="inline-flex min-w-[84px] items-center justify-center rounded-full border border-[#E3CB73] bg-[linear-gradient(135deg,#FFE38A_0%,#F7D447_100%)] px-4 py-2 text-sm font-bold text-[#272727] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
                         {despesa.registro}
                       </span>
                     </td>
-                    <td className="px-4 py-5 text-sm font-semibold text-[#34464D]">
+                    <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
                       {despesa.categoria}
                     </td>
-                    <td className="px-4 py-5 text-sm text-[#4F646C]">{despesa.descricao}</td>
-                    <td className="px-4 py-5 text-sm font-semibold text-[#204C58]">
+                    <td className="px-4 py-5 text-sm text-[var(--foreground-muted)]">{despesa.descricao}</td>
+                    <td className="px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
                       {despesa.valorFormatado}
                     </td>
-                    <td className="px-4 py-5 text-sm text-[#4F646C]">{despesa.dataFormatada}</td>
+                    <td className="px-4 py-5 text-sm text-[var(--foreground-muted)]">{despesa.dataFormatada}</td>
                     <td className="px-4 py-5">
                       <span
-                        className={`inline-flex min-w-[78px] items-center justify-center rounded-full px-3 py-1.5 text-xs font-bold ${
+                        className={`civitas-badge min-w-[84px] ${
                           despesa.situacao === 1
-                            ? "bg-[#FFE39A] text-[#8C5A00]"
-                            : "bg-[#FFD7D7] text-[#C64040]"
+                            ? "civitas-badge--status-active"
+                            : "civitas-badge--status-inactive"
                         }`}
                       >
                         {despesa.situacaoLabel}
@@ -899,7 +931,7 @@ export default function Page() {
                         <button
                           type="button"
                           onClick={() => void handleDelete(despesa)}
-                          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#F1D8D8] bg-white text-[#D16565] transition hover:bg-[#FFF4F4]"
+                          className="flex h-9 w-9 items-center justify-center rounded-[14px] border border-[#F1D8D8] bg-[rgba(255,255,255,0.92)] text-[#D16565] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[#FFF4F4] hover:shadow-[var(--shadow-sm)]"
                           aria-label={`${
                             despesa.situacao === SITUACAO_ATIVO ? "Inativar" : "Reativar"
                           } ${despesa.registro}`}
@@ -914,7 +946,7 @@ export default function Page() {
             </tbody>
           </table>
         </div>
-        <div className="flex flex-col gap-2 border-t border-[#E8F0F1] bg-[#FBFDFD] px-5 py-4 text-sm text-[#71868D] sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex flex-col gap-2 border-t border-[var(--divider)] bg-[linear-gradient(180deg,rgba(247,251,251,0.96)_0%,rgba(243,248,248,0.96)_100%)] px-5 py-4 text-sm text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <span>{listResume}</span>
           <span>Ultima atualizacao: {lastUpdatedLabel}</span>
         </div>

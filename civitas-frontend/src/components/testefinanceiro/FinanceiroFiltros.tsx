@@ -47,23 +47,23 @@ export default function FinanceiroFiltros({
   }, [onApply]);
 
   const inputClass = `
-    w-full rounded-lg border border-[#E4EEF0] bg-white px-3 py-2.5
-    text-[13px] text-[#1F2A32] placeholder:text-[#9AABB2]
-    focus:border-[#004C57] focus:outline-none focus:ring-1 focus:ring-[#004C57]/20
+    w-full rounded-[16px] border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-3 py-2.5
+    text-[13px] text-[var(--foreground)] placeholder:text-[var(--foreground-soft)]
+    shadow-[var(--shadow-xs)] focus:border-[var(--secundary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)]
     disabled:cursor-not-allowed disabled:bg-[#F8FCFC] disabled:opacity-60
   `;
 
   return (
-    <div className="rounded-[16px] border border-[#E4EEF0] bg-white p-5">
+    <div className="civitas-surface civitas-enter rounded-[20px] p-5">
       {/* Header */}
-      <div className="mb-4">
+      <div className="civitas-panel-header mb-4">
         <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#D97706]">
           Filtros
         </span>
-        <h3 className="mt-1 text-[18px] font-bold text-[#1F2A32]">
+        <h3 className="mt-1 text-[18px] font-bold text-[var(--foreground)]">
           Refinar visão financeira
         </h3>
-        <p className="mt-1 text-[12px] leading-relaxed text-[#9AABB2]">
+        <p className="mt-1 text-[12px] leading-relaxed text-[var(--foreground-soft)]">
           Combine período, status e instituição para encontrar rapidamente os registros que importam.
         </p>
       </div>
@@ -73,7 +73,7 @@ export default function FinanceiroFiltros({
         {/* Date inputs row */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-[#6C858E]">
+            <label className="mb-1 block text-[11px] font-medium text-[var(--foreground-muted)]">
               Início do período
             </label>
             <div className="relative">
@@ -88,7 +88,7 @@ export default function FinanceiroFiltros({
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-[#6C858E]">
+            <label className="mb-1 block text-[11px] font-medium text-[var(--foreground-muted)]">
               Fim do período
             </label>
             <div className="relative">
@@ -107,7 +107,7 @@ export default function FinanceiroFiltros({
         {/* Status and Institution row */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-[#6C858E]">
+            <label className="mb-1 block text-[11px] font-medium text-[var(--foreground-muted)]">
               Status
             </label>
             <select
@@ -122,7 +122,7 @@ export default function FinanceiroFiltros({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-[#6C858E]">
+            <label className="mb-1 block text-[11px] font-medium text-[var(--foreground-muted)]">
               Instituição
             </label>
             <select
@@ -146,50 +146,50 @@ export default function FinanceiroFiltros({
           <button
             onClick={handleApply}
             disabled={loading}
-            className="rounded-lg bg-[#004C57] px-4 py-2 text-[12px] font-semibold text-white transition-colors hover:bg-[#003942] disabled:cursor-not-allowed disabled:opacity-60"
+            className="civitas-action civitas-action--primary min-h-[38px] rounded-[14px] px-4 py-2 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
           >
             Aplicar filtros
           </button>
           <button
             onClick={handleClear}
             disabled={loading || !hasActiveFilters}
-            className="rounded-lg border border-[#E4EEF0] bg-white px-4 py-2 text-[12px] font-medium text-[#6C858E] transition-colors hover:bg-[#F8FCFC] disabled:cursor-not-allowed disabled:opacity-40"
+            className="civitas-action civitas-action--ghost min-h-[38px] rounded-[14px] px-4 py-2 text-[12px] font-medium disabled:cursor-not-allowed disabled:opacity-40"
           >
             Limpar filtros
           </button>
         </div>
 
         {/* Active filters section */}
-        <div className="border-t border-[#E4EEF0] pt-3">
+        <div className="border-t border-[var(--divider)] pt-3">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#D97706]">
             Filtros personalizados ativos
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {dataInicio && (
-              <span className="rounded-full bg-[#E4EEF0] px-2.5 py-1 text-[10px] font-medium text-[#1F2A32]">
+              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
                 De: {new Date(dataInicio).toLocaleDateString('pt-BR')}
               </span>
             )}
             {dataFim && (
-              <span className="rounded-full bg-[#E4EEF0] px-2.5 py-1 text-[10px] font-medium text-[#1F2A32]">
+              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
                 Até: {new Date(dataFim).toLocaleDateString('pt-BR')}
               </span>
             )}
             {status && (
-              <span className="rounded-full bg-[#E4EEF0] px-2.5 py-1 text-[10px] font-medium text-[#1F2A32]">
+              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
                 Status: {status === '1' ? 'Ativo' : 'Inativo'}
               </span>
             )}
             {instituicaoId && (
-              <span className="rounded-full bg-[#E4EEF0] px-2.5 py-1 text-[10px] font-medium text-[#1F2A32]">
+              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
                 {instituicoes.find((i) => String(i.id) === instituicaoId)?.nome ?? 'Instituição'}
               </span>
             )}
             {!hasActiveFilters && (
-              <span className="text-[11px] text-[#9AABB2]">Nenhum filtro aplicado</span>
+              <span className="text-[11px] text-[var(--foreground-soft)]">Nenhum filtro aplicado</span>
             )}
           </div>
-          <p className="mt-3 text-[11px] text-[#9AABB2]">
+          <p className="mt-3 text-[11px] text-[var(--foreground-soft)]">
             {instituicoes.length} instituições disponíveis
           </p>
         </div>

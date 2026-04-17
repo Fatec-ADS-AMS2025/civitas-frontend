@@ -27,7 +27,7 @@ export default function FinanceiroHero({ resumo, filtros, instituicoesCount }: F
   const ultimaMovimentacao = formatDateBR();
 
   return (
-    <section className="financeiro-hero relative overflow-hidden rounded-[24px] border border-[#E4EEF0] bg-gradient-to-br from-[#F1F8F9] via-[#F8FCFC] to-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)] lg:p-8">
+    <section className="financeiro-hero civitas-enter relative overflow-hidden rounded-[28px] border border-[#DCE8EA] bg-gradient-to-br from-[#F1F8F9] via-[#F8FCFC] to-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.05)] lg:p-8">
       {/* Decorative circles */}
       <div className="financeiro-hero__decor absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[#E4EEF0] opacity-40" />
       <div className="financeiro-hero__decor absolute -bottom-16 -left-16 h-32 w-32 rounded-full bg-[#58AFAE] opacity-10" />
@@ -42,11 +42,10 @@ export default function FinanceiroHero({ resumo, filtros, instituicoesCount }: F
           </div>
 
           {/* Title */}
-          <h1 className="mt-5 text-[28px] font-bold leading-[1.15] tracking-tight text-[#1F2A32] sm:text-[32px] lg:text-[36px]">
-            Acompanhe saldos,<br />
-            movimentações e filtros<br />
-            em um único painel.
-          </h1>
+          <h2 className="mt-5 text-[28px] font-bold leading-[1.15] tracking-tight text-[#1F2A32] sm:text-[32px] lg:text-[36px]">
+            Leia o pulso financeiro do sistema,
+            conecte filtros ativos e acompanhe as movimentações mais recentes.
+          </h2>
 
           {/* Subtitle */}
           <p className="mt-3 max-w-lg text-[14px] leading-relaxed text-[#72808A]">
