@@ -1,288 +1,102 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import React, { useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { NAVIGATION_CATALOG } from "@/navigation/navigation.data";
 
-export type SidebarItem = {
-  key: string;
-  label: string;
-  icon?: string;
-  active?: boolean;
-  href?: string;
-  onClick?: () => void;
+const normalizePath = (path: string): string => {
+  const trimmed = path.trim();
+  const withoutTrailingSlash = trimmed.replace(/\/+$/, "");
+  return withoutTrailingSlash || "/";
 };
 
-interface SidebarProps {
-  items?: SidebarItem[];
-  activeKey?: string;
-}
-
-const defaultItems: SidebarItem[] = [
-  {
-    key: "home",
-    label: "Home",
-    icon: "home",
-    active: true,
-    href: "/dashboard",
-  },
-  {
-    key: "secretaria",
-    label: "Secretaria",
-    icon: "account_balance",
-    active: false,
-    href: "/dashboard/secretaria",
-  },
-  {
-    key: "instituicao",
-    label: "Instituição",
-    icon: "flowchart",
-    active: false,
-    href: "/dashboard/instituicoes",
-  },
-  {
-    key: "fornecedor",
-    label: "Fornecedor",
-    icon: "box",
-    active: false,
-    href: "/dashboard/fornecedor",
-  },
-  {
-    key: "orcamento",
-    label: "Orçamento",
-    icon: "request_quote",
-    active: false,
-    href: "/dashboard/orcamentos",
-  },
-  {
-    key: "despesas",
-    label: "Despesas",
-    icon: "sell",
-    active: false,
-    href: "/dashboard/despesas",
-  },
-  {
-    key: "financeiro",
-    label: "Financeiro",
-    icon: "finance_mode",
-    active: false,
-    href: "/dashboard/financeiro",
-  },
-  {
-    key: "configuracoes",
-    label: "Configurações",
-    icon: "tune",
-    active: false,
-    href: "/dashboard/configuracoes",
-  },
-  {
-    key: "usuarios",
-    label: "Usuários",
-    icon: "group",
-    active: false,
-    href: "/dashboard/usuarios",
-  },
-];
-
-export default function Sidebar({
-  items = defaultItems,
-  activeKey,
-}: SidebarProps) {
-  const [keyboardExpanded, setKeyboardExpanded] = useState(false);
+export default function Sidebar() {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() || "/dashboard";
 
-  function handleNavigate(item: SidebarItem) {
-    defaultItems.forEach((element) => {
-      if (item.key === element.key) {
-        element.active = true;
-        return;
-      } else {
-        element.active = false;
-      }
-    });
+  const navigationItems = useMemo(
+    () =>
+      NAVIGATION_CATALOG.filter(
+        (item) => item.path.startsWith("/dashboard") && item.key !== "perfil",
+      ),
+    [],
+  );
 
-    if (item.onClick) {
-      item.onClick();
-      return;
-    }
+  const profileItem = useMemo(
+    () => NAVIGATION_CATALOG.find((item) => item.key === "perfil"),
+    [],
+  );
 
-    if (item.href) {
-      router.push(item.href);
-      return;
-    }
+  const normalizedPath = normalizePath(pathname);
 
-    router.push(`/${item.key}`);
-  }
-
-  useEffect(() => {
-    console.log("Current pathname:", pathname);
-    const activeItem = defaultItems.find((item) => item.href === pathname);
-
-    defaultItems.forEach((element) => {
-      if (activeItem && activeItem.key === element.key) {
-        element.active = true;
-        return;
-      } else {
-        element.active = false;
-      }
-    });
-  }, [pathname]);
-
-  useEffect(() => {
-    const handleShortcut = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      const tagName = target?.tagName?.toLowerCase();
-
-      const isTyping =
-        tagName === "input" ||
-        tagName === "textarea" ||
-        tagName === "select" ||
-        target?.isContentEditable;
-
-      if (isTyping) return;
-
-      switch (e.key) {
-        case "1":
-          e.preventDefault();
-          router.push("/dashboard");
-          break;
-        case "2":
-          e.preventDefault();
-          router.push("/dashboard/secretaria");
-          break;
-        case "3":
-          e.preventDefault();
-          router.push("/dashboard/instituicoes");
-          break;
-        case "4":
-          e.preventDefault();
-          router.push("/dashboard/fornecedor");
-          break;
-        case "5":
-          e.preventDefault();
-          router.push("/dashboard/orcamentos");
-          break;
-        case "6":
-          e.preventDefault();
-          router.push("/dashboard/despesas");
-          break;
-        case "7":
-          e.preventDefault();
-          router.push("/dashboard/financeiro");
-          break;
-        case "8":
-          e.preventDefault();
-          router.push("/dashboard/configuracoes");
-          break;
-        case "9":
-          e.preventDefault();
-          router.push("/dashboard/usuarios");
-          break;
-        default:
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleShortcut);
-    return () => window.removeEventListener("keydown", handleShortcut);
-  }, [router]);
+  const navigateToPath = (path: string) => {
+    router.push(path);
+  };
 
   return (
-    <>
-      <aside
-        aria-label="Sidebar"
-        className="group hidden sm:flex flex-col justify-between items-stretch bg-secundary-1 text-tertialy-1 rounded-2xl overflow-hidden select-none transition-all 
-          duration-200 ease-out w-[76px] xl:hover:w-56 2xl:hover:w-60 h-[calc(100vh-2rem)] z-99 fixed left-4 top-4"
-        style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
-      >
-        <div className="pt-6 pb-4 px-3 flex flex-col gap-6">
-          <div className="flex items-center justify-center gap-0 xl:group-hover:justify-start xl:group-hover:gap-3">
-            <div className="flex items-center justify-center w-12 h-10 rounded-md bg-transparent overflow-hidden flex-shrink-0">
-              <img
-                src="/logo.png"
-                alt="Logo Civitas"
-                className="object-contain size-full"
-              />
-            </div>
-            <div className="w-0 overflow-hidden whitespace-nowrap text-2xl font-semibold text-tertialy-1 opacity-0 transition-all duration-200 xl:group-hover:ml-1 xl:group-hover:w-auto xl:group-hover:opacity-100">
-              Civitas
-            </div>
+    <aside
+      aria-label="Sidebar"
+      className="group hidden h-[calc(100vh-2rem)] w-[76px] shrink-0 select-none flex-col justify-between overflow-hidden rounded-2xl bg-secundary-1 text-tertialy-1 transition-all duration-200 ease-out sm:fixed sm:left-4 sm:top-4 sm:z-[110] sm:flex sm:hover:w-[280px] sm:focus-within:w-[280px]"
+      style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
+    >
+      <div className="flex min-h-0 flex-1 flex-col gap-4 px-3 pb-3 pt-6">
+        <div className="flex items-center justify-center gap-0 px-1 transition-all duration-200 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3">
+          <div className="flex h-10 w-12 items-center justify-center overflow-hidden rounded-md bg-transparent">
+            <img src="/logo.png" alt="Logo Civitas" className="size-full object-contain" />
           </div>
-
-          <nav className="flex flex-col gap-3 transition-all duration-200">
-            {items.map((it, index) => {
-              const isActive = it.href === pathname;
-              const shortcutNumber = index + 1;
-
-              return (
-                <button
-                  key={it.key}
-                  onClick={() => handleNavigate(it)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleNavigate(it);
-                    }
-                  }}
-                  title={`Atalho: ${shortcutNumber}`}
-                  className={`group/item flex w-full items-center justify-center gap-0 rounded-md px-3 py-2 text-left transition-colors duration-150 outline-none cursor-pointer xl:group-hover:justify-start xl:group-hover:gap-4
-                    ${
-                      isActive
-                        ? "text-white font-semibold underline decoration-2 underline-offset-4 decoration-white"
-                        : "text-tertialy-1"
-                    }`}
-                >
-                  <div
-                    className={`${
-                      isActive
-                        ? "text-white border-b-2 border-white pb-[2px]"
-                        : "text-tertialy-1"
-                    } flex-none`}
-                  >
-                    {isActive ? (
-                      <span className="material-symbols-outlined filled">
-                        {it.icon}
-                      </span>
-                    ) : (
-                      <span className="material-symbols-outlined">
-                        {it.icon}
-                      </span>
-                    )}
-                  </div>
-
-                  <div
-                    className={`w-0 overflow-hidden whitespace-nowrap text-base truncate opacity-0 transition-all duration-200 xl:group-hover:w-auto xl:group-hover:opacity-100
-                      ${isActive ? "text-white opacity-100" : "font-semibold"}`}
-                  >
-                    {it.label}
-                  </div>
-                </button>
-              );
-            })}
-          </nav>
+          <div className="font-title w-0 overflow-hidden whitespace-nowrap text-2xl font-semibold text-tertialy-1 opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
+            Civitas
+          </div>
         </div>
 
+        <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pr-1">
+          {navigationItems.map((item) => {
+            const isActive = normalizePath(item.path) === normalizedPath;
+
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => navigateToPath(item.path)}
+                className={`flex w-full items-center justify-center gap-0 rounded-xl px-3 py-2 text-left text-sm font-semibold transition-all duration-150 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3 ${
+                  isActive
+                    ? "bg-[#DDF0F2] text-[#003A42]"
+                    : "text-[#D8EBEE] hover:bg-[#0B5A64]"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  {item.icon ?? "apps"}
+                </span>
+                <span className="w-0 truncate whitespace-nowrap opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {profileItem ? (
         <div className="px-3 py-6">
           <button
-            className="flex w-full items-center justify-center gap-0 rounded-2xl bg-tertialy-1 px-3 py-2 text-secundary-1 font-semibold shadow-inner transition-shadow duration-150 cursor-pointer hover:shadow-md xl:group-hover:justify-start xl:group-hover:gap-3"
-            onClick={() => router.push("/perfil")}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                router.push("/perfil");
+            className="flex w-full items-center justify-center gap-0 rounded-xl bg-tertialy-1 px-3 py-2 text-secundary-1 shadow-inner transition-all duration-150 hover:shadow-md sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
+            onClick={() => router.push(profileItem.path)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                router.push(profileItem.path);
               }
             }}
           >
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-secundary-1">
-              <span className="material-symbols-outlined">person</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-secundary-1">
+              <span className="material-symbols-outlined">{profileItem.icon ?? "person"}</span>
             </div>
-            <div className="w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 xl:group-hover:w-auto xl:group-hover:opacity-100">
-              Perfil
+            <div className="font-detail w-0 overflow-hidden whitespace-nowrap text-sm font-semibold opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
+              {profileItem.label}
             </div>
           </button>
         </div>
-      </aside>
-    </>
+      ) : null}
+    </aside>
   );
 }
