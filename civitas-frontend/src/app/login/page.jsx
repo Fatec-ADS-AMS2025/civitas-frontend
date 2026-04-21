@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Checkbox from '@/components/checkbox'
+import { useAppNavigation } from '@/hooks/useNavigationProgress'
 import { Input } from '@/components/Input'
 
 export default function LoginPage() {
@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({ email: '', password: '' })
   const [generalError, setGeneralError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const router = useAppNavigation()
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -118,6 +118,7 @@ export default function LoginPage() {
                 />
                 <Link
                   href="/forgot-password"
+                  onClick={router.handleLinkClick('/forgot-password')}
                   className="text-sm font-medium text-[#5D6A72] underline hover:text-[#004C57]"
                 >
                   Esqueci a senha
@@ -138,6 +139,7 @@ export default function LoginPage() {
                 Ainda nao tem conta?{' '}
                 <Link
                   href="/signup"
+                  onClick={router.handleLinkClick('/signup')}
                   className="font-bold text-[#004C57] underline hover:brightness-110"
                 >
                   Criar conta

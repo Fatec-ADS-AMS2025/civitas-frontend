@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { useAppNavigation } from "@/hooks/useNavigationProgress";
 
 export type SidebarItem = {
   key: string;
@@ -89,7 +89,7 @@ export default function Sidebar({
   activeKey,
 }: SidebarProps) {
   const [keyboardExpanded, setKeyboardExpanded] = useState(false);
-  const router = useRouter();
+  const router = useAppNavigation();
   const pathname = usePathname();
 
   function handleNavigate(item: SidebarItem) {

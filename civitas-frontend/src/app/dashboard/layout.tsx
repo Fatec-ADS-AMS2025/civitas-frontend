@@ -2,7 +2,7 @@
 import React, { useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Sidebar from '@/components/Sidebar/sidebar';
-import { useRouter } from "next/navigation";
+import { useAppNavigation } from "@/hooks/useNavigationProgress";
 
 export default function Layout({
   children,
@@ -12,7 +12,7 @@ export default function Layout({
 
   const paiRef = useRef<HTMLDivElement>(null);
 
-  const router = useRouter();
+  const router = useAppNavigation();
   const pathname = usePathname() || "/dashboard";
   const parts = pathname.split("/").filter(Boolean);
   const currentPage = parts[parts.length - 1] ?? "dashboard";
