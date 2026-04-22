@@ -395,9 +395,7 @@ html {
   }
 }
 
-/* =========================
-   ALTO CONTRASTE LIMPO
-========================= */
+/* High contrast mode */
 
 .high-contrast-shell {
   background: #000 !important;

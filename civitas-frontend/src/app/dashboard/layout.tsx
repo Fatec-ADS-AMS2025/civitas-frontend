@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import Sidebar from "@/components/Sidebar/sidebar";
 import {
   DashboardHeaderProvider,
@@ -12,15 +12,12 @@ export default function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const paiRef = useRef<HTMLDivElement>(null);
-
   return (
     <DashboardHeaderProvider>
       <div className="dashboard-shell flex min-h-screen w-full bg-[var(--surface-page)]">
         <Sidebar />
 
         <div
-          ref={paiRef}
           data-contrast-target="content"
           className="w-full flex-1 sm:ml-[92px] lg:pr-[78px] 2xl:pr-[86px]"
         >
