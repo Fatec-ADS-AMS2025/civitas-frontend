@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import Form from "../Form/form";
 import Modal from "../modal";
@@ -6,13 +6,18 @@ import type { FieldConfig as ModalFieldConfig, FormMode, ValidationFn } from "..
 import PaginationControls from "@/components/PaginationControls";
 import { EmptyState, ErrorState, LoadingState } from "@/components/feedback-states";
 import { showToast } from "@/hooks/useToast";
+import ExportModal from "./export-modal";
+import {
+  exportTableData,
+  getSelectedColumns,
+  getStatusText,
+  getStatusValue,
+  getTableCellText,
+  isStatusColumn,
+} from "./export-utils";
+import type { TableColumn, TableExportConfig } from "./export-types";
 
 type TableRow = object;
-
-type Column = {
-  id: string;
-  label: string;
-};
 
 export type TablePaginationConfig = {
   currentPage: number;
@@ -26,7 +31,7 @@ export type TablePaginationConfig = {
 
 type BaseTableProps<T extends TableRow> = {
   data: T[];
-  columns: Column[];
+  columns: TableColumn[];
   actions?: string[];
   onEdit?: (id: number, data: Partial<T> & Record<string, unknown>) => Promise<unknown>;
   onDelete?: (id: number) => Promise<void>;
@@ -39,6 +44,7 @@ type BaseTableProps<T extends TableRow> = {
   emptyDescription?: string;
   errorMessage?: string | null;
   onRetry?: () => void;
+  exportConfig?: TableExportConfig<T>;
 };
 
 export type TableProps<T extends TableRow> = BaseTableProps<T> &
@@ -70,6 +76,7 @@ const Table = <T extends TableRow,>({
   onRetry,
   paginationEnabled,
   pagination,
+  exportConfig,
 }: TableProps<T>) => {
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
@@ -79,6 +86,17 @@ const Table = <T extends TableRow,>({
 
   const [modalAction, setModalAction] = useState<FormMode | null>(null);
   const [selectedContent, setSelectedContent] = useState<T | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const exportEnabled = exportConfig?.enabled ?? true;
+  const exportAllData = exportConfig?.allData ?? data;
+  const exportTitle = exportConfig?.title?.trim() || nomePagina || "Exportacao";
+  const exportFileName = exportConfig?.fileName?.trim() || nomePagina || "exportacao";
+  const hasExportData = exportAllData.length > 0;
+  const shouldShowExportAction =
+    exportEnabled && !isLoading && !errorMessage && hasExportData;
+  const exportColumns = useMemo(() => columns.filter((column) => column.id.trim() !== ""), [columns]);
 
   const toRecord = (value: T): Record<string, unknown> => value as Record<string, unknown>;
 
@@ -115,45 +133,25 @@ const Table = <T extends TableRow,>({
     setSelectedContent(null);
   };
 
-  const getStatusValue = (objeto: T) => {
-    const record = toRecord(objeto);
-    return record.status ?? record.situacao ?? record.ativo ?? record.estado ?? null;
-  };
-
-  const isStatusColumn = (columnId: string) => {
-    const normalized = columnId.toLowerCase();
-    return (
-      normalized === "status" ||
-      normalized === "statuslabel" ||
-      normalized === "situacao" ||
-      normalized === "situacaolabel"
-    );
-  };
-
   const renderStatusBadge = (status: unknown) => {
-    if (status === null || status === undefined) return null;
-    let statusText = "";
-
-    const normalized = String(status).toLowerCase();
+    const statusText = getStatusText(status);
+    if (!statusText) return null;
 
     let classes =
       "inline-flex min-w-[64px] justify-center rounded-full px-3 py-[6px] text-[11px] font-bold leading-none";
 
-    if (normalized === "ativo" || normalized === "true" || normalized === "sim" || normalized === "1") {
+    if (statusText === "Ativo") {
       classes += " bg-green-600 text-white";
-      statusText = "Ativo";
-    } else if (normalized === "inativo" || normalized === "false" || normalized === "nao" || normalized === "0") {
+    } else if (statusText === "Inativo") {
       classes += " bg-red-600 text-white";
-      statusText = "Inativo";
     } else {
       classes += " bg-gray-300 text-black";
-      statusText = String(status);
     }
 
     return <span className={classes}>{statusText}</span>;
   };
 
-  const renderCellValue = (objeto: T, column: Column) => {
+  const renderCellValue = (objeto: T, column: TableColumn) => {
     const record = toRecord(objeto);
 
     if (isStatusColumn(column.id)) {
@@ -165,25 +163,75 @@ const Table = <T extends TableRow,>({
       return renderStatusBadge(statusValue) ?? "-";
     }
 
-    const value = record[column.id];
+    const cellText = getTableCellText(objeto, column);
 
-    if (value === null || value === undefined || value === "") {
-      return "-";
-    }
-
-    if (column.id.toLowerCase() === "id") {
+    if (column.id.toLowerCase() === "id" && cellText !== "-") {
       return (
         <span className="inline-flex min-w-[74px] justify-center rounded-full bg-[#F7D21A] px-4 py-[7px] text-sm font-bold leading-none text-black">
-          #{String(value).padStart(3, "0")}
+          {cellText}
         </span>
       );
     }
 
-    return String(value);
+    return cellText;
+  };
+
+  const handleExport = async ({
+    outputType,
+    scope,
+    selectedColumnIds,
+  }: {
+    outputType: "xlsx" | "pdf";
+    scope: "filtered" | "all";
+    selectedColumnIds: string[];
+  }) => {
+    const rows = scope === "all" ? exportAllData : data;
+    const selectedColumns = getSelectedColumns(exportColumns, selectedColumnIds);
+
+    try {
+      setIsExporting(true);
+
+      await exportTableData({
+        outputType,
+        title: exportTitle,
+        fileName: exportFileName,
+        rows,
+        columns: selectedColumns,
+      });
+
+      showToast("Arquivo gerado com sucesso.", "success");
+      setIsExportModalOpen(false);
+    } catch (error) {
+      console.error("Erro ao exportar listagem.", error, {
+        title: exportTitle,
+        fileName: exportFileName,
+        outputType,
+        scope,
+        selectedColumnIds,
+        filteredCount: data.length,
+        allCount: exportAllData.length,
+      });
+      showToast("Nao foi possivel gerar o arquivo. Tente novamente.", "error");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
     <div className="civitas-table mt-5 w-full overflow-hidden rounded-[28px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+      {shouldShowExportAction ? (
+        <div className="flex flex-col gap-3 border-b border-[#E4EEF0] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 lg:px-6">
+          <button
+            type="button"
+            onClick={() => setIsExportModalOpen(true)}
+            className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
+          >
+            <span className="material-symbols-outlined text-base text-[#1F2A32]">print</span>
+            Exportar / Imprimir
+          </button>
+        </div>
+      ) : null}
+
       {!isLoading && !errorMessage && data.length > 0 ? (
         <>
           <div className="hidden md:block">
@@ -400,6 +448,19 @@ const Table = <T extends TableRow,>({
             }}
           />
         </Modal>
+      ) : null}
+
+      {exportEnabled ? (
+        <ExportModal
+          open={isExportModalOpen}
+          title={exportTitle}
+          columns={exportColumns}
+          filteredCount={data.length}
+          allCount={exportAllData.length}
+          isGenerating={isExporting}
+          onClose={() => setIsExportModalOpen(false)}
+          onGenerate={handleExport}
+        />
       ) : null}
     </div>
   );
