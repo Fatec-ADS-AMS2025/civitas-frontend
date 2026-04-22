@@ -68,7 +68,7 @@ export default function AccessibilityMenu() {
     <div
       aria-label="Menu de acessibilidade"
       className="
-        fixed right-[14px] top-[88px] z-[9999]
+        fixed right-[14px] top-[88px] z-[90]
         lg:right-[18px] lg:top-[96px]
         flex flex-col items-center
         w-[46px]

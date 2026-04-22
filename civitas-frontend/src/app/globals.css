@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -12,6 +12,10 @@
   --primary-2: #FF6324;
   --secundary-2: #FF8729;
   --tertialy-2: #FFD121;
+
+  --font-body: "Poppins", sans-serif;
+  --font-detail: "Montserrat", sans-serif;
+  --font-title: "Sora", sans-serif;
 }
 
 @theme inline {
@@ -26,14 +30,30 @@
   --color-secundary-2: var(--secundary-2);
   --color-tertialy-2: var(--tertialy-2);
 
-  --font-sans: "Inter", sans-serif;
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-title {
+  font-family: var(--font-title);
+}
+
+small,
+label,
+.font-detail {
+  font-family: var(--font-detail);
 }
 
 html,
@@ -593,7 +613,7 @@ html {
 /* foco */
 button:focus-visible,
 a:focus-visible,
-input:focus-visible,
+input:focus-visible:not(.search-drawer-input),
 select:focus-visible,
 textarea:focus-visible {
   outline: 3px solid #ff8a00;
