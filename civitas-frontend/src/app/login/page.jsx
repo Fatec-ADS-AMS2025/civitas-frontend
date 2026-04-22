@@ -5,39 +5,56 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Checkbox from '@/components/checkbox'
 import { Input } from '@/components/Input'
-import { useAuth } from '@/hooks/useAuth'
-
-const initialErrors = { email: '', password: '' }
-
-const validateLogin = (email, password) => {
-  const nextErrors = { ...initialErrors }
-  if (!email.trim()) nextErrors.email = 'Informe seu e-mail.'
-  if (!password.trim()) nextErrors.password = 'Informe sua senha.'
-  return nextErrors
-}
+import useAuth from '@/hooks/useAuth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
-  const [errors, setErrors] = useState(initialErrors)
+  const [errors, setErrors] = useState({ email: '', password: '' })
+  const [generalError, setGeneralError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
   const router = useRouter()
   const { login, isLoading, error: generalError, clearError } = useAuth()
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    if (isLoading) return
+    if (loading) return
 
-    const validationErrors = validateLogin(email, password)
-    setErrors(validationErrors)
-    if (Object.values(validationErrors).some(Boolean)) return
+    const nextErrors = { email: '', password: '' }
 
-    clearError()
-    const user = await login({ email, password })
-    if (!user) return
+    if (!email.trim()) {
+      nextErrors.email = 'Informe o e-mail'
+    }
 
-    console.info('[LoginPage] Usuario autenticado. Redirecionando para dashboard.', { userId: user.id, rememberMe })
-    router.push('/dashboard')
+    if (!password.trim()) {
+      nextErrors.password = 'Informe a senha'
+    }
+
+    setErrors(nextErrors)
+    setGeneralError('')
+
+    if (nextErrors.email || nextErrors.password) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await login(email.trim(), password)
+
+      if (!result.success) {
+        setGeneralError(result.message)
+        return
+      }
+
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('Erro inesperado no fluxo de login:', error)
+      setGeneralError('Erro ao conectar com o servidor')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
