@@ -16,6 +16,7 @@ export default function FinanceiroPage() {
   const {
     filtros,
     transacoes,
+    allTransacoes,
     resumo,
     instituicoes,
     tiposDespesa,
@@ -88,6 +89,7 @@ export default function FinanceiroPage() {
       {/* Listagem de transações */}
       <FinanceiroLista
         transacoes={transacoes}
+        allTransacoes={allTransacoes}
         hasFiltersApplied={hasFiltersApplied}
         onDelete={excluir}
         loading={loading}

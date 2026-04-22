@@ -380,6 +380,12 @@ export default function Page() {
         onDelete={handleDelete}
         formFields={instituicaoFormFields}
         formHiddenFields={["id"]}
+        exportConfig={{
+          enabled: true,
+          title: "Instituicoes",
+          fileName: "instituicoes",
+          allData: instituicoes,
+        }}
         paginationEnabled={false}
       />
     </>
