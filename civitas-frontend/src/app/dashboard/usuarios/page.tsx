@@ -313,6 +313,12 @@ const Page = () => {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={usuarioFormFields}
+        exportConfig={{
+          enabled: true,
+          title: "Usuarios",
+          fileName: "usuarios",
+          allData: usuarios,
+        }}
         paginationEnabled={true}
         pagination={{
           currentPage: paginationState.currentPage,

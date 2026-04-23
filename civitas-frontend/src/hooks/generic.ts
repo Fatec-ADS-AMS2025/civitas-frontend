@@ -313,28 +313,16 @@ export class GenericService<T> {
   }
 
   async getInactive(query?: ListQuery): Promise<T[]> {
-    try {
-      const response = await fetch(
-        `${this.getUrlEndpoint()}/inativos${toQueryString(query)}`
-      );
-      const payload = await this.handleResponse(response, { showErrorToast: false });
-      return this.unwrapCollection<T>(payload);
-    } catch (error) {
-      const status = getHttpStatusFromError(error);
-
-      // Alguns endpoints do backend nao expõem /inativos; nesse caso
-      // reaproveitamos a listagem principal e filtramos localmente.
-      if (status === 400 || status === 404 || status === 405) {
-        const items = await this.getAll(query);
-        return items.filter((item) => isInactiveRecord(item));
-      }
-
-      throw error;
-    }
+    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
+    const payload = await this.handleResponse(response, { showErrorToast: false });
+    return this.unwrapCollection<T>(payload);
   }
 
   async getInactiveEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
-    const items = await this.getInactive(query);
+    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
+    const payload = await this.handleResponse(response, { showErrorToast: false });
+    const envelope = this.toEnvelope<unknown>(payload);
+
     return {
       data: items,
     };

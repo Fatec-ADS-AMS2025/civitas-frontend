@@ -315,6 +315,12 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={fornecedorFormFields}
+        exportConfig={{
+          enabled: true,
+          title: "Fornecedores",
+          fileName: "fornecedores",
+          allData: fornecedores,
+        }}
         paginationEnabled={true}
         pagination={{
           currentPage: paginationState.currentPage,

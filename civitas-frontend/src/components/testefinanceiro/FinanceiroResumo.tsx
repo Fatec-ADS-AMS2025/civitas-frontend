@@ -23,53 +23,53 @@ export default function FinanceiroResumo({ resumo }: FinanceiroResumoProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* Total de Despesas */}
-      <div className="rounded-[16px] border border-[#E4EEF0] bg-white p-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
+      <div className="civitas-surface civitas-enter rounded-[20px] p-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
           Total de Despesas
         </p>
         <p className="mt-2 text-[24px] font-bold leading-none text-[#C9553A]">
           {formatCurrency(totalDespesas)}
         </p>
-        <p className="mt-2 text-[11px] leading-snug text-[#9AABB2]">
+        <p className="mt-2 text-[11px] leading-snug text-[var(--foreground-soft)]">
           Saída consolidada das despesas registradas.
         </p>
       </div>
 
       {/* Total de Orçamentos */}
-      <div className="rounded-[16px] border border-[#E4EEF0] bg-white p-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
+      <div className="civitas-surface civitas-enter rounded-[20px] p-5" style={{ ["--enter-delay" as string]: "45ms" }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
           Total de Orçamentos
         </p>
-        <p className="mt-2 text-[24px] font-bold leading-none text-[#004C57]">
+        <p className="mt-2 text-[24px] font-bold leading-none text-[var(--secundary-1)]">
           {formatCurrency(totalOrcamentos)}
         </p>
-        <p className="mt-2 text-[11px] leading-snug text-[#9AABB2]">
+        <p className="mt-2 text-[11px] leading-snug text-[var(--foreground-soft)]">
           Base financeira disponível para operação.
         </p>
       </div>
 
       {/* Saldo Atual */}
-      <div className="rounded-[16px] border border-[#E4EEF0] bg-white p-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
+      <div className="civitas-surface civitas-enter rounded-[20px] p-5" style={{ ["--enter-delay" as string]: "90ms" }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
           Saldo Atual
         </p>
         <p className="mt-2 text-[24px] font-bold leading-none text-[#58AFAE]">
           {formatCurrency(saldo)}
         </p>
-        <p className="mt-2 text-[11px] leading-snug text-[#9AABB2]">
+        <p className="mt-2 text-[11px] leading-snug text-[var(--foreground-soft)]">
           Saldo positivo no painel atual.
         </p>
       </div>
 
       {/* Movimentações */}
-      <div className="rounded-[16px] border border-[#E4EEF0] bg-white p-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
+      <div className="civitas-surface civitas-enter rounded-[20px] p-5" style={{ ["--enter-delay" as string]: "135ms" }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
           Movimentações
         </p>
-        <p className="mt-2 text-[24px] font-bold leading-none text-[#1F2A32]">
+        <p className="mt-2 text-[24px] font-bold leading-none text-[var(--foreground)]">
           {totalTransacoes}
         </p>
-        <p className="mt-2 text-[11px] leading-snug text-[#9AABB2]">
+        <p className="mt-2 text-[11px] leading-snug text-[var(--foreground-soft)]">
           Quantidade total de registros ativos no recorte.
         </p>
       </div>

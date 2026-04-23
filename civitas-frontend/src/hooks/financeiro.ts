@@ -400,6 +400,7 @@ export const financeiroService = new FinanceiroService();
 export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
   const [filtros, setFiltros] = useState<FinanceiroFiltrosDTO>(initialFilters);
   const [transacoes, setTransacoes] = useState<FinanceiroTransacaoDTO[]>([]);
+  const [allTransacoes, setAllTransacoes] = useState<FinanceiroTransacaoDTO[]>([]);
   const [resumo, setResumo] = useState<FinanceiroResumoDTO | null>(null);
   const [instituicoes, setInstituicoes] = useState<InstituicaoDTO[]>([]);
   const [tiposDespesa, setTiposDespesa] = useState<TipoDespesaDTO[]>([]);
@@ -412,8 +413,14 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
   const loadFinanceiro = useCallback(async (activeFilters: FinanceiroFiltrosDTO) => {
     try {
       setLoading(true);
+      const baseFilters: FinanceiroFiltrosDTO = {
+        pageNumber: activeFilters.pageNumber,
+        pageSize: activeFilters.pageSize,
+      };
+
       const [
         lista,
+        listaCompleta,
         cards,
         instituicoesData,
         tiposDespesaData,
@@ -422,6 +429,7 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
         usuariosData,
       ] = await Promise.all([
         financeiroService.listarTransacoes(activeFilters),
+        financeiroService.listarTransacoes(baseFilters),
         financeiroService.getResumo(activeFilters),
         financeiroService.getInstituicoes(),
         financeiroService.getTiposDespesa(),
@@ -431,6 +439,7 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       ]);
 
       setTransacoes(lista);
+      setAllTransacoes(listaCompleta);
       setResumo(cards);
       setInstituicoes(instituicoesData);
       setTiposDespesa(tiposDespesaData);
@@ -442,6 +451,7 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       const message = err instanceof Error ? err.message : 'Erro ao carregar dados financeiros.';
       setError(message);
       setTransacoes([]);
+      setAllTransacoes([]);
       setResumo(null);
       setInstituicoes([]);
       setTiposDespesa([]);
@@ -493,6 +503,7 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
     () => ({
       filtros,
       transacoes,
+      allTransacoes,
       resumo,
       instituicoes,
       tiposDespesa,
@@ -511,6 +522,7 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
     [
       filtros,
       transacoes,
+      allTransacoes,
       resumo,
       instituicoes,
       tiposDespesa,

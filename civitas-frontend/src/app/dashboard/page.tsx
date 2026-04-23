@@ -7,7 +7,7 @@ import {
   EmptyState,
   ErrorState,
 } from "@/components/feedback-states";
-import { DashboardRouteSkeleton } from "@/components/route-skeletons";
+import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import { SITUACAO_ATIVO } from "@/global/situacao";
 import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import { useClientPagination } from "@/hooks/useClientPagination";
@@ -152,6 +152,40 @@ export default function Dashboard() {
     refetch,
   } = useDespesasDashboard();
 
+  const headerConfig = useMemo(
+    () => ({
+      title: "Dashboard",
+      eyebrow: "Visão geral",
+      subtitle:
+        "Resumo operacional e financeiro com dados reais do backend, destaques rápidos e acessos prioritários do painel.",
+      breadcrumbs: [
+        { label: "Home", href: "/dashboard" },
+        { label: "Dashboard" },
+      ],
+      actions: [
+        {
+          label: "Atualizar painel",
+          icon: "refresh",
+          variant: "primary" as const,
+          onClick: () => {
+            void refetch();
+          },
+        },
+        {
+          label: showMoneyValues ? "Ocultar valores" : "Exibir valores",
+          icon: showMoneyValues ? "visibility_off" : "visibility",
+          variant: "ghost" as const,
+          onClick: () => {
+            setShowMoneyValues((previous) => !previous);
+          },
+        },
+      ],
+    }),
+    [refetch, showMoneyValues]
+  );
+
+  useDashboardHeader(headerConfig);
+
   const quickActions = useMemo<QuickAction[]>(
     () => [
       {
@@ -257,41 +291,20 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] bg-[#2B8F95] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+      <section className="civitas-enter overflow-hidden rounded-[30px] bg-[#2B8F95] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
+        <div className="flex flex-col gap-6">
           <div>
             <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
-              Dashboard operacional
+              Radar analítico
             </span>
-            <h1 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">
-              Acompanhamento real de despesas e cobertura orcamentaria
-            </h1>
+            <h2 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">
+              Acompanhe sinais críticos, volume financeiro e próximos movimentos do sistema.
+            </h2>
             <p className="mt-3 max-w-3xl text-sm text-white/85 sm:text-base">
-              Esta tela agora usa dados reais do backend para mostrar saldo, volume
-              de despesas, concentracao por categoria e vencimentos proximos.
+              A leitura abaixo complementa o header com uma visão de contexto: saldo,
+              concentração por categoria, vencimentos próximos e atalhos operacionais
+              puxados do backend em tempo real.
             </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => void refetch()}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
-            >
-              <span className="material-symbols-outlined !text-[18px]">refresh</span>
-              Atualizar dados
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowMoneyValues((previous) => !previous)}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
-            >
-              <span className="material-symbols-outlined !text-[18px]">
-                {showMoneyValues ? "visibility_off" : "visibility"}
-              </span>
-              {showMoneyValues ? "Ocultar valores" : "Exibir valores"}
-            </button>
           </div>
         </div>
       </section>
@@ -531,7 +544,7 @@ function MetricCard({
 }) {
   return (
     <article
-      className="dashboard-metric-card relative overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
+      className="dashboard-metric-card relative flex h-full flex-col overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
       style={{ background: gradient }}
     >
       <div className="dashboard-metric-card__sheen absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_56%)]" />
@@ -550,7 +563,7 @@ function MetricCard({
         </span>
       </div>
 
-      <div className="dashboard-metric-card__value relative z-10 mt-6 rounded-2xl border border-white/10 bg-white/14 px-4 py-3 text-lg font-semibold tracking-[0.04em]">
+      <div className="dashboard-metric-card__value relative z-10 mt-auto pt-6 rounded-2xl border border-white/10 bg-white/14 px-4 py-3 text-lg font-semibold tracking-[0.04em]">
         {value}
       </div>
     </article>
