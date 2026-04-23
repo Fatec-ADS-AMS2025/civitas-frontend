@@ -292,6 +292,12 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={orcamentoFormFields}
+        exportConfig={{
+          enabled: true,
+          title: "Orcamentos",
+          fileName: "orcamentos",
+          allData: orcamentos,
+        }}
       />
     </>
   );

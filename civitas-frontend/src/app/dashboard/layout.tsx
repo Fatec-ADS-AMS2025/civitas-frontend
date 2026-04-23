@@ -1,11 +1,13 @@
 "use client";
 
+
 import React from "react";
 import Sidebar from "@/components/Sidebar/sidebar";
 import {
   DashboardHeaderProvider,
   DashboardPageHeader,
 } from "@/components/dashboard/dashboard-header";
+
 
 export default function Layout({
   children,
@@ -31,5 +33,6 @@ export default function Layout({
         </div>
       </div>
     </DashboardHeaderProvider>
+
   );
 }

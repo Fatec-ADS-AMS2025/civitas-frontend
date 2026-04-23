@@ -28,6 +28,7 @@ export interface ListQuery {
 
 interface HandleResponseOptions {
   showSuccessToast?: boolean;
+  showErrorToast?: boolean;
 }
 
 const DEFAULT_LIST_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
@@ -163,7 +164,9 @@ export class GenericService<T> {
         response.status
       );
 
-      showToast(message, "error");
+      if (options.showErrorToast !== false) {
+        showToast(message, "error");
+      }
 
       throw new Error(`HTTP ${response.status}: ${message}`);
     }
@@ -276,13 +279,13 @@ export class GenericService<T> {
 
   async getInactive(query?: ListQuery): Promise<T[]> {
     const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showErrorToast: false });
     return this.unwrapCollection<T>(payload);
   }
 
   async getInactiveEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
     const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
-    const payload = await this.handleResponse(response);
+    const payload = await this.handleResponse(response, { showErrorToast: false });
     const envelope = this.toEnvelope<unknown>(payload);
 
     return {

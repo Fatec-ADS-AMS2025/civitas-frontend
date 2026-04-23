@@ -545,7 +545,7 @@ function MetricCard({
 }) {
   return (
     <article
-      className="dashboard-metric-card relative overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
+      className="dashboard-metric-card relative flex h-full flex-col overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
       style={{ background: gradient }}
     >
       <div className="dashboard-metric-card__sheen absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_56%)]" />
@@ -564,7 +564,7 @@ function MetricCard({
         </span>
       </div>
 
-      <div className="dashboard-metric-card__value relative z-10 mt-6 rounded-2xl border border-white/10 bg-white/14 px-4 py-3 text-lg font-semibold tracking-[0.04em]">
+      <div className="dashboard-metric-card__value relative z-10 mt-auto pt-6 rounded-2xl border border-white/10 bg-white/14 px-4 py-3 text-lg font-semibold tracking-[0.04em]">
         {value}
       </div>
     </article>

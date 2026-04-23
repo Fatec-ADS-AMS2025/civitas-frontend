@@ -238,6 +238,12 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={secretariaFormFields}
+        exportConfig={{
+          enabled: true,
+          title: "Secretarias",
+          fileName: "secretarias",
+          allData: secretarias,
+        }}
       />
     </>
   );

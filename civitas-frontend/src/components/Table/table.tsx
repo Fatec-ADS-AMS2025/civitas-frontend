@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import Form from "../Form/form";
 import Modal from "../modal";
@@ -6,13 +6,18 @@ import type { FieldConfig as ModalFieldConfig, FormMode, ValidationFn } from "..
 import PaginationControls from "@/components/PaginationControls";
 import { EmptyState, ErrorState, LoadingState } from "@/components/feedback-states";
 import { showToast } from "@/hooks/useToast";
+import ExportModal from "./export-modal";
+import {
+  exportTableData,
+  getSelectedColumns,
+  getStatusText,
+  getStatusValue,
+  getTableCellText,
+  isStatusColumn,
+} from "./export-utils";
+import type { TableColumn, TableExportConfig } from "./export-types";
 
 type TableRow = object;
-
-type Column = {
-  id: string;
-  label: string;
-};
 
 export type TablePaginationConfig = {
   currentPage: number;
@@ -26,7 +31,7 @@ export type TablePaginationConfig = {
 
 type BaseTableProps<T extends TableRow> = {
   data: T[];
-  columns: Column[];
+  columns: TableColumn[];
   actions?: string[];
   onEdit?: (id: number, data: Partial<T> & Record<string, unknown>) => Promise<unknown>;
   onDelete?: (id: number) => Promise<void>;
@@ -39,6 +44,7 @@ type BaseTableProps<T extends TableRow> = {
   emptyDescription?: string;
   errorMessage?: string | null;
   onRetry?: () => void;
+  exportConfig?: TableExportConfig<T>;
 };
 
 export type TableProps<T extends TableRow> = BaseTableProps<T> &
@@ -70,6 +76,7 @@ const Table = <T extends TableRow,>({
   onRetry,
   paginationEnabled,
   pagination,
+  exportConfig,
 }: TableProps<T>) => {
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
@@ -79,6 +86,17 @@ const Table = <T extends TableRow,>({
 
   const [modalAction, setModalAction] = useState<FormMode | null>(null);
   const [selectedContent, setSelectedContent] = useState<T | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const exportEnabled = exportConfig?.enabled ?? true;
+  const exportAllData = exportConfig?.allData ?? data;
+  const exportTitle = exportConfig?.title?.trim() || nomePagina || "Exportacao";
+  const exportFileName = exportConfig?.fileName?.trim() || nomePagina || "exportacao";
+  const hasExportData = exportAllData.length > 0;
+  const shouldShowExportAction =
+    exportEnabled && !isLoading && !errorMessage && hasExportData;
+  const exportColumns = useMemo(() => columns.filter((column) => column.id.trim() !== ""), [columns]);
 
   const toRecord = (value: T): Record<string, unknown> => value as Record<string, unknown>;
 
@@ -115,6 +133,7 @@ const Table = <T extends TableRow,>({
     setSelectedContent(null);
   };
 
+
   const getMotionStyle = (index: number): React.CSSProperties | undefined => {
     if (index > 5) return undefined;
 
@@ -137,15 +156,11 @@ const Table = <T extends TableRow,>({
       normalized === "situacaolabel"
     );
   };
-
   const renderStatusBadge = (status: unknown) => {
-    if (status === null || status === undefined) return null;
-    let statusText = "";
-
-    const normalized = String(status).toLowerCase();
+    const statusText = getStatusText(status);
+    if (!statusText) return null;
 
     let classes = "civitas-badge min-w-[74px]";
-
     if (normalized === "ativo" || normalized === "true" || normalized === "sim" || normalized === "1") {
       classes += " civitas-badge--status-active";
       statusText = "Ativo";
@@ -160,7 +175,7 @@ const Table = <T extends TableRow,>({
     return <span className={classes}>{statusText}</span>;
   };
 
-  const renderCellValue = (objeto: T, column: Column) => {
+  const renderCellValue = (objeto: T, column: TableColumn) => {
     const record = toRecord(objeto);
 
     if (isStatusColumn(column.id)) {
@@ -172,11 +187,7 @@ const Table = <T extends TableRow,>({
       return renderStatusBadge(statusValue) ?? "-";
     }
 
-    const value = record[column.id];
-
-    if (value === null || value === undefined || value === "") {
-      return "-";
-    }
+    const cellText = getTableCellText(objeto, column);
 
     if (column.id.toLowerCase() === "id" || column.id.toLowerCase().startsWith("id")) {
       return (
@@ -186,7 +197,48 @@ const Table = <T extends TableRow,>({
       );
     }
 
-    return String(value);
+    return cellText;
+  };
+
+  const handleExport = async ({
+    outputType,
+    scope,
+    selectedColumnIds,
+  }: {
+    outputType: "xlsx" | "pdf";
+    scope: "filtered" | "all";
+    selectedColumnIds: string[];
+  }) => {
+    const rows = scope === "all" ? exportAllData : data;
+    const selectedColumns = getSelectedColumns(exportColumns, selectedColumnIds);
+
+    try {
+      setIsExporting(true);
+
+      await exportTableData({
+        outputType,
+        title: exportTitle,
+        fileName: exportFileName,
+        rows,
+        columns: selectedColumns,
+      });
+
+      showToast("Arquivo gerado com sucesso.", "success");
+      setIsExportModalOpen(false);
+    } catch (error) {
+      console.error("Erro ao exportar listagem.", error, {
+        title: exportTitle,
+        fileName: exportFileName,
+        outputType,
+        scope,
+        selectedColumnIds,
+        filteredCount: data.length,
+        allCount: exportAllData.length,
+      });
+      showToast("Nao foi possivel gerar o arquivo. Tente novamente.", "error");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const actionButtonClassName =
@@ -398,6 +450,19 @@ const Table = <T extends TableRow,>({
             }}
           />
         </Modal>
+      ) : null}
+
+      {exportEnabled ? (
+        <ExportModal
+          open={isExportModalOpen}
+          title={exportTitle}
+          columns={exportColumns}
+          filteredCount={data.length}
+          allCount={exportAllData.length}
+          isGenerating={isExporting}
+          onClose={() => setIsExportModalOpen(false)}
+          onGenerate={handleExport}
+        />
       ) : null}
     </div>
   );

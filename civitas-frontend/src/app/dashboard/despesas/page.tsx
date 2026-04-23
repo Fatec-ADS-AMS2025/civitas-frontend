@@ -2,9 +2,18 @@
 
 import React, { useMemo, useRef, useState } from "react";
 import Form, { type FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import ExportModal from "@/components/Table/export-modal";
 import Input from "@/components/Input";
 import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import Modal from "@/components/modal";
+import {
+  exportTableData,
+  getSelectedColumns,
+} from "@/components/Table/export-utils";
+import type {
+  TableColumn,
+  TableExportOptions,
+} from "@/components/Table/export-types";
 import { showToast } from "@/hooks/useToast";
 import {
   digitsOnly,
@@ -23,6 +32,27 @@ type SelectOption = {
   value: string | number;
   label: string;
 };
+
+type DespesaExportRow = {
+  id: number;
+  categoria: string;
+  descricao: string;
+  valor: string;
+  data: string;
+  situacao: number;
+};
+
+const DESPESAS_EXPORT_COLUMNS: TableColumn[] = [
+  { id: "id", label: "Registro" },
+  { id: "categoria", label: "Categoria" },
+  { id: "descricao", label: "Descricao" },
+  { id: "valor", label: "Valor" },
+  { id: "data", label: "Data" },
+  { id: "situacao", label: "Situacao" },
+];
+
+const DESPESAS_EXPORT_TITLE = "Listagem de despesas";
+const DESPESAS_EXPORT_FILE_NAME = "despesas";
 
 const SOLICITA_UC_OPTIONS: SelectOption[] = [
   { value: "1", label: "Sim" },
@@ -200,8 +230,11 @@ export default function Page() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [viewingDespesa, setViewingDespesa] = useState<DespesaDashboardRow | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const {
+    despesas,
     filteredDespesas,
     tiposDespesa,
     orcamentos,
@@ -527,6 +560,25 @@ export default function Page() {
     }`;
   }, [filteredDespesas.length]);
 
+  const mapDespesaToExportRow = (despesa: DespesaDashboardRow): DespesaExportRow => {
+    return {
+      id: despesa.id,
+      categoria: despesa.categoria,
+      descricao: despesa.descricao,
+      valor: despesa.valorFormatado,
+      data: despesa.dataFormatada,
+      situacao: despesa.situacao,
+    };
+  };
+
+  const filteredExportRows = useMemo(() => {
+    return filteredDespesas.map(mapDespesaToExportRow);
+  }, [filteredDespesas]);
+
+  const allExportRows = useMemo(() => {
+    return despesas.map(mapDespesaToExportRow);
+  }, [despesas]);
+
   const lastUpdatedLabel = useMemo(() => {
     return formatDateTime(lastUpdatedAt);
   }, [lastUpdatedAt]);
@@ -588,6 +640,31 @@ export default function Page() {
           : `Erro ao ${actionLabel} despesa.`,
         "error"
       );
+    }
+  };
+
+  const handleExport = async ({ outputType, scope, selectedColumnIds }: TableExportOptions) => {
+    const rows = scope === "all" ? allExportRows : filteredExportRows;
+    const selectedColumns = getSelectedColumns(DESPESAS_EXPORT_COLUMNS, selectedColumnIds);
+
+    try {
+      setIsExporting(true);
+
+      await exportTableData({
+        outputType,
+        title: DESPESAS_EXPORT_TITLE,
+        fileName: DESPESAS_EXPORT_FILE_NAME,
+        rows,
+        columns: selectedColumns,
+      });
+
+      showToast("Arquivo gerado com sucesso.", "success");
+      setIsExportModalOpen(false);
+    } catch (error) {
+      console.error("Erro ao exportar listagem de despesas.", error);
+      showToast("Nao foi possivel gerar o arquivo. Tente novamente.", "error");
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -833,6 +910,19 @@ export default function Page() {
           </p>
         </div>
 
+        {allExportRows.length > 0 ? (
+          <div className="flex flex-col gap-3 border-b border-[#E4EEF0] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 lg:px-6">
+            <button
+              type="button"
+              onClick={() => setIsExportModalOpen(true)}
+              className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
+            >
+              <span className="material-symbols-outlined text-base text-[#1F2A32]">print</span>
+              Exportar / Imprimir
+            </button>
+          </div>
+        ) : null}
+
         {error && (
           <div className="mx-5 mt-5 rounded-[20px] border border-[#F4C5C5] bg-[#FFF7F7] px-4 py-3 text-sm text-[#AA3A3A] sm:mx-6">
             {error}
@@ -989,6 +1079,19 @@ export default function Page() {
           />
         </Modal>
       )}
+
+      {allExportRows.length > 0 ? (
+        <ExportModal
+          open={isExportModalOpen}
+          title={DESPESAS_EXPORT_TITLE}
+          columns={DESPESAS_EXPORT_COLUMNS}
+          filteredCount={filteredExportRows.length}
+          allCount={allExportRows.length}
+          isGenerating={isExporting}
+          onClose={() => setIsExportModalOpen(false)}
+          onGenerate={handleExport}
+        />
+      ) : null}
     </div>
   );
 }

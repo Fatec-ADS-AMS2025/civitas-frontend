@@ -625,6 +625,12 @@ export default function ConfiguracoesPage() {
         onDelete={handleToggleSituacao}
         formFields={formFields}
         formHiddenFields={["id", "situacaoLabel", "solicitaUcLabel", "unidadeMedidaLabel"]}
+        exportConfig={{
+          enabled: true,
+          title: definition.label,
+          fileName: definition.key,
+          allData: dadosOriginais,
+        }}
       />
     </div>
   );

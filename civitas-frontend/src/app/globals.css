@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -64,7 +64,6 @@
   --color-primary-2: var(--primary-2);
   --color-secundary-2: var(--secundary-2);
   --color-tertialy-2: var(--tertialy-2);
-
   --color-surface-page: var(--surface-page);
   --color-surface-default: var(--surface-default);
   --color-surface-elevated: var(--surface-elevated);
@@ -85,6 +84,7 @@ body {
     radial-gradient(circle at top left, rgba(88, 175, 174, 0.08), transparent 28%),
     radial-gradient(circle at top right, rgba(255, 135, 41, 0.08), transparent 24%),
     linear-gradient(180deg, #f8fbfb 0%, #f4f8f8 100%);
+
 }
 
 html,
@@ -815,7 +815,7 @@ html {
 /* foco */
 button:focus-visible,
 a:focus-visible,
-input:focus-visible,
+input:focus-visible:not(.search-drawer-input),
 select:focus-visible,
 textarea:focus-visible {
   outline: 3px solid var(--focus-outline);
