@@ -133,19 +133,43 @@ const Table = <T extends TableRow,>({
     setSelectedContent(null);
   };
 
+
+  const getMotionStyle = (index: number): React.CSSProperties | undefined => {
+    if (index > 5) return undefined;
+
+    return {
+      ["--enter-delay" as string]: `${index * 45}ms`,
+    };
+  };
+
+  const getStatusValue = (objeto: T) => {
+    const record = toRecord(objeto);
+    return record.status ?? record.situacao ?? record.ativo ?? record.estado ?? null;
+  };
+
+  const isStatusColumn = (columnId: string) => {
+    const normalized = columnId.toLowerCase();
+    return (
+      normalized === "status" ||
+      normalized === "statuslabel" ||
+      normalized === "situacao" ||
+      normalized === "situacaolabel"
+    );
+  };
   const renderStatusBadge = (status: unknown) => {
     const statusText = getStatusText(status);
     if (!statusText) return null;
 
-    let classes =
-      "inline-flex min-w-[64px] justify-center rounded-full px-3 py-[6px] text-[11px] font-bold leading-none";
-
-    if (statusText === "Ativo") {
-      classes += " bg-green-600 text-white";
-    } else if (statusText === "Inativo") {
-      classes += " bg-red-600 text-white";
+    let classes = "civitas-badge min-w-[74px]";
+    if (normalized === "ativo" || normalized === "true" || normalized === "sim" || normalized === "1") {
+      classes += " civitas-badge--status-active";
+      statusText = "Ativo";
+    } else if (normalized === "inativo" || normalized === "false" || normalized === "nao" || normalized === "0") {
+      classes += " civitas-badge--status-inactive";
+      statusText = "Inativo";
     } else {
-      classes += " bg-gray-300 text-black";
+      classes += " civitas-badge--status-neutral";
+      statusText = String(status);
     }
 
     return <span className={classes}>{statusText}</span>;
@@ -165,10 +189,10 @@ const Table = <T extends TableRow,>({
 
     const cellText = getTableCellText(objeto, column);
 
-    if (column.id.toLowerCase() === "id" && cellText !== "-") {
+    if (column.id.toLowerCase() === "id" || column.id.toLowerCase().startsWith("id")) {
       return (
-        <span className="inline-flex min-w-[74px] justify-center rounded-full bg-[#F7D21A] px-4 py-[7px] text-sm font-bold leading-none text-black">
-          {cellText}
+        <span className="inline-flex min-w-[82px] justify-center rounded-full border border-[#E3CB73] bg-[linear-gradient(135deg,#FFE38A_0%,#F7D447_100%)] px-4 py-[7px] text-sm font-bold leading-none text-[#2A2A2A] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+          #{String(value).padStart(3, "0")}
         </span>
       );
     }
@@ -217,34 +241,46 @@ const Table = <T extends TableRow,>({
     }
   };
 
-  return (
-    <div className="civitas-table mt-5 w-full overflow-hidden rounded-[28px] border border-[#E4EEF0] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
-      {shouldShowExportAction ? (
-        <div className="flex flex-col gap-3 border-b border-[#E4EEF0] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 lg:px-6">
-          <button
-            type="button"
-            onClick={() => setIsExportModalOpen(true)}
-            className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
-          >
-            <span className="material-symbols-outlined text-base text-[#1F2A32]">print</span>
-            Exportar / Imprimir
-          </button>
-        </div>
-      ) : null}
+  const actionButtonClassName =
+    "civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[14px] border bg-[rgba(255,255,255,0.92)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:shadow-[var(--shadow-sm)] focus-visible:outline-none focus-visible:ring-4";
 
+  const renderActionButton = (
+    icon: string,
+    action: FormMode,
+    objeto: T,
+    tone: "default" | "danger" = "default"
+  ) => {
+    const toneClassName =
+      tone === "danger"
+        ? "border-[#F1D7D7] text-[#D06B6B] hover:bg-[#FFF8F8] focus-visible:ring-[#FF8A8A]/20"
+        : "border-[var(--border-soft)] text-[var(--secundary-1)] hover:bg-[var(--surface-subtle)] focus-visible:ring-[var(--focus-ring)]";
+
+    return (
+      <button
+        type="button"
+        onClick={() => openModal(action, objeto)}
+        className={`${actionButtonClassName} ${toneClassName}`}
+      >
+        <span className="material-symbols-outlined !text-[21px]">{icon}</span>
+      </button>
+    );
+  };
+
+  return (
+    <div className="civitas-table civitas-table-shell civitas-enter mt-5 w-full">
       {!isLoading && !errorMessage && data.length > 0 ? (
         <>
           <div className="hidden md:block">
             <div className="w-full overflow-x-auto px-4 py-5 sm:px-5 lg:px-6">
-              <table className="min-w-[920px] w-full border-separate border-spacing-y-[14px] text-left text-black">
+              <table className="min-w-[920px] w-full border-separate border-spacing-y-[10px] text-left text-[var(--foreground)]">
                 <thead>
-                  <tr className="civitas-table__head text-[13px] font-semibold uppercase tracking-[0.04em] text-[#95A5AA]">
+                  <tr className="civitas-table__head text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                     {columns.map((column) => (
-                      <th key={column.id} className="px-5 py-2">
+                      <th key={column.id} className="px-5 py-2.5">
                         {column.label}
                       </th>
                     ))}
-                    {hasActions ? <th className="px-5 py-2 text-center">Acoes</th> : null}
+                    {hasActions ? <th className="px-5 py-2.5 text-center">Acoes</th> : null}
                   </tr>
                 </thead>
 
@@ -252,12 +288,13 @@ const Table = <T extends TableRow,>({
                   {data.map((objeto, index) => (
                     <tr
                       key={index}
-                      className="civitas-table__row overflow-hidden rounded-[20px] bg-white shadow-none ring-1 ring-[#D9EFF1] transition-colors hover:bg-[#FBFDFD]"
+                      style={getMotionStyle(index)}
+                      className="civitas-table__row civitas-enter overflow-hidden rounded-[22px] bg-[rgba(255,255,255,0.96)] shadow-[var(--shadow-xs)] ring-1 ring-[#DCEBEC] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[#FCFEFE] hover:shadow-[var(--shadow-sm)] hover:ring-[#CFE2E5]"
                     >
                       {columns.map((column, columnIndex) => (
                         <td
                           key={column.id}
-                          className={`civitas-table__cell break-words px-5 py-[16px] align-middle text-[15px] font-medium text-[#333333] ${
+                          className={`civitas-table__cell break-words border-y border-transparent px-5 py-[16px] align-middle text-[15px] font-medium text-[var(--foreground)] ${
                             columnIndex === 0 ? "rounded-l-[20px]" : ""
                           }`}
                         >
@@ -269,33 +306,15 @@ const Table = <T extends TableRow,>({
                         <td className="rounded-r-[20px] px-5 py-[16px] align-middle">
                           <div className="flex items-center justify-center gap-2">
                             {resolvedActions.includes("view") ? (
-                              <button
-                                type="button"
-                                onClick={() => openModal("view", objeto)}
-                                className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
-                              >
-                                <span className="material-symbols-outlined !text-[22px]">visibility</span>
-                              </button>
+                              renderActionButton("visibility", "view", objeto)
                             ) : null}
 
                             {resolvedActions.includes("edit") ? (
-                              <button
-                                type="button"
-                                onClick={() => openModal("edit", objeto)}
-                                className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
-                              >
-                                <span className="material-symbols-outlined !text-[22px]">edit</span>
-                              </button>
+                              renderActionButton("edit", "edit", objeto)
                             ) : null}
 
                             {resolvedActions.includes("delete") ? (
-                              <button
-                                type="button"
-                                onClick={() => openModal("delete", objeto)}
-                                className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF8A8A]/20"
-                              >
-                                <span className="material-symbols-outlined !text-[22px]">delete</span>
-                              </button>
+                              renderActionButton("delete", "delete", objeto, "danger")
                             ) : null}
                           </div>
                         </td>
@@ -315,7 +334,8 @@ const Table = <T extends TableRow,>({
                 return (
                   <div
                     key={index}
-                    className="civitas-table__card rounded-[20px] border border-[#DDEEEF] bg-white p-4 shadow-sm"
+                    style={getMotionStyle(index)}
+                    className="civitas-table__card civitas-enter rounded-[22px] border border-[var(--border-soft)] bg-[rgba(255,255,255,0.96)] p-4 shadow-[var(--shadow-xs)]"
                   >
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 break-words">
@@ -330,10 +350,10 @@ const Table = <T extends TableRow,>({
                         .filter((column) => !isStatusColumn(column.id))
                         .map((column) => (
                           <div key={column.id} className="flex flex-col">
-                            <span className="civitas-table__meta text-xs font-semibold uppercase tracking-wide text-[#B8B8B8]">
+                            <span className="civitas-table__meta text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                               {column.label}
                             </span>
-                            <span className="civitas-table__cell break-words text-[15px] font-medium text-[#1F1F1F]">
+                            <span className="civitas-table__cell break-words text-[15px] font-medium text-[var(--foreground)]">
                               {renderCellValue(objeto, column)}
                             </span>
                           </div>
@@ -343,33 +363,15 @@ const Table = <T extends TableRow,>({
                     {hasActions ? (
                       <div className="mt-4 flex items-center justify-end gap-2">
                         {resolvedActions.includes("view") ? (
-                          <button
-                            type="button"
-                            onClick={() => openModal("view", objeto)}
-                            className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
-                          >
-                            <span className="material-symbols-outlined !text-[22px]">visibility</span>
-                          </button>
+                          renderActionButton("visibility", "view", objeto)
                         ) : null}
 
                         {resolvedActions.includes("edit") ? (
-                          <button
-                            type="button"
-                            onClick={() => openModal("edit", objeto)}
-                            className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#E3ECEE] bg-white text-[#0B6470] transition hover:bg-[#F5FAFA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/20"
-                          >
-                            <span className="material-symbols-outlined !text-[22px]">edit</span>
-                          </button>
+                          renderActionButton("edit", "edit", objeto)
                         ) : null}
 
                         {resolvedActions.includes("delete") ? (
-                          <button
-                            type="button"
-                            onClick={() => openModal("delete", objeto)}
-                            className="civitas-table__action flex h-10 w-10 cursor-pointer items-center justify-center rounded-[12px] border border-[#F2E2E2] bg-white text-[#FF8A8A] transition hover:bg-[#FFF7F7] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF8A8A]/20"
-                          >
-                            <span className="material-symbols-outlined !text-[22px]">delete</span>
-                          </button>
+                          renderActionButton("delete", "delete", objeto, "danger")
                         ) : null}
                       </div>
                     ) : null}

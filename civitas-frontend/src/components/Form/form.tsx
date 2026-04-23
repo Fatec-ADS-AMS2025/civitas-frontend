@@ -365,7 +365,7 @@ export default function Form({
         if (field.type === 'select') {
             return (
                 <div key={field.key} className='w-full'>
-                    <label className='mb-2 block text-sm font-semibold tracking-[0.01em] text-[#4D5A63]'>
+                    <label className='mb-2 block text-sm font-semibold tracking-[0.01em] text-[var(--foreground-muted)]'>
                         {commonProps.label}
                         {commonProps.required && <span className='text-red-500 ml-1'>*</span>}
                     </label>
@@ -376,7 +376,7 @@ export default function Form({
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         aria-invalid={Boolean(commonProps.error)}
                         aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-                        className='w-full rounded-2xl border border-[#CFE3E3] bg-white px-4 py-3.5 text-[15px] text-[#22313A] shadow-[0_2px_10px_rgba(0,0,0,0.03)] transition-all duration-200 focus:border-[#58AFAE] focus:outline-none focus:ring-4 focus:ring-[#58AFAE]/20 disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
+                        className='w-full rounded-[18px] border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-4 py-3.5 text-[15px] text-[var(--foreground)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
                     >
                         <option value=''>{field.placeholder ?? commonProps.label}</option>
                         {(field.options ?? []).map((option) => (
@@ -397,7 +397,7 @@ export default function Form({
         if (field.type === 'textarea') {
             return (
                 <div key={field.key} className='w-full'>
-                    <label className='mb-2 block text-sm font-semibold tracking-[0.01em] text-[#4D5A63]'>
+                    <label className='mb-2 block text-sm font-semibold tracking-[0.01em] text-[var(--foreground-muted)]'>
                         {commonProps.label}
                         {commonProps.required && <span className='text-red-500 ml-1'>*</span>}
                     </label>
@@ -409,7 +409,7 @@ export default function Form({
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         aria-invalid={Boolean(commonProps.error)}
                         aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-                        className='min-h-[132px] w-full resize-none rounded-2xl border border-[#CFE3E3] bg-white px-4 py-3.5 text-[15px] text-[#22313A] shadow-[0_2px_10px_rgba(0,0,0,0.03)] transition-all duration-200 focus:border-[#58AFAE] focus:outline-none focus:ring-4 focus:ring-[#58AFAE]/20 disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
+                        className='min-h-[132px] w-full resize-none rounded-[18px] border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-4 py-3.5 text-[15px] text-[var(--foreground)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
                     />
                     {commonProps.error && (
                         <p id={commonProps.errorId} className='mt-1.5 text-sm font-medium text-red-600'>
@@ -439,21 +439,21 @@ export default function Form({
 
     return (
         <form
-            className='flex w-full max-w-[1120px] flex-col rounded-[28px] border border-[#E8ECEF] bg-[#FFFDFB] p-5 text-gray-900 shadow-[0_14px_36px_rgba(0,0,0,0.06)] sm:p-7'
+            className='flex w-full max-w-[1120px] flex-col rounded-[28px] border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,251,251,0.98)_100%)] p-5 text-[var(--foreground)] shadow-[var(--shadow-md)] sm:p-7'
             onSubmit={handleSubmit}
             aria-busy={isLoading}
         >
-            <div className='flex flex-col gap-4 border-b border-[#E8ECEF] pb-6 md:flex-row md:items-center md:justify-between'>
+            <div className='flex flex-col gap-4 border-b border-[var(--divider)] pb-6 md:flex-row md:items-center md:justify-between'>
                 <div className='flex flex-col'>
-                    <h1 className='text-[30px] font-bold uppercase tracking-[0.02em] text-[#1F2A32] sm:text-[36px]'>
+                    <h1 className='text-[30px] font-bold uppercase tracking-[0.02em] text-[var(--foreground)] sm:text-[36px]'>
                         {mode === 'create' ? 'Cadastro' : `${tipos[mode]} ${name ?? ''}`}
                     </h1>
-                    <p className='font-medium text-[#72808A]'>Preencha os campos e confirme.</p>
+                    <p className='font-medium text-[var(--foreground-muted)]'>Preencha os campos e confirme.</p>
                 </div>
 
                 {hasMultipleSteps && (
                     <div className='flex flex-wrap items-center gap-2 font-semibold text-primary-1'>
-                        <span className='mr-1 text-sm text-[#72808A]'>Etapas:</span>
+                        <span className='mr-1 text-sm text-[var(--foreground-muted)]'>Etapas:</span>
                         {Array.from({ length: totalSteps }).map((_, index) => {
                             const isActive = index === currentStep
                             const isCompleted = index < currentStep
@@ -467,8 +467,8 @@ export default function Form({
                                         goToStep(index)
                                     }}
                                     className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm transition-all ${isActive || isCompleted
-                                        ? 'border-[#58AFAE] bg-[#58AFAE] text-white shadow-[0_4px_12px_rgba(88,175,174,0.35)]'
-                                        : 'border-[#BFD9D8] bg-white text-[#58AFAE]'
+                                        ? 'border-transparent bg-[linear-gradient(135deg,#0C7178_0%,#2A9B9F_42%,#58AFAE_100%)] text-white shadow-[0_8px_18px_rgba(88,175,174,0.28)]'
+                                        : 'border-[var(--border-default)] bg-[rgba(255,255,255,0.88)] text-[var(--primary-1)]'
                                         }`}
                                     aria-label={`Ir para etapa ${index + 1}`}
                                 >
@@ -476,7 +476,7 @@ export default function Form({
                                 </button>
                             )
                         })}
-                        <span className={`rounded-full border px-4 py-1 text-sm ${currentStep === totalSteps - 1 ? 'border-[#58AFAE] bg-[#58AFAE] text-white' : 'border-[#BFD9D8] bg-white text-[#58AFAE]'}`}>
+                        <span className={`rounded-full border px-4 py-1 text-sm ${currentStep === totalSteps - 1 ? 'border-transparent bg-[linear-gradient(135deg,#0C7178_0%,#2A9B9F_42%,#58AFAE_100%)] text-white' : 'border-[var(--border-default)] bg-[rgba(255,255,255,0.88)] text-[var(--primary-1)]'}`}>
                             CONFIRMAR
                         </span>
                     </div>
@@ -484,11 +484,11 @@ export default function Form({
             </div>
 
             <div className='mt-7 grid grid-cols-1 gap-6 md:grid-cols-12'>
-                <div className='hidden items-start justify-center rounded-[24px] border border-[#E8ECEF] bg-gradient-to-b from-[#F8FCFC] to-[#F4F8F8] p-6 md:col-span-4 md:flex'>
+                <div className='hidden items-start justify-center rounded-[24px] border border-[var(--border-soft)] bg-[linear-gradient(180deg,#F9FCFC_0%,#F3F8F8_100%)] p-6 md:col-span-4 md:flex'>
                     <Image src={imgs[mode]} alt={tipos[mode]} className='w-full h-auto max-w-[260px]' width={260} height={260} />
                 </div>
-                <div className='rounded-[24px] border border-[#E8ECEF] bg-white p-4 md:col-span-8 md:p-5'>
-                    <p className='mb-3 text-sm font-medium text-[#72808A]'>
+                <div className='rounded-[24px] border border-[var(--border-soft)] bg-[rgba(255,255,255,0.92)] p-4 shadow-[var(--shadow-xs)] md:col-span-8 md:p-5'>
+                    <p className='mb-3 text-sm font-medium text-[var(--foreground-muted)]'>
                         Etapa {currentStep + 1} de {totalSteps}
                     </p>
                     <div className={`grid ${currentStepColumns} gap-4`}>
@@ -497,7 +497,7 @@ export default function Form({
                 </div>
             </div>
 
-            <div className='mt-7 flex flex-col gap-3 border-t border-[#E8ECEF] pt-6 md:flex-row'>
+            <div className='mt-7 flex flex-col gap-3 border-t border-[var(--divider)] pt-6 md:flex-row'>
                 <Button
                     variant='secondary'
                     className='!w-full !max-w-none !rounded-2xl !px-6 !py-3.5 !text-base !font-semibold'

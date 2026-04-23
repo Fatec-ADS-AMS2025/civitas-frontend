@@ -205,7 +205,7 @@ const isHttpMethodNotAllowedError = (error: unknown): boolean => {
 
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
   try {
-    return (await despesaService.getInactive()) ?? [];
+    return (await despesaService.getInactiveOptional()) ?? [];
   } catch (error) {
     if (!isHttpNotFoundError(error) && !isHttpBadRequestError(error)) {
       console.error("Erro ao carregar despesas inativas:", error);

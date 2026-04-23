@@ -71,8 +71,8 @@ function TipoBadge({ tipo }: TipoBadgeProps) {
     <span
       className={`inline-flex items-center rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide ${
         isDespesa
-          ? 'bg-red-50 text-red-700'
-          : 'bg-emerald-50 text-emerald-700'
+          ? 'bg-[#FFF1F1] text-[#C55A5A]'
+          : 'bg-[#EEF9F1] text-[#16714A]'
       }`}
     >
       {isDespesa ? 'Despesa' : 'Orçamento'}
@@ -92,8 +92,8 @@ function StatusBadge({ situacao }: StatusBadgeProps) {
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
         isAtivo
-          ? 'bg-emerald-50 text-emerald-700'
-          : 'bg-slate-100 text-slate-600'
+          ? 'bg-[var(--status-active-bg)] text-[var(--status-active-text)]'
+          : 'bg-[var(--status-neutral-bg)] text-[var(--status-neutral-text)]'
       }`}
     >
       <span
@@ -220,31 +220,31 @@ export default function FinanceiroLista({
   }
 
   return (
-    <div className="rounded-[20px] border border-[#E4EEF0] bg-white p-5 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
+    <div className="civitas-surface civitas-enter rounded-[24px] p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
           <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">
             Monitoramento
           </span>
-          <h3 className="mt-1 text-lg font-semibold text-[#1F2A32]">
+          <h3 className="mt-1 text-lg font-semibold text-[var(--foreground)]">
             Listagem de transações
           </h3>
-          <p className="mt-0.5 text-xs text-[#72808A]">
+          <p className="mt-0.5 text-xs text-[var(--foreground-muted)]">
             Painel com leitura rápida do tipo, valor, data e situação de cada movimentação.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3">
           <div className="text-right">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-[#6C858E]">Total</p>
-            <p className="text-xl font-bold text-[#1F2A32]">{transacoes.length}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Total</p>
+            <p className="text-xl font-bold text-[var(--foreground)]">{transacoes.length}</p>
           </div>
           <div className="text-right">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-[#6C858E]">Despesas</p>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Despesas</p>
             <p className="text-xl font-bold text-[#D97706]">{despesas.length}</p>
           </div>
           <div className="text-right">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-[#6C858E]">Orçamentos</p>
-            <p className="text-xl font-bold text-[#004C57]">{orcamentos.length}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Orçamentos</p>
+            <p className="text-xl font-bold text-[var(--secundary-1)]">{orcamentos.length}</p>
           </div>
         </div>
       </div>
@@ -265,41 +265,46 @@ export default function FinanceiroLista({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px]">
           <thead>
-            <tr className="border-b border-[#E4EEF0]">
-              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[#6C858E]">
+            <tr className="border-b border-[var(--divider)]">
+              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 Registro
               </th>
-              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[#6C858E]">
+              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 Tipo
               </th>
-              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[#6C858E]">
+              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 Descrição
               </th>
-              <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-[#6C858E]">
+              <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 Valor
               </th>
-              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[#6C858E]">
+              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 Data
               </th>
-              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[#6C858E]">
+              <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 Situação
               </th>
-              <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-[#6C858E]">
+              <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 Ação
               </th>
             </tr>
           </thead>
           <tbody>
-            {transacoes.map((transacao) => {
+            {transacoes.map((transacao, index) => {
               const isProcessing = processingId === transacao.id || loading;
 
               return (
                 <tr
                   key={`${transacao.tipo}-${transacao.id}`}
-                  className="group border-b border-[#F1F5F5] transition-colors last:border-0 hover:bg-[#F8FCFC]"
+                  style={
+                    index < 6
+                      ? ({ ["--enter-delay" as string]: `${index * 45}ms` } as React.CSSProperties)
+                      : undefined
+                  }
+                  className={`${index < 6 ? "civitas-enter " : ""}group border-b border-[#EEF4F5] transition-all duration-[var(--motion-duration-fast)] last:border-0 hover:bg-[#F8FCFC]`}
                 >
                   <td className="px-3 py-3">
-                    <span className="text-sm font-medium text-[#6C858E]">
+                    <span className="text-sm font-medium text-[var(--foreground-soft)]">
                       #{transacao.id}
                     </span>
                   </td>
@@ -307,7 +312,7 @@ export default function FinanceiroLista({
                     <TipoBadge tipo={transacao.tipo} />
                   </td>
                   <td className="max-w-[200px] px-3 py-3">
-                    <p className="truncate text-sm font-medium text-[#1F2A32]">
+                    <p className="truncate text-sm font-medium text-[var(--foreground)]">
                       {transacao.descricao}
                     </p>
                   </td>
@@ -321,7 +326,7 @@ export default function FinanceiroLista({
                     </span>
                   </td>
                   <td className="px-3 py-3">
-                    <span className="text-sm text-[#72808A]">
+                    <span className="text-sm text-[var(--foreground-muted)]">
                       {formatDate(transacao.data)}
                     </span>
                   </td>
@@ -334,7 +339,7 @@ export default function FinanceiroLista({
                         <button
                           onClick={() => void handleAlterarStatus(transacao.id, transacao.tipo)}
                           disabled={isProcessing}
-                          className="rounded-lg bg-[#004C57] px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-[#003942] disabled:cursor-not-allowed disabled:opacity-50"
+                          className="civitas-action civitas-action--ghost min-h-[34px] rounded-[12px] px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {isProcessing ? '...' : 'Alterar status'}
                         </button>
@@ -342,7 +347,7 @@ export default function FinanceiroLista({
                       <button
                         onClick={() => void handleDelete(transacao.id, transacao.tipo)}
                         disabled={isProcessing}
-                        className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-[34px] items-center justify-center rounded-[12px] border border-[#F1D7D7] bg-[#FFF4F4] px-3 py-1.5 text-xs font-medium text-[#C45F5F] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[#FFECEC] hover:shadow-[var(--shadow-sm)] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isProcessing ? '...' : 'Excluir'}
                       </button>

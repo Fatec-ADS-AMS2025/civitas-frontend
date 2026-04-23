@@ -9,6 +9,7 @@ import {
   ErrorState,
   LoadingState,
 } from "@/components/feedback-states";
+import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import { SITUACAO_ATIVO } from "@/global/situacao";
 import { useClientPagination } from "@/hooks/useClientPagination";
 import {
@@ -152,6 +153,40 @@ export default function Dashboard() {
     refetch,
   } = useDespesasDashboard();
 
+  const headerConfig = useMemo(
+    () => ({
+      title: "Dashboard",
+      eyebrow: "Visão geral",
+      subtitle:
+        "Resumo operacional e financeiro com dados reais do backend, destaques rápidos e acessos prioritários do painel.",
+      breadcrumbs: [
+        { label: "Home", href: "/dashboard" },
+        { label: "Dashboard" },
+      ],
+      actions: [
+        {
+          label: "Atualizar painel",
+          icon: "refresh",
+          variant: "primary" as const,
+          onClick: () => {
+            void refetch();
+          },
+        },
+        {
+          label: showMoneyValues ? "Ocultar valores" : "Exibir valores",
+          icon: showMoneyValues ? "visibility_off" : "visibility",
+          variant: "ghost" as const,
+          onClick: () => {
+            setShowMoneyValues((previous) => !previous);
+          },
+        },
+      ],
+    }),
+    [refetch, showMoneyValues]
+  );
+
+  useDashboardHeader(headerConfig);
+
   const quickActions = useMemo<QuickAction[]>(
     () => [
       {
@@ -257,41 +292,20 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[30px] bg-[#2B8F95] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+      <section className="civitas-enter overflow-hidden rounded-[30px] bg-[#2B8F95] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
+        <div className="flex flex-col gap-6">
           <div>
             <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
-              Dashboard operacional
+              Radar analítico
             </span>
-            <h1 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">
-              Acompanhamento real de despesas e cobertura orcamentaria
-            </h1>
+            <h2 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">
+              Acompanhe sinais críticos, volume financeiro e próximos movimentos do sistema.
+            </h2>
             <p className="mt-3 max-w-3xl text-sm text-white/85 sm:text-base">
-              Esta tela agora usa dados reais do backend para mostrar saldo, volume
-              de despesas, concentracao por categoria e vencimentos proximos.
+              A leitura abaixo complementa o header com uma visão de contexto: saldo,
+              concentração por categoria, vencimentos próximos e atalhos operacionais
+              puxados do backend em tempo real.
             </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => void refetch()}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
-            >
-              <span className="material-symbols-outlined !text-[18px]">refresh</span>
-              Atualizar dados
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowMoneyValues((previous) => !previous)}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-4 focus:ring-white/20"
-            >
-              <span className="material-symbols-outlined !text-[18px]">
-                {showMoneyValues ? "visibility_off" : "visibility"}
-              </span>
-              {showMoneyValues ? "Ocultar valores" : "Exibir valores"}
-            </button>
           </div>
         </div>
       </section>

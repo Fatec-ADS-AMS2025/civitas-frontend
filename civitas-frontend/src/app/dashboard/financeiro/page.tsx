@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useFinanceiro } from '@/hooks/financeiro';
+import { useDashboardHeader } from '@/components/dashboard/dashboard-header';
 import {
   FinanceiroHero,
   FinanceiroResumo,
@@ -13,6 +15,7 @@ import {
 } from '@/components/testefinanceiro';
 
 export default function FinanceiroPage() {
+  const router = useRouter();
   const {
     filtros,
     transacoes,
@@ -41,6 +44,40 @@ export default function FinanceiroPage() {
       filtros.instituicaoId
     );
   }, [filtros]);
+
+  const headerConfig = useMemo(
+    () => ({
+      title: 'Financeiro',
+      eyebrow: 'Monitoramento',
+      subtitle:
+        'Resumo financeiro, filtros e movimentações em um fluxo visual unificado com o restante do dashboard.',
+      breadcrumbs: [
+        { label: 'Home', href: '/dashboard' },
+        { label: 'Financeiro' },
+      ],
+      actions: [
+        {
+          label: 'Atualizar dados',
+          icon: 'refresh',
+          variant: 'primary' as const,
+          onClick: () => {
+            void refetch();
+          },
+        },
+        {
+          label: 'Abrir despesas',
+          icon: 'receipt_long',
+          variant: 'ghost' as const,
+          onClick: () => {
+            router.push('/dashboard/despesas');
+          },
+        },
+      ],
+    }),
+    [refetch, router]
+  );
+
+  useDashboardHeader(headerConfig);
 
   if (loading && !hasData) {
     return <FinanceiroLoadingState />;

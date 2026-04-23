@@ -31,12 +31,12 @@ type ErrorStateProps = {
 function StateContainer({ children, tone = "neutral" }: StateContainerProps) {
   const toneClasses =
     tone === "error"
-      ? "border-[#F3D3D3] bg-[#FFF7F7]"
-      : "border-[#DDEEEF] bg-[#FBFEFE]";
+      ? "border-[#F2D4D4] bg-[linear-gradient(180deg,#FFF8F8_0%,#FFF4F4_100%)]"
+      : "border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(247,251,251,0.96)_100%)]";
 
   return (
     <div
-      className={`civitas-state rounded-[24px] border px-5 py-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)] ${toneClasses}`}
+      className={`civitas-state civitas-enter rounded-[24px] border px-5 py-6 shadow-[var(--shadow-sm)] ${toneClasses}`}
       role="status"
       aria-live="polite"
     >
@@ -54,12 +54,12 @@ export function LoadingState({
   return (
     <StateContainer>
       <div className="mb-5 flex items-start gap-3">
-        <div className="civitas-state__icon flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#E8F5F5] text-[#0B6470]">
+        <div className="civitas-state__icon flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] bg-[var(--surface-subtle)] text-[var(--secundary-1)]">
           <span className="material-symbols-outlined !text-[22px]">progress_activity</span>
         </div>
         <div>
-          <h3 className="civitas-state__title text-lg font-semibold text-[#1F2A32]">{title}</h3>
-          <p className="civitas-state__description mt-1 text-sm text-[#6B7280]">{description}</p>
+          <h3 className="civitas-state__title text-lg font-semibold text-[var(--foreground)]">{title}</h3>
+          <p className="civitas-state__description mt-1 text-sm text-[var(--foreground-muted)]">{description}</p>
         </div>
       </div>
 
@@ -76,11 +76,11 @@ export function EmptyState({
   return (
     <StateContainer>
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="civitas-state__icon flex h-14 w-14 items-center justify-center rounded-full bg-[#F3F9FA] text-[#0B6470]">
+        <div className="civitas-state__icon flex h-14 w-14 items-center justify-center rounded-full bg-[var(--surface-subtle)] text-[var(--secundary-1)]">
           <span className="material-symbols-outlined !text-[28px]">inventory_2</span>
         </div>
-        <h3 className="civitas-state__title mt-4 text-lg font-semibold text-[#1F2A32]">{title}</h3>
-        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[#6B7280]">{description}</p>
+        <h3 className="civitas-state__title mt-4 text-lg font-semibold text-[var(--foreground)]">{title}</h3>
+        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[var(--foreground-muted)]">{description}</p>
         {action ? <div className="mt-5">{action}</div> : null}
       </div>
     </StateContainer>
@@ -96,7 +96,7 @@ export function ErrorState({
   return (
     <StateContainer tone="error">
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="civitas-state__icon flex h-14 w-14 items-center justify-center rounded-full bg-[#FFE8E8] text-[#C23D3D]">
+        <div className="civitas-state__icon flex h-14 w-14 items-center justify-center rounded-full bg-[#FFEAEA] text-[#C23D3D]">
           <span className="material-symbols-outlined !text-[28px]">error</span>
         </div>
         <h3 className="civitas-state__title mt-4 text-lg font-semibold text-[#842D2D]">{title}</h3>
@@ -105,7 +105,7 @@ export function ErrorState({
           <button
             type="button"
             onClick={onRetry}
-            className="civitas-state__action mt-5 rounded-full bg-[#C23D3D] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#C23D3D]/20"
+            className="civitas-state__action mt-5 inline-flex items-center justify-center rounded-full border border-[#D68787] bg-[#C23D3D] px-5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#C23D3D]/20"
           >
             {actionLabel}
           </button>
