@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Checkbox from '@/components/checkbox'
+import { useAppNavigation } from '@/hooks/useNavigationProgress'
 import { Input } from '@/components/Input'
 import useAuth from '@/hooks/useAuth'
 

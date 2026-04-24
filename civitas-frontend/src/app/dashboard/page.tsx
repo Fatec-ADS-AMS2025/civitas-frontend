@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Input from "@/components/Input";
 import PaginationControls from "@/components/PaginationControls";
 import {
   EmptyState,
   ErrorState,
-  LoadingState,
 } from "@/components/feedback-states";
 import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import { SITUACAO_ATIVO } from "@/global/situacao";
+import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import { useClientPagination } from "@/hooks/useClientPagination";
 import {
   type DespesaDashboardRow,
@@ -136,7 +135,7 @@ const buildInstitutionRanking = (
 };
 
 export default function Dashboard() {
-  const router = useRouter();
+  const router = useAppNavigation();
   const [showMoneyValues, setShowMoneyValues] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -276,7 +275,7 @@ export default function Dashboard() {
   const hiddenValue = "* * * * * *";
 
   if (loading) {
-    return <LoadingState description="Carregando painel inicial com dados do backend..." />;
+    return <DashboardRouteSkeleton />;
   }
 
   if (error) {

@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-import { SkeletonTable } from "@/components/skeleton";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import { UsuariosRouteSkeleton } from "@/components/route-skeletons";
 import { usuarioService } from "@/hooks/usuario";
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import UsuarioDTO from "@/models/usuario";
@@ -288,7 +288,7 @@ const Page = () => {
   };
 
   if (loading) {
-    return <SkeletonTable rows={5} cols={4} />;
+    return <UsuariosRouteSkeleton />;
   }
 
   if (error) {

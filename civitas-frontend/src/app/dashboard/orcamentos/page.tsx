@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import { SkeletonTable } from "@/components/skeleton";
+import { OrcamentosRouteSkeleton } from "@/components/route-skeletons";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { normalizeOrcamentoPayload } from "@/global/formPayload";
@@ -265,7 +265,7 @@ export default function Page() {
   };
 
   if (loading) {
-    return <SkeletonTable rows={5} cols={4} />;
+    return <OrcamentosRouteSkeleton />;
   }
 
   return (

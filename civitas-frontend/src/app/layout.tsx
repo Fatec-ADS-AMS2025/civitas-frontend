@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import AccessibilityMenu from "@/components/AccessibilityMenu";
+import NavigationFeedback from "@/components/NavigationFeedback";
 import Toaster from "@/components/Toaster";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";

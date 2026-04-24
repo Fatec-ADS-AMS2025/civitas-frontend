@@ -321,6 +321,20 @@ html {
   }
 }
 
+@keyframes route-progress-sheen {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(140%);
+    opacity: 0;
+  }
+}
+
 .skeleton-loader {
   --skeleton-base: #e6eef1;
   --skeleton-highlight: #f7fbfc;
@@ -341,6 +355,10 @@ html {
 
 .skeleton-card {
   backdrop-filter: blur(1px);
+}
+
+.route-progress-bar__sheen {
+  animation: route-progress-sheen 1.25s ease-in-out infinite;
 }
 
 .dashboard-metric-card__value {
