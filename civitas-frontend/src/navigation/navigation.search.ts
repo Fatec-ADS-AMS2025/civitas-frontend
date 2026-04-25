@@ -27,6 +27,9 @@ const resolveMatchType = (
   const normalizedKeywords = item.keywords.map((keyword) =>
     normalizeSearchText(keyword),
   );
+  const normalizedFeatures = item.features.map((feature) =>
+    normalizeSearchText(feature),
+  );
 
   if (normalizedLabel.startsWith(normalizedQuery)) {
     return "label-prefix";
@@ -44,6 +47,14 @@ const resolveMatchType = (
     return "keyword-includes";
   }
 
+  if (normalizedFeatures.some((feature) => feature.startsWith(normalizedQuery))) {
+    return "feature-prefix";
+  }
+
+  if (normalizedFeatures.some((feature) => feature.includes(normalizedQuery))) {
+    return "feature-includes";
+  }
+
   return null;
 };
 
@@ -52,6 +63,8 @@ const matchWeight: Record<NavigationSearchMatchType, number> = {
   "label-includes": 1,
   "keyword-prefix": 2,
   "keyword-includes": 3,
+  "feature-prefix": 4,
+  "feature-includes": 5,
 };
 
 export const searchNavigation = (

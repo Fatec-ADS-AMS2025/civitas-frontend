@@ -3,6 +3,7 @@ export type NavigationItem = {
   label: string;
   path: string;
   keywords: string[];
+  features: string[];
   category: string;
   icon?: string;
   priority?: number;
@@ -23,7 +24,9 @@ export type NavigationSearchMatchType =
   | "label-prefix"
   | "label-includes"
   | "keyword-prefix"
-  | "keyword-includes";
+  | "keyword-includes"
+  | "feature-prefix"
+  | "feature-includes";
 
 export type NavigationSearchResult = {
   item: NavigationItem;

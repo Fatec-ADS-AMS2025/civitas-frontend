@@ -77,6 +77,20 @@ const HighlightedLabel = ({ label, query }: { label: string; query: string }) =>
   );
 };
 
+const getFeatureMatch = (features: string[], query: string) => {
+  const normalizedQuery = normalizeSearchText(query);
+
+  if (!normalizedQuery) {
+    return features[0] ?? "";
+  }
+
+  return (
+    features.find((feature) =>
+      normalizeSearchText(feature).includes(normalizedQuery)
+    ) ?? features[0] ?? ""
+  );
+};
+
 export default function SearchResults({
   groups,
   query,
@@ -107,6 +121,7 @@ export default function SearchResults({
             {group.items.map((entry) => {
               const isSelected = selectedKey === entry.item.key;
               const isActiveRoute = activePath === entry.item.path;
+              const featureMatch = getFeatureMatch(entry.item.features, query);
 
               return (
                 <button
@@ -119,16 +134,29 @@ export default function SearchResults({
                       ? "bg-[#DDF0F2] text-[#003A42]"
                       : isActiveRoute
                         ? "bg-[#E9F6F7] text-[#004D57]"
-                        : "text-[#D8EBEE] hover:bg-[#0B5A64]"
+                        : "text-[#234852] hover:bg-[#F1F8F9]"
                   }`}
                 >
                   <span className="material-symbols-outlined text-[20px]">
                     {entry.item.icon ?? "apps"}
                   </span>
 
-                  <span className="min-w-0 truncate text-sm font-semibold">
-                    <HighlightedLabel label={entry.item.label} query={query} />
-                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold">
+                      <HighlightedLabel label={entry.item.label} query={query} />
+                    </div>
+                    {featureMatch ? (
+                      <div
+                        className={`mt-0.5 truncate text-xs ${
+                          isSelected || isActiveRoute
+                            ? "text-[#37656D]"
+                            : "text-[#9FC0C8] group-hover:text-[#CFE3E7]"
+                        }`}
+                      >
+                        {featureMatch}
+                      </div>
+                    ) : null}
+                  </div>
                 </button>
               );
             })}
