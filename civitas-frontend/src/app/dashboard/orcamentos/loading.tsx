@@ -1,5 +1,5 @@
-import { OrcamentosRouteSkeleton } from "@/components/route-skeletons";
+import OrcamentosSkeleton from "./skeleton";
 
 export default function Loading() {
-  return <OrcamentosRouteSkeleton />;
+  return <OrcamentosSkeleton />;
 }

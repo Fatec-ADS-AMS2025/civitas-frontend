@@ -1,5 +1,5 @@
-import FinanceiroLoadingState from "@/components/testefinanceiro/FinanceiroLoadingState";
+import FinanceiroSkeleton from "./skeleton";
 
 export default function Loading() {
-  return <FinanceiroLoadingState />;
+  return <FinanceiroSkeleton />;
 }

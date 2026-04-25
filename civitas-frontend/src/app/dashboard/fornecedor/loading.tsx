@@ -1,5 +1,5 @@
-import { FornecedorRouteSkeleton } from "@/components/route-skeletons";
+import FornecedorSkeleton from "./skeleton";
 
 export default function Loading() {
-  return <FornecedorRouteSkeleton />;
+  return <FornecedorSkeleton />;
 }

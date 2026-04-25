@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import { OrcamentosRouteSkeleton } from "@/components/route-skeletons";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { normalizeOrcamentoPayload } from "@/global/formPayload";
@@ -13,6 +12,7 @@ import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import InstituicaoDTO from "@/models/instituicao";
 import OrcamentoDTO from "@/models/orcamento";
 import TipoDespesaDTO from "@/models/tipoDespesa";
+import OrcamentosSkeleton from "./skeleton";
 
 type Orcamento = OrcamentoDTO;
 type Instituicao = InstituicaoDTO;
@@ -265,7 +265,7 @@ export default function Page() {
   };
 
   if (loading) {
-    return <OrcamentosRouteSkeleton />;
+    return <OrcamentosSkeleton />;
   }
 
   return (

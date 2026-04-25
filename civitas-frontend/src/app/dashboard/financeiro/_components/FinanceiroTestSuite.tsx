@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import FinanceiroCrudTeste from '@/components/testefinanceiro/FinanceiroCrudTeste';
-import FinanceiroFiltrosTeste from '@/components/testefinanceiro/FinanceiroFiltros';
-import FinanceiroListaTeste from '@/components/testefinanceiro/FinanceiroLista';
-import FinanceiroResumoTeste from '@/components/testefinanceiro/FinanceiroResumo';
+import FinanceiroCrudTeste from './FinanceiroCrudTeste';
+import FinanceiroFiltrosTeste from './FinanceiroFiltros';
+import FinanceiroListaTeste from './FinanceiroLista';
+import FinanceiroResumoTeste from './FinanceiroResumo';
 import { useFinanceiro } from '@/hooks/financeiro';
 
 export default function FinanceiroTestSuite() {

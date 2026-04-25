@@ -19,7 +19,7 @@ import {
 import { fornecedorService } from "@/hooks/fornecedor";
 import type { ListQuery, PaginatedResult } from "@/hooks/generic";
 import FornecedorDTO from "@/models/fornecedor";
-import { FornecedorRouteSkeleton } from "@/components/route-skeletons";
+import FornecedorSkeleton from "./skeleton";
 // Usando o tipo do service
 
 type Fornecedor = FornecedorDTO;
@@ -288,7 +288,7 @@ export default function Page() {
   };
 
   if (loading) {
-    return <FornecedorRouteSkeleton />;
+    return <FornecedorSkeleton />;
   }
 
   return (

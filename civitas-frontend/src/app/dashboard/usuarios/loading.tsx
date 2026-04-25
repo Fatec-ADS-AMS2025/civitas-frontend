@@ -1,5 +1,5 @@
-import { UsuariosRouteSkeleton } from "@/components/route-skeletons";
+import UsuariosSkeleton from "./skeleton";
 
 export default function Loading() {
-  return <UsuariosRouteSkeleton />;
+  return <UsuariosSkeleton />;
 }

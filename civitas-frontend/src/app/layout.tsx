@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import AccessibilityMenu from "@/components/AccessibilityMenu";
 import NavigationFeedback from "@/components/NavigationFeedback";
 import Toaster from "@/components/Toaster";
-import { AuthProvider } from "@/context/AuthContext";
-import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext";
+import "@/app/globals.css";
 
 export const metadata: Metadata = {
   title: "Civitas",
@@ -18,6 +18,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="antialiased">
         <AuthProvider>
+          <NavigationFeedback />
+
           <a
             href="#conteudo-principal"
             className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[10000] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-black"

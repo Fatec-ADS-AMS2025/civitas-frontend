@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-import { SkeletonTable } from "@/components/skeleton";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
@@ -12,6 +11,7 @@ import { unidadeMedidaService } from "@/hooks/unidadeMedida";
 import TipoInstituicaoDTO from "@/models/tipoInstituicao";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 import UnidadeMedidaDTO from "@/models/unidadeMedida";
+import ConfiguracoesSkeleton from "./skeleton";
 
 type ConfigKind = "tipoInstituicao" | "tipoDespesa" | "unidadeMedida";
 type FeedbackType = "success" | "error";
@@ -549,7 +549,7 @@ export default function ConfiguracoesPage() {
   };
 
   if (loading) {
-    return <SkeletonTable rows={5} cols={4} />;
+    return <ConfiguracoesSkeleton />;
   }
 
   return (

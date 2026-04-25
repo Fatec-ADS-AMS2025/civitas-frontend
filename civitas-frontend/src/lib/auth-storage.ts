@@ -3,6 +3,9 @@ export const AUTH_STORAGE_KEY = 'civitas.auth.user';
 export type AuthStorageUser = {
   id: number;
   nome: string;
+  token: string;
+  expiresAtUtc: string;
+  tipoUsuario?: string;
 };
 
 const isBrowser = () => typeof window !== 'undefined';
@@ -16,13 +19,26 @@ export const authStorage = {
       if (!raw) return null;
 
       const parsed = JSON.parse(raw) as Partial<AuthStorageUser> | null;
-      if (!parsed || typeof parsed.id !== 'number' || typeof parsed.nome !== 'string') {
+      if (
+        !parsed ||
+        typeof parsed.id !== 'number' ||
+        typeof parsed.nome !== 'string' ||
+        typeof parsed.token !== 'string' ||
+        parsed.token.trim() === '' ||
+        typeof parsed.expiresAtUtc !== 'string'
+      ) {
         console.warn('[authStorage] Dados invalidos encontrados no localStorage. Limpando registro.');
         window.localStorage.removeItem(AUTH_STORAGE_KEY);
         return null;
       }
 
-      return { id: parsed.id, nome: parsed.nome };
+      return {
+        id: parsed.id,
+        nome: parsed.nome,
+        token: parsed.token,
+        expiresAtUtc: parsed.expiresAtUtc,
+        tipoUsuario: typeof parsed.tipoUsuario === 'string' ? parsed.tipoUsuario : undefined,
+      };
     } catch (error) {
       console.error('[authStorage] Falha ao ler usuario salvo no localStorage.', error);
       return null;

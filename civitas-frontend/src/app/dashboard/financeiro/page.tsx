@@ -1,21 +1,21 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { useFinanceiro } from '@/hooks/financeiro';
 import { useDashboardHeader } from '@/components/dashboard/dashboard-header';
+import { useAppNavigation } from '@/hooks/useNavigationProgress';
 import {
   FinanceiroHero,
   FinanceiroResumo,
   FinanceiroFiltros,
   FinanceiroFormulario,
   FinanceiroLista,
-  FinanceiroLoadingState,
   FinanceiroErrorState,
-} from '@/components/testefinanceiro';
+} from './_components';
+import FinanceiroSkeleton from './skeleton';
 
 export default function FinanceiroPage() {
-  const router = useRouter();
+  const { push } = useAppNavigation();
   const {
     filtros,
     transacoes,
@@ -69,18 +69,18 @@ export default function FinanceiroPage() {
           icon: 'receipt_long',
           variant: 'ghost' as const,
           onClick: () => {
-            router.push('/dashboard/despesas');
+            push('/dashboard/despesas');
           },
         },
       ],
     }),
-    [refetch, router]
+    [push, refetch]
   );
 
   useDashboardHeader(headerConfig);
 
   if (loading && !hasData) {
-    return <FinanceiroLoadingState />;
+    return <FinanceiroSkeleton />;
   }
 
   if (error && !hasData) {

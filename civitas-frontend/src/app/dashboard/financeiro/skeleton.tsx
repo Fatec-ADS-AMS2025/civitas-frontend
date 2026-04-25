@@ -1,11 +1,6 @@
-'use client';
-
-import React from 'react';
-
-export default function FinanceiroLoadingState() {
+export default function FinanceiroSkeleton() {
   return (
     <div className="skeleton-loader space-y-6">
-      {/* Hero skeleton */}
       <div className="relative overflow-hidden rounded-[28px] border border-[#E4EEF0] bg-white p-6 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
@@ -18,8 +13,8 @@ export default function FinanceiroLoadingState() {
             </div>
           </div>
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between rounded-xl bg-[#F8FCFC] p-3">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="flex items-center justify-between rounded-xl bg-[#F8FCFC] p-3">
                 <div className="skeleton-line h-4 w-32 rounded" />
                 <div className="skeleton-line h-6 w-16 rounded-full" />
               </div>
@@ -28,10 +23,12 @@ export default function FinanceiroLoadingState() {
         </div>
       </div>
 
-      {/* Resumo skeleton */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-[20px] border border-[#E4EEF0] bg-white p-5 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
+        {[1, 2, 3, 4].map((item) => (
+          <div
+            key={item}
+            className="rounded-[20px] border border-[#E4EEF0] bg-white p-5 shadow-[0_8px_20px_rgba(0,0,0,0.04)]"
+          >
             <div className="skeleton-line h-3 w-24 rounded" />
             <div className="skeleton-line mt-3 h-8 w-32 rounded" />
             <div className="skeleton-line mt-2 h-3 w-40 rounded" />
@@ -39,32 +36,30 @@ export default function FinanceiroLoadingState() {
         ))}
       </div>
 
-      {/* Filtros e Cadastro skeleton */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-[20px] border border-[#E4EEF0] bg-white p-5 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
           <div className="skeleton-line h-5 w-20 rounded" />
           <div className="mt-4 space-y-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="skeleton-line h-11 w-full rounded-xl" />
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="skeleton-line h-11 w-full rounded-xl" />
             ))}
           </div>
         </div>
         <div className="rounded-[20px] border border-[#E4EEF0] bg-white p-5 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
           <div className="skeleton-line h-5 w-20 rounded" />
           <div className="mt-4 space-y-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="skeleton-line h-11 w-full rounded-xl" />
+            {[1, 2, 3, 4, 5].map((item) => (
+              <div key={item} className="skeleton-line h-11 w-full rounded-xl" />
             ))}
           </div>
         </div>
       </div>
 
-      {/* Tabela skeleton */}
       <div className="rounded-[20px] border border-[#E4EEF0] bg-white p-5 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
         <div className="skeleton-line h-5 w-40 rounded" />
         <div className="mt-4 space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center gap-4 rounded-xl bg-[#F8FCFC] p-4">
+          {[1, 2, 3, 4, 5].map((item) => (
+            <div key={item} className="flex items-center gap-4 rounded-xl bg-[#F8FCFC] p-4">
               <div className="skeleton-line h-4 w-12 rounded" />
               <div className="skeleton-line h-4 w-20 rounded" />
               <div className="skeleton-line h-4 w-40 flex-1 rounded" />

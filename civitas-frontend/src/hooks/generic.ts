@@ -1,4 +1,5 @@
 import { showToast } from "@/hooks/useToast";
+import { authStorage } from "@/lib/auth-storage";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
 
@@ -171,6 +172,17 @@ export class GenericService<T> {
     return `${BASE_URL}/${this.endpoint}`;
   }
 
+  protected createHeaders(init?: HeadersInit): Headers {
+    const headers = new Headers(init);
+    const authenticatedUser = authStorage.get();
+
+    if (authenticatedUser?.token) {
+      headers.set("Authorization", `Bearer ${authenticatedUser.token}`);
+    }
+
+    return headers;
+  }
+
   protected async handleResponse<R = unknown>(
     response: Response,
     options: HandleResponseOptions = {}
@@ -290,19 +302,25 @@ export class GenericService<T> {
   }
 
   async getAll(query?: ListQuery): Promise<T[]> {
-    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
     const payload = await this.handleResponse(response);
     return this.unwrapCollection<T>(payload);
   }
 
   async getPage(query?: ListQuery): Promise<PaginatedResult<T>> {
-    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
     const payload = await this.handleResponse(response);
     return this.normalizePaginatedResult<T>(payload, query);
   }
 
   async getAllEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
-    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
     const payload = await this.handleResponse(response);
     const envelope = this.toEnvelope<unknown>(payload);
 
@@ -313,17 +331,23 @@ export class GenericService<T> {
   }
 
   async getInactive(query?: ListQuery): Promise<T[]> {
-    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
+    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
     const payload = await this.handleResponse(response, { showErrorToast: false });
     return this.unwrapCollection<T>(payload);
   }
 
   async getInactiveEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
-    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
+    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
     const payload = await this.handleResponse(response, { showErrorToast: false });
     const envelope = this.toEnvelope<unknown>(payload);
+    const items = this.unwrapCollection<T>(payload);
 
     return {
+      ...envelope,
       data: items,
     };
   }
@@ -338,7 +362,9 @@ export class GenericService<T> {
   }
 
   async getById(id: number): Promise<T> {
-    const response = await fetch(`${this.getUrlEndpoint()}/${id}`);
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
+      headers: this.createHeaders(),
+    });
     const payload = await this.handleResponse(response);
     return this.unwrapItem<T>(payload);
   }
@@ -359,9 +385,9 @@ export class GenericService<T> {
   async create(data: unknown): Promise<T> {
     const response = await fetch(this.getUrlEndpoint(), {
       method: "POST",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -372,9 +398,9 @@ export class GenericService<T> {
   async createEnvelope(data: unknown): Promise<ResponseEnvelope<T>> {
     const response = await fetch(this.getUrlEndpoint(), {
       method: "POST",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -400,9 +426,9 @@ export class GenericService<T> {
   async update(id: number, data: Partial<T>): Promise<T> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "PUT",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -413,9 +439,9 @@ export class GenericService<T> {
   async updateEnvelope(id: number, data: Partial<T>): Promise<ResponseEnvelope<T>> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "PUT",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -441,6 +467,7 @@ export class GenericService<T> {
   async delete(id: number): Promise<void> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "DELETE",
+      headers: this.createHeaders(),
     });
 
     await this.handleResponse(response, { showSuccessToast: true });
@@ -449,9 +476,9 @@ export class GenericService<T> {
   async patch(id: number, data: Partial<T>): Promise<T> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "PATCH",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -472,6 +499,7 @@ export class GenericService<T> {
   async alterarSituacao(id: number): Promise<void> {
     const response = await fetch(`${this.getUrlEndpoint()}/situacao/${id}`, {
       method: "PATCH",
+      headers: this.createHeaders(),
     });
 
     await this.handleResponse(response, { showSuccessToast: true });
@@ -480,6 +508,7 @@ export class GenericService<T> {
   async alterarSituacaoEnvelope(id: number): Promise<ResponseEnvelope<unknown>> {
     const response = await fetch(`${this.getUrlEndpoint()}/situacao/${id}`, {
       method: "PATCH",
+      headers: this.createHeaders(),
     });
 
     const payload = await this.handleResponse(response, { showSuccessToast: true });

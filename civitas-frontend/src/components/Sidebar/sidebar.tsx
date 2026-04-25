@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import { NAVIGATION_CATALOG } from "@/navigation/navigation.data";
 
 const normalizePath = (path: string): string => {
@@ -11,7 +12,7 @@ const normalizePath = (path: string): string => {
 };
 
 export default function Sidebar() {
-  const router = useRouter();
+  const { push } = useAppNavigation();
   const pathname = usePathname() || "/dashboard";
 
   const navigationItems = useMemo(
@@ -30,7 +31,7 @@ export default function Sidebar() {
   const normalizedPath = normalizePath(pathname);
 
   const navigateToPath = (path: string) => {
-    router.push(path);
+    push(path);
   };
 
   return (
@@ -58,7 +59,7 @@ export default function Sidebar() {
                 key={item.key}
                 type="button"
                 onClick={() => navigateToPath(item.path)}
-                className={`flex w-full items-center justify-center gap-0 rounded-xl px-3 py-2 text-left text-sm font-semibold transition-all duration-150 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3 ${
+                className={`flex w-full cursor-pointer items-center justify-center gap-0 rounded-xl px-3 py-2 text-left text-sm font-semibold transition-all duration-150 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3 ${
                   isActive
                     ? "bg-[#DDF0F2] text-[#003A42]"
                     : "text-[#D8EBEE] hover:bg-[#0B5A64]"
@@ -80,11 +81,11 @@ export default function Sidebar() {
         <div className="px-3 py-6">
           <button
             className="flex w-full items-center justify-center gap-0 rounded-xl bg-tertialy-1 px-3 py-2 text-secundary-1 shadow-inner transition-all duration-150 hover:shadow-md sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
-            onClick={() => router.push(profileItem.path)}
+            onClick={() => push(profileItem.path)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                router.push(profileItem.path);
+                push(profileItem.path);
               }
             }}
           >

@@ -157,10 +157,13 @@ const Table = <T extends TableRow,>({
     );
   };
   const renderStatusBadge = (status: unknown) => {
-    const statusText = getStatusText(status);
-    if (!statusText) return null;
+    const baseStatusText = getStatusText(status);
+    if (!baseStatusText) return null;
 
     let classes = "civitas-badge min-w-[74px]";
+    let statusText = baseStatusText;
+    const normalized = baseStatusText.trim().toLowerCase();
+
     if (normalized === "ativo" || normalized === "true" || normalized === "sim" || normalized === "1") {
       classes += " civitas-badge--status-active";
       statusText = "Ativo";
@@ -192,7 +195,7 @@ const Table = <T extends TableRow,>({
     if (column.id.toLowerCase() === "id" || column.id.toLowerCase().startsWith("id")) {
       return (
         <span className="inline-flex min-w-[82px] justify-center rounded-full border border-[#E3CB73] bg-[linear-gradient(135deg,#FFE38A_0%,#F7D447_100%)] px-4 py-[7px] text-sm font-bold leading-none text-[#2A2A2A] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
-          #{String(value).padStart(3, "0")}
+          #{String(cellText).padStart(3, "0")}
         </span>
       );
     }

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import { NAVIGATION_CATALOG } from "@/navigation/navigation.data";
 import { searchNavigation } from "@/navigation/navigation.search";
 
@@ -13,7 +14,7 @@ const normalizePath = (path: string): string => {
 };
 
 export const useNavigationSearch = () => {
-  const router = useRouter();
+  const { push } = useAppNavigation();
   const pathname = usePathname() || "/dashboard";
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 220);
@@ -55,7 +56,7 @@ export const useNavigationSearch = () => {
   }, [flattenedResults, normalizedPath, selectedKey]);
 
   const navigateToPath = (path: string) => {
-    router.push(path);
+    push(path);
   };
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {

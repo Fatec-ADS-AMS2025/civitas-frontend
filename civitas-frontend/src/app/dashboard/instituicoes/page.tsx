@@ -23,7 +23,7 @@ import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
 import InstituicaoDTO from "@/models/instituicao";
 import SecretariaDTO from "@/models/secretaria";
 import TipoInstituicaoDTO from "@/models/tipoInstituicao";
-import { SkeletonTable } from "@/components/skeleton";
+import InstituicoesSkeleton from "./skeleton";
 
 type Instituicao = InstituicaoDTO;
 type Secretaria = SecretariaDTO;
@@ -351,7 +351,7 @@ export default function Page() {
   };
 
   if (loading) {
-    return <SkeletonTable rows={5} cols={4} />;
+    return <InstituicoesSkeleton />;
   }
 
   return (

@@ -8,7 +8,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useAppNavigation } from "@/hooks/useNavigationProgress";
 
 export type DashboardHeaderBreadcrumb = {
   label: string;
@@ -227,7 +228,7 @@ export function useResolvedDashboardHeader() {
 }
 
 export function DashboardPageHeader() {
-  const router = useRouter();
+  const { push } = useAppNavigation();
   const header = useResolvedDashboardHeader();
   const breadcrumbs = header.breadcrumbs ?? [];
   const actions = header.actions ?? [];
@@ -256,7 +257,7 @@ export function DashboardPageHeader() {
                     {isClickable ? (
                       <button
                         type="button"
-                        onClick={() => router.push(item.href!)}
+                        onClick={() => push(item.href!)}
                         className="transition-colors duration-200 hover:text-[var(--secundary-1)]"
                       >
                         {item.label}
@@ -309,7 +310,7 @@ export function DashboardPageHeader() {
                     }
 
                     if (action.href) {
-                      router.push(action.href);
+                      push(action.href);
                     }
                   }}
                   className={actionClassName}

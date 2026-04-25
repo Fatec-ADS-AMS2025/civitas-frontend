@@ -4,11 +4,11 @@ import React, { useEffect, useState } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import { UsuariosRouteSkeleton } from "@/components/route-skeletons";
 import { usuarioService } from "@/hooks/usuario";
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import UsuarioDTO from "@/models/usuario";
 import type { ListQuery, PaginatedResult } from "@/hooks/generic";
+import UsuariosSkeleton from "./skeleton";
 
 type User = UsuarioDTO;
 type UserRow = User & {
@@ -288,7 +288,7 @@ const Page = () => {
   };
 
   if (loading) {
-    return <UsuariosRouteSkeleton />;
+    return <UsuariosSkeleton />;
   }
 
   if (error) {

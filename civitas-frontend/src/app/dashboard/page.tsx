@@ -15,6 +15,7 @@ import {
   type DespesaDashboardRow,
   useDespesasDashboard,
 } from "@/hooks/useDespesasDashboard";
+import DashboardSkeleton from "./skeleton";
 
 type ActionTone = "amber" | "blue" | "slate";
 
@@ -275,7 +276,7 @@ export default function Dashboard() {
   const hiddenValue = "* * * * * *";
 
   if (loading) {
-    return <DashboardRouteSkeleton />;
+    return <DashboardSkeleton />;
   }
 
   if (error) {
