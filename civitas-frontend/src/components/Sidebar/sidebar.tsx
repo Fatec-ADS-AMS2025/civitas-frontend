@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import SearchDrawer from "@/components/SearchDrawer";
+import ThemeSwitcher from "@/components/theme/theme-switcher";
 import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import { NAVIGATION_CATALOG } from "@/navigation/navigation.data";
 
@@ -40,15 +41,15 @@ export default function Sidebar() {
     <>
       <aside
         aria-label="Sidebar"
-        className="group hidden h-[calc(100vh-1.5rem)] w-[78px] shrink-0 select-none flex-col justify-between overflow-hidden rounded-[18px] border border-[rgba(255,255,255,0.08)] bg-secundary-1 text-tertialy-1 transition-all duration-200 ease-out sm:fixed sm:left-3 sm:top-3 sm:z-[110] sm:flex sm:hover:w-[256px] sm:focus-within:w-[256px]"
-        style={{ boxShadow: "0 10px 24px rgba(10, 38, 44, 0.14)" }}
+        className="group hidden h-[calc(100vh-1.5rem)] w-[78px] shrink-0 select-none flex-col justify-between overflow-hidden rounded-[18px] border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] transition-all duration-200 ease-out sm:fixed sm:left-3 sm:top-3 sm:z-[110] sm:flex sm:hover:w-[256px] sm:focus-within:w-[256px]"
+        style={{ boxShadow: "var(--sidebar-shadow)" }}
       >
         <div className="flex min-h-0 flex-1 flex-col gap-4 px-3 pb-3 pt-5">
           <div className="flex items-center justify-center gap-0 px-1 transition-all duration-200 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3">
             <div className="flex h-10 w-11 items-center justify-center overflow-hidden rounded-md bg-transparent">
               <img src="/logo.png" alt="Logo Civitas" className="size-full object-contain" />
             </div>
-            <div className="font-title w-0 overflow-hidden whitespace-nowrap text-xl font-semibold text-tertialy-1 opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
+            <div className="font-title w-0 overflow-hidden whitespace-nowrap text-xl font-semibold text-[var(--sidebar-text)] opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
               Civitas
             </div>
           </div>
@@ -56,7 +57,7 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className="flex w-full items-center justify-center gap-0 rounded-xl border border-[#1A6973] bg-[#0B5A64] px-3 py-2.5 text-left text-sm font-medium text-[#E4F5F7] transition-all duration-150 hover:bg-[#0e6570] sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
+            className="flex w-full items-center justify-center gap-0 rounded-xl border border-[var(--sidebar-search-border)] bg-[var(--sidebar-search-bg)] px-3 py-2.5 text-left text-sm font-medium text-[var(--sidebar-search-text)] transition-all duration-150 hover:bg-[var(--sidebar-search-hover-bg)] sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
             aria-label="Buscar funcionalidades"
           >
             <span className="material-symbols-outlined text-[20px]">search</span>
@@ -76,8 +77,8 @@ export default function Sidebar() {
                   onClick={() => navigateToPath(item.path)}
                   className={`flex w-full cursor-pointer items-center justify-center gap-0 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-150 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3 ${
                     isActive
-                      ? "bg-[#DDF0F2] text-[#003A42]"
-                      : "text-[#D8EBEE] hover:bg-[#0B5A64]"
+                      ? "bg-[var(--sidebar-nav-active-bg)] text-[var(--sidebar-nav-active-text)]"
+                      : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-nav-hover-bg)]"
                   }`}
                 >
                   <span className="material-symbols-outlined text-[20px]">
@@ -92,10 +93,12 @@ export default function Sidebar() {
           </nav>
         </div>
 
+        <ThemeSwitcher />
+
         {profileItem ? (
-          <div className="border-t border-[rgba(255,255,255,0.08)] px-3 py-4">
+          <div className="border-t border-[var(--sidebar-divider)] px-3 py-4">
             <button
-              className="flex w-full items-center justify-center gap-0 rounded-xl bg-[rgba(255,255,255,0.92)] px-3 py-2.5 text-secundary-1 transition-all duration-150 hover:bg-white sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
+              className="flex w-full items-center justify-center gap-0 rounded-xl bg-[var(--sidebar-profile-bg)] px-3 py-2.5 text-[var(--sidebar-profile-text)] transition-all duration-150 hover:bg-[var(--sidebar-profile-hover-bg)] sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
               onClick={() => push(profileItem.path)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -104,7 +107,7 @@ export default function Sidebar() {
                 }
               }}
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-secundary-1">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--sidebar-profile-icon-bg)] text-[var(--sidebar-profile-text)]">
                 <span className="material-symbols-outlined">{profileItem.icon ?? "person"}</span>
               </div>
               <div className="font-detail w-0 overflow-hidden whitespace-nowrap text-sm font-medium opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">

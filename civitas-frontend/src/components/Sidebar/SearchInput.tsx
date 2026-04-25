@@ -16,8 +16,8 @@ export default function SearchInput({
   autoFocus = false,
 }: SearchInputProps) {
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-[#D4E4E7] bg-white px-3 py-2 shadow-sm">
-      <span className="material-symbols-outlined text-[#4A6A74]">search</span>
+    <div className="flex items-center gap-2 rounded-xl border border-[var(--search-input-border)] bg-[var(--search-input-bg)] px-3 py-2 shadow-sm">
+      <span className="material-symbols-outlined text-[var(--search-input-icon)]">search</span>
       <input
         type="text"
         value={value}
@@ -25,7 +25,7 @@ export default function SearchInput({
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        className="search-drawer-input font-detail w-full border-none bg-transparent text-sm text-[#1E3640] outline-none placeholder:text-[#8EA1A9]"
+        className="search-drawer-input font-detail w-full border-none bg-transparent text-sm text-[var(--search-input-text)] outline-none placeholder:text-[var(--search-input-placeholder)]"
         aria-label="Buscar funcionalidade na navegacao"
       />
     </div>

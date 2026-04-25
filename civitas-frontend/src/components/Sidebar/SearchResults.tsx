@@ -71,7 +71,9 @@ const HighlightedLabel = ({ label, query }: { label: string; query: string }) =>
   return (
     <>
       {label.slice(0, range.start)}
-      <mark className="rounded bg-[#FDE7D4] px-1 text-[#A84A1D]">{label.slice(range.start, range.end)}</mark>
+      <mark className="rounded bg-[var(--search-highlight-bg)] px-1 text-[var(--search-highlight-text)]">
+        {label.slice(range.start, range.end)}
+      </mark>
       {label.slice(range.end)}
     </>
   );
@@ -101,8 +103,8 @@ export default function SearchResults({
 }: SearchResultsProps) {
   if (groups.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-[#BFD4D9] bg-[#F5FAFB] px-3 py-5 text-center">
-        <p className="font-detail text-sm font-medium text-[#547480]">
+      <div className="rounded-xl border border-dashed border-[var(--search-empty-border)] bg-[var(--search-empty-bg)] px-3 py-5 text-center">
+        <p className="font-detail text-sm font-medium text-[var(--search-empty-text)]">
           Nenhum resultado encontrado para a busca.
         </p>
       </div>
@@ -113,7 +115,7 @@ export default function SearchResults({
     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
       {groups.map((group) => (
         <section key={group.category} className="space-y-2">
-          <h3 className="font-detail px-1 text-xs font-semibold uppercase tracking-[0.06em] text-[#9CB1B8]">
+          <h3 className="font-detail px-1 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--search-section-title)]">
             {group.category}
           </h3>
 
@@ -131,10 +133,10 @@ export default function SearchResults({
                   onMouseEnter={() => onHover(entry.item.key)}
                   className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors duration-150 ${
                     isSelected
-                      ? "bg-[#DDF0F2] text-[#003A42]"
+                      ? "bg-[var(--search-result-selected-bg)] text-[var(--search-result-selected-text)]"
                       : isActiveRoute
-                        ? "bg-[#E9F6F7] text-[#004D57]"
-                        : "text-[#234852] hover:bg-[#F1F8F9]"
+                        ? "bg-[var(--search-result-active-bg)] text-[var(--search-result-active-text)]"
+                        : "text-[var(--search-result-text)] hover:bg-[var(--search-result-hover-bg)]"
                   }`}
                 >
                   <span className="material-symbols-outlined text-[20px]">
@@ -149,8 +151,8 @@ export default function SearchResults({
                       <div
                         className={`mt-0.5 truncate text-xs ${
                           isSelected || isActiveRoute
-                            ? "text-[#37656D]"
-                            : "text-[#9FC0C8] group-hover:text-[#CFE3E7]"
+                            ? "text-[var(--search-result-meta-strong)]"
+                            : "text-[var(--search-result-meta)] group-hover:text-[var(--search-result-meta-hover)]"
                         }`}
                       >
                         {featureMatch}

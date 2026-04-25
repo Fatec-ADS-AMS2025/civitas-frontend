@@ -54,7 +54,7 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
         aria-hidden={!isOpen}
         tabIndex={isOpen ? 0 : -1}
         onClick={onClose}
-        className={`fixed inset-0 z-[120] bg-[#0A1E23]/35 backdrop-blur-[1px] transition-opacity duration-200 ${
+        className={`fixed inset-0 z-[120] bg-[var(--search-drawer-overlay)] backdrop-blur-[1px] transition-opacity duration-200 ${
           isOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -64,18 +64,18 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
       <aside
         aria-label="Painel de busca"
         aria-hidden={!isOpen}
-        className={`fixed right-0 top-0 z-[130] flex h-screen w-full max-w-[380px] flex-col border-l border-[#D7E5E8] bg-white shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 z-[130] flex h-screen w-full max-w-[380px] flex-col border-l border-[var(--search-drawer-border)] bg-[var(--search-drawer-bg)] shadow-2xl transition-transform duration-300 ease-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-[#E1ECEF] px-4 py-3">
-          <h2 className="font-title text-lg font-semibold text-[#0F3A43]">
+        <div className="flex items-center justify-between border-b border-[var(--search-drawer-divider)] px-4 py-3">
+          <h2 className="font-title text-lg font-semibold text-[var(--search-drawer-title)]">
             Buscar funcionalidade
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#D7E5E8] text-[#4F6A72] transition-colors hover:bg-[#F5FAFB]"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--search-drawer-border)] text-[var(--search-drawer-muted)] transition-colors hover:bg-[var(--search-drawer-hover-bg)]"
             aria-label="Fechar busca"
           >
             <span className="material-symbols-outlined">close</span>
