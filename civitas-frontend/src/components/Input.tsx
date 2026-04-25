@@ -32,13 +32,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={`
             civitas-input
             w-full
-            min-h-[48px]
-            rounded-[18px]
+            min-h-[44px]
+            rounded-xl
             border border-[var(--border-default)]
-            bg-[rgba(255,255,255,0.92)]
-            px-4 py-3
-            text-[15px] text-[var(--foreground)]
-            shadow-[var(--shadow-xs)]
+            bg-[var(--surface-elevated)]
+            px-3.5 py-2.5
+            text-sm text-[var(--foreground)]
             focus:border-[var(--primary-1)]
             focus:outline-none
             focus:ring-4 focus:ring-[var(--focus-ring)]

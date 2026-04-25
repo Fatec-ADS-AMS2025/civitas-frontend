@@ -6,6 +6,52 @@ import { usePathname } from 'next/navigation'
 const MIN_FONT = 14
 const DEFAULT_FONT = 16
 const MAX_FONT = 22
+const updateAccessibilityScale = (size: number) => {
+  const scale = Number((size / DEFAULT_FONT).toFixed(3))
+  document.documentElement.style.setProperty('--accessibility-font-size', `${size}px`)
+  document.documentElement.style.setProperty('--accessibility-ui-scale', String(scale))
+}
+
+type AccessibilityActionProps = {
+  label: string
+  ariaLabel: string
+  onClick: () => void
+  children: React.ReactNode
+  isActive?: boolean
+}
+
+function AccessibilityAction({
+  label,
+  ariaLabel,
+  onClick,
+  children,
+  isActive = false,
+}: AccessibilityActionProps) {
+  return (
+    <div className="group relative flex items-center">
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={ariaLabel}
+        className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] bg-primary-1 text-white`}
+      >
+        {children}
+      </button>
+
+      <span
+        className="
+          pointer-events-none absolute right-[calc(100%+10px)] top-1/2 -translate-y-1/2 translate-x-1
+          whitespace-nowrap rounded-lg border border-[var(--border-default)] bg-[var(--surface-elevated)]
+          px-3 py-1.5 text-xs font-medium text-[var(--foreground)]
+          opacity-0 shadow-[0_6px_18px_rgba(15,43,49,0.08)] transition-all duration-150
+          group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100
+        "
+      >
+        {label}
+      </span>
+    </div>
+  )
+}
 
 export default function AccessibilityMenu() {
   const [fontSize, setFontSize] = useState(DEFAULT_FONT)
@@ -34,7 +80,9 @@ export default function AccessibilityMenu() {
     if (savedFont) {
       const parsed = Number(savedFont)
       setFontSize(parsed)
-      document.documentElement.style.fontSize = `${parsed}px`
+      updateAccessibilityScale(parsed)
+    } else {
+      updateAccessibilityScale(DEFAULT_FONT)
     }
 
     if (savedContrast === 'true') {
@@ -50,7 +98,7 @@ export default function AccessibilityMenu() {
   const updateFontSize = (size: number) => {
     const next = Math.max(MIN_FONT, Math.min(MAX_FONT, size))
     setFontSize(next)
-    document.documentElement.style.fontSize = `${next}px`
+    updateAccessibilityScale(next)
     localStorage.setItem('app-font-size', String(next))
   }
 
@@ -65,64 +113,58 @@ export default function AccessibilityMenu() {
   }
 
   return (
-    <div
+    <aside
       aria-label="Menu de acessibilidade"
       className="
-        fixed right-[14px] top-[88px] z-[90]
-        lg:right-[18px] lg:top-[96px]
-        flex flex-col items-center
-        w-[46px]
-        rounded-[999px]
-        bg-[#FF981F]
-        px-[6px] py-[8px]
-        border border-[#F2A94D]
-        shadow-[0_10px_20px_rgba(0,0,0,0.18)]
-        backdrop-blur-[2px]
+        fixed bottom-4 right-4 z-[120]
+        flex flex-col gap-2 rounded-[18px]
+        border border-[var(--border-soft)] bg-secundary-1
+        p-2 shadow-[0_10px_24px_rgba(15,43,49,0.10)]
+        backdrop-blur-[6px]
+        sm:bottom-5 sm:right-5
       "
     >
-      <button
-        type="button"
+
+      <AccessibilityAction
+        label="Aumentar fonte"
+        ariaLabel="Aumentar fonte"
         onClick={increaseFont}
-        aria-label="Aumentar fonte"
-        className="text-black text-[14px] leading-[14px] font-extrabold mb-[6px]"
       >
         A+
-      </button>
+      </AccessibilityAction>
 
-      <button
-        type="button"
+      <AccessibilityAction
+        label="Restaurar fonte"
+        ariaLabel="Restaurar fonte"
         onClick={resetFont}
-        aria-label="Restaurar fonte"
-        className="text-black text-[14px] leading-[14px] font-extrabold mb-[6px]"
       >
         Aa
-      </button>
+      </AccessibilityAction>
 
-      <button
-        type="button"
+      <AccessibilityAction
+        label="Diminuir fonte"
+        ariaLabel="Diminuir fonte"
         onClick={decreaseFont}
-        aria-label="Diminuir fonte"
-        className="text-black text-[14px] leading-[14px] font-extrabold mb-[8px]"
       >
         A-
-      </button>
+      </AccessibilityAction>
 
-      <button
-        type="button"
+      <AccessibilityAction
+        label={highContrast ? 'Desativar contraste' : 'Ativar contraste'}
+        ariaLabel="Alternar contraste"
         onClick={toggleContrast}
-        aria-label="Alternar contraste"
-        title="Alternar contraste"
-        className="
-          relative
-          w-[22px] h-[22px]
-          rounded-full
-          border-[2px] border-black
-          overflow-hidden
-        "
+        isActive={highContrast}
       >
-        <span className="absolute left-0 top-0 h-full w-1/2 bg-black"></span>
-        <span className="absolute right-0 top-0 h-full w-1/2 bg-white"></span>
-      </button>
-    </div>
+        <span
+          className="
+            relative h-5 w-5 overflow-hidden rounded-full border
+            border-current
+          "
+        >
+          <span className="absolute left-0 top-0 h-full w-1/2 bg-current" />
+          <span className="absolute right-0 top-0 h-full w-1/2 bg-white" />
+        </span>
+      </AccessibilityAction>
+    </aside>
   )
 }

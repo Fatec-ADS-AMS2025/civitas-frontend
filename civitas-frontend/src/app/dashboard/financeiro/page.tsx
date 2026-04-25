@@ -49,8 +49,7 @@ export default function FinanceiroPage() {
     () => ({
       title: 'Financeiro',
       eyebrow: 'Monitoramento',
-      subtitle:
-        'Resumo financeiro, filtros e movimentações em um fluxo visual unificado com o restante do dashboard.',
+      subtitle: 'Resumo financeiro, filtros e movimentacoes do modulo.',
       breadcrumbs: [
         { label: 'Home', href: '/dashboard' },
         { label: 'Financeiro' },
@@ -88,20 +87,16 @@ export default function FinanceiroPage() {
   }
 
   return (
-    <div className="financeiro-root space-y-6">
-      {/* Hero com indicadores principais */}
+    <div className="financeiro-root space-y-5">
       <FinanceiroHero
         resumo={resumo}
         filtros={filtros}
         instituicoesCount={instituicoes.length}
       />
 
-      {/* Cards de resumo financeiro */}
       <FinanceiroResumo resumo={resumo} />
 
-      {/* Seção de Filtros e Operação */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Filtros */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <FinanceiroFiltros
           instituicoes={instituicoes}
           filtrosAtuais={filtros}
@@ -109,7 +104,6 @@ export default function FinanceiroPage() {
           loading={loading}
         />
 
-        {/* Cadastro e Atualização */}
         <FinanceiroFormulario
           transacoes={transacoes}
           instituicoes={instituicoes}
@@ -123,7 +117,6 @@ export default function FinanceiroPage() {
         />
       </div>
 
-      {/* Listagem de transações */}
       <FinanceiroLista
         transacoes={transacoes}
         allTransacoes={allTransacoes}

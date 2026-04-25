@@ -33,7 +33,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             id="conteudo-principal"
             className="w-full min-h-screen"
           >
-            {children}
+            <div id="accessibility-scale-shell" className="accessibility-scale-shell">
+              {children}
+            </div>
           </main>
 
           <Toaster />

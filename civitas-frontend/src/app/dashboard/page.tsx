@@ -3,10 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Input from "@/components/Input";
 import PaginationControls from "@/components/PaginationControls";
-import {
-  EmptyState,
-  ErrorState,
-} from "@/components/feedback-states";
+import { EmptyState, ErrorState } from "@/components/feedback-states";
 import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import { SITUACAO_ATIVO } from "@/global/situacao";
 import { useAppNavigation } from "@/hooks/useNavigationProgress";
@@ -156,9 +153,8 @@ export default function Dashboard() {
   const headerConfig = useMemo(
     () => ({
       title: "Dashboard",
-      eyebrow: "Visão geral",
-      subtitle:
-        "Resumo operacional e financeiro com dados reais do backend, destaques rápidos e acessos prioritários do painel.",
+      eyebrow: "Visao geral",
+      subtitle: "Resumo operacional e financeiro do sistema.",
       breadcrumbs: [
         { label: "Home", href: "/dashboard" },
         { label: "Dashboard" },
@@ -191,7 +187,7 @@ export default function Dashboard() {
     () => [
       {
         title: `${filteredDespesas.length} despesas disponiveis`,
-        subtitle: "Acesse a listagem completa e aplique filtros operacionais.",
+        subtitle: "Consultar registros e filtros.",
         button: "Abrir despesas",
         tone: "amber",
         icon: "receipt_long",
@@ -199,7 +195,7 @@ export default function Dashboard() {
       },
       {
         title: `${orcamentos.length} orcamentos carregados`,
-        subtitle: "Revise rapidamente previsao orcamentaria e cobertura.",
+        subtitle: "Revisar previsao orcamentaria.",
         button: "Ver orcamentos",
         tone: "blue",
         icon: "fact_check",
@@ -207,7 +203,7 @@ export default function Dashboard() {
       },
       {
         title: `${instituicoes.length} instituicoes cadastradas`,
-        subtitle: "Navegue para o painel financeiro consolidado do sistema.",
+        subtitle: "Abrir painel financeiro.",
         button: "Ir ao financeiro",
         tone: "slate",
         icon: "bar_chart",
@@ -291,84 +287,83 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="civitas-enter overflow-hidden rounded-[30px] bg-[#2B8F95] px-6 py-7 text-white shadow-[0_18px_32px_rgba(11,100,112,0.18)]">
-        <div className="flex flex-col gap-6">
+    <div className="space-y-5">
+      <section className="civitas-surface civitas-enter px-5 py-4 sm:px-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <span className="inline-flex rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
-              Radar analítico
+            <span className="inline-flex rounded-full border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+              Painel geral
             </span>
-            <h2 className="mt-4 text-[32px] font-bold leading-tight sm:text-[40px]">
-              Acompanhe sinais críticos, volume financeiro e próximos movimentos do sistema.
+            <h2 className="mt-3 text-[22px] font-semibold text-[var(--secundary-1)] sm:text-[24px]">
+              Acompanhamento consolidado
             </h2>
-            <p className="mt-3 max-w-3xl text-sm text-white/85 sm:text-base">
-              A leitura abaixo complementa o header com uma visão de contexto: saldo,
-              concentração por categoria, vencimentos próximos e atalhos operacionais
-              puxados do backend em tempo real.
+            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+              Indicadores, atalhos e registros recentes do sistema.
             </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <HeaderStat label="Despesas" value={filteredDespesas.length} />
+            <HeaderStat label="Instituicoes" value={instituicoes.length} />
+            <HeaderStat label="Usuarios" value={usuarios.length} />
           </div>
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-4">
+      <section className="grid gap-4 xl:grid-cols-4">
         <MetricCard
           title="Saldo atual"
           subtitle="Orcamentos menos despesas"
           value={showMoneyValues ? formatCurrency(summary.saldoTotal) : hiddenValue}
-          gradient="linear-gradient(135deg, #0D7C7C 0%, #66B8B7 100%)"
           icon="account_balance_wallet"
         />
         <MetricCard
           title="Total orcado"
-          subtitle="Base financeira carregada"
+          subtitle="Base financeira"
           value={showMoneyValues ? formatCurrency(summary.entrada) : hiddenValue}
-          gradient="linear-gradient(135deg, #1D1D1D 0%, #555555 100%)"
           icon="savings"
         />
         <MetricCard
           title="Total gasto"
-          subtitle="Despesas encontradas"
+          subtitle="Despesas registradas"
           value={showMoneyValues ? formatCurrency(summary.saida) : hiddenValue}
-          gradient="linear-gradient(135deg, #F18B1B 0%, #FFB354 100%)"
           icon="payments"
         />
         <MetricCard
           title="Cobertura"
-          subtitle="Despesa ativa x estoque cadastral"
+          subtitle="Situacao das despesas"
           value={`${activeExpenses} ativas / ${inactiveExpenses} inativas`}
-          gradient="linear-gradient(135deg, #28455A 0%, #5B7D91 100%)"
           icon="inventory"
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
-          <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#F0A126]">
+      <section className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+        <article className="civitas-surface p-5">
+          <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
             Acoes rapidas
           </span>
-          <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-            Entradas diretas para operacao
+          <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
+            Acessos diretos
           </h2>
-          <p className="mt-2 text-sm text-[#72808A]">
-            Atalhos baseados no volume real atualmente carregado pela API.
+          <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+            Atalhos para os modulos mais usados.
           </p>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-4 space-y-3">
             {quickActions.map((action) => (
               <ActionCard key={action.title} action={action} />
             ))}
           </div>
         </article>
 
-        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
-          <span className="inline-flex rounded-full bg-[#EAF4F5] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0B6470]">
+        <article className="civitas-surface p-5">
+          <span className="inline-flex rounded-full bg-[#EAF4F5] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0B6470]">
             Panorama
           </span>
-          <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
-            Leitura rapida do cadastro
+          <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
+            Cadastros ativos
           </h2>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <OverviewCard
               label="Instituicoes"
               value={instituicoes.length}
@@ -379,11 +374,7 @@ export default function Dashboard() {
               value={fornecedores.length}
               icon="storefront"
             />
-            <OverviewCard
-              label="Usuarios"
-              value={usuarios.length}
-              icon="group"
-            />
+            <OverviewCard label="Usuarios" value={usuarios.length} icon="group" />
             <OverviewCard
               label="Despesas filtradas"
               value={filteredDespesas.length}
@@ -393,7 +384,7 @@ export default function Dashboard() {
         </article>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-2">
+      <section className="grid gap-5 xl:grid-cols-2">
         <RankingCard
           title="Categorias com maior impacto"
           subtitle="Soma das despesas por categoria."
@@ -413,19 +404,18 @@ export default function Dashboard() {
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
+      <section className="grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
+        <article className="civitas-surface p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <span className="inline-flex rounded-full bg-[#F4F8F9] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#7A8B94]">
-                Ultimos registros
+              <span className="inline-flex rounded-full bg-[#F4F8F9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7A8B94]">
+                Registros
               </span>
-              <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
+              <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
                 Despesas recentes
               </h2>
-              <p className="mt-2 text-sm text-[#72808A]">
-                Busca local por descricao, documento ou categoria dentro das
-                despesas carregadas pelo backend.
+              <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                Busca local por descricao, documento ou categoria.
               </p>
             </div>
 
@@ -439,11 +429,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-5">
             {paginatedItems.length === 0 ? (
               <EmptyState
                 title="Nenhuma despesa encontrada"
-                description="A busca atual nao retornou despesas para exibir."
+                description="A busca atual nao retornou despesas para exibicao."
               />
             ) : (
               <>
@@ -457,7 +447,7 @@ export default function Dashboard() {
                   ))}
                 </div>
 
-                <div className="mt-5">
+                <div className="mt-4">
                   <PaginationControls
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -474,19 +464,18 @@ export default function Dashboard() {
           </div>
         </article>
 
-        <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
-          <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#F0A126]">
+        <article className="civitas-surface p-5">
+          <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
             Prioridades
           </span>
-          <h2 className="mt-4 text-[26px] font-bold text-[#1F2A32]">
+          <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
             Vencimentos proximos
           </h2>
-          <p className="mt-2 text-sm text-[#72808A]">
-            Despesas com vencimento em ate 7 dias, calculadas a partir dos dados
-            recebidos.
+          <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+            Despesas com vencimento em ate 7 dias.
           </p>
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-5 space-y-3">
             {dueSoonExpenses.length === 0 ? (
               <EmptyState
                 title="Sem vencimentos proximos"
@@ -496,27 +485,27 @@ export default function Dashboard() {
               dueSoonExpenses.map((item) => (
                 <div
                   key={`due-${item.id}`}
-                  className="rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4"
+                  className="rounded-[14px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-[#1F2A32]">
+                      <p className="text-sm font-semibold text-[var(--foreground)]">
                         {item.descricao}
                       </p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#90A0A8]">
+                      <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
                         {item.categoria}
                       </p>
                     </div>
-                    <span className="rounded-full bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#C97900]">
+                    <span className="rounded-full bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#9B5B00]">
                       {getDueSoonLabel(item.daysUntilDue)}
                     </span>
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[#72808A]">
+                    <span className="text-[var(--foreground-muted)]">
                       Vencimento: {formatDate(item.raw.dataVencimento ?? item.data)}
                     </span>
-                    <span className="font-semibold text-[#0B6470]">
+                    <span className="font-semibold text-[var(--secundary-1)]">
                       {showMoneyValues ? formatCurrency(item.valor) : hiddenValue}
                     </span>
                   </div>
@@ -534,40 +523,43 @@ function MetricCard({
   title,
   subtitle,
   value,
-  gradient,
   icon,
 }: {
   title: string;
   subtitle: string;
   value: string;
-  gradient: string;
   icon: string;
 }) {
   return (
-    <article
-      className="dashboard-metric-card relative flex h-full flex-col overflow-hidden rounded-[24px] p-5 text-white shadow-[0_14px_35px_rgba(0,0,0,0.12)]"
-      style={{ background: gradient }}
-    >
-      <div className="dashboard-metric-card__sheen absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_56%)]" />
-      <div className="relative z-10 flex items-start justify-between gap-4">
+    <article className="dashboard-metric-card civitas-surface flex h-full flex-col p-4">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.14em] text-white/75">
-            Conta digital
+          <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+            Indicador
           </p>
-          <h2 className="mt-5 text-[26px] font-semibold leading-none">{title}</h2>
-          <p className="mt-2 text-sm text-white/80">{subtitle}</p>
+          <h2 className="mt-3 text-base font-semibold text-[var(--foreground)]">{title}</h2>
+          <p className="mt-1 text-sm text-[var(--foreground-muted)]">{subtitle}</p>
         </div>
-        <span className="dashboard-metric-card__icon flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10">
-          <span className="material-symbols-outlined !text-[32px] opacity-80">
-            {icon}
-          </span>
+        <span className="dashboard-metric-card__icon flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border-soft)] bg-[var(--surface-subtle)] text-[var(--secundary-1)]">
+          <span className="material-symbols-outlined !text-[22px]">{icon}</span>
         </span>
       </div>
 
-      <div className="dashboard-metric-card__value relative z-10 mt-auto pt-6 rounded-2xl border border-white/10 bg-white/14 px-4 py-3 text-lg font-semibold tracking-[0.04em]">
+      <div className="dashboard-metric-card__value mt-4 rounded-xl border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3 text-lg font-semibold text-[var(--secundary-1)]">
         {value}
       </div>
     </article>
+  );
+}
+
+function HeaderStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
+      <p className="text-[11px] uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
+        {label}
+      </p>
+      <p className="mt-1 text-xl font-semibold text-[var(--secundary-1)]">{value}</p>
+    </div>
   );
 }
 
@@ -581,14 +573,14 @@ function OverviewCard({
   icon: string;
 }) {
   return (
-    <div className="rounded-[20px] border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-4">
+    <div className="rounded-[14px] border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-3.5">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-[#6F7E87]">{label}</span>
-        <span className="material-symbols-outlined !text-[20px] text-[#0B6470]">
+        <span className="text-sm font-medium text-[var(--foreground-muted)]">{label}</span>
+        <span className="material-symbols-outlined !text-[18px] text-[var(--secundary-1)]">
           {icon}
         </span>
       </div>
-      <p className="mt-3 text-[28px] font-bold leading-none text-[#1F2A32]">
+      <p className="mt-2 text-[24px] font-semibold leading-none text-[var(--foreground)]">
         {value}
       </p>
     </div>
@@ -611,11 +603,11 @@ function RankingCard({
   totalBase: number;
 }) {
   return (
-    <article className="rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)]">
-      <h2 className="text-[24px] font-bold text-[#1F2A32]">{title}</h2>
-      <p className="mt-2 text-sm text-[#72808A]">{subtitle}</p>
+    <article className="civitas-surface p-5">
+      <h2 className="text-[18px] font-semibold text-[var(--foreground)]">{title}</h2>
+      <p className="mt-1 text-sm text-[var(--foreground-muted)]">{subtitle}</p>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-5 space-y-4">
         {items.length === 0 ? (
           <EmptyState title={emptyTitle} description={emptyDescription} />
         ) : (
@@ -623,20 +615,20 @@ function RankingCard({
             <div key={item.id}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <span className="text-sm font-semibold text-[#1F2A32]">
+                  <span className="text-sm font-semibold text-[var(--foreground)]">
                     {index + 1}. {item.label}
                   </span>
-                  <p className="mt-1 text-xs text-[#7B8A93]">
+                  <p className="mt-1 text-xs text-[var(--foreground-soft)]">
                     {item.count ?? 0} registro(s)
                   </p>
                 </div>
-                <span className="text-sm font-semibold text-[#0B6470]">
+                <span className="text-sm font-semibold text-[var(--secundary-1)]">
                   {formatCompactCurrency(item.value)}
                 </span>
               </div>
-              <div className="h-3 rounded-full bg-[#EEF4F5]">
+              <div className="h-2 rounded-full bg-[#EEF4F5]">
                 <div
-                  className="h-3 rounded-full bg-[linear-gradient(90deg,#0D7C7C_0%,#64B7B3_100%)]"
+                  className="h-2 rounded-full bg-[var(--primary-1)]"
                   style={{
                     width: `${Math.min(
                       (item.value / Math.max(totalBase, 1)) * 100,
@@ -661,24 +653,24 @@ function RecentExpenseCard({
   showMoneyValues: boolean;
 }) {
   return (
-    <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4 sm:grid-cols-[1fr_auto_auto]">
+    <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-[14px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
       <div>
-        <p className="text-[15px] font-bold text-[#1F2A32]">
+        <p className="text-[15px] font-semibold text-[var(--foreground)]">
           {showMoneyValues ? formatCurrency(item.valor) : "* * * * * *"}
         </p>
-        <p className="mt-1 text-sm text-[#5B6770]">{item.descricao}</p>
-        <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#90A0A8]">
-          {item.categoria} • {item.registro}
+        <p className="mt-1 text-sm text-[var(--foreground-muted)]">{item.descricao}</p>
+        <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
+          {item.categoria} | {item.registro}
         </p>
       </div>
 
-      <div className="text-right text-sm text-[#6B7280]">
+      <div className="text-right text-sm text-[var(--foreground-muted)]">
         <div>{item.dataFormatada}</div>
         <div>{item.situacaoLabel}</div>
       </div>
 
       <div className="hidden self-center sm:flex sm:flex-col sm:items-end sm:gap-2">
-        <span className="rounded-full bg-[#FFF1DB] px-4 py-2 text-xs font-semibold text-[#F0A126]">
+        <span className="rounded-full bg-[#FFF1DB] px-4 py-2 text-xs font-semibold text-[#9B5B00]">
           Documento {item.numeroDocumento || "-"}
         </span>
       </div>
@@ -689,35 +681,35 @@ function RecentExpenseCard({
 function ActionCard({ action }: { action: QuickAction }) {
   const toneClasses = {
     amber: "border-[#F6E2BA] bg-[#FFF7E8]",
-    blue: "border-[#D9E8FF] bg-[#EFF5FF]",
+    blue: "border-[#DCE8EA] bg-[#F6FAFA]",
     slate: "border-[#D9E2E6] bg-[#F5F8F9]",
   } as const;
 
   const buttonClasses = {
-    amber: "bg-[#FFAA17] text-white",
-    blue: "bg-[#4A8FF7] text-white",
-    slate: "bg-[#1D2940] text-white",
+    amber: "border-[#E8C78C] bg-white text-[#9B5B00]",
+    blue: "border-[var(--border-default)] bg-white text-[var(--secundary-1)]",
+    slate: "border-[var(--border-default)] bg-white text-[var(--foreground)]",
   } as const;
 
   return (
     <div
-      className={`flex items-center gap-4 rounded-[20px] border px-4 py-4 ${toneClasses[action.tone]}`}
+      className={`flex items-center gap-4 rounded-[14px] border px-4 py-3.5 ${toneClasses[action.tone]}`}
     >
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/70">
-        <span className="material-symbols-outlined !text-[22px]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/80 text-[var(--secundary-1)]">
+        <span className="material-symbols-outlined !text-[20px]">
           {action.icon}
         </span>
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-semibold text-[#1F2A32]">
+        <p className="truncate text-[15px] font-semibold text-[var(--foreground)]">
           {action.title}
         </p>
-        <p className="mt-1 text-sm text-[#72808A]">{action.subtitle}</p>
+        <p className="mt-1 text-sm text-[var(--foreground-muted)]">{action.subtitle}</p>
       </div>
       <button
         type="button"
         onClick={action.onClick}
-        className={`rounded-full px-5 py-2 text-sm font-bold transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-black/5 ${buttonClasses[action.tone]}`}
+        className={`rounded-xl border px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-subtle)] focus:outline-none focus:ring-4 focus:ring-black/5 ${buttonClasses[action.tone]}`}
       >
         {action.button}
       </button>

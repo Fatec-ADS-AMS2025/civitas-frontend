@@ -40,15 +40,15 @@ export default function Sidebar() {
     <>
       <aside
         aria-label="Sidebar"
-        className="group hidden h-[calc(100vh-2rem)] w-[76px] shrink-0 select-none flex-col justify-between overflow-hidden rounded-2xl bg-secundary-1 text-tertialy-1 transition-all duration-200 ease-out sm:fixed sm:left-4 sm:top-4 sm:z-[110] sm:flex sm:hover:w-[280px] sm:focus-within:w-[280px]"
-        style={{ boxShadow: "0 6px 18px rgba(2, 22, 22, 0.45)" }}
+        className="group hidden h-[calc(100vh-1.5rem)] w-[78px] shrink-0 select-none flex-col justify-between overflow-hidden rounded-[18px] border border-[rgba(255,255,255,0.08)] bg-secundary-1 text-tertialy-1 transition-all duration-200 ease-out sm:fixed sm:left-3 sm:top-3 sm:z-[110] sm:flex sm:hover:w-[256px] sm:focus-within:w-[256px]"
+        style={{ boxShadow: "0 10px 24px rgba(10, 38, 44, 0.14)" }}
       >
-        <div className="flex min-h-0 flex-1 flex-col gap-4 px-3 pb-3 pt-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 px-3 pb-3 pt-5">
           <div className="flex items-center justify-center gap-0 px-1 transition-all duration-200 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3">
-            <div className="flex h-10 w-12 items-center justify-center overflow-hidden rounded-md bg-transparent">
+            <div className="flex h-10 w-11 items-center justify-center overflow-hidden rounded-md bg-transparent">
               <img src="/logo.png" alt="Logo Civitas" className="size-full object-contain" />
             </div>
-            <div className="font-title w-0 overflow-hidden whitespace-nowrap text-2xl font-semibold text-tertialy-1 opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
+            <div className="font-title w-0 overflow-hidden whitespace-nowrap text-xl font-semibold text-tertialy-1 opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
               Civitas
             </div>
           </div>
@@ -56,7 +56,7 @@ export default function Sidebar() {
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className="flex w-full items-center justify-center gap-0 rounded-xl border border-[#1A6973] bg-[#0B5A64] px-3 py-2 text-left text-sm font-semibold text-[#E4F5F7] transition-all duration-150 hover:bg-[#11707B] sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
+            className="flex w-full items-center justify-center gap-0 rounded-xl border border-[#1A6973] bg-[#0B5A64] px-3 py-2.5 text-left text-sm font-medium text-[#E4F5F7] transition-all duration-150 hover:bg-[#0e6570] sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
             aria-label="Buscar funcionalidades"
           >
             <span className="material-symbols-outlined text-[20px]">search</span>
@@ -65,7 +65,7 @@ export default function Sidebar() {
             </span>
           </button>
 
-          <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pr-1">
+          <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-1">
             {navigationItems.map((item) => {
               const isActive = normalizePath(item.path) === normalizedPath;
 
@@ -74,7 +74,7 @@ export default function Sidebar() {
                   key={item.key}
                   type="button"
                   onClick={() => navigateToPath(item.path)}
-                  className={`flex w-full cursor-pointer items-center justify-center gap-0 rounded-xl px-3 py-2 text-left text-sm font-semibold transition-all duration-150 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3 ${
+                  className={`flex w-full cursor-pointer items-center justify-center gap-0 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-150 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3 ${
                     isActive
                       ? "bg-[#DDF0F2] text-[#003A42]"
                       : "text-[#D8EBEE] hover:bg-[#0B5A64]"
@@ -93,9 +93,9 @@ export default function Sidebar() {
         </div>
 
         {profileItem ? (
-          <div className="px-3 py-6">
+          <div className="border-t border-[rgba(255,255,255,0.08)] px-3 py-4">
             <button
-              className="flex w-full items-center justify-center gap-0 rounded-xl bg-tertialy-1 px-3 py-2 text-secundary-1 shadow-inner transition-all duration-150 hover:shadow-md sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
+              className="flex w-full items-center justify-center gap-0 rounded-xl bg-[rgba(255,255,255,0.92)] px-3 py-2.5 text-secundary-1 transition-all duration-150 hover:bg-white sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
               onClick={() => push(profileItem.path)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -107,7 +107,7 @@ export default function Sidebar() {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-secundary-1">
                 <span className="material-symbols-outlined">{profileItem.icon ?? "person"}</span>
               </div>
-              <div className="font-detail w-0 overflow-hidden whitespace-nowrap text-sm font-semibold opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
+              <div className="font-detail w-0 overflow-hidden whitespace-nowrap text-sm font-medium opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
                 {profileItem.label}
               </div>
             </button>

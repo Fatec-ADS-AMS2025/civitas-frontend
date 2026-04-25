@@ -17,17 +17,17 @@ function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex w-full items-center justify-center gap-2 rounded-[18px] border px-5 py-3 text-base font-semibold shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50";
 
   const variants: Record<ButtonVariant, string> = {
     primary:
-      "border-transparent bg-[linear-gradient(135deg,#0C7178_0%,#2A9B9F_42%,#58AFAE_100%)] text-white hover:-translate-y-[1px] hover:brightness-[0.98] hover:shadow-[var(--shadow-sm)]",
+      "border-[var(--secundary-1)] bg-[var(--secundary-1)] text-white hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)]",
     secondary:
-      "border-[#F2D0AF] bg-[linear-gradient(135deg,#FFF2E1_0%,#FFF8F1_100%)] text-[#9B5B00] hover:-translate-y-[1px] hover:shadow-[var(--shadow-sm)]",
+      "border-[#F2D0AF] bg-[var(--surface-warning-soft)] text-[#9B5B00] hover:bg-[#FFF0DB]",
     tertiary:
-      "border-[var(--border-default)] bg-[rgba(255,255,255,0.88)] text-[var(--foreground)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]",
+      "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-subtle)]",
     login:
-      "max-w-[601px] rounded-full border-transparent bg-[linear-gradient(135deg,#0C7178_0%,#2A9B9F_42%,#58AFAE_100%)] py-4 text-[20px] font-semibold text-white hover:-translate-y-[1px] hover:brightness-[0.98] hover:shadow-[var(--shadow-md)] sm:text-[24px]",
+      "max-w-[601px] rounded-xl border-[var(--secundary-1)] bg-[var(--secundary-1)] py-3.5 text-base font-semibold text-white hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)] sm:text-lg",
   };
 
   return (

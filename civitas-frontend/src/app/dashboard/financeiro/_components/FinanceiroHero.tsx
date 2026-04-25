@@ -27,93 +27,64 @@ export default function FinanceiroHero({ resumo, filtros, instituicoesCount }: F
   const ultimaMovimentacao = formatDateBR();
 
   return (
-    <section className="financeiro-hero civitas-enter relative overflow-hidden rounded-[28px] border border-[#DCE8EA] bg-gradient-to-br from-[#F1F8F9] via-[#F8FCFC] to-white p-6 shadow-[0_10px_24px_rgba(0,0,0,0.05)] lg:p-8">
-      {/* Decorative circles */}
-      <div className="financeiro-hero__decor absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[#E4EEF0] opacity-40" />
-      <div className="financeiro-hero__decor absolute -bottom-16 -left-16 h-32 w-32 rounded-full bg-[#58AFAE] opacity-10" />
-
-      <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
-        {/* Left content */}
+    <section className="financeiro-hero civitas-surface civitas-enter p-5 lg:p-6">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_280px]">
         <div>
-          {/* Badge */}
-          <div className="financeiro-hero__badge inline-flex items-center gap-2 rounded-full border border-[#DCEBED] bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6C858E] backdrop-blur-sm">
-            Módulo Financeiro
-            <span className="h-2 w-2 rounded-full bg-[#D97706]" />
+          <div className="financeiro-hero__badge inline-flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
+            Modulo financeiro
+            <span className="h-2 w-2 rounded-full bg-[var(--primary-2)]" />
           </div>
 
-          {/* Title */}
-          <h2 className="mt-5 text-[28px] font-bold leading-[1.15] tracking-tight text-[#1F2A32] sm:text-[32px] lg:text-[36px]">
-            Leia o pulso financeiro do sistema,
-            conecte filtros ativos e acompanhe as movimentações mais recentes.
+          <h2 className="mt-4 text-[22px] font-semibold leading-tight text-[var(--foreground)] sm:text-[24px] lg:text-[26px]">
+            Acompanhamento financeiro consolidado
           </h2>
 
-          {/* Subtitle */}
-          <p className="mt-3 max-w-lg text-[14px] leading-relaxed text-[#72808A]">
-            Visualize o resumo financeiro, aplique filtros e gerencie lançamentos com mais clareza no dia a dia.
+          <p className="mt-2 max-w-lg text-sm leading-6 text-[var(--foreground-muted)]">
+            Consulte o resumo, aplique filtros e acompanhe as movimentacoes do periodo.
           </p>
 
-          {/* Tags */}
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="financeiro-hero__tag inline-flex items-center gap-1.5 rounded-full bg-[#E4EEF0] px-3 py-1.5 text-[11px] font-medium text-[#1F2A32]">
-              <svg className="h-3.5 w-3.5 text-[#58AFAE]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Última movimentação: {ultimaMovimentacao}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="financeiro-hero__tag inline-flex items-center gap-1.5 rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-1.5 text-[11px] font-medium text-[var(--foreground)]">
+              Ultima atualizacao: {ultimaMovimentacao}
             </span>
-            <span className="financeiro-hero__tag inline-flex items-center gap-1.5 rounded-full bg-[#004C57] px-3 py-1.5 text-[11px] font-semibold text-white">
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Painel financeiro atualizado
+            <span className="financeiro-hero__tag inline-flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-1.5 text-[11px] font-medium text-[var(--secundary-1)]">
+              Filtros ativos: {filtrosAtivos}
             </span>
           </div>
         </div>
 
-        {/* Right indicators */}
         <div className="flex flex-col gap-3">
-          {/* Card 1 - Transações monitoradas */}
-          <div className="financeiro-hero__stat flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
+          <div className="financeiro-hero__stat rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
-                Transações monitoradas
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
+                Transacoes
               </p>
-              <p className="mt-1 text-[28px] font-bold leading-none text-[#1F2A32]">
+              <p className="mt-1 text-[24px] font-semibold leading-none text-[var(--foreground)]">
                 {resumo?.totalTransacoes ?? 0}
               </p>
             </div>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#004C57] text-[10px] font-bold text-white">
-              01
-            </span>
           </div>
 
-          {/* Card 2 - Instituições conectadas */}
-          <div className="financeiro-hero__stat flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
+          <div className="financeiro-hero__stat rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
-                Instituições conectadas
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
+                Instituicoes
               </p>
-              <p className="mt-1 text-[28px] font-bold leading-none text-[#1F2A32]">
+              <p className="mt-1 text-[24px] font-semibold leading-none text-[var(--foreground)]">
                 {instituicoesCount}
               </p>
             </div>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#004C57] text-[10px] font-bold text-white">
-              02
-            </span>
           </div>
 
-          {/* Card 3 - Filtros ativos */}
-          <div className="financeiro-hero__stat flex items-center justify-between rounded-xl border border-[#E4EEF0] bg-white p-4">
+          <div className="financeiro-hero__stat rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#6C858E]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
                 Filtros ativos
               </p>
-              <p className="mt-1 text-[28px] font-bold leading-none text-[#1F2A32]">
+              <p className="mt-1 text-[24px] font-semibold leading-none text-[var(--foreground)]">
                 {filtrosAtivos}
               </p>
             </div>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#004C57] text-[10px] font-bold text-white">
-              03
-            </span>
           </div>
         </div>
       </div>

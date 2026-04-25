@@ -61,30 +61,20 @@ const formatDate = (dateStr: string): string => {
   }
 };
 
-type TipoBadgeProps = {
-  tipo: 'despesa' | 'orcamento';
-};
-
-function TipoBadge({ tipo }: TipoBadgeProps) {
+function TipoBadge({ tipo }: { tipo: 'despesa' | 'orcamento' }) {
   const isDespesa = tipo === 'despesa';
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-        isDespesa
-          ? 'bg-[#FFF1F1] text-[#C55A5A]'
-          : 'bg-[#EEF9F1] text-[#16714A]'
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+        isDespesa ? 'bg-[#FFF1F1] text-[#C55A5A]' : 'bg-[#EEF9F1] text-[#16714A]'
       }`}
     >
-      {isDespesa ? 'Despesa' : 'Orçamento'}
+      {isDespesa ? 'Despesa' : 'Orcamento'}
     </span>
   );
 }
 
-type StatusBadgeProps = {
-  situacao?: number;
-};
-
-function StatusBadge({ situacao }: StatusBadgeProps) {
+function StatusBadge({ situacao }: { situacao?: number }) {
   const isAtivo = situacao === SITUACAO_ATIVO;
   const label = getSituacaoLabel(situacao);
 
@@ -177,9 +167,9 @@ export default function FinanceiroLista({
       setProcessingId(id);
       try {
         await onDelete(id, tipo);
-        showToast(`${tipo === 'despesa' ? 'Despesa' : 'Orçamento'} ${tipo === 'despesa' ? 'inativado' : 'excluído'} com sucesso.`, 'success');
+        showToast(`${tipo === 'despesa' ? 'Despesa' : 'Orcamento'} processado com sucesso.`, 'success');
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Erro ao processar exclusão.';
+        const message = error instanceof Error ? error.message : 'Erro ao processar exclusao.';
         showToast(message, 'error');
       } finally {
         setProcessingId(null);
@@ -209,54 +199,54 @@ export default function FinanceiroLista({
     return (
       <FinanceiroEmptyState
         showFiltersMessage={hasFiltersApplied}
-        title={hasFiltersApplied ? 'Nenhum resultado encontrado' : 'Nenhuma transação cadastrada'}
+        title={hasFiltersApplied ? 'Nenhum resultado encontrado' : 'Nenhuma transacao cadastrada'}
         description={
           hasFiltersApplied
-            ? 'Não encontramos transações com os filtros aplicados.'
-            : 'Cadastre despesas ou orçamentos para começar a visualizar suas transações.'
+            ? 'Nao encontramos transacoes com os filtros aplicados.'
+            : 'Cadastre despesas ou orcamentos para visualizar os registros.'
         }
       />
     );
   }
 
   return (
-    <div className="civitas-surface civitas-enter rounded-[24px] p-5">
+    <div className="civitas-surface civitas-enter p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#D97706]">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
             Monitoramento
           </span>
           <h3 className="mt-1 text-lg font-semibold text-[var(--foreground)]">
-            Listagem de transações
+            Listagem de transacoes
           </h3>
-          <p className="mt-0.5 text-xs text-[var(--foreground-muted)]">
-            Painel com leitura rápida do tipo, valor, data e situação de cada movimentação.
+          <p className="mt-0.5 text-sm text-[var(--foreground-muted)]">
+            Consulta de tipo, valor, data e situacao.
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-4">
           <div className="text-right">
             <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Total</p>
-            <p className="text-xl font-bold text-[var(--foreground)]">{transacoes.length}</p>
+            <p className="text-lg font-semibold text-[var(--foreground)]">{transacoes.length}</p>
           </div>
           <div className="text-right">
             <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Despesas</p>
-            <p className="text-xl font-bold text-[#D97706]">{despesas.length}</p>
+            <p className="text-lg font-semibold text-[#D97706]">{despesas.length}</p>
           </div>
           <div className="text-right">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Orçamentos</p>
-            <p className="text-xl font-bold text-[var(--secundary-1)]">{orcamentos.length}</p>
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Orcamentos</p>
+            <p className="text-lg font-semibold text-[var(--secundary-1)]">{orcamentos.length}</p>
           </div>
         </div>
       </div>
 
       {allExportRows.length > 0 ? (
-        <div className="flex flex-col gap-3 border-b border-[#E4EEF0] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 lg:px-6">
+        <div className="flex flex-col gap-3 border-b border-[#E4EEF0] pb-4 sm:flex-row sm:items-center sm:justify-end">
           <button
             type="button"
             onClick={() => setIsExportModalOpen(true)}
-            className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
+            className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] px-4 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] sm:w-auto"
           >
-            <span className="material-symbols-outlined text-base text-[#1F2A32]">print</span>
+            <span className="material-symbols-outlined text-base text-[var(--foreground)]">print</span>
             Exportar / Imprimir
           </button>
         </div>
@@ -273,7 +263,7 @@ export default function FinanceiroLista({
                 Tipo
               </th>
               <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                Descrição
+                Descricao
               </th>
               <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 Valor
@@ -282,10 +272,10 @@ export default function FinanceiroLista({
                 Data
               </th>
               <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                Situação
+                Situacao
               </th>
               <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                Ação
+                Acao
               </th>
             </tr>
           </thead>
@@ -298,10 +288,10 @@ export default function FinanceiroLista({
                   key={`${transacao.tipo}-${transacao.id}`}
                   style={
                     index < 6
-                      ? ({ ["--enter-delay" as string]: `${index * 45}ms` } as React.CSSProperties)
+                      ? ({ ['--enter-delay' as string]: `${index * 45}ms` } as React.CSSProperties)
                       : undefined
                   }
-                  className={`${index < 6 ? "civitas-enter " : ""}group border-b border-[#EEF4F5] transition-all duration-[var(--motion-duration-fast)] last:border-0 hover:bg-[#F8FCFC]`}
+                  className={`${index < 6 ? 'civitas-enter ' : ''}group border-b border-[#EEF4F5] transition-all duration-[var(--motion-duration-fast)] last:border-0 hover:bg-[#F8FCFC]`}
                 >
                   <td className="px-3 py-3">
                     <span className="text-sm font-medium text-[var(--foreground-soft)]">
@@ -337,17 +327,19 @@ export default function FinanceiroLista({
                     <div className="flex items-center justify-end gap-2">
                       {onAlterarStatus && (
                         <button
+                          type="button"
                           onClick={() => void handleAlterarStatus(transacao.id, transacao.tipo)}
                           disabled={isProcessing}
-                          className="civitas-action civitas-action--ghost min-h-[34px] rounded-[12px] px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50"
+                          className="civitas-action civitas-action--ghost min-h-[34px] rounded-xl px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {isProcessing ? '...' : 'Alterar status'}
                         </button>
                       )}
                       <button
+                        type="button"
                         onClick={() => void handleDelete(transacao.id, transacao.tipo)}
                         disabled={isProcessing}
-                        className="inline-flex min-h-[34px] items-center justify-center rounded-[12px] border border-[#F1D7D7] bg-[#FFF4F4] px-3 py-1.5 text-xs font-medium text-[#C45F5F] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[#FFECEC] hover:shadow-[var(--shadow-sm)] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-[34px] items-center justify-center rounded-xl border border-[#F1D7D7] bg-[#FFF4F4] px-3 py-1.5 text-xs font-medium text-[#C45F5F] transition-all duration-[var(--motion-duration-fast)] hover:bg-[#FFECEC] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isProcessing ? '...' : 'Excluir'}
                       </button>

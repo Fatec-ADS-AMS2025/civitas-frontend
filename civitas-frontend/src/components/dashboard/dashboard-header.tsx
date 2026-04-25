@@ -234,8 +234,8 @@ export function DashboardPageHeader() {
   const actions = header.actions ?? [];
 
   return (
-    <section className="civitas-surface civitas-enter mb-6 overflow-hidden px-5 py-5 sm:px-6 lg:mb-7 lg:px-7 lg:py-6">
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+    <section className="civitas-surface civitas-enter mb-5 px-5 py-4 sm:px-6 lg:mb-6 lg:px-6 lg:py-5">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div className="min-w-0">
           {header.eyebrow ? (
             <span className="civitas-panel-header__eyebrow">
@@ -247,7 +247,7 @@ export function DashboardPageHeader() {
           {breadcrumbs.length > 0 ? (
             <nav
               aria-label="Breadcrumb"
-              className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-[var(--foreground-soft)]"
+              className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-[var(--foreground-soft)] sm:text-sm"
             >
               {breadcrumbs.map((item, index) => {
                 const isClickable = Boolean(item.href);
@@ -276,19 +276,19 @@ export function DashboardPageHeader() {
             </nav>
           ) : null}
 
-          <h1 className="mt-3 text-[30px] font-bold leading-tight text-[var(--secundary-1)] sm:text-[34px] lg:text-[38px]">
+          <h1 className="mt-3 text-[26px] font-semibold leading-tight text-[var(--secundary-1)] sm:text-[30px] lg:text-[32px]">
             {header.title}
           </h1>
 
           {header.subtitle ? (
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)] sm:text-[15px]">
+            <p className="mt-1.5 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
               {header.subtitle}
             </p>
           ) : null}
         </div>
 
         {actions.length > 0 ? (
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap xl:justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap xl:justify-end">
             {actions.map((action) => {
               const variant = action.variant ?? "ghost";
               const actionClassName =
