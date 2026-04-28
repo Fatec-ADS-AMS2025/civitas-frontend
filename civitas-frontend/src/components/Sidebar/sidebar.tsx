@@ -66,31 +66,33 @@ export default function Sidebar() {
             </span>
           </button>
 
-          <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-1">
-            {navigationItems.map((item) => {
-              const isActive = normalizePath(item.path) === normalizedPath;
+          <div className="sidebar-scroll-shell min-h-0 flex-1 overflow-hidden">
+            <nav className="sidebar-scroll civitas-scrollbar flex h-full min-h-0 flex-col gap-1 overflow-y-auto pr-1.5">
+              {navigationItems.map((item) => {
+                const isActive = normalizePath(item.path) === normalizedPath;
 
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => navigateToPath(item.path)}
-                  className={`flex w-full cursor-pointer items-center justify-center gap-0 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-150 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3 ${
-                    isActive
-                      ? "bg-[var(--sidebar-nav-active-bg)] text-[var(--sidebar-nav-active-text)]"
-                      : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-nav-hover-bg)]"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[20px]">
-                    {item.icon ?? "apps"}
-                  </span>
-                  <span className="w-0 truncate whitespace-nowrap opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
-                    {item.label}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => navigateToPath(item.path)}
+                    className={`flex w-full cursor-pointer items-center justify-center gap-0 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-150 sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3 ${
+                      isActive
+                        ? "bg-[var(--sidebar-nav-active-bg)] text-[var(--sidebar-nav-active-text)]"
+                        : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-nav-hover-bg)]"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      {item.icon ?? "apps"}
+                    </span>
+                    <span className="w-0 truncate whitespace-nowrap opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
         </div>
 
         <ThemeSwitcher />

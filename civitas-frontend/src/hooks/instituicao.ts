@@ -1,5 +1,6 @@
 import { GenericService } from './generic';
 import InstituicaoDTO from '@/models/instituicao';
+import { InstituicaoGastosDTO } from '@/models/financeiro';
 
 export class InstituicaoService extends GenericService<InstituicaoDTO> {
   constructor() {
@@ -21,6 +22,19 @@ export class InstituicaoService extends GenericService<InstituicaoDTO> {
     } catch (error) {
       console.error('Erro ao buscar instituicoes por nome:', error);
       return [];
+    }
+  }
+
+  async getGastos(id: number): Promise<InstituicaoGastosDTO | null> {
+    try {
+      const response = await fetch(`${this.getUrlEndpoint()}/${id}/gastos`, {
+        headers: this.createHeaders(),
+      });
+      const payload = await this.handleResponse(response, { showErrorToast: false });
+      return this.unwrapItem<InstituicaoGastosDTO>(payload);
+    } catch (error) {
+      console.error(`Erro ao buscar gastos da instituicao ${id}:`, error);
+      return null;
     }
   }
 }

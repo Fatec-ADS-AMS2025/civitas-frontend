@@ -1,6 +1,7 @@
 export default interface DespesaDTO {
   id: number;
   numeroDocumento?: string;
+  codigo?: number;
   uc?: string;
   dataEmicao?: string;
   consumoPrevisto?: number;

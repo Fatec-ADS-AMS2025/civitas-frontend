@@ -56,7 +56,7 @@ export default function Login() {
 	}
 
 	return (
-		<div className="flex w-full items-center justify-center p-4 sm:p-5 lg:w-1/2 lg:p-8">
+		<div className="flex w-full items-center h-screen justify-center p-4 sm:p-5 lg:w-1/2 lg:p-8 bg-secundary-1">
 			<div className="w-full max-w-md rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[0_6px_18px_rgba(15,43,49,0.04)] sm:p-8">
 				<div className="mb-8">
 					<div className="mb-6 flex items-center gap-3">

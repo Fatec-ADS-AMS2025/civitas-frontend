@@ -6,6 +6,7 @@ import { useDashboardHeader } from '@/components/dashboard/dashboard-header';
 import { useAppNavigation } from '@/hooks/useNavigationProgress';
 import {
   FinanceiroHero,
+  FinanceiroPanorama,
   FinanceiroResumo,
   FinanceiroFiltros,
   FinanceiroFormulario,
@@ -21,6 +22,7 @@ export default function FinanceiroPage() {
     transacoes,
     allTransacoes,
     resumo,
+    panorama,
     instituicoes,
     tiposDespesa,
     orcamentos,
@@ -95,6 +97,8 @@ export default function FinanceiroPage() {
       />
 
       <FinanceiroResumo resumo={resumo} />
+
+      <FinanceiroPanorama panorama={panorama} />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <FinanceiroFiltros

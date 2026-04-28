@@ -8,11 +8,13 @@ import { despesaService } from '@/hooks/despesa';
 import { fornecedorService } from '@/hooks/fornecedor';
 import { instituicaoService } from '@/hooks/instituicao';
 import { orcamentoService } from '@/hooks/orcamento';
+import { secretariaService } from '@/hooks/secretaria';
 import { tipoDespesaService } from '@/hooks/tipoDespesa';
 import { usuarioService } from '@/hooks/usuario';
 import DespesaDTO from '@/models/despesa';
 import {
   FinanceiroFiltrosDTO,
+  FinanceiroPanoramaDTO,
   FinanceiroPayloadDTO,
   FinanceiroResumoDTO,
   FinanceiroTransacaoDTO,
@@ -20,6 +22,7 @@ import {
 import FornecedorDTO from '@/models/fornecedor';
 import InstituicaoDTO from '@/models/instituicao';
 import OrcamentoDTO from '@/models/orcamento';
+import SecretariaDTO from '@/models/secretaria';
 import TipoDespesaDTO from '@/models/tipoDespesa';
 import UsuarioDTO from '@/models/usuario';
 
@@ -167,9 +170,19 @@ const buildNumeroDocumento = (payload: FinanceiroPayloadDTO): string => {
   return String(Date.now());
 };
 
+const compareByTotalGastosDesc = <T extends { totalGastos: number }>(a: T, b: T): number => {
+  return b.totalGastos - a.totalGastos;
+};
+
+const isNotNull = <T>(value: T | null): value is T => value !== null;
+
 export class FinanceiroService {
   async getInstituicoes(): Promise<InstituicaoDTO[]> {
     return safeListRequest(() => instituicaoService.getAllData());
+  }
+
+  async getSecretarias(): Promise<SecretariaDTO[]> {
+    return safeListRequest(() => secretariaService.getAllData());
   }
 
   async getTiposDespesa(): Promise<TipoDespesaDTO[]> {
@@ -231,6 +244,45 @@ export class FinanceiroService {
       totalTransacoes: transacoes.length,
       periodoInicio: filtros.dataInicio,
       periodoFim: filtros.dataFim,
+    };
+  }
+
+  async getPanorama(
+    secretarias: SecretariaDTO[],
+    instituicoes: InstituicaoDTO[]
+  ): Promise<FinanceiroPanoramaDTO> {
+    const [secretariasComGastos, instituicoesComGastos] = await Promise.all([
+      Promise.all(
+        secretarias.map(async (secretaria) => {
+          const gastos = await secretariaService.getGastos(secretaria.idSecretaria);
+          return gastos
+            ? {
+                ...gastos,
+                nomeSecretaria: gastos.nomeSecretaria || secretaria.nome,
+              }
+            : null;
+        })
+      ),
+      Promise.all(
+        instituicoes.map(async (instituicao) => {
+          const gastos = await instituicaoService.getGastos(instituicao.id);
+          return gastos
+            ? {
+                ...gastos,
+                nomeInstituicao: gastos.nomeInstituicao || instituicao.nome,
+                secretariaId: instituicao.idSecretaria,
+                secretariaNome:
+                  secretarias.find((secretaria) => secretaria.idSecretaria === instituicao.idSecretaria)?.nome ||
+                  'Sem secretaria vinculada',
+              }
+            : null;
+        })
+      ),
+    ]);
+
+    return {
+      secretarias: secretariasComGastos.filter(isNotNull).sort(compareByTotalGastosDesc),
+      instituicoes: instituicoesComGastos.filter(isNotNull).sort(compareByTotalGastosDesc),
     };
   }
 
@@ -402,7 +454,12 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
   const [transacoes, setTransacoes] = useState<FinanceiroTransacaoDTO[]>([]);
   const [allTransacoes, setAllTransacoes] = useState<FinanceiroTransacaoDTO[]>([]);
   const [resumo, setResumo] = useState<FinanceiroResumoDTO | null>(null);
+  const [panorama, setPanorama] = useState<FinanceiroPanoramaDTO>({
+    secretarias: [],
+    instituicoes: [],
+  });
   const [instituicoes, setInstituicoes] = useState<InstituicaoDTO[]>([]);
+  const [secretarias, setSecretarias] = useState<SecretariaDTO[]>([]);
   const [tiposDespesa, setTiposDespesa] = useState<TipoDespesaDTO[]>([]);
   const [orcamentos, setOrcamentos] = useState<OrcamentoDTO[]>([]);
   const [fornecedores, setFornecedores] = useState<FornecedorDTO[]>([]);
@@ -423,6 +480,7 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
         listaCompleta,
         cards,
         instituicoesData,
+        secretariasData,
         tiposDespesaData,
         orcamentosData,
         fornecedoresData,
@@ -432,16 +490,21 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
         financeiroService.listarTransacoes(baseFilters),
         financeiroService.getResumo(activeFilters),
         financeiroService.getInstituicoes(),
+        financeiroService.getSecretarias(),
         financeiroService.getTiposDespesa(),
         financeiroService.getOrcamentos(),
         financeiroService.getFornecedores(),
         financeiroService.getUsuarios(),
       ]);
 
+      const panoramaData = await financeiroService.getPanorama(secretariasData, instituicoesData);
+
       setTransacoes(lista);
       setAllTransacoes(listaCompleta);
       setResumo(cards);
+      setPanorama(panoramaData);
       setInstituicoes(instituicoesData);
+      setSecretarias(secretariasData);
       setTiposDespesa(tiposDespesaData);
       setOrcamentos(orcamentosData);
       setFornecedores(fornecedoresData);
@@ -453,7 +516,12 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       setTransacoes([]);
       setAllTransacoes([]);
       setResumo(null);
+      setPanorama({
+        secretarias: [],
+        instituicoes: [],
+      });
       setInstituicoes([]);
+      setSecretarias([]);
       setTiposDespesa([]);
       setOrcamentos([]);
       setFornecedores([]);
@@ -505,7 +573,9 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       transacoes,
       allTransacoes,
       resumo,
+      panorama,
       instituicoes,
+      secretarias,
       tiposDespesa,
       orcamentos,
       fornecedores,
@@ -524,7 +594,9 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       transacoes,
       allTransacoes,
       resumo,
+      panorama,
       instituicoes,
+      secretarias,
       tiposDespesa,
       orcamentos,
       fornecedores,

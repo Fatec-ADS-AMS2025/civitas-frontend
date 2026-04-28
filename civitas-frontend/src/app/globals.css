@@ -81,6 +81,9 @@
   --sidebar-profile-text: #004c57;
   --sidebar-profile-hover-bg: #ffffff;
   --sidebar-profile-icon-bg: #ffffff;
+  --sidebar-scroll-thumb: rgba(216, 241, 244, 0.68);
+  --sidebar-scroll-thumb-hover: rgba(255, 255, 255, 0.88);
+  --sidebar-scroll-track: rgba(255, 255, 255, 0.03);
 
   --search-drawer-overlay: rgba(10, 30, 35, 0.35);
   --search-drawer-bg: #ffffff;
@@ -175,6 +178,9 @@ html[data-theme="dark"] {
   --sidebar-profile-text: #072b31;
   --sidebar-profile-hover-bg: #f3fbfc;
   --sidebar-profile-icon-bg: #ffffff;
+  --sidebar-scroll-thumb: rgba(157, 222, 223, 0.48);
+  --sidebar-scroll-thumb-hover: rgba(223, 243, 245, 0.72);
+  --sidebar-scroll-track: rgba(255, 255, 255, 0.02);
 
   --search-drawer-overlay: rgba(3, 11, 13, 0.58);
   --search-drawer-bg: #0e1d22;
@@ -460,6 +466,90 @@ html[data-theme="dark"] {
   border-radius: 18px;
   background: var(--surface-default);
   box-shadow: var(--shadow-sm);
+}
+
+.civitas-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--secundary-1) 62%, transparent) transparent;
+}
+
+.civitas-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.civitas-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.civitas-scrollbar::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary-1) 84%, white 16%),
+    color-mix(in srgb, var(--secundary-1) 88%, black 12%)
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.civitas-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary-1) 92%, white 8%),
+    color-mix(in srgb, var(--secundary-1) 94%, black 6%)
+  );
+}
+
+.civitas-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.sidebar-scroll-shell {
+  position: relative;
+}
+
+.sidebar-scroll-shell::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 32px;
+  pointer-events: none;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--sidebar-bg) 90%, transparent), transparent);
+}
+
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-scroll-thumb) var(--sidebar-scroll-track);
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: var(--sidebar-scroll-track);
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background: linear-gradient(
+    180deg,
+    var(--sidebar-scroll-thumb),
+    color-mix(in srgb, var(--sidebar-scroll-thumb) 82%, var(--secundary-1) 18%)
+  );
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    var(--sidebar-scroll-thumb-hover),
+    color-mix(in srgb, var(--sidebar-scroll-thumb-hover) 84%, var(--primary-1) 16%)
+  );
 }
 
 .civitas-enter {
@@ -1021,6 +1111,21 @@ html[data-theme="dark"] {
   background: #000 !important;
   color: #fff !important;
   border-top-color: #fff !important;
+}
+
+.high-contrast .civitas-scrollbar {
+  scrollbar-color: #fff #000 !important;
+}
+
+.high-contrast .civitas-scrollbar::-webkit-scrollbar-thumb,
+.high-contrast .sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #fff !important;
+  border-color: #000 !important;
+  box-shadow: none !important;
+}
+
+.high-contrast .sidebar-scroll-shell::after {
+  display: none !important;
 }
 
 /* menu de acessibilidade */
