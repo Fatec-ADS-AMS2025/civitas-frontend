@@ -66,6 +66,7 @@ const DESPESAS_EXPORT_COLUMNS: TableColumn[] = [
 
 const DESPESAS_EXPORT_TITLE = "Listagem de despesas";
 const DESPESAS_EXPORT_FILE_NAME = "despesas";
+const MAX_EXPLORER_ITEMS = 6;
 
 const SOLICITA_UC_OPTIONS: SelectOption[] = [
   { value: "1", label: "Sim" },
@@ -104,10 +105,68 @@ const EMPTY_DESPESA_FORM = {
 };
 
 const filterFieldClassName =
-  "despesas-filter-field w-full rounded-sm border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-4 py-3 text-sm text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--secundary-1)] focus:ring-4 focus:ring-[var(--focus-ring)]";
+  "despesas-filter-field w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-4 py-3 text-sm text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--secundary-1)] focus:ring-4 focus:ring-[var(--focus-ring)]";
 
 const iconButtonClassName =
-  "flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-soft)] bg-[rgba(255,255,255,0.92)] text-[var(--secundary-1)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]";
+  "flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] text-[var(--secundary-1)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]";
+
+const summaryCardStyles: Record<
+  "teal" | "slate" | "amber",
+  {
+    container: React.CSSProperties;
+    value: React.CSSProperties;
+    icon: React.CSSProperties;
+  }
+> = {
+  teal: {
+    container: {
+      background: "var(--surface-accent-teal)",
+      borderColor: "var(--border-accent-teal)",
+    },
+    value: {
+      background: "var(--surface-elevated)",
+      borderColor: "var(--border-accent-teal)",
+      color: "var(--text-accent-teal)",
+    },
+    icon: {
+      background: "var(--surface-elevated)",
+      borderColor: "var(--border-accent-teal)",
+      color: "var(--text-accent-teal)",
+    },
+  },
+  slate: {
+    container: {
+      background: "var(--surface-accent-slate)",
+      borderColor: "var(--border-accent-slate)",
+    },
+    value: {
+      background: "var(--surface-elevated)",
+      borderColor: "var(--border-accent-slate)",
+      color: "var(--text-accent-slate)",
+    },
+    icon: {
+      background: "var(--surface-elevated)",
+      borderColor: "var(--border-accent-slate)",
+      color: "var(--text-accent-slate)",
+    },
+  },
+  amber: {
+    container: {
+      background: "var(--surface-accent-amber)",
+      borderColor: "var(--border-accent-amber)",
+    },
+    value: {
+      background: "var(--surface-elevated)",
+      borderColor: "var(--border-accent-amber)",
+      color: "var(--text-accent-amber)",
+    },
+    icon: {
+      background: "var(--surface-elevated)",
+      borderColor: "var(--border-accent-amber)",
+      color: "var(--text-accent-amber)",
+    },
+  },
+};
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("pt-BR", {
@@ -128,6 +187,14 @@ const formatDateTime = (value?: string | null): string => {
 const toPositiveNumber = (value: unknown): number => {
   const numericValue = Number(value);
   return Number.isFinite(numericValue) ? numericValue : 0;
+};
+
+const normalizeSearchValue = (value: string): string => {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 };
 
 const ensureOption = (
@@ -196,41 +263,49 @@ const SummaryCard = ({
   subtitle,
   value,
   visible,
-  background,
+  tone,
   icon,
 }: {
   title: string;
   subtitle: string;
   value: number;
   visible: boolean;
-  background: string;
+  tone: "teal" | "slate" | "amber";
   icon: string;
 }) => {
+  const toneStyle = summaryCardStyles[tone];
+
   return (
     <article
-      className="despesas-summary-card relative overflow-hidden rounded-sm p-5 text-white shadow-[0_18px_32px_rgba(0,0,0,0.10)]"
-      style={{ background }}
+      className="despesas-summary-card relative overflow-hidden rounded-sm border p-5 text-[var(--foreground)] shadow-[var(--shadow-xs)]"
+      style={toneStyle.container}
     >
-      <div className="despesas-summary-card__sheen absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_56%)]" />
-
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.08em] text-white/70">
+          <p className="text-[11px] uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
             Conta digital
           </p>
-          <h2 className="mt-4 text-[30px] font-semibold leading-none">{title}</h2>
-          <p className="mt-2 text-sm text-white/75">{subtitle}</p>
+          <h2 className="mt-4 text-[30px] font-semibold leading-none text-[var(--foreground)]">
+            {title}
+          </h2>
+          <p className="mt-2 text-sm text-[var(--foreground-muted)]">{subtitle}</p>
         </div>
 
-        <span className="despesas-summary-card__icon flex h-16 w-16 items-center justify-center rounded-sm border border-white/20 bg-white/10">
-          <span className="material-symbols-outlined !text-[34px] text-white/80">
+        <span
+          className="despesas-summary-card__icon flex h-16 w-16 items-center justify-center rounded-sm border"
+          style={toneStyle.icon}
+        >
+          <span className="material-symbols-outlined !text-[34px]">
             {icon}
           </span>
         </span>
       </div>
 
-      <div className="despesas-summary-card__value relative z-10 mt-5 rounded-sm border border-white/10 bg-white/14 px-4 py-3">
-        <p className="text-xs uppercase tracking-[0.18em] text-white/60">Valor atual</p>
+      <div
+        className="despesas-summary-card__value relative z-10 mt-5 rounded-sm border px-4 py-3"
+        style={toneStyle.value}
+      >
+        <p className="text-xs uppercase tracking-[0.18em] text-[var(--foreground-soft)]">Valor atual</p>
         <p className="mt-2 text-[28px] font-semibold leading-none">
           {visible ? formatCurrency(value) : "* * * * * *"}
         </p>
@@ -246,13 +321,13 @@ const LoadingState = () => {
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={`summary-skeleton-${index}`}
-            className="h-[180px] animate-pulse rounded-sm bg-[#E7EFF1]"
+            className="h-[180px] animate-pulse rounded-sm bg-[var(--surface-subtle)]"
           />
         ))}
       </div>
 
-      <div className="h-[240px] animate-pulse rounded-sm bg-[#EEF5F6]" />
-      <div className="h-[360px] animate-pulse rounded-sm bg-[#EEF5F6]" />
+      <div className="h-[240px] animate-pulse rounded-sm bg-[var(--surface-subtle)]" />
+      <div className="h-[360px] animate-pulse rounded-sm bg-[var(--surface-subtle)]" />
     </div>
   );
 };
@@ -260,6 +335,11 @@ const LoadingState = () => {
 export default function Page() {
   const listSectionRef = useRef<HTMLElement | null>(null);
   const [filterForm, setFilterForm] = useState(INITIAL_FILTER_FORM);
+  const [isRelationsSectionOpen, setIsRelationsSectionOpen] = useState(false);
+  const [relationsCodigoSearch, setRelationsCodigoSearch] = useState("");
+  const [relationsInstituicaoSearch, setRelationsInstituicaoSearch] = useState("");
+  const [listCodigoSearch, setListCodigoSearch] = useState("");
+  const [listInstituicaoSearch, setListInstituicaoSearch] = useState("");
   const [valuesVisible, setValuesVisible] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
@@ -282,7 +362,6 @@ export default function Page() {
     summary,
     loading,
     error,
-    empty,
     lastUpdatedAt,
     applyFilters,
     clearFilters,
@@ -328,16 +407,6 @@ export default function Page() {
   useDashboardHeader(headerConfig);
 
   const activeModalDespesa = editingDespesa ?? viewingDespesa;
-  const allRelations = useMemo(() => {
-    return buildFinanceRelations({
-      despesas: despesas.map((item) => item.raw),
-      instituicoes,
-      secretarias,
-      orcamentos,
-      tiposDespesa,
-    });
-  }, [despesas, instituicoes, orcamentos, secretarias, tiposDespesa]);
-
   const filteredRelations = useMemo(() => {
     return buildFinanceRelations({
       despesas: filteredDespesas.map((item) => item.raw),
@@ -347,6 +416,27 @@ export default function Page() {
       tiposDespesa,
     });
   }, [filteredDespesas, instituicoes, orcamentos, secretarias, tiposDespesa]);
+
+  const instituicaoNameMap = useMemo(() => {
+    return new Map(instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const));
+  }, [instituicoes]);
+
+  const normalizedRelationsCodigoSearch = useMemo(
+    () => normalizeSearchValue(relationsCodigoSearch),
+    [relationsCodigoSearch]
+  );
+  const normalizedRelationsInstituicaoSearch = useMemo(
+    () => normalizeSearchValue(relationsInstituicaoSearch),
+    [relationsInstituicaoSearch]
+  );
+  const normalizedListCodigoSearch = useMemo(
+    () => normalizeSearchValue(listCodigoSearch),
+    [listCodigoSearch]
+  );
+  const normalizedListInstituicaoSearch = useMemo(
+    () => normalizeSearchValue(listInstituicaoSearch),
+    [listInstituicaoSearch]
+  );
 
   const tipoDespesaOptions = useMemo<SelectOption[]>(() => {
     return tiposDespesa.map((tipoDespesa) => ({
@@ -618,12 +708,6 @@ export default function Page() {
     tiposDespesa,
   ]);
 
-  const listResume = useMemo(() => {
-    return `${filteredDespesas.length} ${
-      filteredDespesas.length === 1 ? "despesa encontrada" : "despesas encontradas"
-    }`;
-  }, [filteredDespesas.length]);
-
   const panoramaMetrics = useMemo<InsightMetric[]>(() => {
     const instituicoesComGastos = filteredRelations.instituicoes.filter(
       (instituicao) => instituicao.quantidadeDespesas > 0
@@ -660,25 +744,93 @@ export default function Page() {
     ];
   }, [filteredRelations.codigos.length, filteredRelations.instituicoes, filteredRelations.secretarias, summary.saida]);
 
-  const topCodigoGroups = useMemo(() => filteredRelations.codigos.slice(0, 4), [filteredRelations.codigos]);
-  const topInstituicaoGroups = useMemo(
-    () =>
-      filteredRelations.instituicoes
-        .filter((instituicao) => instituicao.quantidadeDespesas > 0)
-        .slice(0, 4),
-    [filteredRelations.instituicoes]
+  const filteredCodigoGroups = useMemo(() => {
+    return filteredRelations.codigos.filter((codigo) => {
+      const matchesCodigo =
+        !normalizedRelationsCodigoSearch ||
+        normalizeSearchValue(`${codigo.codigo} ${codigo.codigoNormalizado}`).includes(
+          normalizedRelationsCodigoSearch
+        );
+      const matchesInstituicao =
+        !normalizedRelationsInstituicaoSearch ||
+        codigo.instituicoes.some((instituicao) =>
+          normalizeSearchValue(instituicao).includes(normalizedRelationsInstituicaoSearch)
+        ) ||
+        codigo.secretarias.some((secretaria) =>
+          normalizeSearchValue(secretaria).includes(normalizedRelationsInstituicaoSearch)
+        );
+
+      return matchesCodigo && matchesInstituicao;
+    });
+  }, [
+    filteredRelations.codigos,
+    normalizedRelationsCodigoSearch,
+    normalizedRelationsInstituicaoSearch,
+  ]);
+
+  const filteredInstituicaoGroups = useMemo(() => {
+    return filteredRelations.instituicoes.filter((instituicao) => {
+      if (instituicao.quantidadeDespesas <= 0) {
+        return false;
+      }
+
+      const matchesInstituicao =
+        !normalizedRelationsInstituicaoSearch ||
+        normalizeSearchValue(
+          `${instituicao.nome} ${instituicao.secretariaNome} ${instituicao.tipoInstituicaoNome}`
+        ).includes(normalizedRelationsInstituicaoSearch);
+      const matchesCodigo =
+        !normalizedRelationsCodigoSearch ||
+        instituicao.codigos.some((codigo) =>
+          normalizeSearchValue(`${codigo.codigo} ${codigo.codigoNormalizado}`).includes(
+            normalizedRelationsCodigoSearch
+          )
+        );
+
+      return matchesInstituicao && matchesCodigo;
+    });
+  }, [
+    filteredRelations.instituicoes,
+    normalizedRelationsCodigoSearch,
+    normalizedRelationsInstituicaoSearch,
+  ]);
+
+  const topCodigoGroups = useMemo(
+    () => filteredCodigoGroups.slice(0, MAX_EXPLORER_ITEMS),
+    [filteredCodigoGroups]
   );
-  const topSecretariaGroups = useMemo(
-    () =>
-      filteredRelations.secretarias
-        .filter((secretaria) => secretaria.quantidadeDespesas > 0)
-        .slice(0, 4),
-    [filteredRelations.secretarias]
+  const topInstituicaoGroups = useMemo(
+    () => filteredInstituicaoGroups.slice(0, MAX_EXPLORER_ITEMS),
+    [filteredInstituicaoGroups]
   );
 
   const getDespesaCodigo = (despesa: DespesaDashboardRow): string => {
     return despesa.raw.codigo?.trim() || "Sem codigo informado";
   };
+
+  const visibleDespesas = useMemo(() => {
+    return filteredDespesas.filter((despesa) => {
+      const codigo = getDespesaCodigo(despesa);
+      const instituicaoNome = instituicaoNameMap.get(despesa.raw.idInstituicao ?? 0) ?? "";
+
+      const matchesCodigo =
+        !normalizedListCodigoSearch ||
+        normalizeSearchValue(codigo).includes(normalizedListCodigoSearch);
+      const matchesInstituicao =
+        !normalizedListInstituicaoSearch ||
+        normalizeSearchValue(instituicaoNome).includes(normalizedListInstituicaoSearch);
+
+      return matchesCodigo && matchesInstituicao;
+    });
+  }, [
+    filteredDespesas,
+    instituicaoNameMap,
+    normalizedListCodigoSearch,
+    normalizedListInstituicaoSearch,
+  ]);
+
+  const hasExplorerSearch = Boolean(relationsCodigoSearch || relationsInstituicaoSearch);
+  const hasLocalListSearch = Boolean(listCodigoSearch || listInstituicaoSearch);
 
   const mapDespesaToExportRow = (despesa: DespesaDashboardRow): DespesaExportRow => {
     return {
@@ -693,12 +845,24 @@ export default function Page() {
   };
 
   const filteredExportRows = useMemo(() => {
-    return filteredDespesas.map(mapDespesaToExportRow);
-  }, [filteredDespesas]);
+    return visibleDespesas.map(mapDespesaToExportRow);
+  }, [visibleDespesas]);
 
   const allExportRows = useMemo(() => {
     return despesas.map(mapDespesaToExportRow);
   }, [despesas]);
+
+  const listResume = useMemo(() => {
+    if (hasLocalListSearch) {
+      return `${visibleDespesas.length} de ${filteredDespesas.length} ${
+        filteredDespesas.length === 1 ? "despesa visivel" : "despesas visiveis"
+      }`;
+    }
+
+    return `${visibleDespesas.length} ${
+      visibleDespesas.length === 1 ? "despesa encontrada" : "despesas encontradas"
+    }`;
+  }, [filteredDespesas.length, hasLocalListSearch, visibleDespesas.length]);
 
   const lastUpdatedLabel = useMemo(() => {
     return formatDateTime(lastUpdatedAt);
@@ -795,27 +959,13 @@ export default function Page() {
 
   return (
     <div className="space-y-7">
-      <section className="despesas-hero civitas-enter relative overflow-hidden rounded-sm border border-[#E0ECEE] bg-white px-6 py-7 shadow-[0_12px_30px_rgba(0,0,0,0.05)] sm:px-8">
-        <div className="despesas-hero__decor absolute -right-14 -top-16 h-40 w-40 rounded-sm bg-[#EAF5F6]" />
-        <div className="despesas-hero__decor absolute bottom-0 left-0 h-20 w-40 rounded-sm bg-[#F7FBFB]" />
-
+      <section className="despesas-hero civitas-enter overflow-hidden rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-6 py-7 shadow-[var(--shadow-sm)] sm:px-8">
         <div className="relative z-10 max-w-4xl">
-          <span className="inline-flex rounded-sm border border-[#D7E6E8] bg-[#F4F9F9] px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#6E8A92]">
-            Painel de acompanhamento
-          </span>
-          <h2 className="mt-3 text-[42px] font-bold leading-[0.95] text-[#0B4D57] sm:text-[56px]">
-            Acompanhe despesas, aplique filtros e mantenha tudo em um unico painel.
-          </h2>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-[#67828A] sm:text-base">
-            Visualize o resumo local, aplique filtros com mais clareza e acompanhe
-            relacoes entre secretaria, instituicao e codigo sem sair da tela.
-          </p>
-
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button
               type="button"
               onClick={() => listSectionRef.current?.scrollIntoView({ behavior: "smooth" })}
-              className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#FF8F2B] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(255,143,43,0.28)] transition hover:brightness-95"
+              className="civitas-action civitas-action--primary rounded-sm px-5 py-3 text-sm"
             >
               <span className="material-symbols-outlined !text-[18px]">arrow_downward</span>
               Ir para listagem
@@ -824,7 +974,7 @@ export default function Page() {
             <button
               type="button"
               onClick={() => setValuesVisible((currentValue) => !currentValue)}
-              className="inline-flex items-center justify-center gap-2 rounded-sm border border-[#D6E5E8] bg-white px-5 py-3 text-sm font-semibold text-[#31505A] transition hover:bg-[#F6FAFA]"
+              className="civitas-action civitas-action--ghost rounded-sm px-5 py-3 text-sm"
             >
               <span className="material-symbols-outlined !text-[18px]">
                 {valuesVisible ? "visibility_off" : "visibility"}
@@ -841,7 +991,7 @@ export default function Page() {
           subtitle="Entrada menos saida com filtros aplicados"
           value={summary.saldoTotal}
           visible={valuesVisible}
-          background="linear-gradient(135deg, #0D7A7C 0%, #38A9A6 52%, #66C7C0 100%)"
+          tone="teal"
           icon="account_balance_wallet"
         />
         <SummaryCard
@@ -849,7 +999,7 @@ export default function Page() {
           subtitle="Orcamentos compativeis com o painel"
           value={summary.entrada}
           visible={valuesVisible}
-          background="linear-gradient(135deg, #1A1F28 0%, #2E3642 48%, #11161F 100%)"
+          tone="slate"
           icon="south_west"
         />
         <SummaryCard
@@ -857,181 +1007,197 @@ export default function Page() {
           subtitle="Total das despesas filtradas"
           value={summary.saida}
           visible={valuesVisible}
-          background="linear-gradient(135deg, #FF9800 0%, #F59E0B 45%, #FFC75A 100%)"
+          tone="amber"
           icon="north_east"
         />
       </section>
 
       <section className="civitas-surface civitas-enter space-y-5 rounded-sm p-5">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-            Relacoes financeiras
-          </p>
-          <h3 className="mt-2 text-[28px] font-semibold text-[var(--secundary-1)]">
-            Agrupe despesas por secretaria, instituicao e codigo.
-          </h3>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-            O contrato do backend foi consolidado aqui para mostrar todos os gastos
-            do mesmo codigo, a relacao entre secretaria e instituicao e o agrupamento
-            de debitos por instituicao.
-          </p>
-        </div>
-
-        <InsightsGrid metrics={panoramaMetrics} />
-
-        <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-              Secretaria x instituicao
+              Explorador de relacoes
             </p>
-            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-              Secretarias com suas instituicoes ativas no recorte atual.
+            <h3 className="mt-2 text-[28px] font-semibold text-[var(--secundary-1)]">
+              Abra a secao abaixo para pesquisar por codigo ou instituicao.
+            </h3>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
+              A exploracao detalhada fica fechada por padrao para reduzir ruido visual.
+              Quando abrir, voce pode localizar um codigo especifico ou uma instituicao
+              e abrir os gastos consolidados daquele recorte.
             </p>
-
-            <div className="mt-4 space-y-3">
-              {topSecretariaGroups.length > 0 ? (
-                topSecretariaGroups.map((secretaria) => (
-                  <article
-                    key={secretaria.id}
-                    className="rounded-sm border border-[var(--border-soft)] bg-white p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h4 className="truncate text-base font-semibold text-[var(--foreground)]">
-                          {secretaria.nome}
-                        </h4>
-                        <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                          {secretaria.quantidadeInstituicoesComGastos} de{" "}
-                          {secretaria.quantidadeInstituicoes} instituicoes com gasto
-                        </p>
-                      </div>
-                      <span className="text-sm font-semibold text-[var(--secundary-1)]">
-                        {secretaria.totalGastosFormatado}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {secretaria.instituicoes.slice(0, 5).map((instituicao) => (
-                        <span
-                          key={`${secretaria.id}-${instituicao.id}`}
-                          className="rounded-sm border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-xs font-medium text-[var(--foreground-muted)]"
-                        >
-                          {instituicao.nome}
-                        </span>
-                      ))}
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <div className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-8 text-center text-sm text-[var(--foreground-soft)]">
-                  Nenhuma relacao secretaria x instituicao encontrada com os filtros atuais.
-                </div>
-              )}
-            </div>
           </div>
 
-          <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-              Agrupamento por codigo
-            </p>
-            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-              Abra todos os gastos do mesmo codigo, mesmo quando passam por mais de uma instituicao.
-            </p>
+          <button
+            type="button"
+            onClick={() => setIsRelationsSectionOpen((currentValue) => !currentValue)}
+            className="civitas-action civitas-action--ghost rounded-sm px-4 py-2.5 text-sm"
+          >
+            <span className="material-symbols-outlined !text-[18px]">
+              {isRelationsSectionOpen ? "expand_less" : "expand_more"}
+            </span>
+            {isRelationsSectionOpen ? "Fechar explorador" : "Abrir explorador"}
+          </button>
+        </div>
 
-            <div className="mt-4 space-y-3">
-              {topCodigoGroups.length > 0 ? (
-                topCodigoGroups.map((codigo) => (
-                  <article
-                    key={codigo.codigoNormalizado}
-                    className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h4 className="truncate text-base font-semibold text-[var(--secundary-1)]">
-                          {codigo.codigo}
-                        </h4>
-                        <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                          {codigo.quantidadeDespesas} despesas em {codigo.quantidadeInstituicoes} instituicoes
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCodigoGroup(codigo)}
-                        className="civitas-action civitas-action--ghost rounded-sm px-4 py-2 text-sm"
+        {!isRelationsSectionOpen ? (
+          <div className="rounded-sm border border-dashed border-[var(--border-default)] bg-[var(--surface-subtle)] px-5 py-8 text-sm text-[var(--foreground-soft)]">
+            Abra esta secao para usar a pesquisa por codigo e instituicao e navegar
+            pelos agrupamentos de despesas.
+          </div>
+        ) : (
+          <>
+            <InsightsGrid metrics={panoramaMetrics} />
+
+            <div className="grid gap-4 lg:grid-cols-[1fr_1fr_auto]">
+              <Input
+                value={relationsCodigoSearch}
+                onChange={(event) => setRelationsCodigoSearch(event.target.value)}
+                label="Pesquisar codigo"
+                placeholder="Ex.: energia, contrato, 001"
+              />
+              <Input
+                value={relationsInstituicaoSearch}
+                onChange={(event) => setRelationsInstituicaoSearch(event.target.value)}
+                label="Pesquisar instituicao"
+                placeholder="Ex.: escola, secretaria, unidade"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setRelationsCodigoSearch("");
+                  setRelationsInstituicaoSearch("");
+                }}
+                className="civitas-action civitas-action--ghost self-end rounded-sm px-4 py-2.5 text-sm"
+              >
+                Limpar busca
+              </button>
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-2">
+              <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+                  Agrupamento por codigo
+                </p>
+                <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                  Pesquise um codigo especifico e abra todas as despesas relacionadas.
+                </p>
+
+                <div className="mt-4 space-y-3">
+                  {topCodigoGroups.length > 0 ? (
+                    topCodigoGroups.map((codigo) => (
+                      <article
+                        key={codigo.codigoNormalizado}
+                        className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4"
                       >
-                        Ver gastos
-                      </button>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h4 className="truncate text-base font-semibold text-[var(--secundary-1)]">
+                              {codigo.codigo}
+                            </h4>
+                            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                              {codigo.quantidadeDespesas} despesas em {codigo.quantidadeInstituicoes} instituicoes
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCodigoGroup(codigo)}
+                            className="civitas-action civitas-action--ghost rounded-sm px-4 py-2 text-sm"
+                          >
+                            Ver gastos
+                          </button>
+                        </div>
+                        <p className="mt-3 text-lg font-semibold text-[var(--foreground)]">
+                          {codigo.totalGastosFormatado}
+                        </p>
+                      </article>
+                    ))
+                  ) : (
+                    <div className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-8 text-center text-sm text-[var(--foreground-soft)]">
+                      {hasExplorerSearch
+                        ? "Nenhum codigo encontrado para a busca informada."
+                        : "Nenhum codigo encontrado nas despesas filtradas."}
                     </div>
-                    <p className="mt-3 text-lg font-semibold text-[var(--foreground)]">
-                      {codigo.totalGastosFormatado}
-                    </p>
-                  </article>
-                ))
-              ) : (
-                <div className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-8 text-center text-sm text-[var(--foreground-soft)]">
-                  Nenhum codigo encontrado nas despesas filtradas.
+                  )}
                 </div>
-              )}
+              </div>
+
+              <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-default)] p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+                  Agrupamento por instituicao
+                </p>
+                <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                  Localize uma instituicao e veja seus codigos e gastos consolidados.
+                </p>
+
+                <div className="mt-4 space-y-3">
+                  {topInstituicaoGroups.length > 0 ? (
+                    topInstituicaoGroups.map((instituicao) => (
+                      <article
+                        key={instituicao.id}
+                        className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <span className="inline-flex rounded-sm border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
+                              {instituicao.secretariaNome}
+                            </span>
+                            <h4 className="mt-3 truncate text-lg font-semibold text-[var(--foreground)]">
+                              {instituicao.nome}
+                            </h4>
+                            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                              {instituicao.quantidadeDespesas} despesas em {instituicao.quantidadeCodigos} codigos
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedInstituicaoGroup(instituicao)}
+                            className="civitas-action civitas-action--ghost rounded-sm px-4 py-2 text-sm"
+                          >
+                            Ver instituicao
+                          </button>
+                        </div>
+
+                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                          <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
+                              Gasto
+                            </p>
+                            <p className="mt-2 text-base font-semibold text-[var(--secundary-1)]">
+                              {instituicao.totalGastosFormatado}
+                            </p>
+                          </div>
+                          <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
+                              Orcamento
+                            </p>
+                            <p className="mt-2 text-base font-semibold text-[var(--foreground)]">
+                              {instituicao.totalOrcamentosFormatado}
+                            </p>
+                          </div>
+                          <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
+                              Saldo
+                            </p>
+                            <p className="mt-2 text-base font-semibold text-[var(--foreground)]">
+                              {instituicao.saldoFormatado}
+                            </p>
+                          </div>
+                        </div>
+                      </article>
+                    ))
+                  ) : (
+                    <div className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-8 text-center text-sm text-[var(--foreground-soft)]">
+                      {hasExplorerSearch
+                        ? "Nenhuma instituicao encontrada para a busca informada."
+                        : "Nenhuma instituicao com despesas encontrada no recorte atual."}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-2">
-          {topInstituicaoGroups.map((instituicao) => (
-            <article
-              key={instituicao.id}
-              className="rounded-sm border border-[var(--border-soft)] bg-[linear-gradient(180deg,var(--surface-elevated),var(--surface-subtle))] p-5 shadow-[0_18px_30px_rgba(13,28,33,0.06)]"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <span className="inline-flex rounded-sm border border-[var(--border-default)] bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
-                    {instituicao.secretariaNome}
-                  </span>
-                  <h4 className="mt-3 truncate text-lg font-semibold text-[var(--foreground)]">
-                    {instituicao.nome}
-                  </h4>
-                  <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                    {instituicao.quantidadeDespesas} despesas em {instituicao.quantidadeCodigos} codigos
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedInstituicaoGroup(instituicao)}
-                  className="civitas-action civitas-action--ghost rounded-sm px-4 py-2 text-sm"
-                >
-                  Ver instituicao
-                </button>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-sm border border-[var(--border-soft)] bg-white p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
-                    Gasto
-                  </p>
-                  <p className="mt-2 text-base font-semibold text-[var(--secundary-1)]">
-                    {instituicao.totalGastosFormatado}
-                  </p>
-                </div>
-                <div className="rounded-sm border border-[var(--border-soft)] bg-white p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
-                    Orcamento
-                  </p>
-                  <p className="mt-2 text-base font-semibold text-[var(--foreground)]">
-                    {instituicao.totalOrcamentosFormatado}
-                  </p>
-                </div>
-                <div className="rounded-sm border border-[var(--border-soft)] bg-white p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
-                    Saldo
-                  </p>
-                  <p className="mt-2 text-base font-semibold text-[var(--foreground)]">
-                    {instituicao.saldoFormatado}
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+          </>
+        )}
       </section>
 
       <section className="despesas-filter-panel civitas-surface civitas-enter rounded-sm p-5 sm:p-6">
@@ -1199,25 +1365,51 @@ export default function Page() {
           </h3>
           <p className="mt-2 text-sm text-[var(--foreground-muted)]">
             Painel com leitura rapida de categoria, valor, data, situacao e acoes
-            de manutencao.
+            de manutencao. Use os filtros abaixo para isolar um unico codigo ou
+            uma instituicao especifica.
           </p>
         </div>
 
+        <div className="grid gap-4 border-b border-[var(--divider)] px-4 py-4 sm:px-5 lg:grid-cols-[1fr_1fr_auto] lg:px-6">
+          <Input
+            value={listCodigoSearch}
+            onChange={(event) => setListCodigoSearch(event.target.value)}
+            label="Filtrar por codigo"
+            placeholder="Ex.: contrato, energia, 001"
+          />
+          <Input
+            value={listInstituicaoSearch}
+            onChange={(event) => setListInstituicaoSearch(event.target.value)}
+            label="Filtrar por instituicao"
+            placeholder="Ex.: escola, secretaria, unidade"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setListCodigoSearch("");
+              setListInstituicaoSearch("");
+            }}
+            className="civitas-action civitas-action--ghost self-end rounded-sm px-4 py-2.5 text-sm"
+          >
+            Limpar listagem
+          </button>
+        </div>
+
         {allExportRows.length > 0 ? (
-          <div className="flex flex-col gap-3 border-b border-[#E4EEF0] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 lg:px-6">
+          <div className="flex flex-col gap-3 border-b border-[var(--divider)] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 lg:px-6">
             <button
               type="button"
               onClick={() => setIsExportModalOpen(true)}
-              className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-sm border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
+              className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-5 py-2.5 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] sm:w-auto"
             >
-              <span className="material-symbols-outlined text-base text-[#1F2A32]">print</span>
+              <span className="material-symbols-outlined text-base text-[var(--foreground)]">print</span>
               Exportar / Imprimir
             </button>
           </div>
         ) : null}
 
         {error && (
-          <div className="mx-5 mt-5 rounded-sm border border-[#F4C5C5] bg-[#FFF7F7] px-4 py-3 text-sm text-[#AA3A3A] sm:mx-6">
+          <div className="mx-5 mt-5 rounded-sm border border-[var(--border-default)] bg-[var(--surface-danger-soft)] px-4 py-3 text-sm text-[var(--status-inactive-text)] sm:mx-6">
             {error}
           </div>
         )}
@@ -1240,25 +1432,27 @@ export default function Page() {
             <tbody>
               {loading ? (
                 Array.from({ length: 4 }).map((_, index) => (
-                  <tr key={`loading-row-${index}`} className="rounded-sm bg-[#F8FBFB]">
+                  <tr key={`loading-row-${index}`} className="rounded-sm bg-[var(--surface-subtle)]">
                     {Array.from({ length: 8 }).map((__, cellIndex) => (
                       <td key={`loading-cell-${index}-${cellIndex}`} className="px-4 py-5">
-                        <div className="h-5 animate-pulse rounded-sm bg-[#E7EFF1]" />
+                        <div className="h-5 animate-pulse rounded-sm bg-[var(--border-soft)]" />
                       </td>
                     ))}
                   </tr>
                 ))
-              ) : empty ? (
+              ) : visibleDespesas.length === 0 ? (
                 <tr>
                   <td
                     colSpan={8}
-                    className="rounded-sm border border-dashed border-[#D6E5E8] px-4 py-10 text-center text-[#7B949B]"
+                    className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-10 text-center text-[var(--foreground-soft)]"
                   >
-                    Nenhuma despesa encontrada com os filtros atuais.
+                    {hasLocalListSearch
+                      ? "Nenhuma despesa encontrada para o codigo ou instituicao informados."
+                      : "Nenhuma despesa encontrada com os filtros atuais."}
                   </td>
                 </tr>
               ) : (
-                filteredDespesas.map((despesa, index) => (
+                visibleDespesas.map((despesa, index) => (
                   <tr
                     key={despesa.id}
                     style={
@@ -1266,10 +1460,10 @@ export default function Page() {
                         ? ({ ["--enter-delay" as string]: `${index * 45}ms` } as React.CSSProperties)
                         : undefined
                     }
-                    className={`${index < 6 ? "civitas-enter " : ""}rounded-sm bg-[rgba(255,255,255,0.96)] shadow-[var(--shadow-xs)] ring-1 ring-[#E2EFF1] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[#FCFEFE] hover:shadow-[var(--shadow-sm)]`}
+                    className={`${index < 6 ? "civitas-enter " : ""}rounded-sm bg-[var(--surface-elevated)] shadow-[var(--shadow-xs)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]`}
                   >
                     <td className="rounded-sm px-4 py-5">
-                      <span className="inline-flex min-w-[84px] items-center justify-center rounded-sm border border-[#E3CB73] bg-[linear-gradient(135deg,#FFE38A_0%,#F7D447_100%)] px-4 py-2 text-sm font-bold text-[#272727] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+                      <span className="inline-flex min-w-[84px] items-center justify-center rounded-sm border border-[var(--border-accent-amber)] bg-[var(--surface-accent-amber)] px-4 py-2 text-sm font-bold text-[var(--text-accent-amber)]">
                         {despesa.registro}
                       </span>
                     </td>
@@ -1316,7 +1510,7 @@ export default function Page() {
                         <button
                           type="button"
                           onClick={() => void handleDelete(despesa)}
-                          className="flex h-9 w-9 items-center justify-center rounded-sm border border-[#F1D8D8] bg-[rgba(255,255,255,0.92)] text-[#D16565] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[#FFF4F4] hover:shadow-[var(--shadow-sm)]"
+                          className="flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--status-inactive-text)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-danger-soft)] hover:shadow-[var(--shadow-sm)]"
                           aria-label={`Remover ${despesa.registro}`}
                         >
                           <span className="material-symbols-outlined !text-[18px]">delete</span>
@@ -1329,7 +1523,7 @@ export default function Page() {
             </tbody>
           </table>
         </div>
-        <div className="flex flex-col gap-2 border-t border-[var(--divider)] bg-[linear-gradient(180deg,rgba(247,251,251,0.96)_0%,rgba(243,248,248,0.96)_100%)] px-5 py-4 text-sm text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex flex-col gap-2 border-t border-[var(--divider)] bg-[var(--surface-subtle)] px-5 py-4 text-sm text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <span>{listResume}</span>
           <span>Ultima atualizacao: {lastUpdatedLabel}</span>
         </div>
@@ -1477,7 +1671,7 @@ export default function Page() {
                         {codigo.codigo}
                       </h5>
                     </div>
-                    <span className="rounded-sm border border-[var(--border-default)] bg-white px-3 py-1 text-xs font-semibold text-[var(--foreground-muted)]">
+                    <span className="rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-1 text-xs font-semibold text-[var(--foreground-muted)]">
                       {codigo.quantidadeDespesas} despesas
                     </span>
                   </div>

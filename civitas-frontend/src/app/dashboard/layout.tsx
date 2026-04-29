@@ -21,7 +21,7 @@ export default function Layout({
       <div className="dashboard-shell flex min-h-screen w-full bg-[var(--surface-page)]">
         <Sidebar />
         <button 
-          className="fixed right-8 top-5 bg-primary-2 px-4 py-2 rounded-sm text-white cursor-pointer z-[9999] flex justify-between gap-2 items-center justify-center"
+          className="fixed right-8 top-5 bg-primary-2 px-4 py-2 rounded-sm text-white cursor-pointer z-[9997] flex justify-between gap-2 items-center justify-center"
           onClick={() => push('/login')}
         >
           Sair

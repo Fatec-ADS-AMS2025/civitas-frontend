@@ -11,11 +11,30 @@ export type InsightMetric = {
   tone?: "teal" | "amber" | "slate" | "coral";
 };
 
-const toneClassNames: Record<NonNullable<InsightMetric["tone"]>, string> = {
-  teal: "from-[#0D7A7C] via-[#2EAAA7] to-[#6AD1C4] text-white",
-  amber: "from-[#B96416] via-[#F59E0B] to-[#FFD169] text-[#372300]",
-  slate: "from-[#19212B] via-[#303946] to-[#556173] text-white",
-  coral: "from-[#8F3A32] via-[#D76855] to-[#F4AB89] text-white",
+const toneStyles: Record<
+  NonNullable<InsightMetric["tone"]>,
+  React.CSSProperties
+> = {
+  teal: {
+    background: "var(--surface-accent-teal)",
+    borderColor: "var(--border-accent-teal)",
+    color: "var(--foreground)",
+  },
+  amber: {
+    background: "var(--surface-accent-amber)",
+    borderColor: "var(--border-accent-amber)",
+    color: "var(--foreground)",
+  },
+  slate: {
+    background: "var(--surface-accent-slate)",
+    borderColor: "var(--border-accent-slate)",
+    color: "var(--foreground)",
+  },
+  coral: {
+    background: "var(--surface-accent-coral)",
+    borderColor: "var(--border-accent-coral)",
+    color: "var(--foreground)",
+  },
 };
 
 export function InsightsGrid({ metrics }: { metrics: InsightMetric[] }) {
@@ -27,15 +46,17 @@ export function InsightsGrid({ metrics }: { metrics: InsightMetric[] }) {
         return (
           <article
             key={`${metric.label}-${metric.value}`}
-            className={`relative overflow-hidden rounded-sm bg-gradient-to-br p-4 shadow-[0_18px_28px_rgba(8,22,26,0.12)] ${toneClassNames[tone]}`}
+            className="dashboard-metric-card relative overflow-hidden rounded-sm border p-4 shadow-[var(--shadow-xs)]"
+            style={toneStyles[tone]}
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.24),transparent_38%)]" />
             <div className="relative z-10">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-80">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
                 {metric.label}
               </p>
-              <p className="mt-4 text-[28px] font-semibold leading-none">{metric.value}</p>
-              <p className="mt-2 text-sm opacity-85">{metric.hint}</p>
+              <p className="mt-4 text-[28px] font-semibold leading-none text-[var(--foreground)]">
+                {metric.value}
+              </p>
+              <p className="mt-2 text-sm text-[var(--foreground-muted)]">{metric.hint}</p>
             </div>
           </article>
         );
@@ -66,12 +87,16 @@ export function InsightsModal({
   return (
     <Modal value={open} setValue={onClose}>
       <div className="space-y-6">
-        <div className="rounded-sm border border-[var(--border-soft)] bg-[linear-gradient(135deg,rgba(8,75,86,0.98),rgba(26,121,126,0.96)_52%,rgba(95,196,186,0.92))] px-5 py-6 text-white">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/72">
+        <div className="insights-modal__header rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-5 py-6 text-[var(--foreground)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
             Leitura consolidada
           </p>
-          <h3 className="mt-3 text-[28px] font-semibold leading-tight">{title}</h3>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/76">{subtitle}</p>
+          <h3 className="mt-3 text-[28px] font-semibold leading-tight text-[var(--secundary-1)]">
+            {title}
+          </h3>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
+            {subtitle}
+          </p>
         </div>
 
         <InsightsGrid metrics={metrics} />
@@ -124,7 +149,7 @@ export function DespesasRelacionadasTable({
                 className="border-t border-[var(--divider)] text-sm text-[var(--foreground)]"
               >
                 <td className="px-4 py-3">
-                  <span className="inline-flex rounded-sm border border-[#E8D79C] bg-[#FFF6D9] px-3 py-1 text-xs font-semibold text-[#5F4B00]">
+                  <span className="inline-flex rounded-sm border border-[var(--border-accent-amber)] bg-[var(--surface-accent-amber)] px-3 py-1 text-xs font-semibold text-[var(--text-accent-amber)]">
                     {despesa.registro}
                   </span>
                 </td>

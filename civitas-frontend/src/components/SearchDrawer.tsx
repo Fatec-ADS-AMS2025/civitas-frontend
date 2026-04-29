@@ -64,7 +64,7 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
       <aside
         aria-label="Painel de busca"
         aria-hidden={!isOpen}
-        className={`fixed right-0 top-0 z-[130] flex h-screen w-full max-w-[380px] flex-col border-l border-[var(--search-drawer-border)] bg-[var(--search-drawer-bg)] shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed right-0 top-0 z-[9999] flex h-screen w-full max-w-[380px] flex-col border-l border-[var(--search-drawer-border)] bg-[var(--search-drawer-bg)] shadow-2xl transition-transform duration-300 ease-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

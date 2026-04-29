@@ -36,6 +36,18 @@ button {
   --surface-warning-soft: #fff4e4;
   --surface-danger-soft: #fff3f3;
   --surface-success-soft: #eef9f1;
+  --surface-accent-teal: color-mix(in srgb, var(--primary-1) 16%, var(--surface-elevated));
+  --surface-accent-slate: color-mix(in srgb, var(--foreground) 8%, var(--surface-elevated));
+  --surface-accent-amber: color-mix(in srgb, var(--secundary-2) 16%, var(--surface-elevated));
+  --surface-accent-coral: color-mix(in srgb, var(--primary-2) 14%, var(--surface-elevated));
+  --border-accent-teal: color-mix(in srgb, var(--primary-1) 36%, var(--border-default));
+  --border-accent-slate: color-mix(in srgb, var(--foreground-soft) 28%, var(--border-default));
+  --border-accent-amber: color-mix(in srgb, var(--secundary-2) 38%, var(--border-default));
+  --border-accent-coral: color-mix(in srgb, var(--primary-2) 34%, var(--border-default));
+  --text-accent-teal: var(--secundary-1);
+  --text-accent-slate: var(--foreground);
+  --text-accent-amber: #8a5600;
+  --text-accent-coral: #8c4334;
 
   --border-soft: #dce8ea;
   --border-default: #d2e3e6;
@@ -138,6 +150,18 @@ html[data-theme="dark"] {
   --surface-warning-soft: #3c2a15;
   --surface-danger-soft: #3a1f24;
   --surface-success-soft: #183126;
+  --surface-accent-teal: color-mix(in srgb, var(--primary-1) 16%, var(--surface-elevated));
+  --surface-accent-slate: color-mix(in srgb, white 6%, var(--surface-elevated));
+  --surface-accent-amber: color-mix(in srgb, var(--secundary-2) 18%, var(--surface-elevated));
+  --surface-accent-coral: color-mix(in srgb, var(--primary-2) 16%, var(--surface-elevated));
+  --border-accent-teal: color-mix(in srgb, var(--primary-1) 38%, var(--border-default));
+  --border-accent-slate: color-mix(in srgb, white 18%, var(--border-default));
+  --border-accent-amber: color-mix(in srgb, var(--secundary-2) 42%, var(--border-default));
+  --border-accent-coral: color-mix(in srgb, var(--primary-2) 38%, var(--border-default));
+  --text-accent-teal: #b8eff0;
+  --text-accent-slate: var(--foreground);
+  --text-accent-amber: #ffd58d;
+  --text-accent-coral: #ffb6a7;
 
   --border-soft: #1f373d;
   --border-default: #29474f;
@@ -671,25 +695,25 @@ html[data-theme="dark"] {
 }
 
 .civitas-input.despesas-filter-field {
-  border-color: #d7e5e8;
-  background: #f6fafa;
+  border-color: var(--border-default);
+  background: var(--surface-elevated);
   @apply rounded-sm;
   box-shadow: none;
 }
 
 .civitas-input.despesas-filter-field::placeholder {
-  color: #9aaab2;
+  color: var(--foreground-soft);
 }
 
 .civitas-input.dashboard-recent-search {
-  border-color: #d7e5e8;
-  background: #f7fafb;
+  border-color: var(--border-default);
+  background: var(--surface-elevated);
   @apply rounded-sm;
   box-shadow: none;
 }
 
 .civitas-input.dashboard-recent-search::placeholder {
-  color: #9aaab2;
+  color: var(--foreground-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {
