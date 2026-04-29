@@ -7,13 +7,15 @@ import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
+import { tipoCodigoService } from "@/hooks/tipoCodigo";
 import { unidadeMedidaService } from "@/hooks/unidadeMedida";
+import TipoCodigoDTO from "@/models/tipoCodigo";
 import TipoInstituicaoDTO from "@/models/tipoInstituicao";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 import UnidadeMedidaDTO from "@/models/unidadeMedida";
 import ConfiguracoesSkeleton from "./skeleton";
 
-type ConfigKind = "tipoInstituicao" | "tipoDespesa" | "unidadeMedida";
+type ConfigKind = "tipoCodigo" | "tipoInstituicao" | "tipoDespesa" | "unidadeMedida";
 type FeedbackType = "success" | "error";
 
 type FeedbackState = {
@@ -25,6 +27,8 @@ type TipoInstituicaoRow = TipoInstituicaoDTO & {
   situacaoLabel: string;
 };
 
+type TipoCodigoRow = TipoCodigoDTO;
+
 type UnidadeMedidaRow = UnidadeMedidaDTO & {
   situacaoLabel: string;
 };
@@ -35,7 +39,7 @@ type TipoDespesaRow = TipoDespesaDTO & {
   unidadeMedidaLabel: string;
 };
 
-type ConfigRow = TipoInstituicaoRow | UnidadeMedidaRow | TipoDespesaRow;
+type ConfigRow = TipoCodigoRow | TipoInstituicaoRow | UnidadeMedidaRow | TipoDespesaRow;
 
 type ConfigDefinition = {
   key: ConfigKind;
@@ -55,6 +59,12 @@ const tipoInstituicaoColumns = [
   { id: "id", label: "ID" },
   { id: "descricao", label: "Descricao" },
   { id: "situacaoLabel", label: "Situacao" },
+];
+
+const tipoCodigoColumns = [
+  { id: "id", label: "ID" },
+  { id: "nome", label: "Nome" },
+  { id: "descricao", label: "Descricao" },
 ];
 
 const tipoDespesaColumns = [
@@ -111,6 +121,12 @@ const mapTipoInstituicaoRows = (items: TipoInstituicaoDTO[]): TipoInstituicaoRow
   }));
 };
 
+const mapTipoCodigoRows = (items: TipoCodigoDTO[]): TipoCodigoRow[] => {
+  return items.map((item) => ({
+    ...item,
+  }));
+};
+
 const mapUnidadeRows = (items: UnidadeMedidaDTO[]): UnidadeMedidaRow[] => {
   return items.map((item) => ({
     ...item,
@@ -134,6 +150,36 @@ const mapTipoDespesaRows = (
 };
 
 const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
+  tipoCodigo: {
+    key: "tipoCodigo",
+    label: "Tipo de Codigo",
+    columns: tipoCodigoColumns,
+    buildFields: () => [
+      { key: "id", hidden: true },
+      {
+        key: "nome",
+        label: "Nome",
+        placeholder: "Informe o nome",
+        required: true,
+      },
+      {
+        key: "descricao",
+        label: "Descricao",
+        placeholder: "Informe a descricao",
+        type: "textarea",
+        required: true,
+      },
+    ],
+    buildSearchFields: () => [
+      { key: "nome", placeholder: "Nome", local: "principal" },
+      { key: "descricao", placeholder: "Descricao", local: "filtro" },
+    ],
+    emptyModel: {
+      id: 0,
+      nome: "",
+      descricao: "",
+    },
+  },
   tipoInstituicao: {
     key: "tipoInstituicao",
     label: "Tipo de Instituicao",
@@ -316,6 +362,10 @@ export default function ConfiguracoesPage() {
     return mergeById(ativas, inativas);
   };
 
+  const fetchTipoCodigoData = async () => {
+    return tipoCodigoService.getAll();
+  };
+
   const fetchTipoDespesaData = async () => {
     const [ativas, inativas] = await Promise.all([
       tipoDespesaService.getAll(),
@@ -338,6 +388,13 @@ export default function ConfiguracoesPage() {
     setLoading(true);
 
     try {
+      if (selectedKind === "tipoCodigo") {
+        const items = await fetchTipoCodigoData();
+        const rows = mapTipoCodigoRows(items);
+        setDadosOriginais(rows);
+        setDadosFiltrados(rows);
+      }
+
       if (selectedKind === "tipoInstituicao") {
         const items = await fetchTipoInstituicaoData();
         const rows = mapTipoInstituicaoRows(items);
@@ -396,6 +453,19 @@ export default function ConfiguracoesPage() {
     setFeedback(null);
 
     try {
+      if (tipoSelecionado === "tipoCodigo") {
+        const payload: Omit<TipoCodigoDTO, "id"> = {
+          nome: normalizeText(formData.nome),
+          descricao: normalizeText(formData.descricao),
+        };
+
+        const result = await tipoCodigoService.createEnvelope(payload);
+        setFeedback({
+          type: "success",
+          message: result.message ?? "Tipo de codigo cadastrado com sucesso.",
+        });
+      }
+
       if (tipoSelecionado === "tipoInstituicao") {
         const payload: Omit<TipoInstituicaoDTO, "id"> = {
           descricao: normalizeText(formData.descricao),
@@ -452,6 +522,20 @@ export default function ConfiguracoesPage() {
     setFeedback(null);
 
     try {
+      if (tipoSelecionado === "tipoCodigo") {
+        const payload: TipoCodigoDTO = {
+          id,
+          nome: normalizeText(formData.nome),
+          descricao: normalizeText(formData.descricao),
+        };
+
+        const result = await tipoCodigoService.updateEnvelope(id, payload);
+        setFeedback({
+          type: "success",
+          message: result.message ?? "Tipo de codigo atualizado com sucesso.",
+        });
+      }
+
       if (tipoSelecionado === "tipoInstituicao") {
         const payload: TipoInstituicaoDTO = {
           id,
@@ -511,6 +595,14 @@ export default function ConfiguracoesPage() {
     setFeedback(null);
 
     try {
+      if (tipoSelecionado === "tipoCodigo") {
+        await tipoCodigoService.delete(id);
+        setFeedback({
+          type: "success",
+          message: "Tipo de codigo removido com sucesso.",
+        });
+      }
+
       if (tipoSelecionado === "tipoInstituicao") {
         const result = await tipoInstituicaoService.alterarSituacaoEnvelope(id);
         setFeedback({
@@ -602,6 +694,18 @@ export default function ConfiguracoesPage() {
             }`}
           >
             Tipo de Despesa
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTipoSelecionado("tipoCodigo")}
+            className={`rounded-sm border px-4 py-2 text-sm font-semibold transition ${
+              tipoSelecionado === "tipoCodigo"
+                ? "border-[#58AFAE] bg-[#58AFAE] text-white"
+                : "border-[#D5E3E6] bg-white text-[#1F2A32] hover:bg-[#F7FAFB]"
+            }`}
+          >
+            Tipo de Codigo
           </button>
 
           <button
