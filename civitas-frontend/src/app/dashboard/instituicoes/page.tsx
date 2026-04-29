@@ -243,6 +243,7 @@ export default function Page() {
         key: "cnpj",
         label: "CNPJ",
         placeholder: "00.000.000/0000-00",
+        mask: "cnpj",
         required: true,
         validate: validateDigitsLength("CNPJ", 14),
       },
@@ -250,6 +251,7 @@ export default function Page() {
         key: "cep",
         label: "CEP",
         placeholder: "00000-000",
+        mask: "cep",
         required: true,
         validate: validateDigitsLength("CEP", 8),
       },
@@ -293,6 +295,7 @@ export default function Page() {
         label: "Telefone",
         placeholder: "(00) 00000-0000",
         type: "tel",
+        mask: "phone",
         required: true,
       },
       {

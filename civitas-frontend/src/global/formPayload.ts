@@ -1,4 +1,4 @@
-type FormPayload = Record<string, unknown>;
+type FormPayload = object;
 
 type SimpleValidator = (value: unknown) => string | undefined;
 
@@ -144,69 +144,99 @@ export const validateUfCode =
   };
 
 export const normalizeFornecedorPayload = <T extends FormPayload>(data: T): T => {
+  const payload = data as Record<string, unknown>;
+
   return {
     ...data,
-    nomeFantasia: toTrimmedString(data.nomeFantasia),
-    situacao: toOptionalNumber(data.situacao),
-    cnpj: digitsOnly(data.cnpj),
-    nome: toTrimmedString(data.nome),
-    logradouro: toTrimmedString(data.logradouro),
-    numero: toTrimmedString(data.numero),
-    bairro: toTrimmedString(data.bairro),
-    cep: digitsOnly(data.cep),
-    telefone: digitsOnly(data.telefone),
-    email: toTrimmedString(data.email).toLowerCase(),
-    cidade: toTrimmedString(data.cidade),
-    estado: normalizeUf(data.estado),
+    nomeFantasia: toTrimmedString(payload.nomeFantasia),
+    situacao: toOptionalNumber(payload.situacao),
+    cnpj: digitsOnly(payload.cnpj),
+    nome: toTrimmedString(payload.nome),
+    logradouro: toTrimmedString(payload.logradouro),
+    numero: toTrimmedString(payload.numero),
+    bairro: toTrimmedString(payload.bairro),
+    cep: digitsOnly(payload.cep),
+    telefone: digitsOnly(payload.telefone),
+    email: toTrimmedString(payload.email).toLowerCase(),
+    cidade: toTrimmedString(payload.cidade),
+    estado: normalizeUf(payload.estado),
   } as T;
 };
 
 export const normalizeSecretariaPayload = <T extends FormPayload>(data: T): T => {
+  const payload = data as Record<string, unknown>;
+
   return {
     ...data,
-    situacao: toOptionalNumber(data.situacao),
-    descricao: toTrimmedString(data.descricao),
-    cnpj: digitsOnly(data.cnpj),
-    nome: toTrimmedString(data.nome),
-    logradouro: toTrimmedString(data.logradouro),
-    numero: toTrimmedString(data.numero),
-    bairro: toTrimmedString(data.bairro),
-    cep: digitsOnly(data.cep),
-    nomeRazaoSocial: toTrimmedString(data.nomeRazaoSocial),
-    telefone: digitsOnly(data.telefone),
-    email: toTrimmedString(data.email).toLowerCase(),
-    cidade: toTrimmedString(data.cidade),
-    estado: normalizeUf(data.estado),
+    situacao: toOptionalNumber(payload.situacao),
+    descricao: toTrimmedString(payload.descricao),
+    cnpj: digitsOnly(payload.cnpj),
+    nome: toTrimmedString(payload.nome),
+    logradouro: toTrimmedString(payload.logradouro),
+    numero: toTrimmedString(payload.numero),
+    bairro: toTrimmedString(payload.bairro),
+    cep: digitsOnly(payload.cep),
+    nomeRazaoSocial: toTrimmedString(payload.nomeRazaoSocial),
+    telefone: digitsOnly(payload.telefone),
+    email: toTrimmedString(payload.email).toLowerCase(),
+    cidade: toTrimmedString(payload.cidade),
+    estado: normalizeUf(payload.estado),
   } as T;
 };
 
 export const normalizeInstituicaoPayload = <T extends FormPayload>(data: T): T => {
+  const payload = data as Record<string, unknown>;
+
   return {
     ...data,
-    cnpj: digitsOnly(data.cnpj),
-    nome: toTrimmedString(data.nome),
-    logradouro: toTrimmedString(data.logradouro),
-    numero: toTrimmedString(data.numero),
-    bairro: toTrimmedString(data.bairro),
-    cep: digitsOnly(data.cep),
-    nomeRazaoSocial: toTrimmedString(data.nomeRazaoSocial),
-    telefone: digitsOnly(data.telefone),
-    email: toTrimmedString(data.email).toLowerCase(),
-    cidade: toTrimmedString(data.cidade),
-    estado: normalizeUf(data.estado),
-    situacao: toOptionalNumber(data.situacao),
-    idTipoInstituicao: toOptionalNumber(data.idTipoInstituicao),
-    idSecretaria: toOptionalNumber(data.idSecretaria),
+    cnpj: digitsOnly(payload.cnpj),
+    nome: toTrimmedString(payload.nome),
+    logradouro: toTrimmedString(payload.logradouro),
+    numero: toTrimmedString(payload.numero),
+    bairro: toTrimmedString(payload.bairro),
+    cep: digitsOnly(payload.cep),
+    nomeRazaoSocial: toTrimmedString(payload.nomeRazaoSocial),
+    telefone: digitsOnly(payload.telefone),
+    email: toTrimmedString(payload.email).toLowerCase(),
+    cidade: toTrimmedString(payload.cidade),
+    estado: normalizeUf(payload.estado),
+    situacao: toOptionalNumber(payload.situacao),
+    idTipoInstituicao: toOptionalNumber(payload.idTipoInstituicao),
+    idSecretaria: toOptionalNumber(payload.idSecretaria),
   } as T;
 };
 
 export const normalizeOrcamentoPayload = <T extends FormPayload>(data: T): T => {
+  const payload = data as Record<string, unknown>;
+
   return {
     ...data,
-    anoOrcamento: toOptionalNumber(data.anoOrcamento),
-    valorOrcamento: toOptionalNumber(data.valorOrcamento),
-    idInstituicao: toOptionalNumber(data.idInstituicao),
-    idTipoDespesa: toOptionalNumber(data.idTipoDespesa),
+    anoOrcamento: toOptionalNumber(payload.anoOrcamento),
+    valorOrcamento: toOptionalNumber(payload.valorOrcamento),
+    idInstituicao: toOptionalNumber(payload.idInstituicao),
+    idTipoDespesa: toOptionalNumber(payload.idTipoDespesa),
+  } as T;
+};
+
+export const normalizeUsuarioPayload = <T extends FormPayload>(data: T): T => {
+  const payload = data as Record<string, unknown>;
+
+  return {
+    ...data,
+    cpf: digitsOnly(payload.cpf),
+    nome: toTrimmedString(payload.nome),
+    rg: toTrimmedString(payload.rg),
+    logradouro: toTrimmedString(payload.logradouro),
+    numero: toTrimmedString(payload.numero),
+    matricula: toTrimmedString(payload.matricula),
+    cidade: toTrimmedString(payload.cidade),
+    estado: normalizeUf(payload.estado),
+    cep: digitsOnly(payload.cep),
+    bairro: toTrimmedString(payload.bairro),
+    email: toTrimmedString(payload.email).toLowerCase(),
+    senha: toTrimmedString(payload.senha),
+    situacao: toOptionalNumber(payload.situacao),
+    tipoUsuario: toOptionalNumber(payload.tipoUsuario),
   } as T;
 };
 
@@ -248,31 +278,32 @@ export const validateDespesaDateRange = (
 };
 
 export const normalizeDespesaPayload = <T extends FormPayload>(data: T): T => {
-  const normalizedCodigo = toTrimmedString(data.codigo);
+  const payload = data as Record<string, unknown>;
+  const normalizedCodigo = toTrimmedString(payload.codigo);
   const normalizedDataEmissao = normalizeDateInput(
-    data.dataEmissao ?? data.dataEmicao
+    payload.dataEmissao ?? payload.dataEmicao
   );
-  const normalizedStatus = toOptionalNumber(data.status ?? data.situacao);
+  const normalizedStatus = toOptionalNumber(payload.status ?? payload.situacao);
 
   return {
     ...data,
-    numeroDocumento: digitsOnly(data.numeroDocumento),
+    numeroDocumento: digitsOnly(payload.numeroDocumento),
     codigo: normalizedCodigo,
-    uc: toTrimmedString(data.uc),
+    uc: toTrimmedString(payload.uc),
     dataEmissao: normalizedDataEmissao,
     dataEmicao: normalizedDataEmissao,
-    consumoPrevisto: toOptionalNumber(data.consumoPrevisto ?? data.valor),
-    dataVencimento: normalizeDateInput(data.dataVencimento ?? data.data),
+    consumoPrevisto: toOptionalNumber(payload.consumoPrevisto ?? payload.valor),
+    dataVencimento: normalizeDateInput(payload.dataVencimento ?? payload.data),
     status: normalizedStatus,
     situacao: normalizedStatus,
-    idTipoDespesa: toOptionalNumber(data.idTipoDespesa),
-    idOrcamento: toOptionalNumber(data.idOrcamento),
-    idInstituicao: toOptionalNumber(data.idInstituicao),
-    idFornecedor: toOptionalNumber(data.idFornecedor ?? data.fornecedorId),
-    idUsuario: toOptionalNumber(data.idUsuario),
-    descricao: toTrimmedString(data.descricao),
-    valor: toOptionalNumber(data.valor),
-    data: normalizeDateInput(data.data),
-    categoria: toTrimmedString(data.categoria),
+    idTipoDespesa: toOptionalNumber(payload.idTipoDespesa),
+    idOrcamento: toOptionalNumber(payload.idOrcamento),
+    idInstituicao: toOptionalNumber(payload.idInstituicao),
+    idFornecedor: toOptionalNumber(payload.idFornecedor ?? payload.fornecedorId),
+    idUsuario: toOptionalNumber(payload.idUsuario),
+    descricao: toTrimmedString(payload.descricao),
+    valor: toOptionalNumber(payload.valor),
+    data: normalizeDateInput(payload.data),
+    categoria: toTrimmedString(payload.categoria),
   } as T;
 };

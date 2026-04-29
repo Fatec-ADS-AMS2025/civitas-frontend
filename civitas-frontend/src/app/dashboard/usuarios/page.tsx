@@ -4,6 +4,13 @@ import React, { useEffect, useState } from "react";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import {
+  composeValidators,
+  normalizeUsuarioPayload,
+  validateDigitsLength,
+  validateMaxLength,
+  validateUfCode,
+} from "@/global/formPayload";
 import { usuarioService } from "@/hooks/usuario";
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import UsuarioDTO from "@/models/usuario";
@@ -93,15 +100,38 @@ const camposConst: FieldConfig[] = [
 const usuarioFormFields: ModalFieldConfig[] = [
   { key: "id", hidden: true },
   { key: "nome", label: "Nome", placeholder: "Nome completo", required: true },
-  { key: "cpf", label: "CPF", placeholder: "000.000.000-00", required: true },
+  {
+    key: "cpf",
+    label: "CPF",
+    placeholder: "000.000.000-00",
+    mask: "cpf",
+    required: true,
+    validate: validateDigitsLength("CPF", 11),
+  },
   { key: "rg", label: "RG", placeholder: "RG", required: true },
   { key: "matricula", label: "Matricula", placeholder: "MAT-0000", required: true },
   { key: "logradouro", label: "Logradouro", placeholder: "Rua / Avenida", required: true },
   { key: "numero", label: "Numero", placeholder: "Numero", required: true },
   { key: "bairro", label: "Bairro", placeholder: "Bairro", required: true },
-  { key: "cep", label: "CEP", placeholder: "00000-000", required: true },
+  {
+    key: "cep",
+    label: "CEP",
+    placeholder: "00000-000",
+    mask: "cep",
+    required: true,
+    validate: validateDigitsLength("CEP", 8),
+  },
   { key: "cidade", label: "Cidade", placeholder: "Cidade", required: true },
-  { key: "estado", label: "Estado", placeholder: "UF", required: true },
+  {
+    key: "estado",
+    label: "Estado",
+    placeholder: "UF",
+    required: true,
+    validate: composeValidators(
+      validateUfCode(),
+      validateMaxLength("Estado", 2)
+    ),
+  },
   { key: "email", label: "E-mail", placeholder: "email@exemplo.com", type: "email", required: true },
   { key: "senha", label: "Senha", placeholder: "Senha", type: "password", required: true },
   {
@@ -253,14 +283,16 @@ const Page = () => {
   }, []);
 
   const handleCreate = async (novoUsuarioData: Omit<User, "id">) => {
-    const payload = toApiUsuarioPayload(novoUsuarioData);
+    const payload = normalizeUsuarioPayload(toApiUsuarioPayload(novoUsuarioData));
     await usuarioService.create(payload);
     await loadUsuarios({ page: currentPage, size: pageSize });
   };
 
   const handleUpdate = async (id: number, dadosAtualizados: Partial<User>) => {
     const current = usuarios.find((item) => item.id === id);
-    const payload = toApiUsuarioPayload({ ...dadosAtualizados, id }, current);
+    const payload = normalizeUsuarioPayload(
+      toApiUsuarioPayload({ ...dadosAtualizados, id }, current)
+    );
 
     await usuarioService.update(id, payload);
     await loadUsuarios({ page: currentPage, size: pageSize });

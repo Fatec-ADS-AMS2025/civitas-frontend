@@ -3,6 +3,12 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Button from '../button'
 import Input from '../Input'
+import {
+    formatMaskedValue,
+    normalizeMaskedValue,
+    resolveInputMask,
+    type InputMask,
+} from '@/lib/input-mask'
 
 type FormMode = 'create' | 'edit' | 'view' | 'delete'
 
@@ -22,9 +28,12 @@ type FormFieldConfig = {
     label?: string;
     placeholder?: string;
     type?: 'text' | 'email' | 'number' | 'password' | 'tel' | 'date' | 'select' | 'textarea';
+    mask?: InputMask;
     required?: boolean;
     hidden?: boolean;
     disabled?: boolean;
+    inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+    maxLength?: number;
     options?: FormOption[];
     readOnlyInModes?: FormMode[];
     validate?: ValidationFn;
@@ -81,6 +90,20 @@ const getColumnClass = (fieldCount: number) => {
     return 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'
 }
 
+const formatValueForFieldState = (
+    field: FormFieldConfig | undefined,
+    value: unknown,
+): unknown => {
+    if (!field) return value
+    if (value === undefined || value === null) return value
+
+    if (field.mask) {
+        return formatMaskedValue(field.mask, value)
+    }
+
+    return value
+}
+
 export type { FieldConfig, FormFieldConfig, FormMode, FormOption, ValidationFn }
 
 export default function Form({
@@ -100,24 +123,6 @@ export default function Form({
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [currentStep, setCurrentStep] = useState(0)
 
-    useEffect(() => {
-        if (isRecord(object)) {
-            setFormData(object)
-            return
-        }
-
-        if (Array.isArray(object)) {
-            const emptyObject = object.reduce<Record<string, unknown>>((acc, key) => {
-                acc[key] = ''
-                return acc
-            }, {})
-            setFormData(emptyObject)
-            return
-        }
-
-        setFormData({})
-    }, [object])
-
     const mode: FormMode = type
     const sourceFromCamps = camps ?? (Array.isArray(object) ? object : undefined) ?? []
     const sourceFromObject = isRecord(object) ? Object.keys(object) : []
@@ -131,6 +136,37 @@ export default function Form({
     const fieldMap = useMemo(() => {
         return new Map(mergedFields.map((field) => [field.key, field]))
     }, [mergedFields])
+
+    const buildDisplayFormData = (source: Record<string, unknown>) => {
+        const keysToNormalize = mergedFields.length > 0
+            ? mergedFields.map((field) => field.key)
+            : Object.keys(source)
+
+        return Object.fromEntries(
+            keysToNormalize.map((key) => {
+                const field = fieldMap.get(key)
+                return [key, formatValueForFieldState(field, source[key])]
+            })
+        )
+    }
+
+    useEffect(() => {
+        if (isRecord(object)) {
+            setFormData(buildDisplayFormData(object))
+            return
+        }
+
+        if (Array.isArray(object)) {
+            const emptyObject = object.reduce<Record<string, unknown>>((acc, key) => {
+                acc[key] = ''
+                return acc
+            }, {})
+            setFormData(buildDisplayFormData(emptyObject))
+            return
+        }
+
+        setFormData({})
+    }, [fieldMap, mergedFields, object])
 
     const fieldsToHide = hiddenFields ?? DEFAULT_HIDDEN_FIELDS
     const visibleFields = mergedFields.filter((field) => !field.hidden && !fieldsToHide.includes(field.key))
@@ -154,6 +190,14 @@ export default function Form({
     ): unknown => {
         if (!field) return value
         if (value === undefined || value === null) return value
+
+        if (field.mask) {
+            if (stage === 'change') {
+                return formatMaskedValue(field.mask, value)
+            }
+
+            value = normalizeMaskedValue(field.mask, value)
+        }
 
         if (field.type === 'select') {
             if (value === '') return ''
@@ -354,6 +398,9 @@ export default function Form({
         const fieldValue = formData[field.key]
         const fieldError = errors[field.key]
         const errorId = getFieldErrorId(field.key)
+        const resolvedMask = resolveInputMask(field.mask)
+        const resolvedInputMode = field.inputMode ?? resolvedMask?.inputMode
+        const resolvedMaxLength = field.maxLength ?? resolvedMask?.maxLength
         const commonProps = {
             required: field.required && !isReadOnlyMode,
             disabled: getFieldDisabled(field),
@@ -423,10 +470,12 @@ export default function Form({
         return (
             <Input
                 key={field.key}
-                type={field.type ?? 'text'}
+                type={field.mask ? 'text' : field.type ?? 'text'}
                 placeholder={field.placeholder ?? commonProps.label}
                 required={commonProps.required}
                 disabled={commonProps.disabled}
+                inputMode={resolvedInputMode}
+                maxLength={resolvedMaxLength}
                 value={toInputValue(fieldValue)}
                 label={commonProps.label}
                 error={commonProps.error}

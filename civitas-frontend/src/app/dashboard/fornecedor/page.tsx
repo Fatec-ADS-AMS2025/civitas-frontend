@@ -92,6 +92,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     key: "cnpj",
     label: "CNPJ",
     placeholder: "00.000.000/0000-00",
+    mask: "cnpj",
     required: true,
     validate: validateDigitsLength("CNPJ", 14),
   },
@@ -118,6 +119,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     key: "cep",
     label: "CEP",
     placeholder: "00000-000",
+    mask: "cep",
     required: true,
     validate: validateDigitsLength("CEP", 8),
   },
@@ -142,6 +144,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     label: "Telefone",
     placeholder: "(00) 00000-0000",
     type: "tel",
+    mask: "phone",
     required: true,
   },
   {

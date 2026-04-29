@@ -168,6 +168,7 @@ export default function Page() {
         placeholder: "Digite o ano",
         required: true,
         type: "number",
+        mask: "year",
         validate: validatePositiveNumber("Ano"),
       },
       {
@@ -176,6 +177,7 @@ export default function Page() {
         placeholder: "Digite o valor do orcamento",
         required: true,
         type: "number",
+        mask: "currency",
         validate: validatePositiveNumber("Valor"),
       },
       {

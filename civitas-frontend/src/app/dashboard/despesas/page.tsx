@@ -450,6 +450,7 @@ export default function Page() {
         key: "numeroDocumento",
         label: "Numero do documento",
         placeholder: "Somente numeros",
+        mask: "integer",
         required: true,
         validate: (value) => {
           const normalizedValue = digitsOnly(value);
@@ -499,6 +500,7 @@ export default function Page() {
         label: "Valor",
         placeholder: "0,00",
         type: "number",
+        mask: "currency",
         required: true,
         validate: (value) => {
           const numericValue = Number(value);
