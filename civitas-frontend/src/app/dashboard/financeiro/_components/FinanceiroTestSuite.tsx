@@ -26,7 +26,7 @@ export default function FinanceiroTestSuite() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[24px] border border-[#E4EEF0] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:p-5">
+      <section className="rounded-sm border border-[#E4EEF0] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:p-5">
         <h3 className="mb-4 text-lg font-semibold text-[#1F2A32]">Resumo e filtros</h3>
         <div className="space-y-4">
           <FinanceiroResumoTeste resumo={resumo} />
@@ -39,7 +39,7 @@ export default function FinanceiroTestSuite() {
         </div>
       </section>
 
-      <section className="rounded-[24px] border border-[#E4EEF0] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:p-5">
+      <section className="rounded-sm border border-[#E4EEF0] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:p-5">
         <h3 className="mb-4 text-lg font-semibold text-[#1F2A32]">Cadastro e atualizacao</h3>
         <FinanceiroCrudTeste
           transacoes={transacoes}
@@ -53,7 +53,7 @@ export default function FinanceiroTestSuite() {
         />
       </section>
 
-      <section className="rounded-[24px] border border-[#E4EEF0] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:p-5">
+      <section className="rounded-sm border border-[#E4EEF0] bg-white p-4 shadow-[0_10px_24px_rgba(0,0,0,0.04)] sm:p-5">
         <h3 className="mb-4 text-lg font-semibold text-[#1F2A32]">Transacoes</h3>
         <FinanceiroListaTeste
           loading={loading}

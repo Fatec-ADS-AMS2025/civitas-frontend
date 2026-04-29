@@ -179,14 +179,14 @@ export default function FinanceiroFormulario({
   };
 
   const inputClass = `
-    w-full rounded-[16px] border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-3 py-2
+    w-full rounded-sm border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-3 py-2
     text-[12px] text-[var(--foreground)] placeholder:text-[var(--foreground-soft)]
     shadow-[var(--shadow-xs)] focus:border-[var(--secundary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)]
     disabled:cursor-not-allowed disabled:bg-[#F8FCFC] disabled:opacity-60
   `;
 
   const tabClass = (active: boolean) => `
-    flex-1 rounded-[14px] border px-3 py-1.5 text-[11px] font-semibold transition-all duration-[var(--motion-duration-fast)]
+    flex-1 rounded-sm border px-3 py-1.5 text-[11px] font-semibold transition-all duration-[var(--motion-duration-fast)]
     ${active
       ? 'border-transparent bg-[linear-gradient(135deg,#0C7178_0%,#2A9B9F_42%,#58AFAE_100%)] text-white shadow-[var(--shadow-xs)]'
       : 'border-[var(--border-soft)] bg-[var(--surface-subtle)] text-[var(--foreground-muted)] hover:bg-[#EAF3F4]'
@@ -196,7 +196,7 @@ export default function FinanceiroFormulario({
   const disabled = loading || createProcessing || updateProcessing;
 
   return (
-    <div className="civitas-surface civitas-enter rounded-[20px] p-5">
+    <div className="civitas-surface civitas-enter rounded-sm p-5">
       {/* Header */}
       <div className="civitas-panel-header mb-4">
         <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#D97706]">
@@ -357,7 +357,7 @@ export default function FinanceiroFormulario({
           <button
             onClick={() => void handleCreate()}
             disabled={disabled}
-            className="civitas-action civitas-action--secondary w-full justify-center rounded-[16px] px-4 py-2.5 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
+            className="civitas-action civitas-action--secondary w-full justify-center rounded-sm px-4 py-2.5 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {createProcessing ? 'Salvando...' : 'Salvar registro'}
           </button>
@@ -370,7 +370,7 @@ export default function FinanceiroFormulario({
               <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--foreground-soft)]">Manutenção</p>
               <p className="text-[14px] font-bold text-[var(--foreground)]">Atualizar</p>
             </div>
-            <button className="flex h-6 w-6 items-center justify-center rounded-full border border-[var(--border-soft)] text-[var(--foreground-soft)]">
+            <button className="flex h-6 w-6 items-center justify-center rounded-sm border border-[var(--border-soft)] text-[var(--foreground-soft)]">
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
@@ -415,7 +415,7 @@ export default function FinanceiroFormulario({
 
           {/* Contexto atual */}
           {transacaoSelecionada && (
-            <div className="rounded-[16px] border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3 shadow-[var(--shadow-xs)]">
+            <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3 shadow-[var(--shadow-xs)]">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--foreground-soft)]">
                 Contexto atual
               </p>
@@ -460,7 +460,7 @@ export default function FinanceiroFormulario({
           <button
             onClick={() => void handleUpdate()}
             disabled={disabled || !idEditar}
-            className="civitas-action civitas-action--secondary w-full justify-center rounded-[16px] px-4 py-2.5 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
+            className="civitas-action civitas-action--secondary w-full justify-center rounded-sm px-4 py-2.5 text-[12px] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {updateProcessing ? 'Atualizando...' : 'Atualizar registro'}
           </button>

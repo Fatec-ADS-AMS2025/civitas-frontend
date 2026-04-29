@@ -33,7 +33,7 @@ function AccessibilityAction({
         type="button"
         onClick={onClick}
         aria-label={ariaLabel}
-        className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] bg-primary-1 text-white`}
+        className={`flex h-10 w-10 items-center justify-center rounded-sm text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] bg-primary-1 text-white`}
       >
         {children}
       </button>
@@ -41,7 +41,7 @@ function AccessibilityAction({
       <span
         className="
           pointer-events-none absolute right-[calc(100%+10px)] top-1/2 -translate-y-1/2 translate-x-1
-          whitespace-nowrap rounded-lg border border-[var(--border-default)] bg-[var(--surface-elevated)]
+          whitespace-nowrap rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)]
           px-3 py-1.5 text-xs font-medium text-[var(--foreground)]
           opacity-0 shadow-[0_6px_18px_rgba(15,43,49,0.08)] transition-all duration-150
           group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100
@@ -117,7 +117,7 @@ export default function AccessibilityMenu() {
       aria-label="Menu de acessibilidade"
       className="
         fixed bottom-4 right-4 z-[120]
-        flex flex-col gap-2 rounded-[18px]
+        flex flex-col gap-2 rounded-sm
         border border-[var(--border-soft)] bg-secundary-1
         p-2 shadow-[0_10px_24px_rgba(15,43,49,0.10)]
         backdrop-blur-[6px]
@@ -157,7 +157,7 @@ export default function AccessibilityMenu() {
       >
         <span
           className="
-            relative h-5 w-5 overflow-hidden rounded-full border
+            relative h-5 w-5 overflow-hidden rounded-sm border
             border-current
           "
         >

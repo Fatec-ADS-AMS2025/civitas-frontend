@@ -51,7 +51,7 @@ export default function ThemeSwitcher() {
           onClick={() => setOpen((v) => !v)}
           aria-haspopup="listbox"
           aria-expanded={open}
-          className="flex w-full items-center justify-center gap-0 rounded-xl border border-[var(--sidebar-option-border)] bg-[var(--sidebar-option-bg)] px-3 py-2.5 text-sm font-medium text-[var(--sidebar-text)] transition-all duration-150 hover:bg-[var(--sidebar-option-hover-bg)] sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
+          className="flex w-full items-center justify-center gap-0 rounded-sm border border-[var(--sidebar-option-border)] bg-[var(--sidebar-option-bg)] px-3 py-2.5 text-sm font-medium text-[var(--sidebar-text)] transition-all duration-150 hover:bg-[var(--sidebar-option-hover-bg)] sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
         >
           <span className="material-symbols-outlined shrink-0 text-[20px]">
             {current.icon}
@@ -73,7 +73,7 @@ export default function ThemeSwitcher() {
           <ul
             role="listbox"
             aria-label="Selecionar tema"
-            className="absolute bottom-full left-0 z-50 mb-1 w-full overflow-hidden rounded-xl border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] py-1 shadow-lg"
+            className="absolute bottom-full left-0 z-50 mb-1 w-full overflow-hidden rounded-sm border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] py-1 shadow-lg"
           >
             {THEME_OPTIONS.map((option) => {
               const isActive = option.value === themeMode;
@@ -82,7 +82,7 @@ export default function ThemeSwitcher() {
                   <button
                     type="button"
                     onClick={() => handleSelect(option.value)}
-                    className={`flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors duration-100 ${
+                    className={`flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors duration-100 ${
                       isActive
                         ? "bg-[var(--sidebar-nav-active-bg)] text-[var(--sidebar-nav-active-text)]"
                         : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-nav-hover-bg)]"

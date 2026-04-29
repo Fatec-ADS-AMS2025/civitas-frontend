@@ -13,7 +13,7 @@
 ## 📋 CRITÉRIOS DE ACEITE - TODOS ATENDIDOS
 
 ### ✅ 1. Input implementado e estilizado conforme padrões do sistema
-- **Design Civitas**: Bordas arredondadas (`rounded-full`), cores teal (#14b8a6)
+- **Design Civitas**: Bordas arredondadas (`rounded-sm`), cores teal (#14b8a6)
 - **Estados visuais**: Normal, foco, erro, desabilitado, hover
 - **Tipografia**: Consistente com identidade visual
 - **Espaçamentos**: Padding px-4 py-3 para conforto de uso
@@ -183,7 +183,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 ### Design System
 - **Cor principal**: Teal 500 (#14b8a6)
-- **Border radius**: `rounded-full` (totalmente arredondado)
+- **Border radius**: `rounded-sm` (totalmente arredondado)
 - **Padding**: `px-4 py-3` (16px horizontal, 12px vertical)
 - **Typography**: `text-gray-800` para contraste ideal
 - **Transitions**: `transition-all duration-200` para UX suave

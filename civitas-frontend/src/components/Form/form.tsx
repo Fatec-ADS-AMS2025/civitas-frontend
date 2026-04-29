@@ -376,7 +376,7 @@ export default function Form({
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         aria-invalid={Boolean(commonProps.error)}
                         aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-                        className='w-full rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
+                        className='w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
                     >
                         <option value=''>{field.placeholder ?? commonProps.label}</option>
                         {(field.options ?? []).map((option) => (
@@ -409,7 +409,7 @@ export default function Form({
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         aria-invalid={Boolean(commonProps.error)}
                         aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-                        className='min-h-[120px] w-full resize-none rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
+                        className='min-h-[120px] w-full resize-none rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
                     />
                     {commonProps.error && (
                         <p id={commonProps.errorId} className='mt-1.5 text-sm font-medium text-red-600'>
@@ -439,7 +439,7 @@ export default function Form({
 
     return (
         <form
-            className='flex w-full max-w-[1120px] flex-col rounded-[20px] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 text-[var(--foreground)] sm:p-6'
+            className='flex w-full max-w-[1120px] flex-col rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 text-[var(--foreground)] sm:p-6'
             onSubmit={handleSubmit}
             aria-busy={isLoading}
         >
@@ -466,7 +466,7 @@ export default function Form({
                                         event.preventDefault()
                                         goToStep(index)
                                     }}
-                                    className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm transition-all ${isActive || isCompleted
+                                    className={`flex h-9 w-9 items-center justify-center rounded-sm border text-sm transition-all ${isActive || isCompleted
                                         ? 'border-[var(--secundary-1)] bg-[var(--secundary-1)] text-white'
                                         : 'border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--primary-1)]'
                                         }`}
@@ -476,7 +476,7 @@ export default function Form({
                                 </button>
                             )
                         })}
-                        <span className={`rounded-full border px-4 py-1 text-sm ${currentStep === totalSteps - 1 ? 'border-[var(--secundary-1)] bg-[var(--secundary-1)] text-white' : 'border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--primary-1)]'}`}>
+                        <span className={`rounded-sm border px-4 py-1 text-sm ${currentStep === totalSteps - 1 ? 'border-[var(--secundary-1)] bg-[var(--secundary-1)] text-white' : 'border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--primary-1)]'}`}>
                             CONFIRMAR
                         </span>
                     </div>
@@ -484,10 +484,10 @@ export default function Form({
             </div>
 
             <div className='mt-6 grid grid-cols-1 gap-5 md:grid-cols-12'>
-                <div className='hidden items-start justify-center rounded-[18px] border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-5 md:col-span-4 md:flex'>
+                <div className='hidden items-start justify-center rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-5 md:col-span-4 md:flex'>
                     <Image src={imgs[mode]} alt={tipos[mode]} className='w-full h-auto max-w-[260px]' width={260} height={260} />
                 </div>
-                <div className='rounded-[18px] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4 md:col-span-8 md:p-5'>
+                <div className='rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4 md:col-span-8 md:p-5'>
                     <p className='mb-3 text-sm text-[var(--foreground-muted)]'>
                         Etapa {currentStep + 1} de {totalSteps}
                     </p>

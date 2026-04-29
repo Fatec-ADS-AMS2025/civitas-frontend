@@ -31,7 +31,7 @@ export default function Modal({ value, setValue, children }: ModalProps) {
       <div className="flex min-h-full items-start justify-center">
         <div className="civitas-enter civitas-surface relative my-2 min-w-0 w-full max-w-5xl p-5 text-[var(--foreground)] md:my-6 md:p-7">
           <button
-            className="civitas-action civitas-action--ghost absolute right-3 top-3 h-11 min-h-[44px] w-11 !rounded-[14px] !px-0 text-xl !shadow-none"
+            className="civitas-action civitas-action--ghost absolute right-3 top-3 h-11 min-h-[44px] w-11 !rounded-sm !px-0 text-xl !shadow-none"
             onClick={handleClose}
             aria-label="Fechar modal"
           >

@@ -16,7 +16,7 @@ export default function SearchInput({
   autoFocus = false,
 }: SearchInputProps) {
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-[var(--search-input-border)] bg-[var(--search-input-bg)] px-3 py-2 shadow-sm">
+    <div className="flex items-center gap-2 rounded-sm border border-[var(--search-input-border)] bg-[var(--search-input-bg)] px-3 py-2 shadow-sm">
       <span className="material-symbols-outlined text-[var(--search-input-icon)]">search</span>
       <input
         type="text"

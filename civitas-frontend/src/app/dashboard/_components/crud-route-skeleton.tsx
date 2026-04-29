@@ -5,7 +5,7 @@ type SkeletonBlockProps = {
 };
 
 function SkeletonBlock({ className = "" }: SkeletonBlockProps) {
-  return <div className={`skeleton-line rounded-[18px] ${className}`.trim()} />;
+  return <div className={`skeleton-line rounded-sm ${className}`.trim()} />;
 }
 
 function Surface({
@@ -17,7 +17,7 @@ function Surface({
 }>) {
   return (
     <div
-      className={`skeleton-loader rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)] ${className}`.trim()}
+      className={`skeleton-loader rounded-sm border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)] ${className}`.trim()}
     >
       {children}
     </div>
@@ -46,19 +46,19 @@ export default function CrudRouteSkeleton({
         </div>
 
         <div className="flex flex-col gap-3 md:flex-row">
-          <SkeletonBlock className="h-12 flex-1 rounded-[20px]" />
-          <SkeletonBlock className="h-12 w-full rounded-[20px] md:w-36" />
-          <SkeletonBlock className="h-12 w-full rounded-[20px] md:w-32" />
+          <SkeletonBlock className="h-12 flex-1 rounded-sm" />
+          <SkeletonBlock className="h-12 w-full rounded-sm md:w-36" />
+          <SkeletonBlock className="h-12 w-full rounded-sm md:w-32" />
         </div>
 
         <div className="flex flex-wrap gap-3 border-t border-[#E6EFF1] pt-4">
           {Array.from({ length: filters }).map((_, index) => (
             <SkeletonBlock
               key={`crud-filter-${index}`}
-              className="h-11 min-w-[160px] flex-1 rounded-[18px]"
+              className="h-11 min-w-[160px] flex-1 rounded-sm"
             />
           ))}
-          <SkeletonBlock className="h-11 w-full rounded-[18px] sm:w-32" />
+          <SkeletonBlock className="h-11 w-full rounded-sm sm:w-32" />
         </div>
       </Surface>
 
@@ -74,27 +74,27 @@ export default function CrudRouteSkeleton({
             style={{ gridTemplateColumns: tableColumns }}
           >
             {Array.from({ length: columns + 1 }).map((_, index) => (
-              <SkeletonBlock key={`crud-head-${index}`} className="h-4 rounded-full" />
+              <SkeletonBlock key={`crud-head-${index}`} className="h-4 rounded-sm" />
             ))}
           </div>
 
           {Array.from({ length: rows }).map((_, rowIndex) => (
             <div
               key={`crud-row-${rowIndex}`}
-              className="grid gap-3 rounded-[22px] border border-[#E6EFF1] bg-[#FCFEFE] px-4 py-4"
+              className="grid gap-3 rounded-sm border border-[#E6EFF1] bg-[#FCFEFE] px-4 py-4"
               style={{ gridTemplateColumns: tableColumns }}
             >
               {Array.from({ length: columns }).map((__, columnIndex) => (
                 <SkeletonBlock
                   key={`crud-cell-${rowIndex}-${columnIndex}`}
-                  className="h-5 rounded-full"
+                  className="h-5 rounded-sm"
                 />
               ))}
 
               <div className="flex items-center justify-end gap-2">
-                <SkeletonBlock className="h-10 w-10 rounded-[12px]" />
-                <SkeletonBlock className="h-10 w-10 rounded-[12px]" />
-                <SkeletonBlock className="h-10 w-10 rounded-[12px]" />
+                <SkeletonBlock className="h-10 w-10 rounded-sm" />
+                <SkeletonBlock className="h-10 w-10 rounded-sm" />
+                <SkeletonBlock className="h-10 w-10 rounded-sm" />
               </div>
             </div>
           ))}
@@ -104,9 +104,9 @@ export default function CrudRouteSkeleton({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <SkeletonBlock className="h-4 w-48" />
             <div className="flex items-center gap-2">
-              <SkeletonBlock className="h-9 w-28 rounded-[14px]" />
-              <SkeletonBlock className="h-9 w-28 rounded-[14px]" />
-              <SkeletonBlock className="h-9 w-32 rounded-[14px]" />
+              <SkeletonBlock className="h-9 w-28 rounded-sm" />
+              <SkeletonBlock className="h-9 w-28 rounded-sm" />
+              <SkeletonBlock className="h-9 w-32 rounded-sm" />
             </div>
           </div>
         </div>

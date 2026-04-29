@@ -65,7 +65,7 @@ function TipoBadge({ tipo }: { tipo: 'despesa' | 'orcamento' }) {
   const isDespesa = tipo === 'despesa';
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+      className={`inline-flex items-center rounded-sm px-2.5 py-1 text-[11px] font-semibold ${
         isDespesa ? 'bg-[#FFF1F1] text-[#C55A5A]' : 'bg-[#EEF9F1] text-[#16714A]'
       }`}
     >
@@ -80,14 +80,14 @@ function StatusBadge({ situacao }: { situacao?: number }) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+      className={`inline-flex items-center rounded-sm px-2.5 py-1 text-[11px] font-semibold ${
         isAtivo
           ? 'bg-[var(--status-active-bg)] text-[var(--status-active-text)]'
           : 'bg-[var(--status-neutral-bg)] text-[var(--status-neutral-text)]'
       }`}
     >
       <span
-        className={`mr-1.5 h-1.5 w-1.5 rounded-full ${
+        className={`mr-1.5 h-1.5 w-1.5 rounded-sm ${
           isAtivo ? 'bg-emerald-500' : 'bg-slate-400'
         }`}
       />
@@ -244,7 +244,7 @@ export default function FinanceiroLista({
           <button
             type="button"
             onClick={() => setIsExportModalOpen(true)}
-            className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] px-4 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] sm:w-auto"
+            className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-4 py-2.5 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] sm:w-auto"
           >
             <span className="material-symbols-outlined text-base text-[var(--foreground)]">print</span>
             Exportar / Imprimir
@@ -330,7 +330,7 @@ export default function FinanceiroLista({
                           type="button"
                           onClick={() => void handleAlterarStatus(transacao.id, transacao.tipo)}
                           disabled={isProcessing}
-                          className="civitas-action civitas-action--ghost min-h-[34px] rounded-xl px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50"
+                          className="civitas-action civitas-action--ghost min-h-[34px] rounded-sm px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {isProcessing ? '...' : 'Alterar status'}
                         </button>
@@ -339,7 +339,7 @@ export default function FinanceiroLista({
                         type="button"
                         onClick={() => void handleDelete(transacao.id, transacao.tipo)}
                         disabled={isProcessing}
-                        className="inline-flex min-h-[34px] items-center justify-center rounded-xl border border-[#F1D7D7] bg-[#FFF4F4] px-3 py-1.5 text-xs font-medium text-[#C45F5F] transition-all duration-[var(--motion-duration-fast)] hover:bg-[#FFECEC] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-[34px] items-center justify-center rounded-sm border border-[#F1D7D7] bg-[#FFF4F4] px-3 py-1.5 text-xs font-medium text-[#C45F5F] transition-all duration-[var(--motion-duration-fast)] hover:bg-[#FFECEC] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isProcessing ? '...' : 'Excluir'}
                       </button>

@@ -9,8 +9,8 @@ type FinanceiroErrorStateProps = {
 
 export default function FinanceiroErrorState({ message, onRetry }: FinanceiroErrorStateProps) {
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-[24px] border border-red-200 bg-red-50 p-8">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-sm border border-red-200 bg-red-50 p-8">
+      <div className="flex h-16 w-16 items-center justify-center rounded-sm bg-red-100">
         <svg
           className="h-8 w-8 text-red-600"
           fill="none"
@@ -30,7 +30,7 @@ export default function FinanceiroErrorState({ message, onRetry }: FinanceiroErr
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-6 rounded-xl bg-red-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          className="mt-6 rounded-sm bg-red-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
         >
           Tentar novamente
         </button>

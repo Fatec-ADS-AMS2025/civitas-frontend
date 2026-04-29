@@ -42,7 +42,7 @@ const toOptionalPositiveNumber = (value: string): number | undefined => {
 };
 
 const controlClassName =
-  'h-[46px] rounded-2xl border border-[#D5E3E6] bg-white px-4 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20';
+  'h-[46px] rounded-sm border border-[#D5E3E6] bg-white px-4 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20';
 
 type FinanceiroCrudTesteProps = {
   transacoes: FinanceiroTransacaoDTO[];
@@ -308,11 +308,11 @@ export default function FinanceiroCrudTeste({
   );
 
   return (
-    <div className="rounded-2xl border border-[#E4EEF0] bg-white p-4">
+    <div className="rounded-sm border border-[#E4EEF0] bg-white p-4">
       <h2 className="mb-3 text-lg font-semibold text-[#1F2A32]">Financeiro - cadastro e atualizacao</h2>
 
       <form
-        className="rounded-2xl border border-[#E4EEF0] p-3"
+        className="rounded-sm border border-[#E4EEF0] p-3"
         onSubmit={(event) => {
           event.preventDefault();
           void handleCreate();
@@ -334,7 +334,7 @@ export default function FinanceiroCrudTeste({
         {renderFormFields(createTipo, createForm, setCreateForm)}
 
         <div className="mt-3 flex gap-2">
-          <button type="submit" className="h-[46px] rounded-2xl bg-[#2E8F63] px-4 font-semibold text-white transition hover:brightness-95">
+          <button type="submit" className="h-[46px] rounded-sm bg-[#2E8F63] px-4 font-semibold text-white transition hover:brightness-95">
             Cadastrar
           </button>
         </div>
@@ -343,7 +343,7 @@ export default function FinanceiroCrudTeste({
       </form>
 
       <form
-        className="mt-4 rounded-2xl border border-[#E4EEF0] p-3"
+        className="mt-4 rounded-sm border border-[#E4EEF0] p-3"
         onSubmit={(event) => {
           event.preventDefault();
           void handleUpdate();
@@ -382,7 +382,7 @@ export default function FinanceiroCrudTeste({
         {renderFormFields(updateTipo, updateForm, setUpdateForm)}
 
         <div className="mt-3 flex gap-2">
-          <button type="submit" className="h-[46px] rounded-2xl bg-[#0B6470] px-4 font-semibold text-white transition hover:brightness-95">
+          <button type="submit" className="h-[46px] rounded-sm bg-[#0B6470] px-4 font-semibold text-white transition hover:brightness-95">
             Atualizar
           </button>
         </div>

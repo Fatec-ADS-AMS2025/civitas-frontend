@@ -291,7 +291,7 @@ export default function Dashboard() {
       <section className="civitas-surface civitas-enter px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <span className="inline-flex rounded-full border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+            <span className="inline-flex rounded-sm border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
               Painel geral
             </span>
             <h2 className="mt-3 text-[22px] font-semibold text-[var(--secundary-1)] sm:text-[24px]">
@@ -338,7 +338,7 @@ export default function Dashboard() {
 
       <section className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
         <article className="civitas-surface p-5">
-          <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
+          <span className="inline-flex rounded-sm bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
             Acoes rapidas
           </span>
           <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
@@ -356,7 +356,7 @@ export default function Dashboard() {
         </article>
 
         <article className="civitas-surface p-5">
-          <span className="inline-flex rounded-full bg-[#EAF4F5] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0B6470]">
+          <span className="inline-flex rounded-sm bg-[#EAF4F5] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0B6470]">
             Panorama
           </span>
           <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
@@ -408,7 +408,7 @@ export default function Dashboard() {
         <article className="civitas-surface p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <span className="inline-flex rounded-full bg-[#F4F8F9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7A8B94]">
+              <span className="inline-flex rounded-sm bg-[#F4F8F9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7A8B94]">
                 Registros
               </span>
               <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
@@ -465,7 +465,7 @@ export default function Dashboard() {
         </article>
 
         <article className="civitas-surface p-5">
-          <span className="inline-flex rounded-full bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
+          <span className="inline-flex rounded-sm bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
             Prioridades
           </span>
           <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
@@ -485,7 +485,7 @@ export default function Dashboard() {
               dueSoonExpenses.map((item) => (
                 <div
                   key={`due-${item.id}`}
-                  className="rounded-[14px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5"
+                  className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -496,7 +496,7 @@ export default function Dashboard() {
                         {item.categoria}
                       </p>
                     </div>
-                    <span className="rounded-full bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#9B5B00]">
+                    <span className="rounded-sm bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#9B5B00]">
                       {getDueSoonLabel(item.daysUntilDue)}
                     </span>
                   </div>
@@ -540,12 +540,12 @@ function MetricCard({
           <h2 className="mt-3 text-base font-semibold text-[var(--foreground)]">{title}</h2>
           <p className="mt-1 text-sm text-[var(--foreground-muted)]">{subtitle}</p>
         </div>
-        <span className="dashboard-metric-card__icon flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border-soft)] bg-[var(--surface-subtle)] text-[var(--secundary-1)]">
+        <span className="dashboard-metric-card__icon flex h-11 w-11 items-center justify-center rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] text-[var(--secundary-1)]">
           <span className="material-symbols-outlined !text-[22px]">{icon}</span>
         </span>
       </div>
 
-      <div className="dashboard-metric-card__value mt-4 rounded-xl border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3 text-lg font-semibold text-[var(--secundary-1)]">
+      <div className="dashboard-metric-card__value mt-4 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3 text-lg font-semibold text-[var(--secundary-1)]">
         {value}
       </div>
     </article>
@@ -554,7 +554,7 @@ function MetricCard({
 
 function HeaderStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-[14px] border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
+    <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
       <p className="text-[11px] uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
         {label}
       </p>
@@ -573,7 +573,7 @@ function OverviewCard({
   icon: string;
 }) {
   return (
-    <div className="rounded-[14px] border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-3.5">
+    <div className="rounded-sm border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-3.5">
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-medium text-[var(--foreground-muted)]">{label}</span>
         <span className="material-symbols-outlined !text-[18px] text-[var(--secundary-1)]">
@@ -626,9 +626,9 @@ function RankingCard({
                   {formatCompactCurrency(item.value)}
                 </span>
               </div>
-              <div className="h-2 rounded-full bg-[#EEF4F5]">
+              <div className="h-2 rounded-sm bg-[#EEF4F5]">
                 <div
-                  className="h-2 rounded-full bg-[var(--primary-1)]"
+                  className="h-2 rounded-sm bg-[var(--primary-1)]"
                   style={{
                     width: `${Math.min(
                       (item.value / Math.max(totalBase, 1)) * 100,
@@ -653,7 +653,7 @@ function RecentExpenseCard({
   showMoneyValues: boolean;
 }) {
   return (
-    <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-[14px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
+    <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
       <div>
         <p className="text-[15px] font-semibold text-[var(--foreground)]">
           {showMoneyValues ? formatCurrency(item.valor) : "* * * * * *"}
@@ -670,7 +670,7 @@ function RecentExpenseCard({
       </div>
 
       <div className="hidden self-center sm:flex sm:flex-col sm:items-end sm:gap-2">
-        <span className="rounded-full bg-[#FFF1DB] px-4 py-2 text-xs font-semibold text-[#9B5B00]">
+        <span className="rounded-sm bg-[#FFF1DB] px-4 py-2 text-xs font-semibold text-[#9B5B00]">
           Documento {item.numeroDocumento || "-"}
         </span>
       </div>
@@ -693,9 +693,9 @@ function ActionCard({ action }: { action: QuickAction }) {
 
   return (
     <div
-      className={`flex items-center gap-4 rounded-[14px] border px-4 py-3.5 ${toneClasses[action.tone]}`}
+      className={`flex items-center gap-4 rounded-sm border px-4 py-3.5 ${toneClasses[action.tone]}`}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/80 text-[var(--secundary-1)]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-white/80 text-[var(--secundary-1)]">
         <span className="material-symbols-outlined !text-[20px]">
           {action.icon}
         </span>
@@ -709,7 +709,7 @@ function ActionCard({ action }: { action: QuickAction }) {
       <button
         type="button"
         onClick={action.onClick}
-        className={`rounded-xl border px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-subtle)] focus:outline-none focus:ring-4 focus:ring-black/5 ${buttonClasses[action.tone]}`}
+        className={`rounded-sm border px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-subtle)] focus:outline-none focus:ring-4 focus:ring-black/5 ${buttonClasses[action.tone]}`}
       >
         {action.button}
       </button>

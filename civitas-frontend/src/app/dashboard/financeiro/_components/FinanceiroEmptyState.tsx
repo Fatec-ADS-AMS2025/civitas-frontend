@@ -14,8 +14,8 @@ export default function FinanceiroEmptyState({
   showFiltersMessage = false,
 }: FinanceiroEmptyStateProps) {
   return (
-    <div className="flex min-h-[300px] flex-col items-center justify-center rounded-[20px] border border-[#E4EEF0] bg-[#F8FCFC] p-8">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#E4EEF0]">
+    <div className="flex min-h-[300px] flex-col items-center justify-center rounded-sm border border-[#E4EEF0] bg-[#F8FCFC] p-8">
+      <div className="flex h-16 w-16 items-center justify-center rounded-sm bg-[#E4EEF0]">
         <svg
           className="h-8 w-8 text-[#6C858E]"
           fill="none"

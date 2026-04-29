@@ -46,7 +46,7 @@ function Checkbox({
         disabled={disabled}
         checked={currentChecked}
         onChange={handleChange}
-        className="w-5 h-5 cursor-pointer accent-primary-1 border-2 border-primary-1 rounded focus:ring-2 focus:ring-secondary-1 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-5 w-5 cursor-pointer rounded-sm border-2 border-primary-1 accent-primary-1 focus:ring-2 focus:ring-secondary-1 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         aria-checked={indeterminate ? 'mixed' : currentChecked}
         {...props}
       />

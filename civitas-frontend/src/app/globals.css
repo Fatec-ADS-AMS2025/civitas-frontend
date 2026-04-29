@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
+button {
+  @apply rounded-sm;
+}
+
 :root {
   --accessibility-font-size: 16px;
   --accessibility-ui-scale: 1;
@@ -319,14 +323,14 @@ html[data-theme="dark"] {
 
 .civitas-surface {
   border: 1px solid var(--border-soft);
-  border-radius: 18px;
+  @apply rounded-sm;
   background: var(--surface-default);
   box-shadow: var(--shadow-sm);
 }
 
 .civitas-surface-subtle {
   border: 1px solid var(--border-soft);
-  border-radius: 16px;
+  @apply rounded-sm;
   background: var(--surface-subtle);
   box-shadow: none;
 }
@@ -345,7 +349,7 @@ html[data-theme="dark"] {
   align-items: center;
   gap: 0.45rem;
   border: 1px solid var(--border-default);
-  border-radius: 999px;
+  @apply rounded-sm;
   background: var(--surface-subtle);
   padding: 0.32rem 0.7rem;
   font-size: 0.66rem;
@@ -362,7 +366,7 @@ html[data-theme="dark"] {
   gap: 0.55rem;
   min-height: 2.625rem;
   padding: 0 1rem;
-  border-radius: 0.8rem;
+  @apply rounded-sm;
   border: 1px solid var(--border-default);
   background: var(--surface-elevated);
   color: var(--foreground);
@@ -407,7 +411,7 @@ html[data-theme="dark"] {
   justify-content: center;
   gap: 0.45rem;
   min-height: 1.75rem;
-  border-radius: 999px;
+  @apply rounded-sm;
   padding: 0 0.75rem;
   font-size: 0.72rem;
   font-weight: 600;
@@ -436,7 +440,7 @@ html[data-theme="dark"] {
 .civitas-control {
   height: 44px;
   width: 100%;
-  border-radius: 12px;
+  @apply rounded-sm;
   border: 1px solid var(--border-default);
   background: var(--surface-elevated);
   padding: 0 14px;
@@ -463,7 +467,7 @@ html[data-theme="dark"] {
 .civitas-table-shell {
   overflow: hidden;
   border: 1px solid var(--border-soft);
-  border-radius: 18px;
+  @apply rounded-sm;
   background: var(--surface-default);
   box-shadow: var(--shadow-sm);
 }
@@ -484,7 +488,7 @@ html[data-theme="dark"] {
 
 .civitas-scrollbar::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
-  border-radius: 999px;
+  @apply rounded-sm;
   background-clip: padding-box;
   background: linear-gradient(
     180deg,
@@ -529,13 +533,13 @@ html[data-theme="dark"] {
 }
 
 .sidebar-scroll::-webkit-scrollbar-track {
-  border-radius: 999px;
+  @apply rounded-sm;
   background: var(--sidebar-scroll-track);
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
-  border-radius: 999px;
+  @apply rounded-sm;
   background-clip: padding-box;
   background: linear-gradient(
     180deg,
@@ -669,7 +673,7 @@ html[data-theme="dark"] {
 .civitas-input.despesas-filter-field {
   border-color: #d7e5e8;
   background: #f6fafa;
-  border-radius: 18px;
+  @apply rounded-sm;
   box-shadow: none;
 }
 
@@ -680,7 +684,7 @@ html[data-theme="dark"] {
 .civitas-input.dashboard-recent-search {
   border-color: #d7e5e8;
   background: #f7fafb;
-  border-radius: 18px;
+  @apply rounded-sm;
   box-shadow: none;
 }
 

@@ -15,12 +15,14 @@ import { despesaService } from "@/hooks/despesa";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
+import { secretariaService } from "@/hooks/secretaria";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import { usuarioService } from "@/hooks/usuario";
 import type DespesaDTO from "@/models/despesa";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
+import type SecretariaDTO from "@/models/secretaria";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
 import type UsuarioDTO from "@/models/usuario";
 
@@ -63,6 +65,7 @@ type DashboardData = {
   tiposDespesa: TipoDespesaDTO[];
   orcamentos: OrcamentoDTO[];
   instituicoes: InstituicaoDTO[];
+  secretarias: SecretariaDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
 };
@@ -72,6 +75,7 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   tiposDespesa: [],
   orcamentos: [],
   instituicoes: [],
+  secretarias: [],
   fornecedores: [],
   usuarios: [],
 };
@@ -122,6 +126,7 @@ const resolveDespesaDate = (despesa: DespesaDTO): string => {
   return (
     normalizeDateInput(despesa.data) ??
     normalizeDateInput(despesa.dataVencimento) ??
+    normalizeDateInput(despesa.dataEmissao) ??
     normalizeDateInput(despesa.dataEmicao) ??
     ""
   );
@@ -137,6 +142,18 @@ const resolveDespesaDescricao = (despesa: DespesaDTO): string => {
 
 const resolveDespesaValor = (despesa: DespesaDTO): number => {
   return Number(despesa.valor ?? despesa.consumoPrevisto ?? 0);
+};
+
+const resolveDespesaStatus = (despesa: DespesaDTO): number => {
+  const normalizedStatus = Number(despesa.status ?? despesa.situacao ?? SITUACAO_ATIVO);
+  return Number.isFinite(normalizedStatus) ? normalizedStatus : SITUACAO_ATIVO;
+};
+
+const resolveDespesaStatusLabel = (status: number): string => {
+  if (status === 1) return "A pagar";
+  if (status === 2) return "Paga";
+  if (status === 3) return "Atrasada";
+  return "Nao informado";
 };
 
 const resolveOrcamentoDate = (orcamento: OrcamentoDTO): string => {
@@ -227,7 +244,7 @@ const buildDespesaRows = (
           : undefined;
       const resolvedDate = resolveDespesaDate(despesa);
       const resolvedValue = resolveDespesaValor(despesa);
-      const situacao = Number(despesa.situacao ?? SITUACAO_ATIVO);
+      const situacao = resolveDespesaStatus(despesa);
       const solicitaUc = tipoDespesa?.solicitaUc === SOLICITA_UC_SIM;
 
       return {
@@ -243,7 +260,7 @@ const buildDespesaRows = (
         data: resolvedDate,
         dataFormatada: formatDate(resolvedDate),
         situacao,
-        situacaoLabel: getSituacaoLabel(situacao),
+        situacaoLabel: resolveDespesaStatusLabel(situacao),
         solicitaUc,
         solicitaUcLabel: solicitaUc ? "Sim" : "Nao",
         numeroDocumento: despesa.numeroDocumento ?? "",
@@ -275,7 +292,7 @@ const matchesDespesaFilters = (
 ): boolean => {
   const searchTerm = normalizeText(filters.search);
   const searchTarget = normalizeText(
-    `${row.descricao} ${row.numeroDocumento} ${row.id} ${row.categoria}`
+    `${row.descricao} ${row.numeroDocumento} ${row.id} ${row.categoria} ${row.raw.codigo ?? ""} ${row.raw.uc ?? ""}`
   );
 
   if (searchTerm && !searchTarget.includes(searchTerm)) {
@@ -396,8 +413,20 @@ const buildDespesaPayload = (
     id: Number(formData.id ?? currentDespesa?.id ?? 0),
     numeroDocumento:
       formData.numeroDocumento ?? currentDespesa?.numeroDocumento ?? "",
+    codigo: formData.codigo ?? currentDespesa?.codigo ?? "",
     uc: formData.uc ?? currentDespesa?.uc ?? "",
-    dataEmicao: formData.dataEmicao ?? currentDespesa?.dataEmicao ?? "",
+    dataEmissao:
+      formData.dataEmissao ??
+      formData.dataEmicao ??
+      currentDespesa?.dataEmissao ??
+      currentDespesa?.dataEmicao ??
+      "",
+    dataEmicao:
+      formData.dataEmissao ??
+      formData.dataEmicao ??
+      currentDespesa?.dataEmissao ??
+      currentDespesa?.dataEmicao ??
+      "",
     consumoPrevisto:
       formData.consumoPrevisto ??
       formData.valor ??
@@ -409,6 +438,12 @@ const buildDespesaPayload = (
       currentDespesa?.dataVencimento ??
       currentDespesa?.data ??
       "",
+    status:
+      formData.status ??
+      formData.situacao ??
+      currentDespesa?.status ??
+      currentDespesa?.situacao ??
+      SITUACAO_ATIVO,
     situacao: formData.situacao ?? currentDespesa?.situacao ?? SITUACAO_ATIVO,
     idTipoDespesa: formData.idTipoDespesa ?? currentDespesa?.idTipoDespesa,
     idOrcamento: formData.idOrcamento ?? currentDespesa?.idOrcamento,
@@ -455,6 +490,7 @@ const buildDespesaPayload = (
     ...normalizedPayload,
     id: currentDespesa?.id ?? Number(normalizedPayload.id ?? 0),
     consumoPrevisto,
+    status: Number(normalizedPayload.status ?? normalizedPayload.situacao ?? SITUACAO_ATIVO),
     situacao: Number(normalizedPayload.situacao ?? SITUACAO_ATIVO),
     idTipoDespesa: Number(normalizedPayload.idTipoDespesa),
     idOrcamento: Number(normalizedPayload.idOrcamento),
@@ -466,28 +502,29 @@ const buildDespesaPayload = (
 
 const loadDashboardData = async (): Promise<DashboardData> => {
   const [
-    despesasAtivas,
-    despesasInativas,
+    despesasTodas,
     tiposDespesa,
     orcamentos,
     instituicoes,
+    secretarias,
     fornecedores,
     usuarios,
   ] = await Promise.all([
-    despesaService.getAllData(),
-    safeLoadInactiveDespesas(),
+    despesaService.getAllStatusData(),
     tipoDespesaService.getAllData(),
     orcamentoService.getAllData(),
     instituicaoService.getAllData(),
+    secretariaService.getAllData(),
     fornecedorService.getAllData(),
     usuarioService.getAllData(),
   ]);
 
   return {
-    despesas: mergeUniqueById([...(despesasAtivas ?? []), ...(despesasInativas ?? [])]),
+    despesas: mergeUniqueById([...(despesasTodas ?? []), ...(await safeLoadInactiveDespesas())]),
     tiposDespesa: tiposDespesa ?? [],
     orcamentos: orcamentos ?? [],
     instituicoes: instituicoes ?? [],
+    secretarias: secretarias ?? [],
     fornecedores: fornecedores ?? [],
     usuarios: usuarios ?? [],
   };
@@ -620,6 +657,7 @@ export const useDespesasDashboard = () => {
       tiposDespesa: dashboardData.tiposDespesa,
       orcamentos: dashboardData.orcamentos,
       instituicoes: dashboardData.instituicoes,
+      secretarias: dashboardData.secretarias,
       fornecedores: dashboardData.fornecedores,
       usuarios: dashboardData.usuarios,
       summary,
@@ -641,6 +679,7 @@ export const useDespesasDashboard = () => {
       dashboardData.tiposDespesa,
       dashboardData.orcamentos,
       dashboardData.instituicoes,
+      dashboardData.secretarias,
       dashboardData.fornecedores,
       dashboardData.usuarios,
       summary,

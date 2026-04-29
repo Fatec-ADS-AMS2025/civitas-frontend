@@ -14,7 +14,7 @@ export default function FinanceiroFiltrosTeste({ instituicoes, onApply }: Financ
   const [instituicaoId, setInstituicaoId] = useState('');
 
   return (
-    <div className="rounded-[20px] border border-[#E4EEF0] bg-[#FBFDFC] p-4">
+    <div className="rounded-sm border border-[#E4EEF0] bg-[#FBFDFC] p-4">
       <h2 className="mb-1 text-lg font-semibold text-[#1F2A32]">Filtros financeiros</h2>
       <p className="mb-4 text-sm text-[#72808A]">
         Refine periodo, status e instituicao sem depender de novas mudancas de backend.
@@ -24,18 +24,18 @@ export default function FinanceiroFiltrosTeste({ instituicoes, onApply }: Financ
           type="date"
           value={dataInicio}
           onChange={(event) => setDataInicio(event.target.value)}
-          className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
+          className="rounded-sm border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
         />
         <input
           type="date"
           value={dataFim}
           onChange={(event) => setDataFim(event.target.value)}
-          className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
+          className="rounded-sm border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
         />
         <select
           value={status}
           onChange={(event) => setStatus(event.target.value)}
-          className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
+          className="rounded-sm border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
         >
           <option value="">Status (todos)</option>
           <option value="1">Ativo</option>
@@ -44,7 +44,7 @@ export default function FinanceiroFiltrosTeste({ instituicoes, onApply }: Financ
         <select
           value={instituicaoId}
           onChange={(event) => setInstituicaoId(event.target.value)}
-          className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
+          className="rounded-sm border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20"
         >
           <option value="">Instituicao (todas)</option>
           {instituicoes.map((item) => (
@@ -56,7 +56,7 @@ export default function FinanceiroFiltrosTeste({ instituicoes, onApply }: Financ
       </div>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <button
-          className="rounded-2xl bg-[#58AFAE] px-4 py-2.5 font-semibold text-white transition hover:brightness-95"
+          className="rounded-sm bg-[#58AFAE] px-4 py-2.5 font-semibold text-white transition hover:brightness-95"
           onClick={() =>
             onApply({
               dataInicio: dataInicio || undefined,
@@ -69,7 +69,7 @@ export default function FinanceiroFiltrosTeste({ instituicoes, onApply }: Financ
           Aplicar filtros
         </button>
         <button
-          className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB]"
+          className="rounded-sm border border-[#D5E3E6] bg-white px-4 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB]"
           onClick={() => {
             setDataInicio('');
             setDataFim('');

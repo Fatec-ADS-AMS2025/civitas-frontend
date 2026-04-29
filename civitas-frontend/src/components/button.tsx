@@ -17,7 +17,7 @@ function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex w-full items-center justify-center gap-2 rounded-sm border px-4 py-2.5 text-sm font-semibold transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50";
 
   const variants: Record<ButtonVariant, string> = {
     primary:
@@ -27,7 +27,7 @@ function Button({
     tertiary:
       "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-subtle)]",
     login:
-      "max-w-[601px] rounded-xl border-[var(--secundary-1)] bg-[var(--secundary-1)] py-3.5 text-base font-semibold text-white hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)] sm:text-lg",
+      "max-w-[601px] rounded-sm border-[var(--secundary-1)] bg-[var(--secundary-1)] py-3.5 text-base font-semibold text-white hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)] sm:text-lg",
   };
 
   return (

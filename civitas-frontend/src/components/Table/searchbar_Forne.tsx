@@ -51,7 +51,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="bg-[#393939] rounded-2xl p-5 shadow-lg w-full flex flex-col gap-4">
+    <div className="bg-[#393939] rounded-sm p-5 shadow-lg w-full flex flex-col gap-4">
       {/* Cabeçalho */}
       <div>
         <p className="text-white text-base">Busca:</p>
@@ -66,7 +66,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           value={filters.nome}
           onChange={(e) => handleChange("nome", e.target.value)}
           onKeyDown={handleFieldKeyDown}
-          className="rounded-full px-4 py-2 text-sm max-w-md md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+          className="rounded-sm px-4 py-2 text-sm max-w-md md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
         />
 
         <input
@@ -75,13 +75,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           value={filters.cpf}
           onChange={(e) => handleChange("cpf", e.target.value)}
           onKeyDown={handleFieldKeyDown}
-          className="rounded-full px-4 py-2 text-sm max-w-sm md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+          className="rounded-sm px-4 py-2 text-sm max-w-sm md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
         />
 
         <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
           <button
             onClick={() => alert("Levar para a tela de cadastro")}
-            className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-sm flex items-center justify-center gap-2 transition w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-white text-base">add</span>
             Cadastrar
@@ -89,7 +89,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
 
           <button
             onClick={toggleAdvanced}
-            className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-sm flex items-center justify-center gap-2 transition w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-white text-base">filter_alt</span>
             {showAdvanced ? "Ocultar" : "Filtrar"}
@@ -107,13 +107,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
             value={filters.telefone}
             onChange={(e) => handleChange("telefone", e.target.value)}
             onKeyDown={handleFieldKeyDown}
-            className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+            className="rounded-sm px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
           />
 
           {/* Botão limpar verde */}
           <button
             onClick={clearFilters}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-full transition w-full md:w-auto"
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-sm transition w-full md:w-auto"
           >
             Limpar
           </button>

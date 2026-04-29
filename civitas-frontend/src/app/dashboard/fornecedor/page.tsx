@@ -294,7 +294,7 @@ export default function Page() {
   return (
     <>
       {error && (
-        <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+        <div className="mb-4 rounded-sm border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
           {error}
         </div>
       )}

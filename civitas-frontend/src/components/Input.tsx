@@ -33,7 +33,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             civitas-input
             w-full
             min-h-[44px]
-            rounded-xl
+            rounded-sm
             border border-[var(--border-default)]
             bg-[var(--surface-elevated)]
             px-3.5 py-2.5

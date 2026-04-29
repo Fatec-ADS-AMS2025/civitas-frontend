@@ -71,7 +71,7 @@ const HighlightedLabel = ({ label, query }: { label: string; query: string }) =>
   return (
     <>
       {label.slice(0, range.start)}
-      <mark className="rounded bg-[var(--search-highlight-bg)] px-1 text-[var(--search-highlight-text)]">
+                    <mark className="rounded-sm bg-[var(--search-highlight-bg)] px-1 text-[var(--search-highlight-text)]">
         {label.slice(range.start, range.end)}
       </mark>
       {label.slice(range.end)}
@@ -103,7 +103,7 @@ export default function SearchResults({
 }: SearchResultsProps) {
   if (groups.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-[var(--search-empty-border)] bg-[var(--search-empty-bg)] px-3 py-5 text-center">
+      <div className="rounded-sm border border-dashed border-[var(--search-empty-border)] bg-[var(--search-empty-bg)] px-3 py-5 text-center">
         <p className="font-detail text-sm font-medium text-[var(--search-empty-text)]">
           Nenhum resultado encontrado para a busca.
         </p>
@@ -131,7 +131,7 @@ export default function SearchResults({
                   type="button"
                   onClick={() => onSelect(entry.item.path)}
                   onMouseEnter={() => onHover(entry.item.key)}
-                  className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors duration-150 ${
+                  className={`group flex w-full items-center gap-3 rounded-sm px-3 py-2 text-left transition-colors duration-150 ${
                     isSelected
                       ? "bg-[var(--search-result-selected-bg)] text-[var(--search-result-selected-text)]"
                       : isActiveRoute

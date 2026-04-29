@@ -46,7 +46,7 @@ export default function Toaster() {
   return (
     <div className="fixed top-5 right-5 z-[9999]">
       <div
-        className={`${bgClass} text-white px-4 py-3 rounded-lg shadow-lg min-w-[260px] max-w-[420px]`}
+        className={`${bgClass} text-white px-4 py-3 rounded-sm shadow-lg min-w-[260px] max-w-[420px]`}
       >
         <p className="text-sm font-medium">{toast.message}</p>
       </div>

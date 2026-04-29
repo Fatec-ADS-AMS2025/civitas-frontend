@@ -47,7 +47,7 @@ export default function FinanceiroFiltros({
   }, [onApply]);
 
   const inputClass = `
-    w-full rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-2.5
+    w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-2.5
     text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-soft)]
     focus:border-[var(--secundary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)]
     disabled:cursor-not-allowed disabled:bg-[#F8FCFC] disabled:opacity-60
@@ -136,7 +136,7 @@ export default function FinanceiroFiltros({
             type="button"
             onClick={handleApply}
             disabled={loading}
-            className="civitas-action civitas-action--primary min-h-[40px] rounded-xl px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+            className="civitas-action civitas-action--primary min-h-[40px] rounded-sm px-4 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
             Aplicar filtros
           </button>
@@ -144,7 +144,7 @@ export default function FinanceiroFiltros({
             type="button"
             onClick={handleClear}
             disabled={loading || !hasActiveFilters}
-            className="civitas-action civitas-action--ghost min-h-[40px] rounded-xl px-4 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+            className="civitas-action civitas-action--ghost min-h-[40px] rounded-sm px-4 text-sm disabled:cursor-not-allowed disabled:opacity-40"
           >
             Limpar
           </button>
@@ -156,22 +156,22 @@ export default function FinanceiroFiltros({
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {dataInicio && (
-              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
+              <span className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
                 De: {new Date(dataInicio).toLocaleDateString('pt-BR')}
               </span>
             )}
             {dataFim && (
-              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
+              <span className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
                 Ate: {new Date(dataFim).toLocaleDateString('pt-BR')}
               </span>
             )}
             {status && (
-              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
+              <span className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
                 Situacao: {status === '1' ? 'Ativo' : 'Inativo'}
               </span>
             )}
             {instituicaoId && (
-              <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
+              <span className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-2.5 py-1 text-[10px] font-medium text-[var(--foreground)]">
                 {instituicoes.find((i) => String(i.id) === instituicaoId)?.nome ?? 'Instituicao'}
               </span>
             )}

@@ -102,12 +102,12 @@ export default function NavigationFeedback() {
         }`}
       >
         <div
-          className={`relative h-full origin-left rounded-r-full bg-primary-1 ${
+          className={`relative h-full origin-left rounded-sm bg-primary-1 ${
             status === "finishing" ? "duration-180 opacity-0" : "duration-200 opacity-100"
           }`}
           style={{ transform: `scaleX(${safeProgress})` }}
         >
-          <span className="route-progress-bar__sheen absolute inset-y-0 right-0 w-24 rounded-full bg-primary-2" />
+          <span className="route-progress-bar__sheen absolute inset-y-0 right-0 w-24 rounded-sm bg-primary-2" />
         </div>
       </div>
     </div>

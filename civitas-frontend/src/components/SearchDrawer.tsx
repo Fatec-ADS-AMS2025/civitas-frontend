@@ -54,7 +54,7 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
         aria-hidden={!isOpen}
         tabIndex={isOpen ? 0 : -1}
         onClick={onClose}
-        className={`fixed inset-0 z-[120] bg-[var(--search-drawer-overlay)] backdrop-blur-[1px] transition-opacity duration-200 ${
+        className={`fixed inset-0 z-[120] rounded-sm bg-[var(--search-drawer-overlay)] backdrop-blur-[1px] transition-opacity duration-200 ${
           isOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -75,7 +75,7 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--search-drawer-border)] text-[var(--search-drawer-muted)] transition-colors hover:bg-[var(--search-drawer-hover-bg)]"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--search-drawer-border)] text-[var(--search-drawer-muted)] transition-colors hover:bg-[var(--search-drawer-hover-bg)]"
             aria-label="Fechar busca"
           >
             <span className="material-symbols-outlined">close</span>

@@ -1,5 +1,5 @@
 function SkeletonBlock({ className = "" }: { className?: string }) {
-  return <div className={`skeleton-line rounded-[18px] ${className}`.trim()} />;
+  return <div className={`skeleton-line rounded-sm ${className}`.trim()} />;
 }
 
 function Surface({
@@ -11,7 +11,7 @@ function Surface({
 }>) {
   return (
     <div
-      className={`skeleton-loader rounded-[28px] border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)] ${className}`.trim()}
+      className={`skeleton-loader rounded-sm border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)] ${className}`.trim()}
     >
       {children}
     </div>
@@ -21,18 +21,18 @@ function Surface({
 export default function DashboardSkeleton() {
   return (
     <div className="skeleton-loader space-y-6">
-      <div className="rounded-[30px] bg-[#EAF4F5] px-6 py-7 shadow-[0_18px_32px_rgba(11,100,112,0.10)]">
+      <div className="rounded-sm bg-[#EAF4F5] px-6 py-7 shadow-[0_18px_32px_rgba(11,100,112,0.10)]">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="w-full max-w-3xl space-y-4">
-            <SkeletonBlock className="h-7 w-40 rounded-full" />
+            <SkeletonBlock className="h-7 w-40 rounded-sm" />
             <SkeletonBlock className="h-10 w-full max-w-[640px]" />
             <SkeletonBlock className="h-10 w-full max-w-[520px]" />
             <SkeletonBlock className="h-4 w-full max-w-[460px]" />
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <SkeletonBlock className="h-12 w-40 rounded-full" />
-            <SkeletonBlock className="h-12 w-40 rounded-full" />
+            <SkeletonBlock className="h-12 w-40 rounded-sm" />
+            <SkeletonBlock className="h-12 w-40 rounded-sm" />
           </div>
         </div>
       </div>
@@ -41,7 +41,7 @@ export default function DashboardSkeleton() {
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`dashboard-metric-${index}`}
-            className="skeleton-loader rounded-[24px] border border-[#DCEAEC] bg-white p-5 shadow-[0_14px_35px_rgba(0,0,0,0.08)]"
+            className="skeleton-loader rounded-sm border border-[#DCEAEC] bg-white p-5 shadow-[0_14px_35px_rgba(0,0,0,0.08)]"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-3">
@@ -49,31 +49,31 @@ export default function DashboardSkeleton() {
                 <SkeletonBlock className="h-8 w-32" />
                 <SkeletonBlock className="h-4 w-36" />
               </div>
-              <SkeletonBlock className="h-14 w-14 rounded-[18px]" />
+              <SkeletonBlock className="h-14 w-14 rounded-sm" />
             </div>
-            <SkeletonBlock className="mt-6 h-12 rounded-[18px]" />
+            <SkeletonBlock className="mt-6 h-12 rounded-sm" />
           </div>
         ))}
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <Surface>
-          <SkeletonBlock className="h-6 w-28 rounded-full" />
+          <SkeletonBlock className="h-6 w-28 rounded-sm" />
           <SkeletonBlock className="mt-4 h-8 w-72" />
           <SkeletonBlock className="mt-3 h-4 w-80 max-w-full" />
           <div className="mt-5 space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`action-card-${index}`}
-                className="rounded-[20px] border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-4"
+                className="rounded-sm border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-4"
               >
                 <div className="flex items-center gap-4">
-                  <SkeletonBlock className="h-11 w-11 rounded-full" />
+                  <SkeletonBlock className="h-11 w-11 rounded-sm" />
                   <div className="min-w-0 flex-1 space-y-2">
                     <SkeletonBlock className="h-5 w-44" />
                     <SkeletonBlock className="h-4 w-full max-w-[280px]" />
                   </div>
-                  <SkeletonBlock className="h-10 w-28 rounded-full" />
+                  <SkeletonBlock className="h-10 w-28 rounded-sm" />
                 </div>
               </div>
             ))}
@@ -81,17 +81,17 @@ export default function DashboardSkeleton() {
         </Surface>
 
         <Surface>
-          <SkeletonBlock className="h-6 w-24 rounded-full" />
+          <SkeletonBlock className="h-6 w-24 rounded-sm" />
           <SkeletonBlock className="mt-4 h-8 w-64" />
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={`overview-card-${index}`}
-                className="rounded-[20px] border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-4"
+                className="rounded-sm border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-4"
               >
                 <div className="flex items-center justify-between gap-3">
                   <SkeletonBlock className="h-4 w-28" />
-                  <SkeletonBlock className="h-5 w-5 rounded-full" />
+                  <SkeletonBlock className="h-5 w-5 rounded-sm" />
                 </div>
                 <SkeletonBlock className="mt-4 h-9 w-20" />
               </div>
@@ -115,7 +115,7 @@ export default function DashboardSkeleton() {
                     </div>
                     <SkeletonBlock className="h-5 w-20" />
                   </div>
-                  <SkeletonBlock className="h-3 rounded-full" />
+                  <SkeletonBlock className="h-3 rounded-sm" />
                 </div>
               ))}
             </div>
@@ -127,18 +127,18 @@ export default function DashboardSkeleton() {
         <Surface>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
-              <SkeletonBlock className="h-6 w-32 rounded-full" />
+              <SkeletonBlock className="h-6 w-32 rounded-sm" />
               <SkeletonBlock className="h-8 w-60" />
               <SkeletonBlock className="h-4 w-80 max-w-full" />
             </div>
-            <SkeletonBlock className="h-12 w-full max-w-md rounded-[18px]" />
+            <SkeletonBlock className="h-12 w-full max-w-md rounded-sm" />
           </div>
 
           <div className="mt-6 grid gap-3">
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={`recent-expense-${index}`}
-                className="rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4"
+                className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4"
               >
                 <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
                   <div className="space-y-2">
@@ -151,7 +151,7 @@ export default function DashboardSkeleton() {
                     <SkeletonBlock className="h-4 w-16" />
                   </div>
                   <div className="hidden self-center sm:block">
-                    <SkeletonBlock className="h-9 w-28 rounded-full" />
+                    <SkeletonBlock className="h-9 w-28 rounded-sm" />
                   </div>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export default function DashboardSkeleton() {
         </Surface>
 
         <Surface>
-          <SkeletonBlock className="h-6 w-28 rounded-full" />
+          <SkeletonBlock className="h-6 w-28 rounded-sm" />
           <SkeletonBlock className="mt-4 h-8 w-56" />
           <SkeletonBlock className="mt-3 h-4 w-full max-w-[300px]" />
 
@@ -168,14 +168,14 @@ export default function DashboardSkeleton() {
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={`priority-card-${index}`}
-                className="rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4"
+                className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-2">
                     <SkeletonBlock className="h-5 w-40" />
                     <SkeletonBlock className="h-4 w-20" />
                   </div>
-                  <SkeletonBlock className="h-8 w-28 rounded-full" />
+                  <SkeletonBlock className="h-8 w-28 rounded-sm" />
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <SkeletonBlock className="h-4 w-32" />

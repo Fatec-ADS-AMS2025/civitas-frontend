@@ -248,14 +248,23 @@ export const validateDespesaDateRange = (
 };
 
 export const normalizeDespesaPayload = <T extends FormPayload>(data: T): T => {
+  const normalizedCodigo = toTrimmedString(data.codigo);
+  const normalizedDataEmissao = normalizeDateInput(
+    data.dataEmissao ?? data.dataEmicao
+  );
+  const normalizedStatus = toOptionalNumber(data.status ?? data.situacao);
+
   return {
     ...data,
     numeroDocumento: digitsOnly(data.numeroDocumento),
+    codigo: normalizedCodigo,
     uc: toTrimmedString(data.uc),
-    dataEmicao: normalizeDateInput(data.dataEmicao),
+    dataEmissao: normalizedDataEmissao,
+    dataEmicao: normalizedDataEmissao,
     consumoPrevisto: toOptionalNumber(data.consumoPrevisto ?? data.valor),
     dataVencimento: normalizeDateInput(data.dataVencimento ?? data.data),
-    situacao: toOptionalNumber(data.situacao),
+    status: normalizedStatus,
+    situacao: normalizedStatus,
     idTipoDespesa: toOptionalNumber(data.idTipoDespesa),
     idOrcamento: toOptionalNumber(data.idOrcamento),
     idInstituicao: toOptionalNumber(data.idInstituicao),

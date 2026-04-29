@@ -95,10 +95,10 @@ export default function ExportModal({
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
-          <section className="rounded-[20px] border border-[#E4EEF0] bg-[#F8FCFC] p-4">
+          <section className="rounded-sm border border-[#E4EEF0] bg-[#F8FCFC] p-4">
             <p className="text-sm font-semibold text-[#1F2A32]">Tipo de saida</p>
             <div className="mt-3 space-y-2">
-              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-3 text-sm text-[#1F2A32]">
+              <label className="flex cursor-pointer items-start gap-3 rounded-sm border border-[#D5E3E6] bg-white px-4 py-3 text-sm text-[#1F2A32]">
                 <input
                   type="radio"
                   name="export-output-type"
@@ -113,7 +113,7 @@ export default function ExportModal({
                 </span>
               </label>
 
-              <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-3 text-sm text-[#1F2A32]">
+              <label className="flex cursor-pointer items-start gap-3 rounded-sm border border-[#D5E3E6] bg-white px-4 py-3 text-sm text-[#1F2A32]">
                 <input
                   type="radio"
                   name="export-output-type"
@@ -130,7 +130,7 @@ export default function ExportModal({
             </div>
           </section>
 
-          <section className="rounded-[20px] border border-[#E4EEF0] bg-white p-4">
+          <section className="rounded-sm border border-[#E4EEF0] bg-white p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold text-[#1F2A32]">Colunas</p>
@@ -141,14 +141,14 @@ export default function ExportModal({
                 <button
                   type="button"
                   onClick={() => setSelectedColumnIds(columns.map((column) => column.id))}
-                  className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2 text-sm font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB]"
+                  className="rounded-sm border border-[#D5E3E6] bg-white px-4 py-2 text-sm font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB]"
                 >
                   Marcar todas
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedColumnIds([])}
-                  className="rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2 text-sm font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB]"
+                  className="rounded-sm border border-[#D5E3E6] bg-white px-4 py-2 text-sm font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB]"
                 >
                   Limpar
                 </button>
@@ -159,7 +159,7 @@ export default function ExportModal({
               {columns.map((column) => (
                 <label
                   key={column.id}
-                  className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[#DDEEEF] bg-[#FBFDFD] px-4 py-3 text-sm font-medium text-[#1F2A32]"
+                  className="flex cursor-pointer items-center gap-3 rounded-sm border border-[#DDEEEF] bg-[#FBFDFD] px-4 py-3 text-sm font-medium text-[#1F2A32]"
                 >
                   <input
                     type="checkbox"
@@ -180,10 +180,10 @@ export default function ExportModal({
           </section>
         </div>
 
-        <section className="rounded-[20px] border border-[#E4EEF0] bg-white p-4">
+        <section className="rounded-sm border border-[#E4EEF0] bg-white p-4">
           <p className="text-sm font-semibold text-[#1F2A32]">Escopo dos dados</p>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#D5E3E6] bg-[#FBFDFD] px-4 py-3 text-sm text-[#1F2A32]">
+            <label className="flex cursor-pointer items-start gap-3 rounded-sm border border-[#D5E3E6] bg-[#FBFDFD] px-4 py-3 text-sm text-[#1F2A32]">
               <input
                 type="radio"
                 name="export-scope"
@@ -198,7 +198,7 @@ export default function ExportModal({
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#D5E3E6] bg-[#FBFDFD] px-4 py-3 text-sm text-[#1F2A32]">
+            <label className="flex cursor-pointer items-start gap-3 rounded-sm border border-[#D5E3E6] bg-[#FBFDFD] px-4 py-3 text-sm text-[#1F2A32]">
               <input
                 type="radio"
                 name="export-scope"
@@ -226,7 +226,7 @@ export default function ExportModal({
             type="button"
             onClick={onClose}
             disabled={isGenerating}
-            className="rounded-2xl border border-[#D5E3E6] bg-white px-5 py-3 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-sm border border-[#D5E3E6] bg-white px-5 py-3 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancelar
           </button>
@@ -234,7 +234,7 @@ export default function ExportModal({
             type="button"
             onClick={() => void handleGenerate()}
             disabled={disableGenerate}
-            className="rounded-2xl bg-[#58AFAE] px-5 py-3 font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-sm bg-[#58AFAE] px-5 py-3 font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isGenerating ? "Gerando..." : outputType === "pdf" ? "Gerar PDF" : "Gerar Excel"}
           </button>

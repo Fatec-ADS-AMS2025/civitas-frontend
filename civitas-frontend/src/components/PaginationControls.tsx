@@ -36,7 +36,7 @@ export default function PaginationControls({
       <div className="flex flex-col gap-3 text-sm text-[var(--foreground-muted)] md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
           <span>{totalRecords} registros</span>
-          <span className="inline-flex items-center rounded-full border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-3 py-1 font-semibold text-[var(--secundary-1)]">
+          <span className="inline-flex items-center rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-3 py-1 font-semibold text-[var(--secundary-1)]">
             Pagina {displayCurrentPage} de {displayTotalPages}
           </span>
 
@@ -48,7 +48,7 @@ export default function PaginationControls({
                 onChange={(event) => onPageSizeChange(Number(event.target.value))}
                 disabled={disabled}
                 aria-label="Selecionar quantidade de itens por pagina"
-                className="h-[42px] rounded-xl border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 text-sm text-[var(--foreground)] outline-none transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-[42px] rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 text-sm text-[var(--foreground)] outline-none transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {sizeOptions.map((option) => (
                   <option key={option} value={option}>
@@ -65,7 +65,7 @@ export default function PaginationControls({
             type="button"
             onClick={() => onPageChange(displayCurrentPage - 1)}
             disabled={!canGoPrevious}
-            className="civitas-action civitas-action--ghost min-h-[44px] rounded-[16px] px-4 disabled:cursor-not-allowed disabled:opacity-50"
+            className="civitas-action civitas-action--ghost min-h-[44px] rounded-sm px-4 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Anterior
           </button>
@@ -73,7 +73,7 @@ export default function PaginationControls({
             type="button"
             onClick={() => onPageChange(displayCurrentPage + 1)}
             disabled={!canGoNext}
-            className="civitas-action civitas-action--primary min-h-[44px] rounded-[16px] px-4 disabled:cursor-not-allowed disabled:opacity-50"
+            className="civitas-action civitas-action--primary min-h-[44px] rounded-sm px-4 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Proxima
           </button>

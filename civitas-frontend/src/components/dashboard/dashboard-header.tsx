@@ -258,7 +258,7 @@ export function DashboardPageHeader() {
                       <button
                         type="button"
                         onClick={() => push(item.href!)}
-                        className="transition-colors duration-200 hover:text-[var(--secundary-1)]"
+                        className="rounded-sm transition-colors duration-200 hover:text-[var(--secundary-1)]"
                       >
                         {item.label}
                       </button>
@@ -313,7 +313,7 @@ export function DashboardPageHeader() {
                       push(action.href);
                     }
                   }}
-                  className={actionClassName}
+                  className={`${actionClassName} rounded-sm`}
                 >
                   {action.icon ? (
                     <span className="material-symbols-outlined !text-[18px]">{action.icon}</span>
