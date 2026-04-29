@@ -45,7 +45,7 @@ type ConfigDefinition = {
   key: ConfigKind;
   label: string;
   columns: { id: string; label: string }[];
-  buildFields: (unidades: UnidadeMedidaDTO[]) => ModalFieldConfig[];
+  buildFields: (unidades: UnidadeMedidaDTO[], tipoCodigos: TipoCodigoDTO[]) => ModalFieldConfig[];
   buildSearchFields: () => FieldConfig[];
   emptyModel: Record<string, unknown>;
 };
@@ -223,7 +223,7 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
     key: "tipoDespesa",
     label: "Tipo de Despesa",
     columns: tipoDespesaColumns,
-    buildFields: (unidades) => [
+    buildFields: (unidades, tipoCodigos) => [
       { key: "id", hidden: true },
       {
         key: "descricao",
@@ -236,6 +236,17 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
         label: "Solicita UC",
         type: "select",
         options: SOLICITA_UC_OPTIONS,
+        required: true,
+      },
+      {
+        key: "idTipoCodigo",
+        label: "Tipo de Codigo",
+        placeholder: "Selecione o tipo de codigo",
+        type: "select",
+        options: tipoCodigos.map((item) => ({
+          value: item.id,
+          label: item.nome,
+        })),
         required: true,
       },
       {
@@ -274,6 +285,7 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
       id: 0,
       descricao: "",
       solicitaUc: 1,
+      idTipoCodigo: "",
       idUnidadeMedida: "",
       situacao: SITUACAO_ATIVO,
     },
@@ -334,14 +346,15 @@ export default function ConfiguracoesPage() {
   const [dadosOriginais, setDadosOriginais] = useState<ConfigRow[]>([]);
   const [dadosFiltrados, setDadosFiltrados] = useState<ConfigRow[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<UnidadeMedidaDTO[]>([]);
+  const [tipoCodigos, setTipoCodigos] = useState<TipoCodigoDTO[]>([]);
   const [feedback, setFeedback] = useState<FeedbackState>(null);
   const [loading, setLoading] = useState(true);
 
   const definition = useMemo(() => CONFIG_DEFINITIONS[tipoSelecionado], [tipoSelecionado]);
 
   const formFields = useMemo(
-    () => definition.buildFields(unidadesMedida),
-    [definition, unidadesMedida]
+    () => definition.buildFields(unidadesMedida, tipoCodigos),
+    [definition, tipoCodigos, unidadesMedida]
   );
 
   const loadUnidadesAll = async () => {
@@ -364,6 +377,11 @@ export default function ConfiguracoesPage() {
 
   const fetchTipoCodigoData = async () => {
     return tipoCodigoService.getAll();
+  };
+
+  const loadTipoCodigosAll = async () => {
+    const items = await fetchTipoCodigoData();
+    setTipoCodigos(items);
   };
 
   const fetchTipoDespesaData = async () => {
@@ -403,7 +421,7 @@ export default function ConfiguracoesPage() {
       }
 
       if (selectedKind === "tipoDespesa") {
-        await loadUnidadesAll();
+        await Promise.all([loadUnidadesAll(), loadTipoCodigosAll()]);
 
         const [tiposDespesa, unidades] = await Promise.all([
           fetchTipoDespesaData(),
@@ -484,6 +502,7 @@ export default function ConfiguracoesPage() {
           descricao: normalizeText(formData.descricao),
           solicitaUc: toNumber(formData.solicitaUc, 1),
           situacao: toNumber(formData.situacao, SITUACAO_ATIVO),
+          idTipoCodigo: toNumber(formData.idTipoCodigo),
           idUnidadeMedida: toNumber(formData.idUnidadeMedida),
         };
 
@@ -556,6 +575,7 @@ export default function ConfiguracoesPage() {
           descricao: normalizeText(formData.descricao),
           solicitaUc: toNumber(formData.solicitaUc, 1),
           situacao: toNumber(formData.situacao, SITUACAO_ATIVO),
+          idTipoCodigo: toNumber(formData.idTipoCodigo),
           idUnidadeMedida: toNumber(formData.idUnidadeMedida),
         };
 

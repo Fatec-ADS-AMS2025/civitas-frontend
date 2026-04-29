@@ -47,6 +47,7 @@ type SelectOption = {
 type DespesaExportRow = {
   id: number;
   codigo: string;
+  tipoCodigo: string;
   categoria: string;
   descricao: string;
   valor: string;
@@ -57,6 +58,7 @@ type DespesaExportRow = {
 const DESPESAS_EXPORT_COLUMNS: TableColumn[] = [
   { id: "id", label: "Registro" },
   { id: "codigo", label: "Codigo" },
+  { id: "tipoCodigo", label: "Tipo de codigo" },
   { id: "categoria", label: "Categoria" },
   { id: "descricao", label: "Descricao" },
   { id: "valor", label: "Valor" },
@@ -83,6 +85,7 @@ const INITIAL_FILTER_FORM: DespesasDashboardFilters = {
   search: "",
   dataInicio: "",
   dataFim: "",
+  idTipoCodigo: "",
   idTipoDespesa: "",
   situacao: "",
   solicitaUc: "",
@@ -92,6 +95,7 @@ const EMPTY_DESPESA_FORM = {
   id: 0,
   numeroDocumento: "",
   codigo: "",
+  idTipoCodigo: "",
   idTipoDespesa: "",
   uc: "",
   consumoPrevisto: "",
@@ -226,6 +230,7 @@ const buildDespesaFormObject = (
     id: despesa.id,
     numeroDocumento: despesa.raw.numeroDocumento ?? "",
     codigo: despesa.raw.codigo ?? "",
+    idTipoCodigo: despesa.tipoCodigoId ?? "",
     idTipoDespesa: despesa.raw.idTipoDespesa ?? "",
     uc: despesa.raw.uc ?? "",
     consumoPrevisto: despesa.raw.consumoPrevisto ?? despesa.raw.valor ?? "",
@@ -353,6 +358,7 @@ export default function Page() {
   const {
     despesas,
     filteredDespesas,
+    tipoCodigos,
     tiposDespesa,
     orcamentos,
     instituicoes,
@@ -441,9 +447,16 @@ export default function Page() {
   const tipoDespesaOptions = useMemo<SelectOption[]>(() => {
     return tiposDespesa.map((tipoDespesa) => ({
       value: tipoDespesa.id,
-      label: tipoDespesa.descricao,
+      label: `${tipoCodigos.find((tipoCodigo) => tipoCodigo.id === tipoDespesa.idTipoCodigo)?.nome ?? "Sem tipo"} - ${tipoDespesa.descricao}`,
     }));
-  }, [tiposDespesa]);
+  }, [tipoCodigos, tiposDespesa]);
+
+  const tipoCodigoOptions = useMemo<SelectOption[]>(() => {
+    return tipoCodigos.map((tipoCodigo) => ({
+      value: tipoCodigo.id,
+      label: tipoCodigo.nome,
+    }));
+  }, [tipoCodigos]);
 
   const instituicaoOptions = useMemo<SelectOption[]>(() => {
     return instituicoes.map((instituicao) => ({
@@ -487,6 +500,14 @@ export default function Page() {
       activeModalDespesa?.categoria ?? "Tipo atual"
     );
   }, [activeModalDespesa, tipoDespesaOptions]);
+
+  const resolvedTipoCodigoOptions = useMemo(() => {
+    return ensureOption(
+      tipoCodigoOptions,
+      activeModalDespesa?.tipoCodigoId ?? undefined,
+      activeModalDespesa?.tipoCodigoNome ?? "Tipo atual"
+    );
+  }, [activeModalDespesa, tipoCodigoOptions]);
 
   const resolvedInstituicaoOptions = useMemo(() => {
     return ensureOption(
@@ -533,6 +554,11 @@ export default function Page() {
     return tiposDespesa.find((tipoDespesa) => tipoDespesa.id === tipoDespesaId);
   };
 
+  const resolveTipoCodigo = (value: unknown) => {
+    const tipoCodigoId = Number(value);
+    return tipoCodigos.find((tipoCodigo) => tipoCodigo.id === tipoCodigoId);
+  };
+
   const despesaFormFields = useMemo<ModalFieldConfig[]>(() => {
     return [
       { key: "id", hidden: true },
@@ -562,15 +588,46 @@ export default function Page() {
         placeholder: "RENAVAM, patrimonio, contrato...",
       },
       {
+        key: "idTipoCodigo",
+        label: "Tipo de codigo",
+        placeholder: "Selecione um tipo de codigo",
+        type: "select",
+        required: true,
+        options: resolvedTipoCodigoOptions,
+        validate: (value, formData) => {
+          if (toPositiveNumber(value) <= 0) {
+            return "Selecione um tipo de codigo valido.";
+          }
+
+          const tipoDespesa = resolveTipoDespesa(formData.idTipoDespesa);
+          if (tipoDespesa && tipoDespesa.idTipoCodigo !== toPositiveNumber(value)) {
+            return "Selecione um tipo de codigo compativel com a categoria.";
+          }
+
+          return undefined;
+        },
+      },
+      {
         key: "idTipoDespesa",
         label: "Categoria",
         placeholder: "Selecione um tipo de despesa",
         type: "select",
         required: true,
         options: resolvedTipoDespesaOptions,
-        validate: (value) => {
+        validate: (value, formData) => {
           if (toPositiveNumber(value) <= 0) {
             return "Selecione um tipo de despesa valido.";
+          }
+
+          const tipoDespesa = resolveTipoDespesa(value);
+          const tipoCodigoSelecionado = resolveTipoCodigo(formData.idTipoCodigo);
+
+          if (
+            tipoDespesa &&
+            tipoCodigoSelecionado &&
+            tipoDespesa.idTipoCodigo !== tipoCodigoSelecionado.id
+          ) {
+            return "Selecione uma categoria compativel com o tipo de codigo informado.";
           }
 
           return undefined;
@@ -703,8 +760,10 @@ export default function Page() {
     resolvedFornecedorOptions,
     resolvedInstituicaoOptions,
     resolvedOrcamentoOptions,
+    resolvedTipoCodigoOptions,
     resolvedTipoDespesaOptions,
     resolvedUsuarioOptions,
+    tipoCodigos,
     tiposDespesa,
   ]);
 
@@ -836,6 +895,7 @@ export default function Page() {
     return {
       id: despesa.id,
       codigo: getDespesaCodigo(despesa),
+      tipoCodigo: despesa.tipoCodigoNome,
       categoria: despesa.categoria,
       descricao: despesa.descricao,
       valor: despesa.valorFormatado,
@@ -1271,6 +1331,27 @@ export default function Page() {
           />
 
           <div className="space-y-2">
+            <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">Tipo de codigo</label>
+            <select
+              value={filterForm.idTipoCodigo}
+              onChange={(event) =>
+                setFilterForm((currentValue) => ({
+                  ...currentValue,
+                  idTipoCodigo: event.target.value,
+                }))
+              }
+              className={filterFieldClassName}
+            >
+              <option value="">Todos</option>
+              {tipoCodigoOptions.map((option) => (
+                <option key={`filter-type-code-${option.value}`} value={String(option.value)}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
             <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">Categoria</label>
             <select
               value={filterForm.idTipoDespesa}
@@ -1420,6 +1501,7 @@ export default function Page() {
               <tr className="text-left text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 <th className="px-4 py-2">Registro</th>
                 <th className="px-4 py-2">Codigo</th>
+                <th className="px-4 py-2">Tipo codigo</th>
                 <th className="px-4 py-2">Categoria</th>
                 <th className="px-4 py-2">Descricao</th>
                 <th className="px-4 py-2">Valor</th>
@@ -1433,7 +1515,7 @@ export default function Page() {
               {loading ? (
                 Array.from({ length: 4 }).map((_, index) => (
                   <tr key={`loading-row-${index}`} className="rounded-sm bg-[var(--surface-subtle)]">
-                    {Array.from({ length: 8 }).map((__, cellIndex) => (
+                    {Array.from({ length: 9 }).map((__, cellIndex) => (
                       <td key={`loading-cell-${index}-${cellIndex}`} className="px-4 py-5">
                         <div className="h-5 animate-pulse rounded-sm bg-[var(--border-soft)]" />
                       </td>
@@ -1443,7 +1525,7 @@ export default function Page() {
               ) : visibleDespesas.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-10 text-center text-[var(--foreground-soft)]"
                   >
                     {hasLocalListSearch
@@ -1469,6 +1551,9 @@ export default function Page() {
                     </td>
                     <td className="px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
                       {getDespesaCodigo(despesa)}
+                    </td>
+                    <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
+                      {despesa.tipoCodigoNome}
                     </td>
                     <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
                       {despesa.categoria}

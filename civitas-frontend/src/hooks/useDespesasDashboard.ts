@@ -16,6 +16,7 @@ import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
+import { tipoCodigoService } from "@/hooks/tipoCodigo";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import { usuarioService } from "@/hooks/usuario";
 import type DespesaDTO from "@/models/despesa";
@@ -23,6 +24,7 @@ import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
 import type SecretariaDTO from "@/models/secretaria";
+import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
 import type UsuarioDTO from "@/models/usuario";
 
@@ -32,6 +34,7 @@ export type DespesasDashboardFilters = {
   search: string;
   dataInicio: string;
   dataFim: string;
+  idTipoCodigo: string;
   idTipoDespesa: string;
   situacao: string;
   solicitaUc: string;
@@ -47,6 +50,8 @@ export type DespesaDashboardRow = {
   id: number;
   registro: string;
   categoria: string;
+  tipoCodigoId: number | null;
+  tipoCodigoNome: string;
   descricao: string;
   valor: number;
   valorFormatado: string;
@@ -62,6 +67,7 @@ export type DespesaDashboardRow = {
 
 type DashboardData = {
   despesas: DespesaDTO[];
+  tipoCodigos: TipoCodigoDTO[];
   tiposDespesa: TipoDespesaDTO[];
   orcamentos: OrcamentoDTO[];
   instituicoes: InstituicaoDTO[];
@@ -72,6 +78,7 @@ type DashboardData = {
 
 const EMPTY_DASHBOARD_DATA: DashboardData = {
   despesas: [],
+  tipoCodigos: [],
   tiposDespesa: [],
   orcamentos: [],
   instituicoes: [],
@@ -84,6 +91,7 @@ const DEFAULT_FILTERS: DespesasDashboardFilters = {
   search: "",
   dataInicio: "",
   dataFim: "",
+  idTipoCodigo: "",
   idTipoDespesa: "",
   situacao: "",
   solicitaUc: "",
@@ -234,13 +242,18 @@ const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
 
 const buildDespesaRows = (
   despesas: DespesaDTO[],
-  tiposDespesaMap: Map<number, TipoDespesaDTO>
+  tiposDespesaMap: Map<number, TipoDespesaDTO>,
+  tipoCodigosMap: Map<number, TipoCodigoDTO>
 ): DespesaDashboardRow[] => {
   return despesas
     .map((despesa) => {
       const tipoDespesa =
         despesa.idTipoDespesa !== undefined
           ? tiposDespesaMap.get(despesa.idTipoDespesa)
+          : undefined;
+      const tipoCodigo =
+        tipoDespesa?.idTipoCodigo !== undefined
+          ? tipoCodigosMap.get(tipoDespesa.idTipoCodigo)
           : undefined;
       const resolvedDate = resolveDespesaDate(despesa);
       const resolvedValue = resolveDespesaValor(despesa);
@@ -254,6 +267,11 @@ const buildDespesaRows = (
           tipoDespesa?.descricao ??
           despesa.categoria?.trim() ??
           "Categoria nao informada",
+        tipoCodigoId: tipoDespesa?.idTipoCodigo ?? null,
+        tipoCodigoNome:
+          tipoCodigo?.nome?.trim() ||
+          tipoCodigo?.descricao?.trim() ||
+          "Tipo de codigo nao informado",
         descricao: resolveDespesaDescricao(despesa),
         valor: resolvedValue,
         valorFormatado: formatCurrency(resolvedValue),
@@ -292,7 +310,7 @@ const matchesDespesaFilters = (
 ): boolean => {
   const searchTerm = normalizeText(filters.search);
   const searchTarget = normalizeText(
-    `${row.descricao} ${row.numeroDocumento} ${row.id} ${row.categoria} ${row.raw.codigo ?? ""} ${row.raw.uc ?? ""}`
+    `${row.descricao} ${row.numeroDocumento} ${row.id} ${row.categoria} ${row.tipoCodigoNome} ${row.raw.codigo ?? ""} ${row.raw.uc ?? ""}`
   );
 
   if (searchTerm && !searchTarget.includes(searchTerm)) {
@@ -307,6 +325,12 @@ const matchesDespesaFilters = (
   if (filters.idTipoDespesa) {
     const rowTipoDespesa = row.raw.idTipoDespesa ?? 0;
     if (rowTipoDespesa !== Number(filters.idTipoDespesa)) {
+      return false;
+    }
+  }
+
+  if (filters.idTipoCodigo) {
+    if ((row.tipoCodigoId ?? 0) !== Number(filters.idTipoCodigo)) {
       return false;
     }
   }
@@ -353,11 +377,20 @@ const matchesOrcamentoFilters = (
 
 const validateLookupRelationship = (
   payload: DespesaDTO,
-  data: DashboardData
+  data: DashboardData,
+  selectedTipoCodigoId?: number
 ): string | undefined => {
   const tipoDespesa = data.tiposDespesa.find((item) => item.id === payload.idTipoDespesa);
   if (!tipoDespesa) {
     return "Selecione um tipo de despesa valido.";
+  }
+
+  if (
+    selectedTipoCodigoId &&
+    selectedTipoCodigoId > 0 &&
+    tipoDespesa.idTipoCodigo !== selectedTipoCodigoId
+  ) {
+    return "Selecione uma categoria compativel com o tipo de codigo informado.";
   }
 
   const orcamento = data.orcamentos.find(
@@ -481,7 +514,12 @@ const buildDespesaPayload = (
     throw new Error("Valor da despesa nao pode ser negativo.");
   }
 
-  const lookupError = validateLookupRelationship(normalizedPayload, data);
+  const selectedTipoCodigoId = Number(formData.idTipoCodigo ?? 0);
+  const lookupError = validateLookupRelationship(
+    normalizedPayload,
+    data,
+    Number.isFinite(selectedTipoCodigoId) ? selectedTipoCodigoId : 0
+  );
   if (lookupError) {
     throw new Error(lookupError);
   }
@@ -503,6 +541,7 @@ const buildDespesaPayload = (
 const loadDashboardData = async (): Promise<DashboardData> => {
   const [
     despesasTodas,
+    tipoCodigos,
     tiposDespesa,
     orcamentos,
     instituicoes,
@@ -511,6 +550,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     usuarios,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
+    tipoCodigoService.getAllData(),
     tipoDespesaService.getAllData(),
     orcamentoService.getAllData(),
     instituicaoService.getAllData(),
@@ -521,6 +561,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
 
   return {
     despesas: mergeUniqueById([...(despesasTodas ?? []), ...(await safeLoadInactiveDespesas())]),
+    tipoCodigos: tipoCodigos ?? [],
     tiposDespesa: tiposDespesa ?? [],
     orcamentos: orcamentos ?? [],
     instituicoes: instituicoes ?? [],
@@ -561,9 +602,13 @@ export const useDespesasDashboard = () => {
     return new Map(dashboardData.tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa]));
   }, [dashboardData.tiposDespesa]);
 
+  const tipoCodigosMap = useMemo(() => {
+    return new Map(dashboardData.tipoCodigos.map((tipoCodigo) => [tipoCodigo.id, tipoCodigo]));
+  }, [dashboardData.tipoCodigos]);
+
   const despesas = useMemo(() => {
-    return buildDespesaRows(dashboardData.despesas, tiposDespesaMap);
-  }, [dashboardData.despesas, tiposDespesaMap]);
+    return buildDespesaRows(dashboardData.despesas, tiposDespesaMap, tipoCodigosMap);
+  }, [dashboardData.despesas, tiposDespesaMap, tipoCodigosMap]);
 
   const filteredDespesas = useMemo(() => {
     return despesas.filter((despesa) => matchesDespesaFilters(despesa, filters));
@@ -654,6 +699,7 @@ export const useDespesasDashboard = () => {
       filters,
       despesas,
       filteredDespesas,
+      tipoCodigos: dashboardData.tipoCodigos,
       tiposDespesa: dashboardData.tiposDespesa,
       orcamentos: dashboardData.orcamentos,
       instituicoes: dashboardData.instituicoes,
@@ -676,6 +722,7 @@ export const useDespesasDashboard = () => {
       filters,
       despesas,
       filteredDespesas,
+      dashboardData.tipoCodigos,
       dashboardData.tiposDespesa,
       dashboardData.orcamentos,
       dashboardData.instituicoes,
