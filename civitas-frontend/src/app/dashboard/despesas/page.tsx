@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   DespesasRelacionadasTable,
   InsightsGrid,
@@ -12,6 +12,11 @@ import ExportModal from "@/components/Table/export-modal";
 import Input from "@/components/Input";
 import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import Modal from "@/components/modal";
+import DespesaForm, {
+  type DespesaFormValues,
+  type UcItem,
+} from "./_components/DespesaForm";
+import ucsData from "./_components/ucs.json";
 import {
   exportTableData,
   getSelectedColumns,
@@ -80,6 +85,9 @@ const STATUS_OPTIONS: SelectOption[] = [
   { value: "2", label: "Paga" },
   { value: "3", label: "Atrasada" },
 ];
+
+// JSON local para manter os dados de UC desacoplados da UI.
+const MOCK_UCS: UcItem[] = ucsData as UcItem[];
 
 const INITIAL_FILTER_FORM: DespesasDashboardFilters = {
   search: "",
@@ -347,6 +355,8 @@ export default function Page() {
   const [listInstituicaoSearch, setListInstituicaoSearch] = useState("");
   const [valuesVisible, setValuesVisible] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // UC selecionada no fluxo de cadastro via modal.
+  const [selectedUc, setSelectedUc] = useState<UcItem | null>(null);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [viewingDespesa, setViewingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [selectedCodigoGroup, setSelectedCodigoGroup] = useState<FinanceCodigoResumo | null>(null);
@@ -371,11 +381,17 @@ export default function Page() {
     lastUpdatedAt,
     applyFilters,
     clearFilters,
-    createDespesa,
     updateDespesa,
     removeDespesa,
     refetch,
   } = useDespesasDashboard();
+
+  useEffect(() => {
+    if (!isCreateModalOpen) {
+      // Limpa a UC selecionada ao fechar o modal para evitar estado antigo.
+      setSelectedUc(null);
+    }
+  }, [isCreateModalOpen]);
 
   const headerConfig = useMemo(
     () => ({
@@ -940,16 +956,23 @@ export default function Page() {
     clearFilters();
   };
 
-  const handleCreateSubmit = async (formData: Record<string, unknown>) => {
-    try {
-      await createDespesa(formData);
-      setIsCreateModalOpen(false);
-    } catch (submitError) {
-      showToast(
-        submitError instanceof Error ? submitError.message : "Erro ao cadastrar despesa.",
-        "error"
-      );
+  const handleCreateSubmit = (formData: DespesaFormValues) => {
+    // Garante selecao de UC antes de prosseguir com o envio simulado.
+    if (!selectedUc) {
+      showToast("Selecione uma UC antes de confirmar.", "error");
+      return;
     }
+
+    // Monta o payload com UC e valores normalizados para numero.
+    const payload = {
+      uc: selectedUc,
+      valorDespesa: toPositiveNumber(formData.valorDespesa),
+      consumoPrevisto: toPositiveNumber(formData.consumoPrevisto),
+    };
+
+    // Envio simulado para o fluxo de UC.
+    console.log("Despesa UC - payload", payload);
+    setIsCreateModalOpen(false);
   };
 
   const handleEditSubmit = async (formData: Record<string, unknown>) => {
@@ -1615,12 +1638,12 @@ export default function Page() {
       </section>
 
       {isCreateModalOpen ? (
+        /* Modal de cadastro usando selecao de UC e dados do JSON local. */
         <Modal value={isCreateModalOpen} setValue={setIsCreateModalOpen}>
-          <Form
-            object={EMPTY_DESPESA_FORM}
-            name="despesa"
-            type="create"
-            fields={despesaFormFields}
+          <DespesaForm
+            ucs={MOCK_UCS}
+            selectedUc={selectedUc}
+            onSelectUc={setSelectedUc}
             onCancel={() => setIsCreateModalOpen(false)}
             onConfirm={handleCreateSubmit}
           />
