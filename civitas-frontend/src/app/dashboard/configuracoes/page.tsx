@@ -237,6 +237,7 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
         type: "select",
         options: SOLICITA_UC_OPTIONS,
         required: true,
+        section: "Configuracao",
       },
       {
         key: "idTipoCodigo",
@@ -248,6 +249,7 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
           label: item.nome,
         })),
         required: true,
+        section: "Configuracao",
       },
       {
         key: "idUnidadeMedida",
@@ -259,6 +261,7 @@ const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
           label: item.situacao === SITUACAO_ATIVO ? item.descricao : `${item.descricao} (Inativo)`,
         })),
         required: true,
+        section: "Configuracao",
       },
       {
         key: "situacao",

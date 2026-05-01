@@ -118,16 +118,11 @@ const secretariaFormFields: ModalFieldConfig[] = [
     validate: validateDigitsLength("CNPJ", 14),
   },
   {
-    key: "descricao",
-    label: "Descricao",
-    placeholder: "Descricao da secretaria",
-    required: true,
-  },
-  {
     key: "logradouro",
     label: "Logradouro",
     placeholder: "Rua / Avenida",
     required: true,
+    section: "Endereco",
   },
   {
     key: "numero",
@@ -135,12 +130,14 @@ const secretariaFormFields: ModalFieldConfig[] = [
     placeholder: "Numero",
     required: true,
     validate: validateMaxLength("Numero", 10),
+    section: "Endereco",
   },
   {
     key: "bairro",
     label: "Bairro",
     placeholder: "Bairro",
     required: true,
+    section: "Endereco",
   },
   {
     key: "cep",
@@ -149,12 +146,14 @@ const secretariaFormFields: ModalFieldConfig[] = [
     mask: "cep",
     required: true,
     validate: validateDigitsLength("CEP", 8),
+    section: "Endereco",
   },
   {
     key: "cidade",
     label: "Cidade",
     placeholder: "Cidade",
     required: true,
+    section: "Endereco",
   },
   {
     key: "estado",
@@ -162,6 +161,7 @@ const secretariaFormFields: ModalFieldConfig[] = [
     placeholder: "UF",
     required: true,
     validate: composeValidators(validateUfCode(), validateMaxLength("Estado", 2)),
+    section: "Endereco",
   },
   {
     key: "telefone",
@@ -170,12 +170,20 @@ const secretariaFormFields: ModalFieldConfig[] = [
     type: "tel",
     mask: "phone",
     required: true,
+    section: "Contato",
   },
   {
     key: "email",
     label: "E-mail",
     placeholder: "email@secretaria.gov.br",
     type: "email",
+    required: true,
+    section: "Contato",
+  },
+  {
+    key: "descricao",
+    label: "Descricao",
+    placeholder: "Descricao da secretaria",
     required: true,
   },
   {

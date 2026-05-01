@@ -254,12 +254,14 @@ export default function Page() {
         mask: "cep",
         required: true,
         validate: validateDigitsLength("CEP", 8),
+        section: "Endereco",
       },
       {
         key: "logradouro",
         label: "Logradouro",
         placeholder: "Rua / Avenida",
         required: true,
+        section: "Endereco",
       },
       {
         key: "numero",
@@ -267,18 +269,21 @@ export default function Page() {
         placeholder: "Numero",
         required: true,
         validate: validateMaxLength("Numero", 4),
+        section: "Endereco",
       },
       {
         key: "bairro",
         label: "Bairro",
         placeholder: "Bairro",
         required: true,
+        section: "Endereco",
       },
       {
         key: "cidade",
         label: "Cidade",
         placeholder: "Cidade",
         required: true,
+        section: "Endereco",
       },
       {
         key: "estado",
@@ -289,6 +294,7 @@ export default function Page() {
           validateUfCode(),
           validateMaxLength("Estado", 2)
         ),
+        section: "Endereco",
       },
       {
         key: "telefone",
@@ -297,6 +303,7 @@ export default function Page() {
         type: "tel",
         mask: "phone",
         required: true,
+        section: "Contato",
       },
       {
         key: "email",
@@ -304,6 +311,7 @@ export default function Page() {
         placeholder: "email@instituicao.com",
         type: "email",
         required: true,
+        section: "Contato",
       },
       {
         key: "idTipoInstituicao",
@@ -312,6 +320,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: tipoInstituicaoOptions,
+        section: "Vinculacao",
       },
       {
         key: "idSecretaria",
@@ -320,6 +329,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: secretariaOptions,
+        section: "Vinculacao",
       },
       {
         key: "situacao",

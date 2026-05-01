@@ -594,6 +594,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: resolvedTipoCodigoOptions,
+        section: "Classificacao",
         validate: (value, formData) => {
           if (toPositiveNumber(value) <= 0) {
             return "Selecione um tipo de codigo valido.";
@@ -614,6 +615,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: resolvedTipoDespesaOptions,
+        section: "Classificacao",
         validate: (value, formData) => {
           if (toPositiveNumber(value) <= 0) {
             return "Selecione um tipo de despesa valido.";
@@ -637,6 +639,7 @@ export default function Page() {
         key: "uc",
         label: "UC",
         placeholder: "Informe a unidade consumidora",
+        section: "Consumo",
         validate: (value, formData) => {
           const tipoDespesa = resolveTipoDespesa(formData.idTipoDespesa);
           return validateRequiredUc(value, tipoDespesa?.solicitaUc === 1);
@@ -649,6 +652,7 @@ export default function Page() {
         type: "number",
         mask: "currency",
         required: true,
+        section: "Consumo",
         validate: (value) => {
           const numericValue = Number(value);
 
@@ -664,6 +668,7 @@ export default function Page() {
         label: "Data de emissao",
         type: "date",
         required: true,
+        section: "Datas",
         validate: (value, formData) => {
           const normalizedDate = normalizeDateInput(value);
           if (!normalizedDate) {
@@ -678,6 +683,7 @@ export default function Page() {
         label: "Data de vencimento",
         type: "date",
         required: true,
+        section: "Datas",
         validate: (value, formData) => {
           const normalizedDate = normalizeDateInput(value);
           if (!normalizedDate) {
@@ -694,6 +700,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: resolvedInstituicaoOptions,
+        section: "Relacionamentos",
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
             return "Selecione uma instituicao valida.";
@@ -709,6 +716,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: resolvedOrcamentoOptions,
+        section: "Relacionamentos",
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
             return "Selecione um orcamento valido.";
@@ -724,6 +732,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: resolvedFornecedorOptions,
+        section: "Relacionamentos",
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
             return "Selecione um fornecedor valido.";
@@ -739,6 +748,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: resolvedUsuarioOptions,
+        section: "Relacionamentos",
         validate: (value) => {
           if (toPositiveNumber(value) <= 0) {
             return "Selecione um usuario valido.";
@@ -754,6 +764,7 @@ export default function Page() {
         type: "select",
         required: true,
         options: STATUS_OPTIONS,
+        section: "Status",
       },
     ];
   }, [
