@@ -47,7 +47,7 @@ export class ConfiguracoesService {
   async getTipoDespesaLookups(): Promise<ConfiguracoesLookups> {
     const [unidadesMedida, tipoCodigos] = await Promise.all([
       this.fetchUnidadeData(),
-      this.fetchTipoCodigoData(),
+      this.fetchTipoCodigoData(true),
     ]);
 
     return { unidadesMedida, tipoCodigos };
@@ -73,12 +73,13 @@ export class ConfiguracoesService {
     }
 
     if (kind === "tipoDespesa") {
+      const tipoCodigoId = toNumber(formData.idTipoCodigo);
       const payload: Omit<TipoDespesaDTO, "id"> = {
         descricao: normalizeText(formData.descricao),
         solicitaUc: toNumber(formData.solicitaUc, 1),
         situacao: toNumber(formData.situacao, SITUACAO_ATIVO),
-        idTipoCodigo: toNumber(formData.idTipoCodigo),
         idUnidadeMedida: toNumber(formData.idUnidadeMedida),
+        ...(tipoCodigoId > 0 ? { idTipoCodigo: tipoCodigoId } : {}),
       };
       const result = await tipoDespesaService.createEnvelope(payload);
       return result.message ?? "Tipo de despesa cadastrado com sucesso.";
@@ -119,13 +120,14 @@ export class ConfiguracoesService {
     }
 
     if (kind === "tipoDespesa") {
+      const tipoCodigoId = toNumber(formData.idTipoCodigo);
       const payload: TipoDespesaDTO = {
         id,
         descricao: normalizeText(formData.descricao),
         solicitaUc: toNumber(formData.solicitaUc, 1),
         situacao: toNumber(formData.situacao, SITUACAO_ATIVO),
-        idTipoCodigo: toNumber(formData.idTipoCodigo),
         idUnidadeMedida: toNumber(formData.idUnidadeMedida),
+        ...(tipoCodigoId > 0 ? { idTipoCodigo: tipoCodigoId } : {}),
       };
       const result = await tipoDespesaService.updateEnvelope(id, payload);
       return result.message ?? "Tipo de despesa atualizado com sucesso.";
@@ -170,7 +172,11 @@ export class ConfiguracoesService {
     return mergeById(ativas, inativas);
   }
 
-  private async fetchTipoCodigoData(): Promise<TipoCodigoDTO[]> {
+  private async fetchTipoCodigoData(optional = false): Promise<TipoCodigoDTO[]> {
+    if (optional) {
+      return tipoCodigoService.getAllOptional();
+    }
+
     return tipoCodigoService.getAll();
   }
 

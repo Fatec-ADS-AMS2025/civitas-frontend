@@ -129,48 +129,53 @@ export const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
     key: "tipoDespesa",
     label: "Tipo de Despesa",
     columns: tipoDespesaColumns,
-    buildFields: (unidades, tipoCodigos) => [
-      { key: "id", hidden: true },
-      {
-        key: "descricao",
-        label: "Descricao",
-        placeholder: "Informe a descricao",
-        required: true,
-      },
-      {
-        key: "solicitaUc",
-        label: "Solicita UC",
-        type: "select",
-        options: SOLICITA_UC_OPTIONS,
-        required: true,
-      },
-      {
-        key: "idTipoCodigo",
-        label: "Tipo de Codigo",
-        placeholder: "Selecione o tipo de codigo",
-        type: "select",
-        options: tipoCodigos.map((item) => ({
-          value: item.id,
-          label: item.nome,
-        })),
-        required: true,
-      },
-      {
-        key: "idUnidadeMedida",
-        label: "Unidade de Medida",
-        placeholder: "Selecione a unidade de medida",
-        type: "select",
-        options: unidades.map((item) => ({
-          value: item.id,
-          label:
-            item.situacao === SITUACAO_ATIVO
-              ? item.descricao
-              : `${item.descricao} (Inativo)`,
-        })),
-        required: true,
-      },
-      buildSituacaoField(),
-    ],
+    buildFields: (unidades, tipoCodigos) => {
+      const hasTipoCodigoOptions = tipoCodigos.length > 0;
+
+      return [
+        { key: "id", hidden: true },
+        {
+          key: "descricao",
+          label: "Descricao",
+          placeholder: "Informe a descricao",
+          required: true,
+        },
+        {
+          key: "solicitaUc",
+          label: "Solicita UC",
+          type: "select",
+          options: SOLICITA_UC_OPTIONS,
+          required: true,
+        },
+        {
+          key: "idTipoCodigo",
+          label: "Tipo de Codigo",
+          placeholder: "Selecione o tipo de codigo",
+          type: "select",
+          options: tipoCodigos.map((item) => ({
+            value: item.id,
+            label: item.nome,
+          })),
+          hidden: !hasTipoCodigoOptions,
+          required: hasTipoCodigoOptions,
+        },
+        {
+          key: "idUnidadeMedida",
+          label: "Unidade de Medida",
+          placeholder: "Selecione a unidade de medida",
+          type: "select",
+          options: unidades.map((item) => ({
+            value: item.id,
+            label:
+              item.situacao === SITUACAO_ATIVO
+                ? item.descricao
+                : `${item.descricao} (Inativo)`,
+          })),
+          required: true,
+        },
+        buildSituacaoField(),
+      ];
+    },
     buildSearchFields: () => [
       { key: "descricao", placeholder: "Descricao", local: "principal" },
       buildStatusSearchField(),

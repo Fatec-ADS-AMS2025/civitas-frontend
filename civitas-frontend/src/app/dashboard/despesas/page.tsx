@@ -443,11 +443,20 @@ export default function Page() {
     () => normalizeSearchValue(listInstituicaoSearch),
     [listInstituicaoSearch]
   );
+  const hasTipoCodigoOptions = tipoCodigos.length > 0;
 
   const tipoDespesaOptions = useMemo<SelectOption[]>(() => {
     return tiposDespesa.map((tipoDespesa) => ({
       value: tipoDespesa.id,
-      label: `${tipoCodigos.find((tipoCodigo) => tipoCodigo.id === tipoDespesa.idTipoCodigo)?.nome ?? "Sem tipo"} - ${tipoDespesa.descricao}`,
+      label: (() => {
+        const tipoCodigoNome = tipoCodigos.find(
+          (tipoCodigo) => tipoCodigo.id === tipoDespesa.idTipoCodigo
+        )?.nome;
+
+        return tipoCodigoNome
+          ? `${tipoCodigoNome} - ${tipoDespesa.descricao}`
+          : tipoDespesa.descricao;
+      })(),
     }));
   }, [tipoCodigos, tiposDespesa]);
 
@@ -592,9 +601,14 @@ export default function Page() {
         label: "Tipo de codigo",
         placeholder: "Selecione um tipo de codigo",
         type: "select",
-        required: true,
+        hidden: !hasTipoCodigoOptions,
+        required: hasTipoCodigoOptions,
         options: resolvedTipoCodigoOptions,
         validate: (value, formData) => {
+          if (!hasTipoCodigoOptions) {
+            return undefined;
+          }
+
           if (toPositiveNumber(value) <= 0) {
             return "Selecione um tipo de codigo valido.";
           }
@@ -623,6 +637,7 @@ export default function Page() {
           const tipoCodigoSelecionado = resolveTipoCodigo(formData.idTipoCodigo);
 
           if (
+            hasTipoCodigoOptions &&
             tipoDespesa &&
             tipoCodigoSelecionado &&
             tipoDespesa.idTipoCodigo !== tipoCodigoSelecionado.id
@@ -757,6 +772,7 @@ export default function Page() {
       },
     ];
   }, [
+    hasTipoCodigoOptions,
     resolvedFornecedorOptions,
     resolvedInstituicaoOptions,
     resolvedOrcamentoOptions,
@@ -1330,26 +1346,28 @@ export default function Page() {
             className="despesas-filter-field"
           />
 
-          <div className="space-y-2">
-            <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">Tipo de codigo</label>
-            <select
-              value={filterForm.idTipoCodigo}
-              onChange={(event) =>
-                setFilterForm((currentValue) => ({
-                  ...currentValue,
-                  idTipoCodigo: event.target.value,
-                }))
-              }
-              className={filterFieldClassName}
-            >
-              <option value="">Todos</option>
-              {tipoCodigoOptions.map((option) => (
-                <option key={`filter-type-code-${option.value}`} value={String(option.value)}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {hasTipoCodigoOptions ? (
+            <div className="space-y-2">
+              <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">Tipo de codigo</label>
+              <select
+                value={filterForm.idTipoCodigo}
+                onChange={(event) =>
+                  setFilterForm((currentValue) => ({
+                    ...currentValue,
+                    idTipoCodigo: event.target.value,
+                  }))
+                }
+                className={filterFieldClassName}
+              >
+                <option value="">Todos</option>
+                {tipoCodigoOptions.map((option) => (
+                  <option key={`filter-type-code-${option.value}`} value={String(option.value)}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
 
           <div className="space-y-2">
             <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">Categoria</label>
