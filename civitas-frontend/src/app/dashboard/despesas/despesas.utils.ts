@@ -61,7 +61,7 @@ export const buildDespesaFormObject = (
   return {
     id: despesa.id,
     numeroDocumento: despesa.raw.numeroDocumento ?? "",
-    codigo: despesa.raw.codigo === 0 ? "" : despesa.raw.codigo ?? "",
+    codigo: despesa.raw.codigo === "0" ? "" : despesa.raw.codigo ?? "",
     idTipoCodigo: despesa.tipoCodigoId ?? "",
     idTipoDespesa: despesa.raw.idTipoDespesa ?? "",
     uc: despesa.raw.uc ?? "",
