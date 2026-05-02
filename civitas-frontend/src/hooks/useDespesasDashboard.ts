@@ -228,12 +228,18 @@ const isHttpMethodNotAllowedError = (error: unknown): boolean => {
   return error instanceof Error && error.message.includes("HTTP 405");
 };
 
+const logOptionalDashboardWarning = (message: string, error: unknown): void => {
+  if (process.env.NODE_ENV === "development") {
+    console.warn(message, error);
+  }
+};
+
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
   try {
     return (await despesaService.getInactiveOptional()) ?? [];
   } catch (error) {
     if (!isHttpNotFoundError(error) && !isHttpBadRequestError(error)) {
-      console.error("Erro ao carregar despesas inativas:", error);
+      logOptionalDashboardWarning("Erro ao carregar despesas inativas:", error);
     }
 
     return [];
@@ -550,7 +556,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     usuarios,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
-    tipoCodigoService.getAllData(),
+    tipoCodigoService.getAllOptional(),
     tipoDespesaService.getAllData(),
     orcamentoService.getAllData(),
     instituicaoService.getAllData(),
