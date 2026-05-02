@@ -1,7 +1,7 @@
 export default interface DespesaDTO {
   id: number;
   numeroDocumento?: string;
-  codigo?: string;
+  codigo?: string | number;
   uc?: string;
   dataEmissao?: string;
   dataEmicao?: string;

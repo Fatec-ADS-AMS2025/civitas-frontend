@@ -279,7 +279,7 @@ export const validateDespesaDateRange = (
 
 export const normalizeDespesaPayload = <T extends FormPayload>(data: T): T => {
   const payload = data as Record<string, unknown>;
-  const normalizedCodigo = toTrimmedString(payload.codigo);
+  const normalizedCodigo = toOptionalNumber(payload.codigo);
   const normalizedDataEmissao = normalizeDateInput(
     payload.dataEmissao ?? payload.dataEmicao
   );
