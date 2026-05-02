@@ -37,6 +37,14 @@ const DEFAULT_LIST_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
   size: 100,
 };
 
+const isDevelopmentEnvironment = process.env.NODE_ENV === "development";
+
+const logHandledFallback = (message: string, error: unknown): void => {
+  if (isDevelopmentEnvironment) {
+    console.warn(message, error);
+  }
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -301,12 +309,32 @@ export class GenericService<T> {
     return payload as R;
   }
 
-  async getAll(query?: ListQuery): Promise<T[]> {
+  protected async requestCollection(
+    query?: ListQuery,
+    options: HandleResponseOptions = {}
+  ): Promise<T[]> {
     const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`, {
       headers: this.createHeaders(),
     });
-    const payload = await this.handleResponse(response);
+
+    const payload = await this.handleResponse(response, options);
     return this.unwrapCollection<T>(payload);
+  }
+
+  protected async requestItem(
+    id: number,
+    options: HandleResponseOptions = {}
+  ): Promise<T> {
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
+      headers: this.createHeaders(),
+    });
+
+    const payload = await this.handleResponse(response, options);
+    return this.unwrapItem<T>(payload);
+  }
+
+  async getAll(query?: ListQuery): Promise<T[]> {
+    return this.requestCollection(query);
   }
 
   async getPage(query?: ListQuery): Promise<PaginatedResult<T>> {
@@ -354,30 +382,26 @@ export class GenericService<T> {
 
   async getAllData(query?: ListQuery): Promise<T[]> {
     try {
-      return await this.getAll(query);
+      return await this.requestCollection(query, { showErrorToast: false });
     } catch (error) {
-      console.error(`Erro ao listar ${this.endpoint}:`, error);
+      logHandledFallback(`Erro ao listar ${this.endpoint}:`, error);
       return [];
     }
   }
 
   async getById(id: number): Promise<T> {
-    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
-      headers: this.createHeaders(),
-    });
-    const payload = await this.handleResponse(response);
-    return this.unwrapItem<T>(payload);
+    return this.requestItem(id);
   }
 
   async getByIdData(id: number): Promise<T | null> {
     try {
-      return await this.getById(id);
+      return await this.requestItem(id, { showErrorToast: false });
     } catch (error) {
       if (isHttpNotFoundError(error)) {
         return null;
       }
 
-      console.error(`Erro ao buscar ${this.endpoint} por ID ${id}:`, error);
+      logHandledFallback(`Erro ao buscar ${this.endpoint} por ID ${id}:`, error);
       return null;
     }
   }

@@ -10,6 +10,11 @@ export type AuthStorageUser = {
 
 const isBrowser = () => typeof window !== 'undefined';
 
+const isExpired = (expiresAtUtc: string): boolean => {
+  const expiresAt = new Date(expiresAtUtc).getTime();
+  return Number.isNaN(expiresAt) || expiresAt <= Date.now();
+};
+
 export const authStorage = {
   get(): AuthStorageUser | null {
     if (!isBrowser()) return null;
@@ -28,6 +33,12 @@ export const authStorage = {
         typeof parsed.expiresAtUtc !== 'string'
       ) {
         console.warn('[authStorage] Dados invalidos encontrados no localStorage. Limpando registro.');
+        window.localStorage.removeItem(AUTH_STORAGE_KEY);
+        return null;
+      }
+
+      if (isExpired(parsed.expiresAtUtc)) {
+        console.warn('[authStorage] Sessao expirada encontrada no localStorage. Limpando registro.');
         window.localStorage.removeItem(AUTH_STORAGE_KEY);
         return null;
       }
