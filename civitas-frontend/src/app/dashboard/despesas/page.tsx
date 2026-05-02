@@ -43,6 +43,8 @@ export default function Page() {
   const [listInstituicaoSearch, setListInstituicaoSearch] = useState("");
   const [valuesVisible, setValuesVisible] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // UC selecionada no fluxo de cadastro via modal.
+  const [selectedUc, setSelectedUc] = useState<UcItem | null>(null);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [viewingDespesa, setViewingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [selectedCodigoGroup, setSelectedCodigoGroup] =
@@ -132,6 +134,17 @@ export default function Page() {
     } catch (submitError) {
       showToast(getSubmitErrorMessage(submitError, "Erro ao cadastrar despesa."), "error");
     }
+
+    // Monta o payload com UC e valores normalizados para numero.
+    const payload = {
+      uc: selectedUc,
+      valorDespesa: toPositiveNumber(formData.valorDespesa),
+      consumoPrevisto: toPositiveNumber(formData.consumoPrevisto),
+    };
+
+    // Envio simulado para o fluxo de UC.
+    console.log("Despesa UC - payload", payload);
+    setIsCreateModalOpen(false);
   };
 
   const handleEditSubmit = async (formData: Record<string, unknown>) => {
