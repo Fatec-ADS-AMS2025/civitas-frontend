@@ -1,0 +1,19 @@
+
+> civitas-frontend@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.51:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.4s
+ ○ Compiling / ...
+ ✓ Compiled / in 4s
+ GET / 200 in 4746ms
+ GET / 200 in 567ms
+ ✓ Compiled /favicon.ico in 465ms
+ GET /favicon.ico?favicon.0b3bf435.ico 200 in 951ms
+ ○ Compiling /dashboard/instituicoes ...
+ ✓ Compiled /dashboard/instituicoes in 3.9s
+ GET /dashboard/instituicoes 200 in 5401ms

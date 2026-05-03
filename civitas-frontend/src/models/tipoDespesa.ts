@@ -4,5 +4,5 @@ export default interface TipoDespesaDTO {
   solicitaUc: number;
   situacao: number;
   idUnidadeMedida: number;
-  idTipoCodigo: number;
+  idTipoCodigo?: number;
 }
