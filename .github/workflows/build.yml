@@ -18,6 +18,9 @@ jobs:
               uses: actions/setup-node@v4
               with:
                 node-version: 18
+
+            - name: Entrar no Projeto
+              run: cd civitas-frontend
             
             - name: Instalar Dependências
               run: npm install
