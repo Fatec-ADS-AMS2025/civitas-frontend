@@ -77,15 +77,15 @@ const camposConst: FieldConfig[] = [
 const fornecedorFormFields: ModalFieldConfig[] = [
   { key: "idFornecedor", hidden: true },
   {
-    key: "nomeFantasia",
-    label: "Nome Fantasia",
-    placeholder: "Nome fantasia do fornecedor",
-    required: true,
-  },
-  {
     key: "nome",
     label: "Razao Social / Nome",
     placeholder: "Nome ou razao social do fornecedor",
+    required: true,
+  },
+  {
+    key: "nomeFantasia",
+    label: "Nome Fantasia",
+    placeholder: "Nome fantasia do fornecedor",
     required: true,
   },
   {
@@ -101,6 +101,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     label: "Logradouro",
     placeholder: "Rua / Avenida",
     required: true,
+    section: "Endereco",
   },
   {
     key: "numero",
@@ -108,12 +109,14 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     placeholder: "Numero",
     required: true,
     validate: validateMaxLength("Numero", 10),
+    section: "Endereco",
   },
   {
     key: "bairro",
     label: "Bairro",
     placeholder: "Bairro",
     required: true,
+    section: "Endereco",
   },
   {
     key: "cep",
@@ -122,12 +125,14 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     mask: "cep",
     required: true,
     validate: validateDigitsLength("CEP", 8),
+    section: "Endereco",
   },
   {
     key: "cidade",
     label: "Cidade",
     placeholder: "Cidade",
     required: true,
+    section: "Endereco",
   },
   {
     key: "estado",
@@ -138,6 +143,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
       validateUfCode(),
       validateMaxLength("Estado", 2)
     ),
+    section: "Endereco",
   },
   {
     key: "telefone",
@@ -146,6 +152,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     type: "tel",
     mask: "phone",
     required: true,
+    section: "Contato",
   },
   {
     key: "email",
@@ -153,6 +160,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     placeholder: "email@fornecedor.com.br",
     type: "email",
     required: true,
+    section: "Contato",
   },
   {
     key: "situacao",

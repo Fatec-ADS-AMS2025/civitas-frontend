@@ -100,6 +100,7 @@ const camposConst: FieldConfig[] = [
 const usuarioFormFields: ModalFieldConfig[] = [
   { key: "id", hidden: true },
   { key: "nome", label: "Nome", placeholder: "Nome completo", required: true },
+  { key: "email", label: "E-mail", placeholder: "email@exemplo.com", type: "email", required: true },
   {
     key: "cpf",
     label: "CPF",
@@ -107,12 +108,13 @@ const usuarioFormFields: ModalFieldConfig[] = [
     mask: "cpf",
     required: true,
     validate: validateDigitsLength("CPF", 11),
+    section: "Documentos",
   },
-  { key: "rg", label: "RG", placeholder: "RG", required: true },
-  { key: "matricula", label: "Matricula", placeholder: "MAT-0000", required: true },
-  { key: "logradouro", label: "Logradouro", placeholder: "Rua / Avenida", required: true },
-  { key: "numero", label: "Numero", placeholder: "Numero", required: true },
-  { key: "bairro", label: "Bairro", placeholder: "Bairro", required: true },
+  { key: "rg", label: "RG", placeholder: "RG", required: true, section: "Documentos" },
+  { key: "matricula", label: "Matricula", placeholder: "MAT-0000", required: true, section: "Documentos" },
+  { key: "logradouro", label: "Logradouro", placeholder: "Rua / Avenida", required: true, section: "Endereco" },
+  { key: "numero", label: "Numero", placeholder: "Numero", required: true, section: "Endereco" },
+  { key: "bairro", label: "Bairro", placeholder: "Bairro", required: true, section: "Endereco" },
   {
     key: "cep",
     label: "CEP",
@@ -120,8 +122,9 @@ const usuarioFormFields: ModalFieldConfig[] = [
     mask: "cep",
     required: true,
     validate: validateDigitsLength("CEP", 8),
+    section: "Endereco",
   },
-  { key: "cidade", label: "Cidade", placeholder: "Cidade", required: true },
+  { key: "cidade", label: "Cidade", placeholder: "Cidade", required: true, section: "Endereco" },
   {
     key: "estado",
     label: "Estado",
@@ -131,15 +134,16 @@ const usuarioFormFields: ModalFieldConfig[] = [
       validateUfCode(),
       validateMaxLength("Estado", 2)
     ),
+    section: "Endereco",
   },
-  { key: "email", label: "E-mail", placeholder: "email@exemplo.com", type: "email", required: true },
-  { key: "senha", label: "Senha", placeholder: "Senha", type: "password", required: true },
+  { key: "senha", label: "Senha", placeholder: "Senha", type: "password", required: true, section: "Acesso" },
   {
     key: "tipoUsuario",
     label: "Tipo",
     type: "select",
     required: true,
     options: TIPO_USUARIO_OPTIONS,
+    section: "Acesso",
   },
   {
     key: "situacao",
@@ -147,6 +151,7 @@ const usuarioFormFields: ModalFieldConfig[] = [
     type: "select",
     required: true,
     options: SITUACAO_OPTIONS,
+    section: "Status",
   },
 ];
 
