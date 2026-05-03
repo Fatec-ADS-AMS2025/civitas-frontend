@@ -42,6 +42,7 @@ export default function FormModal({
 }: FormModalProps) {
     // Título do modal varia por modo e entidade.
     const title = mode === 'create' ? 'Cadastro' : `${modeLabels[mode]} ${name ?? ''}`
+    
 
     return (
         <>
@@ -87,7 +88,7 @@ export default function FormModal({
                     ))}
                 </div>
 
-                <div className='flex flex-col gap-3 border-t border-[var(--divider)] md:flex-row absolute bottom-0 left-0 w-full pt-5 bg-[inherit] px-5 sm:px-6'>
+                <div className='flex flex-col gap-3 border-t border-[var(--divider)] md:flex-row absolute bottom-5 left-0 w-full pt-5 bg-[inherit] px-5 sm:px-6'>
                     <Button
                         variant='secondary'
                         className='!w-full !max-w-none'

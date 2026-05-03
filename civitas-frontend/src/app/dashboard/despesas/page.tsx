@@ -28,6 +28,8 @@ import {
 } from "./despesas.constants";
 import { useDespesaFormFields } from "./useDespesaFormFields";
 import { useDespesasViewModel } from "./useDespesasViewModel";
+import { toPositiveNumber } from "./despesas.utils";
+import type { UcItem } from "./_components/DespesaForm";
 
 export default function Page() {
   // Excecao Sprint 16: esta page permanece acima do limite de 250 linhas porque concentra apenas a orquestracao da tela de despesas.

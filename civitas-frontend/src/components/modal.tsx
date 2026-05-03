@@ -3,6 +3,7 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+
 type ModalProps = {
   value: boolean;
   setValue: ((open: boolean) => void) | (() => void);
@@ -14,6 +15,13 @@ export default function Modal({ value, setValue, children }: ModalProps) {
 
   useEffect(() => {
     setMounted(true);
+    const body = document.body;
+    const prev = body.style.overflow;
+    document.documentElement.style.overflow = 'hidden'
+
+    return () => {
+      document.documentElement.style.overflow = prev
+    }
   }, []);
 
   // useEffect(() => {
