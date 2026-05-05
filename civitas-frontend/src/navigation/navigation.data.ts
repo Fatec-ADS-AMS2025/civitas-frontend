@@ -118,6 +118,22 @@ export const NAVIGATION_CATALOG: NavigationItem[] = [
     priority: 70,
   },
   {
+    key: "unidades-consumidoras",
+    label: "Unidades Consumidoras",
+    path: "/dashboard/unidades-consumidoras",
+    keywords: ["unidade consumidora", "uc", "energia", "consumo"],
+    features: [
+      "cadastrar unidade consumidora",
+      "editar unidade consumidora",
+      "excluir unidade consumidora",
+      "filtrar unidades consumidoras",
+      "vincular instituicao e fornecedor",
+    ],
+    category: "Cadastros",
+    icon: "bolt",
+    priority: 65,
+  },
+  {
     key: "usuarios",
     label: "Usuarios",
     path: "/dashboard/usuarios",
