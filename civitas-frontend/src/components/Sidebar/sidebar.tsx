@@ -33,12 +33,130 @@ export default function Sidebar() {
 
   const normalizedPath = normalizePath(pathname);
 
+<<<<<<< Updated upstream
   const navigateToPath = (path: string) => {
     push(path);
   };
+=======
+    if (item.onClick) {
+      item.onClick();
+      return;
+    }
+
+    if (item.href) {
+      router.push(item.href);
+      return;
+    }
+
+    router.push(`/${item.key}`);
+  }
+
+  useEffect(() => {
+    const activeItem = defaultItems.find((item) => item.href === pathname);
+
+    defaultItems.forEach((element) => {
+      if (activeItem && activeItem.key === element.key) {
+        element.active = true;
+        return;
+      } else {
+        element.active = false;
+      }
+    });
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleShortcut = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+
+      const isTyping =
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select" ||
+        target?.isContentEditable;
+
+      if (isTyping) return;
+
+      switch (e.key) {
+        case "1":
+          e.preventDefault();
+          router.push("/dashboard");
+          break;
+        case "2":
+          e.preventDefault();
+          router.push("/dashboard/secretaria");
+          break;
+        case "3":
+          e.preventDefault();
+          router.push("/dashboard/instituicoes");
+          break;
+        case "4":
+          e.preventDefault();
+          router.push("/dashboard/fornecedor");
+          break;
+        case "5":
+          e.preventDefault();
+          router.push("/dashboard/orcamentos");
+          break;
+        case "6":
+          e.preventDefault();
+          router.push("/dashboard/despesas");
+          break;
+        case "7":
+          e.preventDefault();
+          router.push("/dashboard/financeiro");
+          break;
+        case "8":
+          e.preventDefault();
+          router.push("/dashboard/configuracoes");
+          break;
+        case "9":
+          e.preventDefault();
+          router.push("/dashboard/usuarios");
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [router]);
+>>>>>>> Stashed changes
 
   return (
     <>
+      <nav
+        aria-label="Navegacao principal mobile"
+        className="fixed bottom-0 left-0 right-0 z-[9997] border-t border-[var(--border)] bg-[var(--surface)] px-2 py-2 shadow-[0_-10px_24px_rgba(0,0,0,0.12)] sm:hidden"
+      >
+        <div className="flex gap-1 overflow-x-auto pb-1">
+          {items.map((it) => {
+            const isActive = it.href === pathname;
+
+            return (
+              <button
+                key={it.key}
+                type="button"
+                onClick={() => handleNavigate(it)}
+                className={`flex min-w-[70px] flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-[11px] font-semibold transition-colors ${
+                  isActive
+                    ? "bg-[var(--surface-soft)] text-[var(--secundary-1)]"
+                    : "text-[var(--text-muted)]"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+                title={it.label}
+              >
+                <span className={`material-symbols-outlined ${isActive ? "filled" : ""} !text-[21px]`}>
+                  {it.icon}
+                </span>
+                <span className="max-w-full truncate">{it.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
       <aside
         aria-label="Sidebar"
         className="group hidden h-[calc(100vh-1.5rem)] w-[78px] shrink-0 select-none flex-col justify-between overflow-hidden rounded-sm border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] transition-all duration-200 ease-out sm:fixed sm:left-3 sm:top-3 sm:z-[110] sm:flex sm:hover:w-[256px] sm:focus-within:w-[256px]"

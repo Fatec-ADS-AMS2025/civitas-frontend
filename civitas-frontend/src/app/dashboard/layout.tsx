@@ -39,6 +39,7 @@ export default function Layout({
   }
 
   return (
+<<<<<<< Updated upstream
     <DashboardHeaderProvider>
       <div className="dashboard-shell flex min-h-screen w-full bg-[var(--surface-page)]">
         <Sidebar />
@@ -61,6 +62,35 @@ export default function Layout({
 
             <div className="w-full">
               {children}
+=======
+    <div className="dashboard-shell flex min-h-screen w-full bg-[var(--background)]">
+
+      <Sidebar />
+
+      <div
+        ref={paiRef}
+        data-contrast-target="content"
+        className="w-full flex-1 pb-24 sm:ml-[92px] sm:pb-0 lg:pr-[78px] 2xl:pr-[86px]"
+      >
+        <div className="mx-auto w-full max-w-[1680px] pb-8 pl-4 pr-[68px] pt-5 sm:px-5 lg:px-8 lg:pt-6 2xl:px-10">
+          <div className='mb-6 sm:mb-7'>
+            <h1 className='text-[30px] font-bold capitalize text-[var(--secundary-1)] sm:text-[34px] lg:text-[38px]'>
+              {currentMeta.title}
+            </h1>
+
+            <div className='mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1'>
+              {parts.map((item, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => alterarPagina(index)}
+                  className='cursor-pointer text-sm capitalize text-[var(--text-muted)] opacity-90 transition-colors duration-200 hover:text-[var(--secundary-1)] hover:opacity-100'
+                >
+                  {item}
+                  {index < parts.length - 1 && <span className="px-1 text-[var(--text-subtle)]">/</span>}
+                </button>
+              ))}
+>>>>>>> Stashed changes
             </div>
           </div>
         </div>

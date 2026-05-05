@@ -41,9 +41,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeInitializer }} />
       </head>
       <body className="antialiased">
+<<<<<<< Updated upstream
         <ThemeProvider>
           <AuthProvider>
             <NavigationFeedback />
+=======
+        <a
+          href="#conteudo-principal"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[10000] focus:rounded-md focus:bg-[var(--surface)] focus:px-4 focus:py-2 focus:text-[var(--text-strong)]"
+        >
+          Pular para o conteúdo principal
+        </a>
+>>>>>>> Stashed changes
 
             <a
               href="#conteudo-principal"

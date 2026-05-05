@@ -227,11 +227,20 @@ export default function Dashboard() {
             <span className="inline-flex rounded-sm border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
               Painel principal
             </span>
+<<<<<<< Updated upstream
             <h2 className="mt-3 text-[22px] font-semibold text-[var(--secundary-1)] sm:text-[24px]">
               Operacao direta
             </h2>
             <p className="mt-1 text-sm text-[var(--foreground-muted)]">
               Resumo financeiro, acessos centrais e fila recente de despesas sem blocos duplicados.
+=======
+            <h1 className="mt-4 break-words text-[28px] font-bold leading-tight [overflow-wrap:anywhere] sm:text-[40px]">
+              Acompanhamento real de despesas e cobertura orcamentaria
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm text-white/85 sm:text-base">
+              Esta tela agora usa dados reais do backend para mostrar saldo, volume
+              de despesas, concentracao por categoria e vencimentos proximos.
+>>>>>>> Stashed changes
             </p>
           </div>
 
@@ -370,22 +379,37 @@ export default function Dashboard() {
                   key={`due-${item.id}`}
                   className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5"
                 >
+<<<<<<< Updated upstream
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-[var(--foreground)]">
+=======
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[#1F2A32]">
+>>>>>>> Stashed changes
                         {item.descricao}
                       </p>
                       <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
                         {item.categoria}
                       </p>
                     </div>
+<<<<<<< Updated upstream
                     <span className="rounded-sm bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#9B5B00]">
+=======
+                    <span className="w-fit rounded-full bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#C97900]">
+>>>>>>> Stashed changes
                       {getDueSoonLabel(item.daysUntilDue)}
                     </span>
                   </div>
 
+<<<<<<< Updated upstream
                   <div className="mt-3 flex items-center justify-between gap-3 text-sm">
                     <span className="text-[var(--foreground-muted)]">
+=======
+                  <div className="mt-3 flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-[#72808A]">
+>>>>>>> Stashed changes
                       Vencimento: {formatDate(item.raw.dataVencimento ?? item.data)}
                     </span>
                     <span className="font-semibold text-[var(--secundary-1)]">
@@ -410,9 +434,15 @@ function RecentExpenseCard({
   showMoneyValues: boolean;
 }) {
   return (
+<<<<<<< Updated upstream
     <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
       <div>
         <p className="text-[15px] font-semibold text-[var(--foreground)]">
+=======
+    <div className="grid w-full grid-cols-1 gap-3 rounded-[18px] border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+      <div className="min-w-0">
+        <p className="text-[15px] font-bold text-[#1F2A32]">
+>>>>>>> Stashed changes
           {showMoneyValues ? formatCurrency(item.valor) : "* * * * * *"}
         </p>
         <p className="mt-1 text-sm text-[var(--foreground-muted)]">{item.descricao}</p>
@@ -421,7 +451,11 @@ function RecentExpenseCard({
         </p>
       </div>
 
+<<<<<<< Updated upstream
       <div className="text-right text-sm text-[var(--foreground-muted)]">
+=======
+      <div className="text-left text-sm text-[#6B7280] sm:text-right">
+>>>>>>> Stashed changes
         <div>{item.dataFormatada}</div>
         <div>{item.situacaoLabel}</div>
       </div>
@@ -434,3 +468,45 @@ function RecentExpenseCard({
     </div>
   );
 }
+<<<<<<< Updated upstream
+=======
+
+function ActionCard({ action }: { action: QuickAction }) {
+  const toneClasses = {
+    amber: "border-[#F6E2BA] bg-[#FFF7E8]",
+    blue: "border-[#D9E8FF] bg-[#EFF5FF]",
+    slate: "border-[#D9E2E6] bg-[#F5F8F9]",
+  } as const;
+
+  const buttonClasses = {
+    amber: "bg-[#FFAA17] text-white",
+    blue: "bg-[#4A8FF7] text-white",
+    slate: "bg-[#1D2940] text-white",
+  } as const;
+
+  return (
+    <div
+      className={`flex flex-col gap-4 rounded-[20px] border px-4 py-4 sm:flex-row sm:items-center ${toneClasses[action.tone]}`}
+    >
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/70">
+        <span className="material-symbols-outlined !text-[22px]">
+          {action.icon}
+        </span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[15px] font-semibold text-[#1F2A32] sm:truncate">
+          {action.title}
+        </p>
+        <p className="mt-1 text-sm text-[#72808A]">{action.subtitle}</p>
+      </div>
+      <button
+        type="button"
+        onClick={action.onClick}
+        className={`w-full rounded-full px-5 py-2 text-sm font-bold transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-black/5 sm:w-auto ${buttonClasses[action.tone]}`}
+      >
+        {action.button}
+      </button>
+    </div>
+  );
+}
+>>>>>>> Stashed changes
