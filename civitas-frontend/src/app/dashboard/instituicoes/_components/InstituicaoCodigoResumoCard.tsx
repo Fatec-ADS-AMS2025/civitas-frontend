@@ -20,13 +20,13 @@ export default function InstituicaoCodigoResumoCard({
             {codigo.codigo}
           </h5>
         </div>
-        <span className="rounded-sm border border-[var(--border-default)] bg-white px-3 py-1 text-xs font-semibold text-[var(--foreground-muted)]">
+        <span className="civitas-chip civitas-chip--neutral px-3 py-1 text-xs normal-case tracking-normal text-[var(--foreground-muted)]">
           {codigo.quantidadeDespesas} despesas
         </span>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-sm bg-white p-3">
+        <div className="civitas-subcard p-3">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
             Total
           </p>
@@ -34,7 +34,7 @@ export default function InstituicaoCodigoResumoCard({
             {codigo.totalGastosFormatado}
           </p>
         </div>
-        <div className="rounded-sm bg-white p-3">
+        <div className="civitas-subcard p-3">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
             Ultima referencia
           </p>

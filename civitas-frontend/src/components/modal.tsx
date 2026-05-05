@@ -15,13 +15,15 @@ export default function Modal({ value, setValue, children }: ModalProps) {
 
   useEffect(() => {
     setMounted(true);
-    const body = document.body;
-    const prev = body.style.overflow;
-    document.documentElement.style.overflow = 'hidden'
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 
     return () => {
-      document.documentElement.style.overflow = prev
-    }
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
   }, []);
 
   // useEffect(() => {
@@ -41,9 +43,8 @@ export default function Modal({ value, setValue, children }: ModalProps) {
     (setValue as (open: boolean) => void)(false);
   };
 
-<<<<<<< Updated upstream
   return createPortal(
-    <div className="fixed inset-0 z-[9998] overflow-y-auto bg-[rgba(10,31,36,0.52)] p-4 backdrop-blur-[3px] md:p-8 justify-center items-center">
+    <div className="fixed inset-0 z-[9998] flex items-center justify-center overflow-y-auto bg-[var(--modal-overlay)] p-4 backdrop-blur-[3px] md:p-8">
       <div className="flex min-h-full items-center justify-center">
         <div className="civitas-enter civitas-surface relative my-2 min-w-0 w-full max-w-5xl p-5 text-[var(--foreground)] md:my-6 md:p-7">
           <button
@@ -55,19 +56,6 @@ export default function Modal({ value, setValue, children }: ModalProps) {
           </button>
           {children}
         </div>
-=======
-  return (
-    <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-[rgba(0,0,0,0.48)] p-3 sm:p-4 md:p-8">
-      <div className="relative max-h-[95vh] w-full max-w-5xl overflow-auto rounded-2xl bg-[var(--surface)] p-4 text-[var(--text-strong)] shadow-lg sm:p-6 md:p-8">
-        <button
-          className="absolute right-2 top-2 text-xl text-[var(--text-muted)] hover:text-[var(--text-strong)]"
-          onClick={handleClose}
-          aria-label="Fechar modal"
-        >
-          &times;
-        </button>
-        {children}
->>>>>>> Stashed changes
       </div>
     </div>,
     document.body

@@ -56,22 +56,22 @@ export default function Login() {
 	}
 
 	return (
-		<div className="flex w-full items-center h-screen justify-center p-4 sm:p-5 lg:w-1/2 lg:p-8 bg-secundary-1">
-			<div className="w-full max-w-md rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[0_6px_18px_rgba(15,43,49,0.04)] sm:p-8">
+		<div className="flex h-screen w-full items-center justify-center bg-[var(--secundary-1)] p-4 sm:p-5 lg:w-1/2 lg:p-8">
+			<div className="w-full max-w-md rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[var(--shadow-xs)] sm:p-8">
 				<div className="mb-8">
 					<div className="mb-6 flex items-center gap-3">
 						<img src="/logo1.png" alt="Civitas Logo" className="h-10 w-10 object-contain" />
-						<span className="font-semibold text-[#004C57]">Civitas</span>
+						<span className="font-semibold text-[var(--secundary-1)]">Civitas</span>
 					</div>
-					<h2 className="mb-3 text-[30px] font-semibold text-[#1F2A32] sm:text-[34px]">Entrar</h2>
-					<p className="text-sm text-[#72808A]">Sistema de gerenciamento da Prefeitura de Jales</p>
+					<h2 className="mb-3 text-[30px] font-semibold text-[var(--foreground)] sm:text-[34px]">Entrar</h2>
+					<p className="text-sm text-[var(--foreground-muted)]">Sistema de gerenciamento da Prefeitura de Jales</p>
 				</div>
 
 				<form onSubmit={handleLogin} noValidate aria-busy={isLoading} className="space-y-5">
-					{generalError && <div className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">{generalError}</div>}
+					{generalError && <div className="rounded-sm border border-[var(--border-danger)] bg-[var(--surface-danger-accent)] px-3 py-2.5 text-sm text-[var(--text-danger-strong)]">{generalError}</div>}
 
 					<div>
-						<label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">E-mail</label>
+						<label htmlFor="email" className="mb-2 block text-sm font-medium text-[var(--foreground-muted)]">E-mail</label>
 						<Input
 							id="email"
 							type="email"
@@ -90,7 +90,7 @@ export default function Login() {
 					</div>
 
 					<div>
-						<label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">Senha</label>
+						<label htmlFor="password" className="mb-2 block text-sm font-medium text-[var(--foreground-muted)]">Senha</label>
 						<Input
 							id="password"
 							type="password"
@@ -108,18 +108,18 @@ export default function Login() {
 						/>
 					</div>
 
-					<div className="mt-6 flex items-center justify-between">
+					<div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<Checkbox id="rememberMe" label="Lembrar-me" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} disabled={isLoading} />
-						<Link href="/forgot-password" className="text-sm font-medium text-[#5D6A72] underline hover:text-[#004C57]">Esqueci a senha</Link>
+						<Link href="/forgot-password" className="text-sm font-medium text-[var(--foreground-muted)] underline hover:text-[var(--secundary-1)]">Esqueci a senha</Link>
 					</div>
 
-					<button type="submit" disabled={isLoading} className="mt-6 w-full rounded-sm border border-[#004C57] bg-[#004C57] px-4 py-3 font-semibold text-white transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60">
+					<button type="submit" disabled={isLoading} className="mt-6 w-full rounded-sm border border-[var(--secundary-1)] bg-[var(--secundary-1)] px-4 py-3 font-semibold text-white transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60">
 						{isLoading ? 'Entrando...' : 'Entrar'}
 					</button>
 				</form>
 
 				<div className="mt-6 text-center">
-					<p className="text-sm text-[#5D6A72]">Ainda nao tem conta? <Link href="/signup" className="font-semibold text-[#004C57] underline hover:brightness-110">Criar conta</Link></p>
+					<p className="text-sm text-[var(--foreground-muted)]">Ainda nao tem conta? <Link href="/signup" className="font-semibold text-[var(--secundary-1)] underline hover:brightness-110">Criar conta</Link></p>
 				</div>
 			</div>
 		</div>

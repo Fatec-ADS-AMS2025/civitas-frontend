@@ -11,7 +11,7 @@ function Surface({
 }>) {
   return (
     <div
-      className={`skeleton-loader rounded-sm border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)] ${className}`.trim()}
+      className={`skeleton-loader rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] ${className}`.trim()}
     >
       {children}
     </div>
@@ -21,7 +21,7 @@ function Surface({
 export default function DashboardSkeleton() {
   return (
     <div className="skeleton-loader space-y-6">
-      <div className="rounded-sm bg-[#EAF4F5] px-6 py-7 shadow-[0_18px_32px_rgba(11,100,112,0.10)]">
+      <div className="rounded-sm bg-[var(--surface-accent-teal)] px-6 py-7 shadow-[var(--shadow-md)]">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="w-full max-w-3xl space-y-4">
             <SkeletonBlock className="h-7 w-40 rounded-sm" />
@@ -41,7 +41,7 @@ export default function DashboardSkeleton() {
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`dashboard-metric-${index}`}
-            className="skeleton-loader rounded-sm border border-[#DCEAEC] bg-white p-5 shadow-[0_14px_35px_rgba(0,0,0,0.08)]"
+            className="skeleton-loader rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)]"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-3">
@@ -65,7 +65,7 @@ export default function DashboardSkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`action-card-${index}`}
-                className="rounded-sm border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-4"
+                className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-4"
               >
                 <div className="flex items-center gap-4">
                   <SkeletonBlock className="h-11 w-11 rounded-sm" />
@@ -87,7 +87,7 @@ export default function DashboardSkeleton() {
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={`overview-card-${index}`}
-                className="rounded-sm border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-4"
+                className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-4"
               >
                 <div className="flex items-center justify-between gap-3">
                   <SkeletonBlock className="h-4 w-28" />
@@ -138,7 +138,7 @@ export default function DashboardSkeleton() {
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={`recent-expense-${index}`}
-                className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4"
+                className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-4"
               >
                 <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
                   <div className="space-y-2">
@@ -168,7 +168,7 @@ export default function DashboardSkeleton() {
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={`priority-card-${index}`}
-                className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-4"
+                className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-2">

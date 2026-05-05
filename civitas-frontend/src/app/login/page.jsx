@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="mx-auto flex h-full flex-1 w-full relative">
         <CardLogin />
         <Login />
-        <div className="h-2 absolute bottom-0 w-full bg-[#004C57]" />
+        <div className="absolute bottom-0 h-2 w-full bg-[var(--secundary-1)]" />
       </div>
 
     </div>

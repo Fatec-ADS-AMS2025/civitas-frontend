@@ -33,7 +33,11 @@ function AccessibilityAction({
         type="button"
         onClick={onClick}
         aria-label={ariaLabel}
-        className={`flex h-10 w-10 items-center justify-center rounded-sm text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] bg-primary-1 text-white`}
+        className={`flex h-10 w-10 items-center justify-center rounded-sm border text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] ${
+          isActive
+            ? "border-[var(--border-accent-teal)] bg-[var(--primary-1)] text-white"
+            : "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--secundary-1)] hover:bg-[var(--surface-subtle)]"
+        }`}
       >
         {children}
       </button>
@@ -43,7 +47,7 @@ function AccessibilityAction({
           pointer-events-none absolute right-[calc(100%+10px)] top-1/2 -translate-y-1/2 translate-x-1
           whitespace-nowrap rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)]
           px-3 py-1.5 text-xs font-medium text-[var(--foreground)]
-          opacity-0 shadow-[0_6px_18px_rgba(15,43,49,0.08)] transition-all duration-150
+          opacity-0 shadow-[var(--shadow-xs)] transition-all duration-150
           group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100
         "
       >
@@ -56,26 +60,12 @@ function AccessibilityAction({
 export default function AccessibilityMenu() {
   const [fontSize, setFontSize] = useState(DEFAULT_FONT)
   const [highContrast, setHighContrast] = useState(false)
-  const [darkTheme, setDarkTheme] = useState(false)
   const pathname = usePathname()
 
   const applyContrast = (enabled: boolean) => {
-    const root = document.documentElement
-    const body = document.body
-
-    if (enabled) {
-      root.classList.add('high-contrast')
-      body.classList.add('high-contrast-shell')
-    } else {
-      root.classList.remove('high-contrast')
-      body.classList.remove('high-contrast-shell')
-    }
-  }
-
-  const applyTheme = (enabled: boolean) => {
-    const root = document.documentElement
-    root.classList.toggle('theme-dark', enabled)
-    root.dataset.theme = enabled ? 'dark' : 'light'
+    const mainTarget = document.getElementById('conteudo-principal')
+    document.body.classList.toggle('high-contrast', enabled)
+    mainTarget?.classList.toggle('high-contrast-shell', enabled)
   }
 
   useEffect(() => {
@@ -94,21 +84,11 @@ export default function AccessibilityMenu() {
       setHighContrast(true)
       applyContrast(true)
     }
-
-    const savedTheme = localStorage.getItem('app-dark-theme')
-    if (savedTheme === 'true') {
-      setDarkTheme(true)
-      applyTheme(true)
-    }
   }, [])
 
   useEffect(() => {
     applyContrast(highContrast)
   }, [highContrast, pathname])
-
-  useEffect(() => {
-    applyTheme(darkTheme)
-  }, [darkTheme, pathname])
 
   const updateFontSize = (size: number) => {
     const next = Math.max(MIN_FONT, Math.min(MAX_FONT, size))
@@ -127,35 +107,16 @@ export default function AccessibilityMenu() {
     localStorage.setItem('app-high-contrast', String(next))
   }
 
-  const toggleTheme = () => {
-    const next = !darkTheme
-    setDarkTheme(next)
-    localStorage.setItem('app-dark-theme', String(next))
-  }
-
   return (
     <aside
       aria-label="Menu de acessibilidade"
       className="
-<<<<<<< Updated upstream
         fixed bottom-4 right-4 z-[120]
         flex flex-col gap-2 rounded-sm
-        border border-[var(--border-soft)] bg-secundary-1
-        p-2 shadow-[0_10px_24px_rgba(15,43,49,0.10)]
+        border border-[var(--border-soft)] bg-[var(--surface-default)]
+        p-2 shadow-[var(--shadow-sm)]
         backdrop-blur-[6px]
         sm:bottom-5 sm:right-5
-=======
-        fixed right-[14px] top-[88px] z-[9999]
-        lg:right-[18px] lg:top-[96px]
-        flex flex-col items-center
-        w-[46px]
-        rounded-[999px]
-        bg-[var(--accessibility-bg)]
-        px-[6px] py-[8px]
-        border border-[var(--accessibility-border)]
-        shadow-[0_10px_20px_rgba(0,0,0,0.18)]
-        backdrop-blur-[2px]
->>>>>>> Stashed changes
       "
     >
 
@@ -163,11 +124,6 @@ export default function AccessibilityMenu() {
         label="Aumentar fonte"
         ariaLabel="Aumentar fonte"
         onClick={increaseFont}
-<<<<<<< Updated upstream
-=======
-        aria-label="Aumentar fonte"
-        className="text-[var(--accessibility-text)] text-[14px] leading-[14px] font-extrabold mb-[6px]"
->>>>>>> Stashed changes
       >
         A+
       </AccessibilityAction>
@@ -176,11 +132,6 @@ export default function AccessibilityMenu() {
         label="Restaurar fonte"
         ariaLabel="Restaurar fonte"
         onClick={resetFont}
-<<<<<<< Updated upstream
-=======
-        aria-label="Restaurar fonte"
-        className="text-[var(--accessibility-text)] text-[14px] leading-[14px] font-extrabold mb-[6px]"
->>>>>>> Stashed changes
       >
         Aa
       </AccessibilityAction>
@@ -189,16 +140,10 @@ export default function AccessibilityMenu() {
         label="Diminuir fonte"
         ariaLabel="Diminuir fonte"
         onClick={decreaseFont}
-<<<<<<< Updated upstream
-=======
-        aria-label="Diminuir fonte"
-        className="text-[var(--accessibility-text)] text-[14px] leading-[14px] font-extrabold mb-[8px]"
->>>>>>> Stashed changes
       >
         A-
       </AccessibilityAction>
 
-<<<<<<< Updated upstream
       <AccessibilityAction
         label={highContrast ? 'Desativar contraste' : 'Ativar contraste'}
         ariaLabel="Alternar contraste"
@@ -216,36 +161,5 @@ export default function AccessibilityMenu() {
         </span>
       </AccessibilityAction>
     </aside>
-=======
-      <button
-        type="button"
-        onClick={toggleTheme}
-        aria-label={darkTheme ? "Alternar para tema claro" : "Alternar para tema escuro"}
-        title={darkTheme ? "Alternar para tema claro" : "Alternar para tema escuro"}
-        className="mb-[8px] flex h-[24px] w-[24px] items-center justify-center rounded-full text-[var(--accessibility-text)]"
-      >
-        <span className="material-symbols-outlined !text-[19px]">
-          {darkTheme ? "light_mode" : "dark_mode"}
-        </span>
-      </button>
-
-      <button
-        type="button"
-        onClick={toggleContrast}
-        aria-label="Alternar contraste"
-        title="Alternar contraste"
-        className="
-          relative
-          w-[22px] h-[22px]
-          rounded-full
-          border-[2px] border-[var(--accessibility-text)]
-          overflow-hidden
-        "
-      >
-        <span className="absolute left-0 top-0 h-full w-1/2 bg-[var(--accessibility-text)]"></span>
-        <span className="absolute right-0 top-0 h-full w-1/2 bg-[var(--accessibility-inverse)]"></span>
-      </button>
-    </div>
->>>>>>> Stashed changes
   )
 }

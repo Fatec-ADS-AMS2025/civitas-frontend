@@ -23,7 +23,7 @@ function Button({
     primary:
       "border-[var(--secundary-1)] bg-[var(--secundary-1)] text-white hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)]",
     secondary:
-      "border-[#F2D0AF] bg-[var(--surface-warning-soft)] text-[#9B5B00] hover:bg-[#FFF0DB]",
+      "border-[var(--border-accent-amber)] bg-[var(--surface-accent-amber)] text-[var(--text-accent-amber)] hover:bg-[color-mix(in_srgb,var(--surface-accent-amber)_82%,white_18%)]",
     tertiary:
       "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-subtle)]",
     login:

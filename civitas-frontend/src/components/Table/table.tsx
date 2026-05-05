@@ -194,7 +194,7 @@ const Table = <T extends TableRow,>({
 
     if (column.id.toLowerCase() === "id" || column.id.toLowerCase().startsWith("id")) {
       return (
-        <span className="inline-flex min-w-[74px] justify-center rounded-sm border border-[#E8D79C] bg-[#FFF6D9] px-3 py-1.5 text-xs font-semibold leading-none text-[#5F4B00]">
+        <span className="civitas-chip civitas-chip--warning min-w-[74px] px-3 py-1.5 text-xs leading-none tracking-normal">
           #{String(cellText).padStart(3, "0")}
         </span>
       );
@@ -255,7 +255,7 @@ const Table = <T extends TableRow,>({
   ) => {
     const toneClassName =
       tone === "danger"
-        ? "border-[#F1D7D7] text-[#D06B6B] hover:bg-[#FFF8F8] focus-visible:ring-[#FF8A8A]/20"
+        ? "border-[var(--border-danger)] text-[var(--action-danger-bg)] hover:bg-[var(--surface-danger-soft)] focus-visible:ring-[var(--focus-ring-danger)]"
         : "border-[var(--border-soft)] text-[var(--secundary-1)] hover:bg-[var(--surface-subtle)] focus-visible:ring-[var(--focus-ring)]";
 
     return (
@@ -292,7 +292,7 @@ const Table = <T extends TableRow,>({
                     <tr
                       key={index}
                       style={getMotionStyle(index)}
-                      className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[#E3ECEE] transition-all duration-[var(--motion-duration-fast)] hover:bg-[#FCFEFE] hover:ring-[#D4E2E5]"
+                      className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:bg-[var(--surface-subtle)] hover:ring-[var(--border-default)]"
                     >
                       {columns.map((column, columnIndex) => (
                         <td

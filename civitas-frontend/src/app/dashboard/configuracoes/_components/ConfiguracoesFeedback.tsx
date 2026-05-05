@@ -11,8 +11,8 @@ export default function ConfiguracoesFeedback({
 
   const classes =
     feedback.type === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-      : "border-red-200 bg-red-50 text-red-900";
+      ? "border-[var(--border-accent-teal)] bg-[var(--surface-success-soft)] text-[var(--text-accent-teal)]"
+      : "border-[var(--border-danger)] bg-[var(--surface-danger-accent)] text-[var(--text-danger-strong)]";
 
   return (
     <div className={`rounded-sm border px-4 py-3 text-sm ${classes}`}>

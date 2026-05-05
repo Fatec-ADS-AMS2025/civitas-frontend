@@ -9,7 +9,11 @@ const THEME_OPTIONS: Array<{ value: ThemeMode; label: string; icon: string }> = 
   { value: "dark", label: "Escuro", icon: "dark_mode" },
 ];
 
-export default function ThemeSwitcher() {
+type ThemeSwitcherProps = {
+  variant?: "sidebar" | "panel";
+};
+
+export default function ThemeSwitcher({ variant = "sidebar" }: ThemeSwitcherProps) {
   const { themeMode, resolvedTheme, setThemeMode } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -36,6 +40,43 @@ export default function ThemeSwitcher() {
     setThemeMode(value);
     setOpen(false);
   };
+
+  if (variant === "panel") {
+    return (
+      <section className="space-y-3 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+            Tema
+          </p>
+          <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+            Atual: {currentLabel}
+          </p>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-3">
+          {THEME_OPTIONS.map((option) => {
+            const isActive = option.value === themeMode;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => handleSelect(option.value)}
+                className={`flex min-h-[44px] items-center justify-center gap-2 rounded-sm border px-3 py-2.5 text-sm font-semibold transition-all duration-150 ${
+                  isActive
+                    ? "border-[var(--border-accent-teal)] bg-[var(--surface-accent-teal)] text-[var(--text-accent-teal)]"
+                    : "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-subtle)]"
+                }`}
+              >
+                <span className="material-symbols-outlined !text-[18px]">{option.icon}</span>
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="border-t border-[var(--sidebar-divider)] px-3 py-4">

@@ -21,21 +21,21 @@ const TableForne: React.FC<TableForneProps> = ({ data }) => {
   const badgeColor = (situacao: string) => {
        switch (situacao) {
       case "Ativo":
-        return "bg-[#2ECC71] text-white"; 
+        return "civitas-badge civitas-badge--status-active"; 
       case "Inativo":
-        return "bg-[#E74C3C] text-white"; 
+        return "civitas-badge civitas-badge--status-inactive"; 
       default:
-        return "bg-gray-300 text-black";
+        return "civitas-badge civitas-badge--status-neutral";
     }
   };
 
   return (
-    <div className="w-full bg-white rounded-sm shadow-md overflow-hidden mt-5">
+    <div className="civitas-table-shell mt-5 w-full overflow-hidden">
 
       <div className="max-h-[430px] overflow-y-auto">
         <table className="w-full text-left border-collapse">
 
-          <thead className="bg-[#4BA3A4] text-white sticky top-0 z-10">
+          <thead className="sticky top-0 z-10 bg-[var(--primary-1)] text-white">
             <tr>
               <th className="p-3">ID</th>
               <th className="p-3">Nome Fantasia</th>
@@ -48,13 +48,13 @@ const TableForne: React.FC<TableForneProps> = ({ data }) => {
 
           <tbody>
             {data.map((f) => (
-              <tr key={f.id} className="border-b hover:bg-gray-100">
+              <tr key={f.id} className="border-b border-[var(--border-soft)] hover:bg-[var(--surface-subtle)]">
                 <td className="p-3">{f.id}</td>
                 <td className="p-3">{f.nomeFantasia}</td>
                 <td className="p-3">{f.cnpj}</td>
                 <td className="p-3">{f.telefone}</td>
                 <td className="p-3">
-                  <span className={`px-3 py-1 rounded-sm text-sm ${badgeColor(f.situacao)}`}>
+                  <span className={`${badgeColor(f.situacao)} px-3 py-1 text-sm`}>
                     {f.situacao}
                   </span>
                 </td>
@@ -62,19 +62,19 @@ const TableForne: React.FC<TableForneProps> = ({ data }) => {
                 <td className="p-3 flex gap-2">
                   <button
                     onClick={() => setModal({ action: "Ver", fornecedor: f })}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[#D5E3E6] bg-white text-[#1F2A32] transition hover:bg-[#F7FAFB]"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)]"
                   >
                     <span className="material-symbols-outlined">visibility</span>
                   </button>
                   <button
                     onClick={() => setModal({ action: "Editar", fornecedor: f })}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[#D5E3E6] bg-white text-[#1F2A32] transition hover:bg-[#F7FAFB]"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)]"
                   >
                     <span className="material-symbols-outlined">edit_square</span>
                   </button>
                   <button
                     onClick={() => setModal({ action: "Excluir", fornecedor: f })}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[#F1D8D8] bg-white text-[#D16565] transition hover:bg-[#FFF4F4]"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-danger)] bg-[var(--surface-elevated)] text-[var(--action-danger-bg)] transition hover:bg-[var(--surface-danger-soft)]"
                   >
                     <span className="material-symbols-outlined">delete</span>
                   </button>
@@ -89,22 +89,22 @@ const TableForne: React.FC<TableForneProps> = ({ data }) => {
 
       {/* Modal */}
       {modal.fornecedor && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-6 rounded-sm shadow-xl w-80 text-center relative">
+        <div className="fixed inset-0 flex items-center justify-center bg-[var(--modal-overlay)]">
+          <div className="relative w-80 rounded-sm bg-[var(--surface-elevated)] p-6 text-center shadow-[var(--shadow-lg)]">
             <button
               onClick={() => setModal({ action: "", fornecedor: null })}
-              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[#D5E3E6] bg-white text-[#1F2A32] transition hover:bg-[#F7FAFB]"
+              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)]"
             >
               <span className="material-symbols-outlined">close</span>
             </button>
 
-            <h2 className="text-xl font-bold mb-3">{modal.action} Fornecedor</h2>
+            <h2 className="mb-3 text-xl font-bold text-[var(--foreground)]">{modal.action} Fornecedor</h2>
 
-            <p className="text-gray-600">{modal.fornecedor.nomeFantasia}</p>
+            <p className="text-[var(--foreground-muted)]">{modal.fornecedor.nomeFantasia}</p>
 
             <button
               onClick={() => setModal({ action: "", fornecedor: null })}
-              className="mt-4 rounded-sm bg-[#4BA3A4] px-5 py-2 text-white"
+              className="mt-4 rounded-sm border border-[var(--primary-1)] bg-[var(--primary-1)] px-5 py-2 text-white"
             >
               Fechar
             </button>

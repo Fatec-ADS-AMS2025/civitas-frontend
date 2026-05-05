@@ -31,7 +31,7 @@ type ErrorStateProps = {
 function StateContainer({ children, tone = "neutral" }: StateContainerProps) {
   const toneClasses =
     tone === "error"
-      ? "border-[#F2D4D4] bg-[var(--surface-danger-soft)]"
+      ? "border-[var(--border-danger)] bg-[var(--surface-danger-accent)]"
       : "border-[var(--border-soft)] bg-[var(--surface-elevated)]";
 
   return (
@@ -96,16 +96,16 @@ export function ErrorState({
   return (
     <StateContainer tone="error">
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="civitas-state__icon flex h-12 w-12 items-center justify-center rounded-sm bg-[#FFEAEA] text-[#C23D3D]">
+        <div className="civitas-state__icon flex h-12 w-12 items-center justify-center rounded-sm bg-[var(--surface-danger-soft)] text-[var(--action-danger-bg)]">
           <span className="material-symbols-outlined !text-[28px]">error</span>
         </div>
-        <h3 className="civitas-state__title mt-4 text-base font-semibold text-[#842D2D]">{title}</h3>
-        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[#9B4C4C]">{description}</p>
+        <h3 className="civitas-state__title mt-4 text-base font-semibold text-[var(--text-danger-strong)]">{title}</h3>
+        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[var(--text-danger)]">{description}</p>
         {onRetry ? (
           <button
             type="button"
             onClick={onRetry}
-            className="civitas-state__action mt-5 inline-flex items-center justify-center rounded-sm border border-[#D68787] bg-[#C23D3D] px-4 py-2.5 text-sm font-semibold text-white transition-all duration-[var(--motion-duration-fast)] hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#C23D3D]/20"
+            className="civitas-state__action civitas-action civitas-action--danger mt-5 rounded-sm px-4 py-2.5 text-sm focus-visible:ring-[var(--focus-ring-danger)]"
           >
             {actionLabel}
           </button>

@@ -38,15 +38,15 @@ export default function Toaster() {
 
   const bgClass =
     toast.type === "success"
-      ? "bg-green-600"
+      ? "bg-[var(--primary-1)]"
       : toast.type === "error"
-      ? "bg-red-600"
-      : "bg-blue-600";
+      ? "bg-[var(--action-danger-bg)]"
+      : "bg-[var(--secundary-1)]";
 
   return (
     <div className="fixed top-5 right-5 z-[9999]">
       <div
-        className={`${bgClass} text-white px-4 py-3 rounded-sm shadow-lg min-w-[260px] max-w-[420px]`}
+        className={`${bgClass} min-w-[260px] max-w-[420px] rounded-sm px-4 py-3 text-white shadow-[var(--shadow-lg)]`}
       >
         <p className="text-sm font-medium">{toast.message}</p>
       </div>
