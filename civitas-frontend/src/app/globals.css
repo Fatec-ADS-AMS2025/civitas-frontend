@@ -1047,6 +1047,99 @@ html[data-theme="dark"] {
   background: #000 !important;
 }
 
+.high-contrast .civitas-panel-header__eyebrow {
+  background: #000 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+}
+
+.high-contrast .civitas-panel-header__eyebrow * {
+  color: #fff !important;
+}
+
+.high-contrast .civitas-surface,
+.high-contrast .despesas-filter-panel,
+.high-contrast .despesas-table-section,
+.high-contrast .despesas-table-header,
+.high-contrast .despesas-table-filterbar,
+.high-contrast .despesas-table-exportbar,
+.high-contrast .despesas-table-scroll,
+.high-contrast .despesas-table-footer {
+  background: #000 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+}
+
+.high-contrast .civitas-surface,
+.high-contrast .despesas-filter-panel,
+.high-contrast .despesas-table-section {
+  overflow-wrap: anywhere;
+}
+
+.high-contrast .civitas-surface p,
+.high-contrast .despesas-filter-panel p,
+.high-contrast .despesas-table-section p {
+  max-width: 100% !important;
+  white-space: normal !important;
+}
+
+.high-contrast .despesas-table-section table,
+.high-contrast .despesas-table-section thead,
+.high-contrast .despesas-table-section tbody,
+.high-contrast .despesas-table-head,
+.high-contrast .despesas-table-heading,
+.high-contrast .despesas-table-row,
+.high-contrast .despesas-table-cell,
+.high-contrast .despesas-table-empty {
+  background: #000 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+}
+
+.high-contrast .despesas-table-row:hover {
+  background: #000 !important;
+  transform: none !important;
+}
+
+.high-contrast .despesas-table-cell {
+  border-top: 1px solid #fff !important;
+  border-bottom: 1px solid #fff !important;
+}
+
+.high-contrast .despesas-table-row .despesas-table-cell:first-child {
+  border-left: 1px solid #fff !important;
+}
+
+.high-contrast .despesas-table-row .despesas-table-cell:last-child {
+  border-right: 1px solid #fff !important;
+}
+
+.high-contrast .despesas-table-record-badge,
+.high-contrast .despesas-table-status-badge,
+.high-contrast .civitas-badge,
+.high-contrast .civitas-badge--status-active,
+.high-contrast .civitas-badge--status-inactive,
+.high-contrast .civitas-badge--status-neutral {
+  background: #000 !important;
+  border: 1px solid #fff !important;
+  color: #fff !important;
+}
+
+.high-contrast .despesas-table-action,
+.high-contrast .despesas-table-action--danger {
+  background: #000 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+}
+
+.high-contrast .despesas-table-action * {
+  color: #fff !important;
+}
+
+.high-contrast .despesas-table-skeleton {
+  background: #333 !important;
+}
+
 .high-contrast .despesas-hero__decor,
 .high-contrast .despesas-summary-card__sheen {
   display: none !important;
