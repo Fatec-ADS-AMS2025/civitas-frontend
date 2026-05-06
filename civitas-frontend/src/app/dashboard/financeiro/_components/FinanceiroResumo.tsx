@@ -26,7 +26,7 @@ export default function FinanceiroResumo({ resumo }: FinanceiroResumoProps) {
         <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
           Total de despesas
         </p>
-        <p className="mt-2 text-[22px] font-semibold leading-none text-[#C9553A]">
+        <p className="mt-2 text-[22px] font-semibold leading-none text-[var(--tone-danger-text)]">
           {formatCurrency(totalDespesas)}
         </p>
         <p className="mt-1.5 text-[11px] leading-snug text-[var(--foreground-soft)]">
@@ -50,7 +50,7 @@ export default function FinanceiroResumo({ resumo }: FinanceiroResumoProps) {
         <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
           Saldo atual
         </p>
-        <p className="mt-2 text-[22px] font-semibold leading-none text-[#58AFAE]">
+        <p className="mt-2 text-[22px] font-semibold leading-none text-[var(--tone-teal-text)]">
           {formatCurrency(saldo)}
         </p>
         <p className="mt-1.5 text-[11px] leading-snug text-[var(--foreground-soft)]">

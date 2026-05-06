@@ -414,7 +414,7 @@ export default function Form({
                 <div key={field.key} className='w-full'>
                     <label className='mb-2 block text-sm font-semibold tracking-[0.01em] text-[var(--foreground-muted)]'>
                         {commonProps.label}
-                        {commonProps.required && <span className='text-red-500 ml-1'>*</span>}
+                        {commonProps.required && <span className='ml-1 text-[var(--tone-danger-text)]'>*</span>}
                     </label>
                     <select
                         value={toInputValue(fieldValue)}
@@ -423,7 +423,7 @@ export default function Form({
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         aria-invalid={Boolean(commonProps.error)}
                         aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-                        className='w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
+                        className={`w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed ${commonProps.error ? 'civitas-control--error' : ''}`}
                     >
                         <option value=''>{field.placeholder ?? commonProps.label}</option>
                         {(field.options ?? []).map((option) => (
@@ -433,7 +433,7 @@ export default function Form({
                         ))}
                     </select>
                     {commonProps.error && (
-                        <p id={commonProps.errorId} className='mt-1.5 text-sm font-medium text-red-600'>
+                        <p id={commonProps.errorId} className='mt-1.5 text-sm font-medium text-[var(--tone-danger-text)]'>
                             {commonProps.error}
                         </p>
                     )}
@@ -446,7 +446,7 @@ export default function Form({
                 <div key={field.key} className='w-full'>
                     <label className='mb-2 block text-sm font-semibold tracking-[0.01em] text-[var(--foreground-muted)]'>
                         {commonProps.label}
-                        {commonProps.required && <span className='text-red-500 ml-1'>*</span>}
+                        {commonProps.required && <span className='ml-1 text-[var(--tone-danger-text)]'>*</span>}
                     </label>
                     <textarea
                         value={toInputValue(fieldValue)}
@@ -456,10 +456,10 @@ export default function Form({
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         aria-invalid={Boolean(commonProps.error)}
                         aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-                        className='min-h-[120px] w-full resize-none rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]'
+                        className={`min-h-[120px] w-full resize-none rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed ${commonProps.error ? 'civitas-control--error' : ''}`}
                     />
                     {commonProps.error && (
-                        <p id={commonProps.errorId} className='mt-1.5 text-sm font-medium text-red-600'>
+                        <p id={commonProps.errorId} className='mt-1.5 text-sm font-medium text-[var(--tone-danger-text)]'>
                             {commonProps.error}
                         </p>
                     )}
@@ -516,7 +516,7 @@ export default function Form({
                                         goToStep(index)
                                     }}
                                     className={`flex h-9 w-9 items-center justify-center rounded-sm border text-sm transition-all ${isActive || isCompleted
-                                        ? 'border-[var(--secundary-1)] bg-[var(--secundary-1)] text-white'
+                                        ? 'border-[var(--secundary-1)] bg-[var(--secundary-1)] text-[var(--text-on-brand)]'
                                         : 'border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--primary-1)]'
                                         }`}
                                     aria-label={`Ir para etapa ${index + 1}`}
@@ -525,7 +525,7 @@ export default function Form({
                                 </button>
                             )
                         })}
-                        <span className={`rounded-sm border px-4 py-1 text-sm ${currentStep === totalSteps - 1 ? 'border-[var(--secundary-1)] bg-[var(--secundary-1)] text-white' : 'border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--primary-1)]'}`}>
+                        <span className={`rounded-sm border px-4 py-1 text-sm ${currentStep === totalSteps - 1 ? 'border-[var(--secundary-1)] bg-[var(--secundary-1)] text-[var(--text-on-brand)]' : 'border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--primary-1)]'}`}>
                             CONFIRMAR
                         </span>
                     </div>

@@ -47,7 +47,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
             <a
               href="#conteudo-principal"
-              className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[10000] focus:rounded-sm focus:bg-white focus:px-4 focus:py-2 focus:text-black"
+              className="civitas-link-skip sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[10000] focus:px-4 focus:py-2"
             >
               Pular para o conteudo principal
             </a>

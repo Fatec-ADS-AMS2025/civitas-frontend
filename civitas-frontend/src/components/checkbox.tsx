@@ -46,14 +46,14 @@ function Checkbox({
         disabled={disabled}
         checked={currentChecked}
         onChange={handleChange}
-              className="h-5 w-5 cursor-pointer rounded-sm border-2 border-primary-1 accent-primary-1 focus:ring-2 focus:ring-secondary-1 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-5 w-5 cursor-pointer rounded-sm border-2 border-[var(--primary-1)] accent-[var(--primary-1)] focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 focus:ring-offset-[var(--surface-elevated)] disabled:cursor-not-allowed disabled:opacity-50"
         aria-checked={indeterminate ? 'mixed' : currentChecked}
         {...props}
       />
       {label && (
         <label
           htmlFor={checkboxId}
-          className={`text-base font-medium text-gray-800 cursor-pointer select-none ${
+          className={`cursor-pointer select-none text-base font-medium text-[var(--foreground)] ${
             disabled ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >

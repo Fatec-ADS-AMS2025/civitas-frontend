@@ -66,7 +66,7 @@ function TipoBadge({ tipo }: { tipo: 'despesa' | 'orcamento' }) {
   return (
     <span
       className={`inline-flex items-center rounded-sm px-2.5 py-1 text-[11px] font-semibold ${
-        isDespesa ? 'bg-[#FFF1F1] text-[#C55A5A]' : 'bg-[#EEF9F1] text-[#16714A]'
+        isDespesa ? 'civitas-chip civitas-chip--danger' : 'civitas-chip civitas-chip--success'
       }`}
     >
       {isDespesa ? 'Despesa' : 'Orcamento'}
@@ -88,7 +88,7 @@ function StatusBadge({ situacao }: { situacao?: number }) {
     >
       <span
         className={`mr-1.5 h-1.5 w-1.5 rounded-sm ${
-          isAtivo ? 'bg-emerald-500' : 'bg-slate-400'
+          isAtivo ? 'bg-[var(--status-active-text)]' : 'bg-[var(--status-neutral-text)]'
         }`}
       />
       {label}
@@ -230,7 +230,7 @@ export default function FinanceiroLista({
           </div>
           <div className="text-right">
             <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Despesas</p>
-            <p className="text-lg font-semibold text-[#D97706]">{despesas.length}</p>
+            <p className="text-lg font-semibold text-[var(--tone-amber-text)]">{despesas.length}</p>
           </div>
           <div className="text-right">
             <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-soft)]">Orcamentos</p>
@@ -240,7 +240,7 @@ export default function FinanceiroLista({
       </div>
 
       {allExportRows.length > 0 ? (
-        <div className="flex flex-col gap-3 border-b border-[#E4EEF0] pb-4 sm:flex-row sm:items-center sm:justify-end">
+        <div className="flex flex-col gap-3 border-b border-[var(--divider)] pb-4 sm:flex-row sm:items-center sm:justify-end">
           <button
             type="button"
             onClick={() => setIsExportModalOpen(true)}
@@ -253,7 +253,7 @@ export default function FinanceiroLista({
       ) : null}
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[700px]">
+        <table className="w-full min-w-[640px] lg:min-w-[760px]">
           <thead>
             <tr className="border-b border-[var(--divider)]">
               <th className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
@@ -291,7 +291,7 @@ export default function FinanceiroLista({
                       ? ({ ['--enter-delay' as string]: `${index * 45}ms` } as React.CSSProperties)
                       : undefined
                   }
-                  className={`${index < 6 ? 'civitas-enter ' : ''}group border-b border-[#EEF4F5] transition-all duration-[var(--motion-duration-fast)] last:border-0 hover:bg-[#F8FCFC]`}
+                  className={`${index < 6 ? 'civitas-enter ' : ''}group border-b border-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] last:border-0 hover:bg-[var(--surface-subtle)]`}
                 >
                   <td className="px-3 py-3">
                     <span className="text-sm font-medium text-[var(--foreground-soft)]">
@@ -309,7 +309,7 @@ export default function FinanceiroLista({
                   <td className="px-3 py-3 text-right">
                     <span
                       className={`text-sm font-semibold ${
-                        transacao.tipo === 'despesa' ? 'text-red-600' : 'text-emerald-600'
+                        transacao.tipo === 'despesa' ? 'text-[var(--tone-danger-text)]' : 'text-[var(--tone-success-text)]'
                       }`}
                     >
                       {formatCurrency(transacao.valor)}
@@ -339,7 +339,7 @@ export default function FinanceiroLista({
                         type="button"
                         onClick={() => void handleDelete(transacao.id, transacao.tipo)}
                         disabled={isProcessing}
-                        className="inline-flex min-h-[34px] items-center justify-center rounded-sm border border-[#F1D7D7] bg-[#FFF4F4] px-3 py-1.5 text-xs font-medium text-[#C45F5F] transition-all duration-[var(--motion-duration-fast)] hover:bg-[#FFECEC] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="civitas-action civitas-action--danger min-h-[34px] px-3 py-1.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isProcessing ? '...' : 'Excluir'}
                       </button>

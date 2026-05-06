@@ -32,7 +32,7 @@ export function SkeletonTable({ rows = 5, cols = 4 }) {
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <div
           key={rowIndex}
-          className="skeleton-card grid gap-4 rounded-sm border border-[#E6EFF1] bg-white p-4"
+          className="skeleton-card grid gap-4 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4"
           style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
         >
           {Array.from({ length: cols }).map((_, colIndex) => (
@@ -49,7 +49,7 @@ export function SkeletonForm() {
   return (
     <div className="skeleton-loader w-full space-y-4">
       <div className="skeleton-line h-5 w-40 rounded-sm" />
-      <div className="skeleton-card space-y-3 rounded-sm border border-[#E6EFF1] bg-white p-4">
+      <div className="skeleton-card space-y-3 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4">
         <div className="skeleton-line h-11 rounded-sm" />
         <div className="skeleton-line h-11 rounded-sm" />
         <div className="skeleton-line h-11 rounded-sm" />

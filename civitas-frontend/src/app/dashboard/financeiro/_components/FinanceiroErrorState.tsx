@@ -9,10 +9,10 @@ type FinanceiroErrorStateProps = {
 
 export default function FinanceiroErrorState({ message, onRetry }: FinanceiroErrorStateProps) {
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-sm border border-red-200 bg-red-50 p-8">
-      <div className="flex h-16 w-16 items-center justify-center rounded-sm bg-red-100">
+    <div className="civitas-card-soft civitas-card-soft--danger flex min-h-[400px] flex-col items-center justify-center p-8">
+      <div className="flex h-16 w-16 items-center justify-center rounded-sm bg-[var(--tone-danger-bg)]">
         <svg
-          className="h-8 w-8 text-red-600"
+          className="h-8 w-8 text-[var(--tone-danger-text)]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -25,12 +25,12 @@ export default function FinanceiroErrorState({ message, onRetry }: FinanceiroErr
           />
         </svg>
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-red-800">Erro ao carregar dados financeiros</h3>
-      <p className="mt-2 max-w-md text-center text-sm text-red-600">{message}</p>
+      <h3 className="mt-4 text-lg font-semibold text-[var(--tone-danger-text)]">Erro ao carregar dados financeiros</h3>
+      <p className="mt-2 max-w-md text-center text-sm text-[var(--tone-danger-text)]">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-6 rounded-sm bg-red-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          className="civitas-action civitas-action--danger mt-6 px-6 py-2.5 text-sm font-medium"
         >
           Tentar novamente
         </button>

@@ -179,17 +179,17 @@ export default function FinanceiroFormulario({
   };
 
   const inputClass = `
-    w-full rounded-sm border border-[var(--border-default)] bg-[rgba(255,255,255,0.92)] px-3 py-2
+    w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-2
     text-[12px] text-[var(--foreground)] placeholder:text-[var(--foreground-soft)]
     shadow-[var(--shadow-xs)] focus:border-[var(--secundary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)]
-    disabled:cursor-not-allowed disabled:bg-[#F8FCFC] disabled:opacity-60
+    disabled:cursor-not-allowed disabled:opacity-60
   `;
 
   const tabClass = (active: boolean) => `
     flex-1 rounded-sm border px-3 py-1.5 text-[11px] font-semibold transition-all duration-[var(--motion-duration-fast)]
     ${active
-      ? 'border-transparent bg-[linear-gradient(135deg,#0C7178_0%,#2A9B9F_42%,#58AFAE_100%)] text-white shadow-[var(--shadow-xs)]'
-      : 'border-[var(--border-soft)] bg-[var(--surface-subtle)] text-[var(--foreground-muted)] hover:bg-[#EAF3F4]'
+      ? 'border-transparent bg-[var(--surface-brand)] text-[var(--text-on-brand)] shadow-[var(--shadow-xs)]'
+      : 'border-[var(--border-soft)] bg-[var(--surface-subtle)] text-[var(--foreground-muted)] hover:bg-[var(--surface-elevated)]'
     }
   `;
 
@@ -199,7 +199,7 @@ export default function FinanceiroFormulario({
     <div className="civitas-surface civitas-enter rounded-sm p-5">
       {/* Header */}
       <div className="civitas-panel-header mb-4">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#D97706]">
+        <span className="civitas-chip civitas-chip--amber w-fit px-3 py-1 text-[10px] tracking-[0.12em]">
           Operação
         </span>
         <h3 className="mt-1 text-[18px] font-bold text-[var(--foreground)]">

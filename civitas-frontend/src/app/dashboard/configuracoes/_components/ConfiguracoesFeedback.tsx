@@ -11,11 +11,14 @@ export default function ConfiguracoesFeedback({
 
   const classes =
     feedback.type === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-      : "border-red-200 bg-red-50 text-red-900";
+      ? "civitas-card-soft civitas-card-soft--success text-[var(--tone-success-text)]"
+      : "civitas-card-soft civitas-card-soft--danger text-[var(--tone-danger-text)]";
 
   return (
-    <div className={`rounded-sm border px-4 py-3 text-sm ${classes}`}>
+    <div
+      className={`rounded-sm px-4 py-3 text-sm ${classes}`}
+      role={feedback.type === "success" ? "status" : "alert"}
+    >
       {feedback.message}
     </div>
   );

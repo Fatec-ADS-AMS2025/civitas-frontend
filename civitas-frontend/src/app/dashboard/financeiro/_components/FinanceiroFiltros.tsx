@@ -50,13 +50,13 @@ export default function FinanceiroFiltros({
     w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-2.5
     text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-soft)]
     focus:border-[var(--secundary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)]
-    disabled:cursor-not-allowed disabled:bg-[#F8FCFC] disabled:opacity-60
+    disabled:cursor-not-allowed disabled:opacity-60
   `;
 
   return (
     <div className="civitas-surface civitas-enter p-5">
       <div className="civitas-panel-header mb-4">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#9B5B00]">
+        <span className="civitas-chip civitas-chip--amber w-fit px-3 py-1 text-[10px] tracking-[0.12em]">
           Filtros
         </span>
         <h3 className="mt-1 text-[18px] font-semibold text-[var(--foreground)]">

@@ -338,7 +338,7 @@ export default function Dashboard() {
 
       <section className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
         <article className="civitas-surface p-5">
-          <span className="inline-flex rounded-sm bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
+          <span className="civitas-chip civitas-chip--amber px-3 py-1 text-[11px] tracking-[0.08em]">
             Acoes rapidas
           </span>
           <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
@@ -356,7 +356,7 @@ export default function Dashboard() {
         </article>
 
         <article className="civitas-surface p-5">
-          <span className="inline-flex rounded-sm bg-[#EAF4F5] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0B6470]">
+          <span className="civitas-chip civitas-chip--teal px-3 py-1 text-[11px] tracking-[0.08em]">
             Panorama
           </span>
           <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
@@ -408,7 +408,7 @@ export default function Dashboard() {
         <article className="civitas-surface p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <span className="inline-flex rounded-sm bg-[#F4F8F9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7A8B94]">
+              <span className="civitas-chip civitas-chip--slate px-3 py-1 text-[11px] tracking-[0.08em]">
                 Registros
               </span>
               <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
@@ -465,7 +465,7 @@ export default function Dashboard() {
         </article>
 
         <article className="civitas-surface p-5">
-          <span className="inline-flex rounded-sm bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
+          <span className="civitas-chip civitas-chip--amber px-3 py-1 text-[11px] tracking-[0.08em]">
             Prioridades
           </span>
           <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
@@ -485,7 +485,7 @@ export default function Dashboard() {
               dueSoonExpenses.map((item) => (
                 <div
                   key={`due-${item.id}`}
-                  className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5"
+                  className="civitas-card-soft px-4 py-3.5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -496,7 +496,7 @@ export default function Dashboard() {
                         {item.categoria}
                       </p>
                     </div>
-                    <span className="rounded-sm bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#9B5B00]">
+                    <span className="civitas-chip civitas-chip--amber px-3 py-1 text-xs">
                       {getDueSoonLabel(item.daysUntilDue)}
                     </span>
                   </div>
@@ -573,7 +573,7 @@ function OverviewCard({
   icon: string;
 }) {
   return (
-    <div className="rounded-sm border border-[#E7EFF1] bg-[#FBFEFE] px-4 py-3.5">
+    <div className="civitas-card-soft px-4 py-3.5">
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-medium text-[var(--foreground-muted)]">{label}</span>
         <span className="material-symbols-outlined !text-[18px] text-[var(--secundary-1)]">
@@ -626,7 +626,7 @@ function RankingCard({
                   {formatCompactCurrency(item.value)}
                 </span>
               </div>
-              <div className="h-2 rounded-sm bg-[#EEF4F5]">
+              <div className="h-2 rounded-sm bg-[var(--surface-subtle)]">
                 <div
                   className="h-2 rounded-sm bg-[var(--primary-1)]"
                   style={{
@@ -653,7 +653,7 @@ function RecentExpenseCard({
   showMoneyValues: boolean;
 }) {
   return (
-    <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
+    <div className="civitas-card-soft grid w-full grid-cols-[1fr_auto] gap-3 px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
       <div>
         <p className="text-[15px] font-semibold text-[var(--foreground)]">
           {showMoneyValues ? formatCurrency(item.valor) : "* * * * * *"}
@@ -670,7 +670,7 @@ function RecentExpenseCard({
       </div>
 
       <div className="hidden self-center sm:flex sm:flex-col sm:items-end sm:gap-2">
-        <span className="rounded-sm bg-[#FFF1DB] px-4 py-2 text-xs font-semibold text-[#9B5B00]">
+        <span className="civitas-chip civitas-chip--amber px-4 py-2 text-xs">
           Documento {item.numeroDocumento || "-"}
         </span>
       </div>
@@ -680,22 +680,16 @@ function RecentExpenseCard({
 
 function ActionCard({ action }: { action: QuickAction }) {
   const toneClasses = {
-    amber: "border-[#F6E2BA] bg-[#FFF7E8]",
-    blue: "border-[#DCE8EA] bg-[#F6FAFA]",
-    slate: "border-[#D9E2E6] bg-[#F5F8F9]",
-  } as const;
-
-  const buttonClasses = {
-    amber: "border-[#E8C78C] bg-white text-[#9B5B00]",
-    blue: "border-[var(--border-default)] bg-white text-[var(--secundary-1)]",
-    slate: "border-[var(--border-default)] bg-white text-[var(--foreground)]",
+    amber: "civitas-card-soft civitas-card-soft--amber",
+    blue: "civitas-card-soft civitas-card-soft--teal",
+    slate: "civitas-card-soft civitas-card-soft--slate",
   } as const;
 
   return (
     <div
-      className={`flex items-center gap-4 rounded-sm border px-4 py-3.5 ${toneClasses[action.tone]}`}
+      className={`flex flex-col gap-4 px-4 py-3.5 sm:flex-row sm:items-center ${toneClasses[action.tone]}`}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-white/80 text-[var(--secundary-1)]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-[var(--surface-elevated)] text-[var(--secundary-1)]">
         <span className="material-symbols-outlined !text-[20px]">
           {action.icon}
         </span>
@@ -709,7 +703,7 @@ function ActionCard({ action }: { action: QuickAction }) {
       <button
         type="button"
         onClick={action.onClick}
-        className={`rounded-sm border px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-subtle)] focus:outline-none focus:ring-4 focus:ring-black/5 ${buttonClasses[action.tone]}`}
+        className="civitas-action civitas-action--ghost w-full px-4 py-2 text-sm sm:w-auto"
       >
         {action.button}
       </button>

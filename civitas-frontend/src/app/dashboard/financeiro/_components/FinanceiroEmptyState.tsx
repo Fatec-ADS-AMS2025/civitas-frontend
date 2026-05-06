@@ -14,10 +14,10 @@ export default function FinanceiroEmptyState({
   showFiltersMessage = false,
 }: FinanceiroEmptyStateProps) {
   return (
-    <div className="flex min-h-[300px] flex-col items-center justify-center rounded-sm border border-[#E4EEF0] bg-[#F8FCFC] p-8">
-      <div className="flex h-16 w-16 items-center justify-center rounded-sm bg-[#E4EEF0]">
+    <div className="civitas-card-soft flex min-h-[300px] flex-col items-center justify-center p-8">
+      <div className="flex h-16 w-16 items-center justify-center rounded-sm bg-[var(--surface-elevated)]">
         <svg
-          className="h-8 w-8 text-[#6C858E]"
+          className="h-8 w-8 text-[var(--foreground-soft)]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -30,10 +30,10 @@ export default function FinanceiroEmptyState({
           />
         </svg>
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-[#1F2A32]">{title}</h3>
-      <p className="mt-2 max-w-md text-center text-sm text-[#72808A]">{description}</p>
+      <h3 className="mt-4 text-lg font-semibold text-[var(--foreground)]">{title}</h3>
+      <p className="mt-2 max-w-md text-center text-sm text-[var(--foreground-muted)]">{description}</p>
       {showFiltersMessage && (
-        <p className="mt-3 text-sm text-[#58AFAE]">
+        <p className="mt-3 text-sm text-[var(--primary-1)]">
           Tente ajustar os filtros ou limpar a busca para ver mais resultados.
         </p>
       )}
