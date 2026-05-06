@@ -48,7 +48,7 @@ export default function FormModal({
         <>
             {/* Container com scroll interno para grandes volumes de campos. */}
             <form
-                className='flex w-full max-w-5xl flex-col rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 text-[var(--foreground)] sm:p-6 max-h-[80vh] overflow-y-auto'
+                className='civitas-form-modal flex w-full max-w-5xl flex-col rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 text-[var(--foreground)] sm:p-6 max-h-[80vh] overflow-y-auto'
                 onSubmit={onSubmit}
                 aria-busy={isLoading}
             >

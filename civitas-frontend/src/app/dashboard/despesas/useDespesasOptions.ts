@@ -2,11 +2,14 @@
 
 import { useMemo } from "react";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
+import type { DocumentoFieldOption } from "@/components/Form/documento-field";
+import type DocumentoDTO from "@/models/documento";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 import type UsuarioDTO from "@/models/usuario";
 import type { SelectOption } from "./despesas.types";
 import { ensureOption, formatCurrency } from "./despesas.utils";
@@ -18,6 +21,8 @@ type UseDespesasOptionsInput = {
   instituicoes: InstituicaoDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
+  documentos: DocumentoDTO[];
+  unidadesConsumidoras: UnidadeConsumidoraDTO[];
   activeModalDespesa: DespesaDashboardRow | null;
 };
 
@@ -28,6 +33,8 @@ export function useDespesasOptions({
   instituicoes,
   fornecedores,
   usuarios,
+  documentos,
+  unidadesConsumidoras,
   activeModalDespesa,
 }: UseDespesasOptionsInput) {
   const tipoDespesaOptions = useMemo<SelectOption[]>(
@@ -66,6 +73,31 @@ export function useDespesasOptions({
   const usuarioOptions = useMemo<SelectOption[]>(
     () => usuarios.map((item) => ({ value: item.id, label: item.nome })),
     [usuarios]
+  );
+
+  const documentoOptions = useMemo<DocumentoFieldOption[]>(
+    () =>
+      documentos.map((documento) => ({
+        value: documento.idDocumento,
+        label: `#${String(documento.idDocumento).padStart(3, "0")} - Documento ${documento.numeroDocumento}`,
+        documento: {
+          idDocumento: documento.idDocumento,
+          digitalizacao: documento.digitalizacao ?? "",
+          numeroDocumento: Number(documento.numeroDocumento),
+          idFornecedor: Number(documento.idFornecedor),
+          idFluxo: Number(documento.idFluxo),
+        },
+      })),
+    [documentos]
+  );
+
+  const unidadeConsumidoraOptions = useMemo<SelectOption[]>(
+    () =>
+      unidadesConsumidoras.map((unidadeConsumidora) => ({
+        value: unidadeConsumidora.id,
+        label: `#${String(unidadeConsumidora.id).padStart(3, "0")} - ${unidadeConsumidora.identificador}`,
+      })),
+    [unidadesConsumidoras]
   );
 
   const orcamentoOptions = useMemo<SelectOption[]>(
@@ -149,6 +181,18 @@ export function useDespesasOptions({
     [activeModalDespesa, usuarioOptions]
   );
 
+  const resolvedUnidadeConsumidoraOptions = useMemo(
+    () =>
+      ensureOption(
+        unidadeConsumidoraOptions,
+        activeModalDespesa?.raw.idUnidadeConsumidora,
+        activeModalDespesa?.raw.uc
+          ? `Unidade ${activeModalDespesa.raw.uc}`
+          : "Unidade consumidora atual"
+      ),
+    [activeModalDespesa, unidadeConsumidoraOptions]
+  );
+
   return {
     tipoDespesaOptions,
     tipoCodigoOptions,
@@ -158,5 +202,7 @@ export function useDespesasOptions({
     resolvedOrcamentoOptions,
     resolvedFornecedorOptions,
     resolvedUsuarioOptions,
+    resolvedDocumentoOptions: documentoOptions,
+    resolvedUnidadeConsumidoraOptions,
   };
 }

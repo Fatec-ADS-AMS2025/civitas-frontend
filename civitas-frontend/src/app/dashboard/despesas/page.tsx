@@ -21,8 +21,6 @@ import {
 } from "./despesas.constants";
 import { useDespesaFormFields } from "./useDespesaFormFields";
 import { useDespesasViewModel } from "./useDespesasViewModel";
-import { toPositiveNumber } from "./despesas.utils";
-import type { UcItem } from "./_components/DespesaForm";
 
 export default function Page() {
   const listSectionRef = useRef<HTMLElement | null>(null);
@@ -31,7 +29,6 @@ export default function Page() {
   const [listCodigoSearch, setListCodigoSearch] = useState("");
   const [listInstituicaoSearch, setListInstituicaoSearch] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedUc, setSelectedUc] = useState<UcItem | null>(null);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [viewingDespesa, setViewingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -58,6 +55,10 @@ export default function Page() {
     resolvedOrcamentoOptions: viewModel.resolvedOrcamentoOptions,
     resolvedFornecedorOptions: viewModel.resolvedFornecedorOptions,
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
+    resolvedDocumentoOptions: viewModel.resolvedDocumentoOptions,
+    resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
+    isOptionsLoading: dashboard.loading,
+    optionsError: dashboard.error,
   });
 
   const headerConfig = useMemo(
@@ -112,15 +113,6 @@ export default function Page() {
     } catch (submitError) {
       showToast(getSubmitErrorMessage(submitError, "Erro ao cadastrar despesa."), "error");
     }
-
-    const payload = {
-      uc: selectedUc,
-      valorDespesa: toPositiveNumber(formData.valorDespesa),
-      consumoPrevisto: toPositiveNumber(formData.consumoPrevisto),
-    };
-
-    console.log("Despesa UC - payload", payload);
-    setIsCreateModalOpen(false);
   };
 
   const handleEditSubmit = async (formData: Record<string, unknown>) => {

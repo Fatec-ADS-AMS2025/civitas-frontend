@@ -15,6 +15,7 @@ import {
     normalizeFieldValue,
     toFieldConfig,
 } from './form-helpers'
+import type { DocumentoFieldOption } from './documento-field'
 
 type FormMode = 'create' | 'edit' | 'view' | 'delete'
 
@@ -39,7 +40,7 @@ type FormFieldConfig = {
     key: string;
     label?: string;
     placeholder?: string;
-    type?: 'text' | 'email' | 'number' | 'password' | 'tel' | 'date' | 'select' | 'textarea';
+    type?: 'text' | 'email' | 'number' | 'password' | 'tel' | 'date' | 'select' | 'textarea' | 'documento';
     mask?: InputMask;
     required?: boolean;
     hidden?: boolean;
@@ -50,6 +51,9 @@ type FormFieldConfig = {
     readOnlyInModes?: FormMode[];
     validate?: ValidationFn;
     section?: string;
+    documentOptions?: DocumentoFieldOption[];
+    documentLoading?: boolean;
+    documentError?: string;
 }
 
 type FieldConfig = FormFieldConfig
@@ -200,10 +204,24 @@ export default function Form({
     const handleInputChange = (field: FormFieldConfig, value: unknown) => {
         const normalizedValue = normalizeFieldValue(field, value, 'change')
 
-        setFormData((prev) => ({
-            ...prev,
-            [field.key]: normalizedValue,
-        }))
+        setFormData((prev) => {
+            const nextFormData = {
+                ...prev,
+                [field.key]: normalizedValue,
+            }
+
+            if (field.type === 'documento') {
+                if (isRecord(normalizedValue)) {
+                    nextFormData.numeroDocumento = normalizedValue.numeroDocumento ?? ''
+                    nextFormData.idFornecedor = normalizedValue.idFornecedor ?? ''
+                } else {
+                    nextFormData.numeroDocumento = ''
+                    nextFormData.idFornecedor = ''
+                }
+            }
+
+            return nextFormData
+        })
 
         if (errors[field.key]) {
             setErrors((prev) => ({ ...prev, [field.key]: '' }))

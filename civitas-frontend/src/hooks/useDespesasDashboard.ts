@@ -5,27 +5,30 @@ import {
   normalizeDateInput,
   normalizeDespesaPayload,
   validateDespesaDateRange,
-  validateRequiredUc,
 } from "@/global/formPayload";
 import {
   getSituacaoLabel,
   SITUACAO_ATIVO,
 } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
+import { documentoService } from "@/hooks/documento";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
 import { tipoCodigoService } from "@/hooks/tipoCodigo";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
+import { unidadeConsumidoraService } from "@/hooks/unidadeConsumidora";
 import { usuarioService } from "@/hooks/usuario";
 import type DespesaDTO from "@/models/despesa";
+import type DocumentoDTO from "@/models/documento";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
 import type SecretariaDTO from "@/models/secretaria";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 import type UsuarioDTO from "@/models/usuario";
 
 const SOLICITA_UC_SIM = 1;
@@ -74,6 +77,8 @@ type DashboardData = {
   secretarias: SecretariaDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
+  documentos: DocumentoDTO[];
+  unidadesConsumidoras: UnidadeConsumidoraDTO[];
 };
 
 const EMPTY_DASHBOARD_DATA: DashboardData = {
@@ -85,6 +90,8 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   secretarias: [],
   fornecedores: [],
   usuarios: [],
+  documentos: [],
+  unidadesConsumidoras: [],
 };
 
 const DEFAULT_FILTERS: DespesasDashboardFilters = {
@@ -149,7 +156,12 @@ const resolveDespesaDescricao = (despesa: DespesaDTO): string => {
 };
 
 const resolveDespesaValor = (despesa: DespesaDTO): number => {
-  return Number(despesa.valor ?? despesa.consumoPrevisto ?? 0);
+  return Number(
+    despesa.valor ??
+      despesa.valorPrevisto ??
+      despesa.consumoPrevisto ??
+      0
+  );
 };
 
 const resolveDespesaStatus = (despesa: DespesaDTO): number => {
@@ -234,6 +246,35 @@ const logOptionalDashboardWarning = (message: string, error: unknown): void => {
   }
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
+const toPositiveNumber = (value: unknown): number => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
+};
+
+const resolveSelectedDocumento = (
+  value: unknown
+): Pick<DocumentoDTO, "numeroDocumento" | "idFornecedor"> | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const numeroDocumento = Number(value.numeroDocumento);
+  const idFornecedor = Number(value.idFornecedor);
+
+  if (!Number.isFinite(numeroDocumento) || numeroDocumento <= 0) {
+    return null;
+  }
+
+  return {
+    numeroDocumento,
+    idFornecedor: Number.isFinite(idFornecedor) ? idFornecedor : 0,
+  };
+};
+
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
   try {
     return (await despesaService.getInactiveOptional()) ?? [];
@@ -249,13 +290,25 @@ const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
 const buildDespesaRows = (
   despesas: DespesaDTO[],
   tiposDespesaMap: Map<number, TipoDespesaDTO>,
-  tipoCodigosMap: Map<number, TipoCodigoDTO>
+  tipoCodigosMap: Map<number, TipoCodigoDTO>,
+  unidadesConsumidorasMap: Map<number, UnidadeConsumidoraDTO>
 ): DespesaDashboardRow[] => {
   return despesas
     .map((despesa) => {
+      const unidadeConsumidora = despesa.idUnidadeConsumidora
+        ? unidadesConsumidorasMap.get(despesa.idUnidadeConsumidora)
+        : undefined;
+      const enrichedDespesa: DespesaDTO = {
+        ...despesa,
+        idTipoDespesa: despesa.idTipoDespesa ?? unidadeConsumidora?.idTipoDespesa,
+        idOrcamento: despesa.idOrcamento ?? unidadeConsumidora?.idOrcamento,
+        idInstituicao: despesa.idInstituicao ?? unidadeConsumidora?.idInstituicao,
+        idFornecedor: despesa.idFornecedor ?? unidadeConsumidora?.idFornecedor,
+        uc: despesa.uc ?? unidadeConsumidora?.identificador,
+      };
       const tipoDespesa =
-        despesa.idTipoDespesa !== undefined
-          ? tiposDespesaMap.get(despesa.idTipoDespesa)
+        enrichedDespesa.idTipoDespesa !== undefined
+          ? tiposDespesaMap.get(enrichedDespesa.idTipoDespesa)
           : undefined;
       const tipoCodigo =
         tipoDespesa?.idTipoCodigo !== undefined
@@ -288,7 +341,7 @@ const buildDespesaRows = (
         solicitaUc,
         solicitaUcLabel: solicitaUc ? "Sim" : "Nao",
         numeroDocumento: despesa.numeroDocumento ?? "",
-        raw: despesa,
+        raw: enrichedDespesa,
       };
     })
     .sort((current, next) => {
@@ -386,9 +439,20 @@ const validateLookupRelationship = (
   data: DashboardData,
   selectedTipoCodigoId?: number
 ): string | undefined => {
+  const unidadeConsumidora = data.unidadesConsumidoras.find(
+    (item) => item.id === payload.idUnidadeConsumidora
+  );
+  if (!unidadeConsumidora) {
+    return "Selecione uma unidade consumidora valida.";
+  }
+
   const tipoDespesa = data.tiposDespesa.find((item) => item.id === payload.idTipoDespesa);
   if (!tipoDespesa) {
     return "Selecione um tipo de despesa valido.";
+  }
+
+  if (unidadeConsumidora.idTipoDespesa !== payload.idTipoDespesa) {
+    return "A unidade consumidora nao pertence a categoria selecionada.";
   }
 
   if (
@@ -406,9 +470,17 @@ const validateLookupRelationship = (
     return "Selecione um orcamento valido.";
   }
 
+  if (unidadeConsumidora.idOrcamento !== payload.idOrcamento) {
+    return "A unidade consumidora nao pertence ao orcamento selecionado.";
+  }
+
   const instituicao = data.instituicoes.find((item) => item.id === payload.idInstituicao);
   if (!instituicao) {
     return "Selecione uma instituicao valida.";
+  }
+
+  if (unidadeConsumidora.idInstituicao !== payload.idInstituicao) {
+    return "A unidade consumidora nao pertence a instituicao selecionada.";
   }
 
   const fornecedor = data.fornecedores.find(
@@ -416,6 +488,10 @@ const validateLookupRelationship = (
   );
   if (!fornecedor) {
     return "Selecione um fornecedor valido.";
+  }
+
+  if (unidadeConsumidora.idFornecedor !== payload.idFornecedor) {
+    return "O fornecedor do documento nao corresponde a unidade consumidora selecionada.";
   }
 
   const usuario = data.usuarios.find((item) => item.id === payload.idUsuario);
@@ -435,11 +511,6 @@ const validateLookupRelationship = (
     return "O orcamento informado nao esta vinculado ao tipo de despesa selecionado.";
   }
 
-  const ucError = validateRequiredUc(payload.uc, tipoDespesa.solicitaUc === SOLICITA_UC_SIM);
-  if (ucError) {
-    return ucError;
-  }
-
   return undefined;
 };
 
@@ -448,9 +519,25 @@ const buildDespesaPayload = (
   data: DashboardData,
   currentDespesa?: DespesaDTO
 ): DespesaDTO => {
+  const selectedDocumento = resolveSelectedDocumento(formData.documento);
+  const selectedUnidadeConsumidoraId = toPositiveNumber(
+    formData.idUnidadeConsumidora ?? currentDespesa?.idUnidadeConsumidora
+  );
+  const selectedUnidadeConsumidora = data.unidadesConsumidoras.find(
+    (item) => item.id === selectedUnidadeConsumidoraId
+  );
+  const resolvedValor =
+    formData.consumoPrevisto ??
+    formData.valor ??
+    formData.valorPrevisto ??
+    currentDespesa?.valorPrevisto ??
+    currentDespesa?.consumoPrevisto ??
+    currentDespesa?.valor ??
+    0;
   const normalizedPayload = normalizeDespesaPayload({
     id: Number(formData.id ?? currentDespesa?.id ?? 0),
     numeroDocumento:
+      selectedDocumento?.numeroDocumento ??
       formData.numeroDocumento ?? currentDespesa?.numeroDocumento ?? "",
     codigo: formData.codigo ?? currentDespesa?.codigo ?? "",
     uc: formData.uc ?? currentDespesa?.uc ?? "",
@@ -466,12 +553,10 @@ const buildDespesaPayload = (
       currentDespesa?.dataEmissao ??
       currentDespesa?.dataEmicao ??
       "",
-    consumoPrevisto:
-      formData.consumoPrevisto ??
-      formData.valor ??
-      currentDespesa?.consumoPrevisto ??
-      currentDespesa?.valor ??
-      0,
+    valorPrevisto: resolvedValor,
+    valorPago: formData.valorPago ?? currentDespesa?.valorPago ?? 0,
+    consumoPrevisto: resolvedValor,
+    consumoReal: formData.consumoReal ?? currentDespesa?.consumoReal ?? 0,
     dataVencimento:
       formData.dataVencimento ??
       currentDespesa?.dataVencimento ??
@@ -484,10 +569,22 @@ const buildDespesaPayload = (
       currentDespesa?.situacao ??
       SITUACAO_ATIVO,
     situacao: formData.situacao ?? currentDespesa?.situacao ?? SITUACAO_ATIVO,
-    idTipoDespesa: formData.idTipoDespesa ?? currentDespesa?.idTipoDespesa,
-    idOrcamento: formData.idOrcamento ?? currentDespesa?.idOrcamento,
-    idInstituicao: formData.idInstituicao ?? currentDespesa?.idInstituicao,
+    idUnidadeConsumidora: selectedUnidadeConsumidoraId,
+    idTipoDespesa:
+      selectedUnidadeConsumidora?.idTipoDespesa ??
+      formData.idTipoDespesa ??
+      currentDespesa?.idTipoDespesa,
+    idOrcamento:
+      selectedUnidadeConsumidora?.idOrcamento ??
+      formData.idOrcamento ??
+      currentDespesa?.idOrcamento,
+    idInstituicao:
+      selectedUnidadeConsumidora?.idInstituicao ??
+      formData.idInstituicao ??
+      currentDespesa?.idInstituicao,
     idFornecedor:
+      selectedDocumento?.idFornecedor ??
+      selectedUnidadeConsumidora?.idFornecedor ??
       formData.idFornecedor ??
       currentDespesa?.idFornecedor ??
       currentDespesa?.fornecedorId,
@@ -519,6 +616,12 @@ const buildDespesaPayload = (
   if (Number.isNaN(consumoPrevisto) || consumoPrevisto < 0) {
     throw new Error("Valor da despesa nao pode ser negativo.");
   }
+  const valorPrevisto = Number(normalizedPayload.valorPrevisto ?? consumoPrevisto);
+  const valorPago = Number(normalizedPayload.valorPago ?? 0);
+  const consumoReal = Number(normalizedPayload.consumoReal ?? 0);
+  if ([valorPrevisto, valorPago, consumoReal].some((value) => Number.isNaN(value) || value < 0)) {
+    throw new Error("Valores financeiros e de consumo nao podem ser negativos.");
+  }
 
   const selectedTipoCodigoId = Number(formData.idTipoCodigo ?? 0);
   const lookupError = validateLookupRelationship(
@@ -533,9 +636,13 @@ const buildDespesaPayload = (
   return {
     ...normalizedPayload,
     id: currentDespesa?.id ?? Number(normalizedPayload.id ?? 0),
+    valorPrevisto,
+    valorPago,
     consumoPrevisto,
+    consumoReal,
     status: Number(normalizedPayload.status ?? normalizedPayload.situacao ?? SITUACAO_ATIVO),
     situacao: Number(normalizedPayload.situacao ?? SITUACAO_ATIVO),
+    idUnidadeConsumidora: Number(normalizedPayload.idUnidadeConsumidora),
     idTipoDespesa: Number(normalizedPayload.idTipoDespesa),
     idOrcamento: Number(normalizedPayload.idOrcamento),
     idInstituicao: Number(normalizedPayload.idInstituicao),
@@ -554,6 +661,8 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretarias,
     fornecedores,
     usuarios,
+    documentos,
+    unidadesConsumidoras,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
     tipoCodigoService.getAllOptional(),
@@ -563,6 +672,8 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretariaService.getAllData(),
     fornecedorService.getAllData(),
     usuarioService.getAllData(),
+    documentoService.getAllData(),
+    unidadeConsumidoraService.getAllData(),
   ]);
 
   return {
@@ -574,8 +685,25 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretarias: secretarias ?? [],
     fornecedores: fornecedores ?? [],
     usuarios: usuarios ?? [],
+    documentos: documentos ?? [],
+    unidadesConsumidoras: unidadesConsumidoras ?? [],
   };
 };
+
+const buildDespesaApiPayload = (payload: DespesaDTO): DespesaDTO => ({
+  id: Number(payload.id ?? 0),
+  numeroDocumento: payload.numeroDocumento ?? "",
+  codigo: payload.codigo ?? "",
+  dataEmissao: payload.dataEmissao ?? payload.dataEmicao ?? "",
+  valorPrevisto: Number(payload.valorPrevisto ?? payload.consumoPrevisto ?? 0),
+  valorPago: Number(payload.valorPago ?? 0),
+  consumoPrevisto: Number(payload.consumoPrevisto ?? payload.valorPrevisto ?? 0),
+  consumoReal: Number(payload.consumoReal ?? 0),
+  dataVencimento: payload.dataVencimento ?? "",
+  status: Number(payload.status ?? payload.situacao ?? SITUACAO_ATIVO),
+  idUsuario: Number(payload.idUsuario),
+  idUnidadeConsumidora: Number(payload.idUnidadeConsumidora),
+});
 
 export const useDespesasDashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData>(EMPTY_DASHBOARD_DATA);
@@ -612,9 +740,23 @@ export const useDespesasDashboard = () => {
     return new Map(dashboardData.tipoCodigos.map((tipoCodigo) => [tipoCodigo.id, tipoCodigo]));
   }, [dashboardData.tipoCodigos]);
 
+  const unidadesConsumidorasMap = useMemo(() => {
+    return new Map(
+      dashboardData.unidadesConsumidoras.map((unidadeConsumidora) => [
+        unidadeConsumidora.id,
+        unidadeConsumidora,
+      ])
+    );
+  }, [dashboardData.unidadesConsumidoras]);
+
   const despesas = useMemo(() => {
-    return buildDespesaRows(dashboardData.despesas, tiposDespesaMap, tipoCodigosMap);
-  }, [dashboardData.despesas, tiposDespesaMap, tipoCodigosMap]);
+    return buildDespesaRows(
+      dashboardData.despesas,
+      tiposDespesaMap,
+      tipoCodigosMap,
+      unidadesConsumidorasMap
+    );
+  }, [dashboardData.despesas, tiposDespesaMap, tipoCodigosMap, unidadesConsumidorasMap]);
 
   const filteredDespesas = useMemo(() => {
     return despesas.filter((despesa) => matchesDespesaFilters(despesa, filters));
@@ -654,10 +796,10 @@ export const useDespesasDashboard = () => {
   const createDespesa = useCallback(
     async (formData: Record<string, unknown>) => {
       const payload = buildDespesaPayload(formData, dashboardData);
-      await despesaService.createData({
+      await despesaService.createData(buildDespesaApiPayload({
         ...payload,
         id: 0,
-      });
+      }));
       await refetch();
     },
     [dashboardData, refetch]
@@ -671,10 +813,10 @@ export const useDespesasDashboard = () => {
       }
 
       const payload = buildDespesaPayload(formData, dashboardData, currentDespesa);
-      await despesaService.updateData(id, {
+      await despesaService.updateData(id, buildDespesaApiPayload({
         ...payload,
         id,
-      });
+      }));
       await refetch();
     },
     [dashboardData, refetch]
@@ -712,6 +854,8 @@ export const useDespesasDashboard = () => {
       secretarias: dashboardData.secretarias,
       fornecedores: dashboardData.fornecedores,
       usuarios: dashboardData.usuarios,
+      documentos: dashboardData.documentos,
+      unidadesConsumidoras: dashboardData.unidadesConsumidoras,
       summary,
       loading,
       error,
@@ -735,6 +879,8 @@ export const useDespesasDashboard = () => {
       dashboardData.secretarias,
       dashboardData.fornecedores,
       dashboardData.usuarios,
+      dashboardData.documentos,
+      dashboardData.unidadesConsumidoras,
       summary,
       loading,
       error,

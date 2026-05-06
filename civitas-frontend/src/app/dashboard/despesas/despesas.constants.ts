@@ -41,11 +41,12 @@ export const INITIAL_FILTER_FORM: DespesasDashboardFilters = {
 
 export const EMPTY_DESPESA_FORM: Record<string, unknown> = {
   id: 0,
+  documento: "",
   numeroDocumento: "",
   codigo: "",
   idTipoCodigo: "",
   idTipoDespesa: "",
-  uc: "",
+  idUnidadeConsumidora: "",
   consumoPrevisto: "",
   dataEmicao: "",
   dataVencimento: "",

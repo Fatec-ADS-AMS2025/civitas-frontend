@@ -60,12 +60,14 @@ export const buildDespesaFormObject = (
 
   return {
     id: despesa.id,
+    documento: "",
     numeroDocumento: despesa.raw.numeroDocumento ?? "",
     codigo: despesa.raw.codigo === "0" ? "" : despesa.raw.codigo ?? "",
     idTipoCodigo: despesa.tipoCodigoId ?? "",
     idTipoDespesa: despesa.raw.idTipoDespesa ?? "",
-    uc: despesa.raw.uc ?? "",
-    consumoPrevisto: despesa.raw.consumoPrevisto ?? despesa.raw.valor ?? "",
+    idUnidadeConsumidora: despesa.raw.idUnidadeConsumidora ?? "",
+    consumoPrevisto:
+      despesa.raw.valorPrevisto ?? despesa.raw.consumoPrevisto ?? despesa.raw.valor ?? "",
     // O backend antigo expunha dataEmicao; o frontend ainda aceita ambos.
     dataEmicao:
       normalizeDateInput(despesa.raw.dataEmissao) ??

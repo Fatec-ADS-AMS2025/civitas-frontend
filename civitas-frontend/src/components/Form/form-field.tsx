@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Input from '../Input'
+import DocumentoField from './documento-field'
 import type { FormFieldConfig, FormMode } from './form'
 import { getFieldErrorId, toInputValue, toLabel } from './form-utils'
 import { resolveInputMask } from '@/lib/input-mask'
@@ -42,6 +43,20 @@ function FormField({
         label: field.label ?? toLabel(field.key),
         error,
         errorId,
+    }
+
+    if (field.type === 'documento') {
+        return (
+            <DocumentoField
+                field={field}
+                value={value}
+                error={commonProps.error}
+                onChange={onChange}
+                disabled={commonProps.disabled}
+                required={Boolean(commonProps.required)}
+                label={commonProps.label}
+            />
+        )
     }
 
     if (field.type === 'select') {

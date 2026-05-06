@@ -1,12 +1,15 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import type {
+  DocumentoFieldOption,
+  DocumentoFieldValue,
+} from "@/components/Form/documento-field";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import {
   digitsOnly,
   normalizeDateInput,
   validateDespesaDateRange,
-  validateRequiredUc,
 } from "@/global/formPayload";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
@@ -23,6 +26,10 @@ type UseDespesaFormFieldsInput = {
   resolvedOrcamentoOptions: SelectOption[];
   resolvedFornecedorOptions: SelectOption[];
   resolvedUsuarioOptions: SelectOption[];
+  resolvedDocumentoOptions: DocumentoFieldOption[];
+  resolvedUnidadeConsumidoraOptions: SelectOption[];
+  isOptionsLoading?: boolean;
+  optionsError?: string | null;
 };
 
 export function useDespesaFormFields({
@@ -34,7 +41,23 @@ export function useDespesaFormFields({
   resolvedOrcamentoOptions,
   resolvedFornecedorOptions,
   resolvedUsuarioOptions,
+  resolvedDocumentoOptions,
+  resolvedUnidadeConsumidoraOptions,
+  isOptionsLoading = false,
+  optionsError,
 }: UseDespesaFormFieldsInput): ModalFieldConfig[] {
+  const isDocumentoValue = useCallback(
+    (value: unknown): value is DocumentoFieldValue => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return false;
+      }
+
+      const documento = value as Partial<DocumentoFieldValue>;
+      return Number(documento.idDocumento) > 0;
+    },
+    []
+  );
+
   const resolveTipoDespesa = useCallback(
     (value: unknown) => {
       const tipoDespesaId = Number(value);
@@ -51,9 +74,46 @@ export function useDespesaFormFields({
     [tipoCodigos]
   );
 
+  const resolveDocumento = useCallback(
+    (value: unknown) => {
+      if (isDocumentoValue(value)) return value;
+      const documentoId = Number(value);
+      return resolvedDocumentoOptions.find((option) => option.value === documentoId)?.documento;
+    },
+    [isDocumentoValue, resolvedDocumentoOptions]
+  );
+
   return useMemo<ModalFieldConfig[]>(
     () => [
       { key: "id", hidden: true },
+      {
+        key: "documento",
+        label: "Documento",
+        placeholder: "Selecione um documento",
+        type: "documento",
+        required: true,
+        documentOptions: resolvedDocumentoOptions,
+        documentLoading: isOptionsLoading,
+        documentError: optionsError ?? undefined,
+        validate: (value, formData) => {
+          const documento = resolveDocumento(value);
+          if (!documento) return "Selecione um documento valido.";
+
+          if (
+            digitsOnly(documento.numeroDocumento) !==
+            digitsOnly(formData.numeroDocumento)
+          ) {
+            return "Documento selecionado nao corresponde ao numero informado.";
+          }
+
+          const idFornecedor = toPositiveNumber(formData.idFornecedor);
+          if (idFornecedor > 0 && documento.idFornecedor !== idFornecedor) {
+            return "Documento selecionado nao corresponde ao fornecedor informado.";
+          }
+
+          return undefined;
+        },
+      },
       {
         key: "numeroDocumento",
         label: "Numero do documento",
@@ -122,13 +182,16 @@ export function useDespesaFormFields({
         },
       },
       {
-        key: "uc",
-        label: "UC",
-        placeholder: "Informe a unidade consumidora",
-        validate: (value, formData) => {
-          const tipoDespesa = resolveTipoDespesa(formData.idTipoDespesa);
-          return validateRequiredUc(value, tipoDespesa?.solicitaUc === 1);
-        },
+        key: "idUnidadeConsumidora",
+        label: "Unidade consumidora",
+        placeholder: "Selecione a unidade consumidora",
+        type: "select",
+        required: true,
+        options: resolvedUnidadeConsumidoraOptions,
+        validate: (value) =>
+          toPositiveNumber(value) <= 0
+            ? "Selecione uma unidade consumidora valida."
+            : undefined,
       },
       {
         key: "consumoPrevisto",
@@ -219,10 +282,15 @@ export function useDespesaFormFields({
     [
       resolvedFornecedorOptions,
       resolvedInstituicaoOptions,
+      resolvedDocumentoOptions,
       resolvedOrcamentoOptions,
       resolvedTipoCodigoOptions,
       resolvedTipoDespesaOptions,
       resolvedUsuarioOptions,
+      resolvedUnidadeConsumidoraOptions,
+      isOptionsLoading,
+      optionsError,
+      resolveDocumento,
       resolveTipoCodigo,
       resolveTipoDespesa,
     ]

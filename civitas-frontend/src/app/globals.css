@@ -1105,6 +1105,47 @@ html[data-theme="dark"] {
   color: #fff !important;
 }
 
+.high-contrast .civitas-form-modal {
+  background: #000 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.high-contrast .civitas-form-modal h1,
+.high-contrast .civitas-form-modal p,
+.high-contrast .civitas-form-modal label,
+.high-contrast .civitas-form-modal strong,
+.high-contrast .civitas-form-modal span {
+  color: #fff !important;
+}
+
+.high-contrast .civitas-form-modal input,
+.high-contrast .civitas-form-modal select,
+.high-contrast .civitas-form-modal textarea {
+  background: #000 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+  caret-color: #fff !important;
+  box-shadow: none !important;
+}
+
+.high-contrast .civitas-form-modal option {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+.high-contrast .civitas-documento-field__summary {
+  background: #000 !important;
+  border-color: #fff !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.high-contrast .civitas-documento-field__summary * {
+  color: #fff !important;
+}
+
 .high-contrast input[type="date"],
 .high-contrast input[type="datetime-local"],
 .high-contrast input[type="month"],
