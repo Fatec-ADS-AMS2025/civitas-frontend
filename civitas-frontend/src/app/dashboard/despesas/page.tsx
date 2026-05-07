@@ -6,18 +6,11 @@ import type { TableExportOptions } from "@/components/Table/export-types";
 import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import { showToast } from "@/hooks/useToast";
 import { type DespesaDashboardRow, useDespesasDashboard } from "@/hooks/useDespesasDashboard";
-import type {
-  FinanceCodigoResumo,
-  FinanceInstituicaoResumo,
-} from "@/lib/financeiro-relations";
 import {
   DespesaCrudModals,
-  DespesasExplorer,
   DespesasExportModal,
   DespesasFiltros,
-  DespesasInsightsModals,
   DespesasLoadingState,
-  DespesasResumo,
   DespesasTabela,
 } from "./_components";
 import {
@@ -28,45 +21,34 @@ import {
 } from "./despesas.constants";
 import { useDespesaFormFields } from "./useDespesaFormFields";
 import { useDespesasViewModel } from "./useDespesasViewModel";
+import { toPositiveNumber } from "./despesas.utils";
+import type { UcItem } from "./_components/DespesaForm";
 
 export default function Page() {
-  // Excecao Sprint 16: esta page permanece acima do limite de 250 linhas porque concentra apenas a orquestracao da tela de despesas.
-  // A regra de negocio, os dados derivados e a UI foram extraidos para hooks, utils e componentes especificos em _components.
   const listSectionRef = useRef<HTMLElement | null>(null);
 
-  // Estados locais usados somente para coordenar filtros, buscas, modais e acoes da pagina.
   const [filterForm, setFilterForm] = useState(INITIAL_FILTER_FORM);
-  const [isRelationsSectionOpen, setIsRelationsSectionOpen] = useState(false);
-  const [relationsCodigoSearch, setRelationsCodigoSearch] = useState("");
-  const [relationsInstituicaoSearch, setRelationsInstituicaoSearch] = useState("");
   const [listCodigoSearch, setListCodigoSearch] = useState("");
   const [listInstituicaoSearch, setListInstituicaoSearch] = useState("");
-  const [valuesVisible, setValuesVisible] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedUc, setSelectedUc] = useState<UcItem | null>(null);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [viewingDespesa, setViewingDespesa] = useState<DespesaDashboardRow | null>(null);
-  const [selectedCodigoGroup, setSelectedCodigoGroup] =
-    useState<FinanceCodigoResumo | null>(null);
-  const [selectedInstituicaoGroup, setSelectedInstituicaoGroup] =
-    useState<FinanceInstituicaoResumo | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Hook principal de dados: encapsula carregamento, filtros e operacoes de CRUD do modulo.
   const dashboard = useDespesasDashboard();
   const activeModalDespesa = editingDespesa ?? viewingDespesa;
 
-  // View model da tela: prepara listas, metricas, opcoes e linhas de exportacao sem poluir a page.
   const viewModel = useDespesasViewModel({
     ...dashboard,
     activeModalDespesa,
-    relationsCodigoSearch,
-    relationsInstituicaoSearch,
+    relationsCodigoSearch: "",
+    relationsInstituicaoSearch: "",
     listCodigoSearch,
     listInstituicaoSearch,
   });
 
-  // Campos do formulario ficam em hook proprio para manter validacoes e opcoes reutilizaveis entre criar, editar e visualizar.
   const despesaFormFields = useDespesaFormFields({
     tipoCodigos: dashboard.tipoCodigos,
     tiposDespesa: dashboard.tiposDespesa,
@@ -78,13 +60,12 @@ export default function Page() {
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
   });
 
-  // Configuracao do cabecalho do dashboard fica na page porque depende das acoes globais da rota.
   const headerConfig = useMemo(
     () => ({
       title: "Despesas",
       eyebrow: "Operacao",
       subtitle:
-        "Centralize filtros, cadastro e manutencao das despesas com feedback rapido e leitura desktop consistente.",
+        "Tela operacional para filtrar, cadastrar, editar e exportar despesas sem paineis paralelos.",
       breadcrumbs: [
         { label: "Home", href: "/dashboard" },
         { label: "Cadastros", href: "/dashboard/despesas" },
@@ -112,7 +93,6 @@ export default function Page() {
 
   useDashboardHeader(headerConfig);
 
-  // Handlers da page coordenam estado local, hooks de dados e feedback visual sem duplicar regras nos componentes filhos.
   const handleApplyFilters = () => {
     dashboard.applyFilters({
       ...filterForm,
@@ -132,6 +112,15 @@ export default function Page() {
     } catch (submitError) {
       showToast(getSubmitErrorMessage(submitError, "Erro ao cadastrar despesa."), "error");
     }
+
+    const payload = {
+      uc: selectedUc,
+      valorDespesa: toPositiveNumber(formData.valorDespesa),
+      consumoPrevisto: toPositiveNumber(formData.consumoPrevisto),
+    };
+
+    console.log("Despesa UC - payload", payload);
+    setIsCreateModalOpen(false);
   };
 
   const handleEditSubmit = async (formData: Record<string, unknown>) => {
@@ -158,7 +147,6 @@ export default function Page() {
     }
   };
 
-  // Exportacao usa as linhas ja preparadas pelo view model para respeitar filtros e colunas selecionadas.
   const handleExport = async ({ outputType, scope, selectedColumnIds }: TableExportOptions) => {
     const rows = scope === "all" ? viewModel.allExportRows : viewModel.filteredExportRows;
     const selectedColumns = getSelectedColumns(DESPESAS_EXPORT_COLUMNS, selectedColumnIds);
@@ -182,40 +170,12 @@ export default function Page() {
     }
   };
 
-  // Durante a primeira carga, renderiza somente o skeleton para evitar tela incompleta.
   if (dashboard.loading && dashboard.filteredDespesas.length === 0 && !dashboard.error) {
     return <DespesasLoadingState />;
   }
 
-  // A renderizacao abaixo apenas compoe secoes independentes; cada componente concentra sua propria responsabilidade visual.
   return (
-    <div className="space-y-7">
-      <DespesasResumo
-        summary={dashboard.summary}
-        valuesVisible={valuesVisible}
-        onToggleValues={() => setValuesVisible((currentValue) => !currentValue)}
-        onScrollToList={() => listSectionRef.current?.scrollIntoView({ behavior: "smooth" })}
-      />
-
-      <DespesasExplorer
-        isOpen={isRelationsSectionOpen}
-        onToggleOpen={() => setIsRelationsSectionOpen((currentValue) => !currentValue)}
-        search={{
-          codigoSearch: relationsCodigoSearch,
-          setCodigoSearch: setRelationsCodigoSearch,
-          instituicaoSearch: relationsInstituicaoSearch,
-          setInstituicaoSearch: setRelationsInstituicaoSearch,
-        }}
-        data={{
-          metrics: viewModel.panoramaMetrics,
-          topCodigoGroups: viewModel.topCodigoGroups,
-          topInstituicaoGroups: viewModel.topInstituicaoGroups,
-          hasExplorerSearch: viewModel.hasExplorerSearch,
-        }}
-        onSelectCodigoGroup={setSelectedCodigoGroup}
-        onSelectInstituicaoGroup={setSelectedInstituicaoGroup}
-      />
-
+    <div className="space-y-6">
       <DespesasFiltros
         filterForm={filterForm}
         setFilterForm={setFilterForm}
@@ -259,13 +219,6 @@ export default function Page() {
         fields={despesaFormFields}
         onCreateSubmit={handleCreateSubmit}
         onEditSubmit={handleEditSubmit}
-      />
-
-      <DespesasInsightsModals
-        selectedCodigoGroup={selectedCodigoGroup}
-        setSelectedCodigoGroup={setSelectedCodigoGroup}
-        selectedInstituicaoGroup={selectedInstituicaoGroup}
-        setSelectedInstituicaoGroup={setSelectedInstituicaoGroup}
       />
 
       <DespesasExportModal

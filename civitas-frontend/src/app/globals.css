@@ -387,9 +387,15 @@ body {
   }
 }
 
-html,
+html {
+  overflow: hidden; /* bloqueia o html de scrollar */
+  height: 100%;
+}
+
 body {
   overflow-x: hidden;
+  overflow-y: auto; /* body que scrolla */
+  height: 100%;
 }
 
 html {
