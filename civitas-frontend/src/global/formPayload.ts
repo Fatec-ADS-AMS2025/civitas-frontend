@@ -223,6 +223,21 @@ export const normalizeOrcamentoPayload = <T extends FormPayload>(data: T): T => 
   } as T;
 };
 
+export const normalizeUnidadeConsumidoraPayload = <T extends FormPayload>(data: T): T => {
+  // Normaliza valores vindos do formulário para o payload da API.
+  const payload = data as Record<string, unknown>;
+
+  return {
+    ...data,
+    identificador: toTrimmedString(payload.identificador),
+    idInstituicao: toOptionalNumber(payload.idInstituicao),
+    idTipoDespesa: toOptionalNumber(payload.idTipoDespesa),
+    idSecretaria: toOptionalNumber(payload.idSecretaria),
+    idOrcamento: toOptionalNumber(payload.idOrcamento),
+    idFornecedor: toOptionalNumber(payload.idFornecedor),
+  } as T;
+};
+
 export const normalizeUsuarioPayload = <T extends FormPayload>(data: T): T => {
   const payload = data as Record<string, unknown>;
 
