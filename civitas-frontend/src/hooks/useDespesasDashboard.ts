@@ -6,12 +6,10 @@ import {
   normalizeDespesaPayload,
   validateDespesaDateRange,
 } from "@/global/formPayload";
-import {
-  getSituacaoLabel,
-  SITUACAO_ATIVO,
-} from "@/global/situacao";
+import { SITUACAO_ATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
 import { documentoService } from "@/hooks/documento";
+import { fluxoService } from "@/hooks/fluxo";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
@@ -22,6 +20,7 @@ import { unidadeConsumidoraService } from "@/hooks/unidadeConsumidora";
 import { usuarioService } from "@/hooks/usuario";
 import type DespesaDTO from "@/models/despesa";
 import type DocumentoDTO from "@/models/documento";
+import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -77,7 +76,7 @@ type DashboardData = {
   secretarias: SecretariaDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
-  documentos: DocumentoDTO[];
+  fluxos: FluxoDTO[];
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
 };
 
@@ -90,7 +89,7 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   secretarias: [],
   fornecedores: [],
   usuarios: [],
-  documentos: [],
+  fluxos: [],
   unidadesConsumidoras: [],
 };
 
@@ -651,6 +650,62 @@ const buildDespesaPayload = (
   };
 };
 
+const buildDocumentoPayload = (
+  formData: Record<string, unknown>,
+  despesaPayload: DespesaDTO,
+  required: boolean
+): DocumentoDTO | null => {
+  if (!isRecord(formData.documento)) {
+    if (required) {
+      throw new Error("Selecione um documento para anexar a despesa.");
+    }
+
+    return null;
+  }
+
+  const digitalizacao =
+    typeof formData.documento.digitalizacao === "string"
+      ? formData.documento.digitalizacao.trim()
+      : "";
+
+  if (!digitalizacao) {
+    if (required) {
+      throw new Error("Documento selecionado ainda nao foi convertido para Base64.");
+    }
+
+    return null;
+  }
+
+  const numeroDocumento = Number(
+    formData.documento.numeroDocumento ?? despesaPayload.numeroDocumento
+  );
+  const idFornecedor = Number(
+    formData.documento.idFornecedor ?? despesaPayload.idFornecedor
+  );
+  const idFluxo = Number(formData.documento.idFluxo ?? formData.idFluxo);
+
+  if (!Number.isFinite(numeroDocumento) || numeroDocumento <= 0) {
+    throw new Error("Numero do documento deve conter apenas numeros.");
+  }
+
+  if (!Number.isFinite(idFornecedor) || idFornecedor <= 0) {
+    throw new Error("Selecione um fornecedor valido para o documento.");
+  }
+
+  if (!Number.isFinite(idFluxo) || idFluxo <= 0) {
+    throw new Error("Selecione um fluxo valido para o documento.");
+  }
+
+  // O endpoint de documentos aceita o arquivo como string Base64 e desserializa para byte[] no backend.
+  return {
+    idDocumento: 0,
+    digitalizacao,
+    numeroDocumento,
+    idFornecedor,
+    idFluxo,
+  };
+};
+
 const loadDashboardData = async (): Promise<DashboardData> => {
   const [
     despesasTodas,
@@ -661,7 +716,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretarias,
     fornecedores,
     usuarios,
-    documentos,
+    fluxos,
     unidadesConsumidoras,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
@@ -672,7 +727,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretariaService.getAllData(),
     fornecedorService.getAllData(),
     usuarioService.getAllData(),
-    documentoService.getAllData(),
+    fluxoService.getAllData(),
     unidadeConsumidoraService.getAllData(),
   ]);
 
@@ -685,7 +740,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretarias: secretarias ?? [],
     fornecedores: fornecedores ?? [],
     usuarios: usuarios ?? [],
-    documentos: documentos ?? [],
+    fluxos: fluxos ?? [],
     unidadesConsumidoras: unidadesConsumidoras ?? [],
   };
 };
@@ -796,6 +851,13 @@ export const useDespesasDashboard = () => {
   const createDespesa = useCallback(
     async (formData: Record<string, unknown>) => {
       const payload = buildDespesaPayload(formData, dashboardData);
+      const documentoPayload = buildDocumentoPayload(formData, payload, true);
+
+      if (!documentoPayload) {
+        throw new Error("Selecione um documento para anexar a despesa.");
+      }
+
+      await documentoService.createData(documentoPayload);
       await despesaService.createData(buildDespesaApiPayload({
         ...payload,
         id: 0,
@@ -813,6 +875,12 @@ export const useDespesasDashboard = () => {
       }
 
       const payload = buildDespesaPayload(formData, dashboardData, currentDespesa);
+      const documentoPayload = buildDocumentoPayload(formData, payload, false);
+
+      if (documentoPayload) {
+        await documentoService.createData(documentoPayload);
+      }
+
       await despesaService.updateData(id, buildDespesaApiPayload({
         ...payload,
         id,
@@ -854,7 +922,7 @@ export const useDespesasDashboard = () => {
       secretarias: dashboardData.secretarias,
       fornecedores: dashboardData.fornecedores,
       usuarios: dashboardData.usuarios,
-      documentos: dashboardData.documentos,
+      fluxos: dashboardData.fluxos,
       unidadesConsumidoras: dashboardData.unidadesConsumidoras,
       summary,
       loading,
@@ -879,7 +947,7 @@ export const useDespesasDashboard = () => {
       dashboardData.secretarias,
       dashboardData.fornecedores,
       dashboardData.usuarios,
-      dashboardData.documentos,
+      dashboardData.fluxos,
       dashboardData.unidadesConsumidoras,
       summary,
       loading,

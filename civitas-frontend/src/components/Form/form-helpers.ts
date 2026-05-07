@@ -8,23 +8,30 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
     return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-const digitsOnly = (value: unknown): string => {
-    if (value === undefined || value === null) return ''
-    return String(value).trim().replace(/\D/g, '')
-}
-
 const toOptionalNumber = (value: unknown): number | undefined => {
     if (value === undefined || value === null || value === '') return undefined
     const parsedValue = Number(value)
     return Number.isFinite(parsedValue) ? parsedValue : undefined
 }
 
-const normalizeDocumentValue = (value: Record<string, unknown>) => ({
+const toPositiveNumberOrZero = (...values: unknown[]): number => {
+    for (const value of values) {
+        const parsedValue = toOptionalNumber(value)
+        if (parsedValue !== undefined && parsedValue > 0) return parsedValue
+    }
+
+    return 0
+}
+
+const normalizeDocumentValue = (
+    value: Record<string, unknown>,
+    source: Record<string, unknown> = {}
+) => ({
     idDocumento: toOptionalNumber(value.idDocumento) ?? 0,
     digitalizacao: typeof value.digitalizacao === 'string' ? value.digitalizacao : '',
-    numeroDocumento: toOptionalNumber(value.numeroDocumento) ?? 0,
-    idFornecedor: toOptionalNumber(value.idFornecedor) ?? 0,
-    idFluxo: toOptionalNumber(value.idFluxo) ?? 0,
+    numeroDocumento: toPositiveNumberOrZero(value.numeroDocumento, source.numeroDocumento),
+    idFornecedor: toPositiveNumberOrZero(value.idFornecedor, source.idFornecedor, source.fornecedorId),
+    idFluxo: toPositiveNumberOrZero(value.idFluxo, source.idFluxo),
 })
 
 const resolveDocumentFieldValue = (
@@ -33,28 +40,8 @@ const resolveDocumentFieldValue = (
     value: unknown
 ): unknown => {
     if (field?.type !== 'documento') return value
-    if (isRecord(value)) return normalizeDocumentValue(value)
-
-    const documentOptions = field.documentOptions ?? []
-    const explicitId = toOptionalNumber(value ?? source.idDocumento)
-    if (explicitId) {
-        return documentOptions.find((option) => option.value === explicitId)?.documento ?? ''
-    }
-
-    const numeroDocumento = digitsOnly(source.numeroDocumento)
-    if (!numeroDocumento) return ''
-
-    const fornecedorId = toOptionalNumber(source.idFornecedor ?? source.fornecedorId)
-    const matchingOption = documentOptions.find((option) => {
-        const documentNumberMatches =
-            digitsOnly(option.documento.numeroDocumento) === numeroDocumento
-        const fornecedorMatches =
-            !fornecedorId || option.documento.idFornecedor === fornecedorId
-
-        return documentNumberMatches && fornecedorMatches
-    })
-
-    return matchingOption?.documento ?? ''
+    if (isRecord(value)) return normalizeDocumentValue(value, source)
+    return ''
 }
 
 const inferFieldType = (value: unknown): FormFieldConfig['type'] => {
@@ -91,7 +78,8 @@ const formatValueForFieldState = (
 const normalizeFieldValue = (
     field: FormFieldConfig | undefined,
     value: unknown,
-    stage: 'change' | 'submit'
+    stage: 'change' | 'submit',
+    source: Record<string, unknown> = {}
 ): unknown => {
     // Normaliza valores por campo para manter change vs submit consistente.
     if (!field) return value
@@ -108,12 +96,15 @@ const normalizeFieldValue = (
     // Selects devem manter o value original quando possível.
     if (field.type === 'documento') {
         if (value === '') return ''
-        if (isRecord(value)) return normalizeDocumentValue(value)
+        if (!isRecord(value)) return ''
 
-        const matchingOption = field.documentOptions?.find(
-            (option) => String(option.value) === String(value)
-        )
-        return matchingOption?.documento ?? ''
+        const normalizedDocument = normalizeDocumentValue(value, source)
+        if (stage === 'submit') return normalizedDocument
+
+        return {
+            ...value,
+            ...normalizedDocument,
+        }
     }
 
     if (field.type === 'select') {
@@ -170,7 +161,7 @@ const buildNormalizedFormData = (
 
     const normalizedEntries = keysToNormalize.map((key) => {
         const field = fieldMap.get(key)
-        return [key, normalizeFieldValue(field, source[key], stage)] as const
+        return [key, normalizeFieldValue(field, source[key], stage, source)] as const
     })
 
     return Object.fromEntries(normalizedEntries)

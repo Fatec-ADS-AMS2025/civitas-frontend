@@ -55,10 +55,9 @@ export default function Page() {
     resolvedOrcamentoOptions: viewModel.resolvedOrcamentoOptions,
     resolvedFornecedorOptions: viewModel.resolvedFornecedorOptions,
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
-    resolvedDocumentoOptions: viewModel.resolvedDocumentoOptions,
+    resolvedFluxoOptions: viewModel.resolvedFluxoOptions,
     resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
     isOptionsLoading: dashboard.loading,
-    optionsError: dashboard.error,
   });
 
   const headerConfig = useMemo(

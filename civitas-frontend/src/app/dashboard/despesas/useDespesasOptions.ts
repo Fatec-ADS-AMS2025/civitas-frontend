@@ -2,8 +2,7 @@
 
 import { useMemo } from "react";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
-import type { DocumentoFieldOption } from "@/components/Form/documento-field";
-import type DocumentoDTO from "@/models/documento";
+import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -21,7 +20,7 @@ type UseDespesasOptionsInput = {
   instituicoes: InstituicaoDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
-  documentos: DocumentoDTO[];
+  fluxos: FluxoDTO[];
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   activeModalDespesa: DespesaDashboardRow | null;
 };
@@ -33,7 +32,7 @@ export function useDespesasOptions({
   instituicoes,
   fornecedores,
   usuarios,
-  documentos,
+  fluxos,
   unidadesConsumidoras,
   activeModalDespesa,
 }: UseDespesasOptionsInput) {
@@ -75,20 +74,13 @@ export function useDespesasOptions({
     [usuarios]
   );
 
-  const documentoOptions = useMemo<DocumentoFieldOption[]>(
+  const fluxoOptions = useMemo<SelectOption[]>(
     () =>
-      documentos.map((documento) => ({
-        value: documento.idDocumento,
-        label: `#${String(documento.idDocumento).padStart(3, "0")} - Documento ${documento.numeroDocumento}`,
-        documento: {
-          idDocumento: documento.idDocumento,
-          digitalizacao: documento.digitalizacao ?? "",
-          numeroDocumento: Number(documento.numeroDocumento),
-          idFornecedor: Number(documento.idFornecedor),
-          idFluxo: Number(documento.idFluxo),
-        },
+      fluxos.map((fluxo) => ({
+        value: fluxo.idFluxo,
+        label: `#${String(fluxo.idFluxo).padStart(3, "0")} - Status ${fluxo.status} - Consumo ${fluxo.consumo}`,
       })),
-    [documentos]
+    [fluxos]
   );
 
   const unidadeConsumidoraOptions = useMemo<SelectOption[]>(
@@ -202,7 +194,7 @@ export function useDespesasOptions({
     resolvedOrcamentoOptions,
     resolvedFornecedorOptions,
     resolvedUsuarioOptions,
-    resolvedDocumentoOptions: documentoOptions,
+    resolvedFluxoOptions: fluxoOptions,
     resolvedUnidadeConsumidoraOptions,
   };
 }

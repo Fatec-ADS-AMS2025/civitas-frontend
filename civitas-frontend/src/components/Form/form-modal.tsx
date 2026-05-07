@@ -71,6 +71,7 @@ export default function FormModal({
                             onChange={onFieldChange}
                             mode={mode}
                             isReadOnlyMode={mode === 'view' || mode === 'delete'}
+                            isSubmitting={isLoading}
                         />
                     )}
 
@@ -84,6 +85,7 @@ export default function FormModal({
                             onChange={onFieldChange}
                             mode={mode}
                             isReadOnlyMode={mode === 'view' || mode === 'delete'}
+                            isSubmitting={isLoading}
                         />
                     ))}
                 </div>

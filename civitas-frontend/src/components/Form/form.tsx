@@ -4,6 +4,8 @@ import FormModal from './form-modal'
 import {
     getSectionOrder,
     groupFieldsBySection,
+    isFieldRequired,
+    isFieldValueEmpty,
     isRecord,
     toLabel,
 } from './form-utils'
@@ -15,7 +17,6 @@ import {
     normalizeFieldValue,
     toFieldConfig,
 } from './form-helpers'
-import type { DocumentoFieldOption } from './documento-field'
 
 type FormMode = 'create' | 'edit' | 'view' | 'delete'
 
@@ -43,17 +44,16 @@ type FormFieldConfig = {
     type?: 'text' | 'email' | 'number' | 'password' | 'tel' | 'date' | 'select' | 'textarea' | 'documento';
     mask?: InputMask;
     required?: boolean;
+    requiredInModes?: FormMode[];
     hidden?: boolean;
     disabled?: boolean;
+    accept?: string;
     inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
     maxLength?: number;
     options?: FormOption[];
     readOnlyInModes?: FormMode[];
     validate?: ValidationFn;
     section?: string;
-    documentOptions?: DocumentoFieldOption[];
-    documentLoading?: boolean;
-    documentError?: string;
 }
 
 type FieldConfig = FormFieldConfig
@@ -149,9 +149,7 @@ export default function Form({
         fieldsForValidation.forEach((field) => {
             const value = normalizedFormData[field.key]
             const fieldLabel = field.label ?? toLabel(field.key)
-            const valueAsText = value === undefined || value === null ? '' : String(value).trim()
-
-            if (field.required && valueAsText.length === 0 && !isViewMode && mode !== 'delete') {
+            if (isFieldRequired(field, mode) && isFieldValueEmpty(field, value) && !isViewMode && mode !== 'delete') {
                 nextErrors[field.key] = `${fieldLabel} é obrigatório.`
                 return
             }
@@ -202,25 +200,13 @@ export default function Form({
 
     // Normaliza o valor no change para manter estado consistente.
     const handleInputChange = (field: FormFieldConfig, value: unknown) => {
-        const normalizedValue = normalizeFieldValue(field, value, 'change')
+        const normalizedValue = normalizeFieldValue(field, value, 'change', formData)
 
         setFormData((prev) => {
-            const nextFormData = {
+            return {
                 ...prev,
                 [field.key]: normalizedValue,
             }
-
-            if (field.type === 'documento') {
-                if (isRecord(normalizedValue)) {
-                    nextFormData.numeroDocumento = normalizedValue.numeroDocumento ?? ''
-                    nextFormData.idFornecedor = normalizedValue.idFornecedor ?? ''
-                } else {
-                    nextFormData.numeroDocumento = ''
-                    nextFormData.idFornecedor = ''
-                }
-            }
-
-            return nextFormData
         })
 
         if (errors[field.key]) {

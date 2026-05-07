@@ -13,6 +13,7 @@ interface FormSectionProps {
     onChange: (field: FormFieldConfig, value: unknown) => void
     mode: FormMode
     isReadOnlyMode: boolean
+    isSubmitting: boolean
 }
 
 export default function FormSection({
@@ -23,6 +24,7 @@ export default function FormSection({
     onChange,
     mode,
     isReadOnlyMode,
+    isSubmitting,
 }: FormSectionProps) {
     if (fields.length === 0) return null
 
@@ -42,6 +44,7 @@ export default function FormSection({
                         onChange={onChange}
                         mode={mode}
                         isReadOnlyMode={isReadOnlyMode}
+                        isSubmitting={isSubmitting}
                     />
                 ))}
             </div>
@@ -64,6 +67,7 @@ export default function FormSection({
                         onChange={onChange}
                         mode={mode}
                         isReadOnlyMode={isReadOnlyMode}
+                        isSubmitting={isSubmitting}
                     />
                 ))}
             </div>

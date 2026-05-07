@@ -4,7 +4,7 @@ import React from 'react'
 import Input from '../Input'
 import DocumentoField from './documento-field'
 import type { FormFieldConfig, FormMode } from './form'
-import { getFieldErrorId, toInputValue, toLabel } from './form-utils'
+import { getFieldErrorId, isFieldRequired, toInputValue, toLabel } from './form-utils'
 import { resolveInputMask } from '@/lib/input-mask'
 
 interface FormFieldProps {
@@ -14,6 +14,7 @@ interface FormFieldProps {
     onChange: (field: FormFieldConfig, value: unknown) => void
     mode: FormMode
     isReadOnlyMode: boolean
+    isSubmitting: boolean
 }
 
 function FormField({
@@ -23,6 +24,7 @@ function FormField({
     onChange,
     mode,
     isReadOnlyMode,
+    isSubmitting,
 }: FormFieldProps) {
     const errorId = getFieldErrorId(field.key)
     // Resolve comportamento de mask uma vez por render.
@@ -33,12 +35,13 @@ function FormField({
     // Regra única para desabilitar campos por modo/flag.
     const getFieldDisabled = () => {
         if (field.disabled) return true
+        if (isSubmitting) return true
         if (isReadOnlyMode) return true
         return field.readOnlyInModes?.includes(mode) ?? false
     }
 
     const commonProps = {
-        required: field.required && !isReadOnlyMode,
+        required: isFieldRequired(field, mode) && !isReadOnlyMode,
         disabled: getFieldDisabled(),
         label: field.label ?? toLabel(field.key),
         error,

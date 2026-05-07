@@ -1,10 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import type {
-  DocumentoFieldOption,
-  DocumentoFieldValue,
-} from "@/components/Form/documento-field";
+import type { DocumentoFieldValue } from "@/components/Form/documento-field";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import {
   digitsOnly,
@@ -26,10 +23,9 @@ type UseDespesaFormFieldsInput = {
   resolvedOrcamentoOptions: SelectOption[];
   resolvedFornecedorOptions: SelectOption[];
   resolvedUsuarioOptions: SelectOption[];
-  resolvedDocumentoOptions: DocumentoFieldOption[];
+  resolvedFluxoOptions: SelectOption[];
   resolvedUnidadeConsumidoraOptions: SelectOption[];
   isOptionsLoading?: boolean;
-  optionsError?: string | null;
 };
 
 export function useDespesaFormFields({
@@ -41,10 +37,9 @@ export function useDespesaFormFields({
   resolvedOrcamentoOptions,
   resolvedFornecedorOptions,
   resolvedUsuarioOptions,
-  resolvedDocumentoOptions,
+  resolvedFluxoOptions,
   resolvedUnidadeConsumidoraOptions,
   isOptionsLoading = false,
-  optionsError,
 }: UseDespesaFormFieldsInput): ModalFieldConfig[] {
   const isDocumentoValue = useCallback(
     (value: unknown): value is DocumentoFieldValue => {
@@ -53,7 +48,7 @@ export function useDespesaFormFields({
       }
 
       const documento = value as Partial<DocumentoFieldValue>;
-      return Number(documento.idDocumento) > 0;
+      return typeof documento.digitalizacao === "string" && documento.digitalizacao.trim().length > 0;
     },
     []
   );
@@ -75,12 +70,8 @@ export function useDespesaFormFields({
   );
 
   const resolveDocumento = useCallback(
-    (value: unknown) => {
-      if (isDocumentoValue(value)) return value;
-      const documentoId = Number(value);
-      return resolvedDocumentoOptions.find((option) => option.value === documentoId)?.documento;
-    },
-    [isDocumentoValue, resolvedDocumentoOptions]
+    (value: unknown) => (isDocumentoValue(value) ? value : undefined),
+    [isDocumentoValue]
   );
 
   return useMemo<ModalFieldConfig[]>(
@@ -89,26 +80,32 @@ export function useDespesaFormFields({
       {
         key: "documento",
         label: "Documento",
-        placeholder: "Selecione um documento",
+        placeholder: "Selecione um arquivo",
         type: "documento",
-        required: true,
-        documentOptions: resolvedDocumentoOptions,
-        documentLoading: isOptionsLoading,
-        documentError: optionsError ?? undefined,
-        validate: (value, formData) => {
+        requiredInModes: ["create"],
+        accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
+        validate: (value, formData, mode) => {
           const documento = resolveDocumento(value);
-          if (!documento) return "Selecione um documento valido.";
+          const hasDocumentInput = value !== "" && value !== undefined && value !== null;
 
-          if (
-            digitsOnly(documento.numeroDocumento) !==
-            digitsOnly(formData.numeroDocumento)
-          ) {
-            return "Documento selecionado nao corresponde ao numero informado.";
+          if (mode !== "create" && !hasDocumentInput) {
+            return undefined;
           }
 
-          const idFornecedor = toPositiveNumber(formData.idFornecedor);
-          if (idFornecedor > 0 && documento.idFornecedor !== idFornecedor) {
-            return "Documento selecionado nao corresponde ao fornecedor informado.";
+          if (!documento) {
+            return "Selecione um arquivo e aguarde a conversao para Base64.";
+          }
+
+          if (!digitsOnly(formData.numeroDocumento)) {
+            return "Informe o numero do documento antes de enviar.";
+          }
+
+          if (toPositiveNumber(formData.idFornecedor) <= 0) {
+            return "Selecione um fornecedor valido para vincular o documento.";
+          }
+
+          if (toPositiveNumber(formData.idFluxo) <= 0) {
+            return "Selecione um fluxo valido para vincular o documento.";
           }
 
           return undefined;
@@ -126,6 +123,27 @@ export function useDespesaFormFields({
           if (normalizedValue.length > 100) {
             return "Numero do documento deve ter no maximo 100 caracteres.";
           }
+          return undefined;
+        },
+      },
+      {
+        key: "idFluxo",
+        label: "Fluxo",
+        placeholder: "Selecione o fluxo",
+        type: "select",
+        requiredInModes: ["create"],
+        disabled: isOptionsLoading,
+        options: resolvedFluxoOptions,
+        validate: (value, formData, mode) => {
+          const hasDocumentInput =
+            formData.documento !== "" &&
+            formData.documento !== undefined &&
+            formData.documento !== null;
+
+          if ((mode === "create" || hasDocumentInput) && toPositiveNumber(value) <= 0) {
+            return "Selecione um fluxo valido.";
+          }
+
           return undefined;
         },
       },
@@ -282,14 +300,13 @@ export function useDespesaFormFields({
     [
       resolvedFornecedorOptions,
       resolvedInstituicaoOptions,
-      resolvedDocumentoOptions,
+      resolvedFluxoOptions,
       resolvedOrcamentoOptions,
       resolvedTipoCodigoOptions,
       resolvedTipoDespesaOptions,
       resolvedUsuarioOptions,
       resolvedUnidadeConsumidoraOptions,
       isOptionsLoading,
-      optionsError,
       resolveDocumento,
       resolveTipoCodigo,
       resolveTipoDespesa,
