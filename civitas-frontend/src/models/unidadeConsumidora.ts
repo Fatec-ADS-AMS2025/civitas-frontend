@@ -6,6 +6,6 @@ export default interface UnidadeConsumidoraDTO {
   idSecretaria: number;
   idOrcamento: number;
   idFornecedor: number;
-  excluido?: boolean;
+  excluido: boolean;
   dataExclusao?: string | null;
 }
