@@ -56,8 +56,8 @@ export default function Login() {
 	}
 
 	return (
-		<div className="flex h-screen w-full items-center justify-center bg-[var(--secundary-1)] p-4 sm:p-5 lg:w-1/2 lg:p-8">
-			<div className="w-full max-w-md rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[var(--shadow-xs)] sm:p-8">
+		<div className="flex min-h-screen w-full overflow-x-hidden items-start justify-center bg-[var(--secundary-1)] px-4 py-8 sm:px-5 sm:py-10 lg:w-1/2 lg:items-center lg:px-8 lg:py-12">
+			<div className="w-full max-w-[min(28rem,calc(100vw-2rem))] rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[var(--shadow-sm)] sm:max-w-md sm:p-8">
 				<div className="mb-8">
 					<div className="mb-6 flex items-center gap-3">
 						<img src="/logo1.png" alt="Civitas Logo" className="h-10 w-10 object-contain" />
@@ -108,12 +108,12 @@ export default function Login() {
 						/>
 					</div>
 
-					<div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<div className="mt-6 flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<Checkbox id="rememberMe" label="Lembrar-me" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} disabled={isLoading} />
-						<Link href="/forgot-password" className="text-sm font-medium text-[var(--foreground-muted)] underline hover:text-[var(--secundary-1)]">Esqueci a senha</Link>
+						<Link href="/forgot-password" className="w-full text-left text-sm font-medium text-[var(--foreground-muted)] underline underline-offset-2 hover:text-[var(--secundary-1)] sm:w-auto sm:text-right">Esqueci a senha</Link>
 					</div>
 
-					<button type="submit" disabled={isLoading} className="mt-6 w-full rounded-sm border border-[var(--secundary-1)] bg-[var(--secundary-1)] px-4 py-3 font-semibold text-white transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60">
+					<button type="submit" disabled={isLoading} className="mt-6 w-full rounded-sm border border-[var(--secundary-1)] bg-[var(--secundary-1)] px-4 py-3 font-semibold text-[var(--text-on-brand)] transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60">
 						{isLoading ? 'Entrando...' : 'Entrar'}
 					</button>
 				</form>

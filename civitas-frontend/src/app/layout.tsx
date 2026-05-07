@@ -14,8 +14,10 @@ export const metadata: Metadata = {
 const themeInitializer = `
 (() => {
   const storageKey = "civitas-theme";
+  const contrastStorageKey = "app-high-contrast";
   const root = document.documentElement;
   const savedTheme = window.localStorage.getItem(storageKey);
+  const highContrastEnabled = window.localStorage.getItem(contrastStorageKey) === "true";
   const themeMode =
     savedTheme === "light" || savedTheme === "dark" || savedTheme === "system"
       ? savedTheme
@@ -29,7 +31,8 @@ const themeInitializer = `
 
   root.dataset.themeMode = themeMode;
   root.dataset.theme = resolvedTheme;
-  root.style.colorScheme = resolvedTheme;
+  root.dataset.contrast = highContrastEnabled ? "high" : "normal";
+  root.style.colorScheme = highContrastEnabled ? "dark" : resolvedTheme;
 })();
 `;
 
@@ -47,7 +50,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
             <a
               href="#conteudo-principal"
-              className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[10000] focus:rounded-sm focus:bg-[var(--surface-elevated)] focus:px-4 focus:py-2 focus:text-[var(--foreground)]"
+              className="civitas-link-skip sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[10000] focus:px-4 focus:py-2"
             >
               Pular para o conteudo principal
             </a>

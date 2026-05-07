@@ -21,13 +21,13 @@ function Button({
 
   const variants: Record<ButtonVariant, string> = {
     primary:
-      "border-[var(--secundary-1)] bg-[var(--secundary-1)] text-white hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)]",
+      "border-[var(--secundary-1)] bg-[var(--secundary-1)] text-[var(--text-on-brand)] hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)]",
     secondary:
-      "border-[var(--border-accent-amber)] bg-[var(--surface-accent-amber)] text-[var(--text-accent-amber)] hover:bg-[color-mix(in_srgb,var(--surface-accent-amber)_82%,white_18%)]",
+      "border-[var(--tone-amber-border)] bg-[var(--tone-amber-bg)] text-[var(--tone-amber-text)] hover:bg-[color-mix(in_srgb,var(--tone-amber-bg)_84%,var(--surface-elevated)_16%)]",
     tertiary:
       "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-subtle)]",
     login:
-      "max-w-[601px] rounded-sm border-[var(--secundary-1)] bg-[var(--secundary-1)] py-3.5 text-base font-semibold text-white hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)] sm:text-lg",
+      "max-w-[601px] rounded-sm border-[var(--secundary-1)] bg-[var(--secundary-1)] py-3.5 text-base font-semibold text-[var(--text-on-brand)] hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)] sm:text-lg",
   };
 
   return (
