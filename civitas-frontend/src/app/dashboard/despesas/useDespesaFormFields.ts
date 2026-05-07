@@ -2,14 +2,17 @@
 
 import { useCallback, useMemo } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import {
-  digitsOnly,
-  normalizeDateInput,
-  validateDespesaDateRange,
-  validateRequiredUc,
-} from "@/global/formPayload";
+import { validateDespesaDateRange } from "@/global/formPayload";
+import { normalizeValidDateInput } from "@/hooks/despesasDashboard/dates";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
+import {
+  DESPESA_FORM_SECTIONS,
+  validateNumeroDocumento,
+  validatePositiveSelect,
+  validateUnidadeConsumidora,
+} from "./despesaFormFields.helpers";
 import { STATUS_OPTIONS } from "./despesas.constants";
 import type { SelectOption } from "./despesas.types";
 import { toPositiveNumber } from "./despesas.utils";
@@ -23,6 +26,8 @@ type UseDespesaFormFieldsInput = {
   resolvedOrcamentoOptions: SelectOption[];
   resolvedFornecedorOptions: SelectOption[];
   resolvedUsuarioOptions: SelectOption[];
+  resolvedUnidadeConsumidoraOptions: SelectOption[];
+  unidadesConsumidoras: UnidadeConsumidoraDTO[];
 };
 
 export function useDespesaFormFields({
@@ -34,20 +39,17 @@ export function useDespesaFormFields({
   resolvedOrcamentoOptions,
   resolvedFornecedorOptions,
   resolvedUsuarioOptions,
+  resolvedUnidadeConsumidoraOptions,
+  unidadesConsumidoras,
 }: UseDespesaFormFieldsInput): ModalFieldConfig[] {
+  const sections = DESPESA_FORM_SECTIONS;
   const resolveTipoDespesa = useCallback(
-    (value: unknown) => {
-      const tipoDespesaId = Number(value);
-      return tiposDespesa.find((tipoDespesa) => tipoDespesa.id === tipoDespesaId);
-    },
+    (value: unknown) => tiposDespesa.find((tipoDespesa) => tipoDespesa.id === Number(value)),
     [tiposDespesa]
   );
 
   const resolveTipoCodigo = useCallback(
-    (value: unknown) => {
-      const tipoCodigoId = Number(value);
-      return tipoCodigos.find((tipoCodigo) => tipoCodigo.id === tipoCodigoId);
-    },
+    (value: unknown) => tipoCodigos.find((tipoCodigo) => tipoCodigo.id === Number(value)),
     [tipoCodigos]
   );
 
@@ -60,32 +62,30 @@ export function useDespesaFormFields({
         placeholder: "Somente numeros",
         mask: "integer",
         required: true,
-        validate: (value) => {
-          const normalizedValue = digitsOnly(value);
-          if (!normalizedValue) return "Numero do documento deve conter apenas numeros.";
-          if (normalizedValue.length > 100) {
-            return "Numero do documento deve ter no maximo 100 caracteres.";
-          }
-          return undefined;
-        },
+        section: sections.identificacao,
+        validate: validateNumeroDocumento,
       },
       {
         key: "codigo",
-        label: "Codigo de agrupamento",
-        placeholder: "Ex.: 1001",
+        label: "Codigo",
+        placeholder: "Codigo de agrupamento",
         mask: "integer",
+        section: sections.identificacao,
       },
       {
         key: "idTipoCodigo",
         label: "Tipo de codigo",
-        placeholder: "Selecione um tipo de codigo",
+        placeholder: "Selecione o tipo de codigo",
         type: "select",
         required: true,
         options: resolvedTipoCodigoOptions,
+        section: sections.classificacao,
         validate: (value, formData) => {
-          if (toPositiveNumber(value) <= 0) {
-            return "Selecione um tipo de codigo valido.";
-          }
+          const requiredError = validatePositiveSelect(
+            value,
+            "Selecione um tipo de codigo valido."
+          );
+          if (requiredError) return requiredError;
 
           const tipoDespesa = resolveTipoDespesa(formData.idTipoDespesa);
           if (tipoDespesa && tipoDespesa.idTipoCodigo !== toPositiveNumber(value)) {
@@ -98,14 +98,14 @@ export function useDespesaFormFields({
       {
         key: "idTipoDespesa",
         label: "Categoria",
-        placeholder: "Selecione um tipo de despesa",
+        placeholder: "Selecione a categoria",
         type: "select",
         required: true,
         options: resolvedTipoDespesaOptions,
+        section: sections.classificacao,
         validate: (value, formData) => {
-          if (toPositiveNumber(value) <= 0) {
-            return "Selecione um tipo de despesa valido.";
-          }
+          const requiredError = validatePositiveSelect(value, "Selecione uma categoria valida.");
+          if (requiredError) return requiredError;
 
           const tipoDespesa = resolveTipoDespesa(value);
           const tipoCodigoSelecionado = resolveTipoCodigo(formData.idTipoCodigo);
@@ -122,21 +122,13 @@ export function useDespesaFormFields({
         },
       },
       {
-        key: "uc",
-        label: "UC",
-        placeholder: "Informe a unidade consumidora",
-        validate: (value, formData) => {
-          const tipoDespesa = resolveTipoDespesa(formData.idTipoDespesa);
-          return validateRequiredUc(value, tipoDespesa?.solicitaUc === 1);
-        },
-      },
-      {
         key: "consumoPrevisto",
-        label: "Valor",
+        label: "Valor da despesa",
         placeholder: "0,00",
         type: "number",
         mask: "currency",
         required: true,
+        section: sections.valoresDatas,
         validate: (value) => {
           const numericValue = Number(value);
           if (Number.isNaN(numericValue) || numericValue < 0) {
@@ -150,8 +142,9 @@ export function useDespesaFormFields({
         label: "Data de emissao",
         type: "date",
         required: true,
+        section: sections.valoresDatas,
         validate: (value, formData) => {
-          const normalizedDate = normalizeDateInput(value);
+          const normalizedDate = normalizeValidDateInput(value);
           if (!normalizedDate) return "Data de emissao invalida.";
           return validateDespesaDateRange(normalizedDate, formData.dataVencimento);
         },
@@ -161,8 +154,9 @@ export function useDespesaFormFields({
         label: "Data de vencimento",
         type: "date",
         required: true,
+        section: sections.valoresDatas,
         validate: (value, formData) => {
-          const normalizedDate = normalizeDateInput(value);
+          const normalizedDate = normalizeValidDateInput(value);
           if (!normalizedDate) return "Data de vencimento invalida.";
           return validateDespesaDateRange(formData.dataEmicao, normalizedDate);
         },
@@ -174,8 +168,8 @@ export function useDespesaFormFields({
         type: "select",
         required: true,
         options: resolvedInstituicaoOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0 ? "Selecione uma instituicao valida." : undefined,
+        section: sections.vinculos,
+        validate: (value) => validatePositiveSelect(value, "Selecione uma instituicao valida."),
       },
       {
         key: "idOrcamento",
@@ -184,8 +178,8 @@ export function useDespesaFormFields({
         type: "select",
         required: true,
         options: resolvedOrcamentoOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0 ? "Selecione um orcamento valido." : undefined,
+        section: sections.vinculos,
+        validate: (value) => validatePositiveSelect(value, "Selecione um orcamento valido."),
       },
       {
         key: "idFornecedor",
@@ -194,26 +188,45 @@ export function useDespesaFormFields({
         type: "select",
         required: true,
         options: resolvedFornecedorOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0 ? "Selecione um fornecedor valido." : undefined,
+        section: sections.vinculos,
+        validate: (value) => validatePositiveSelect(value, "Selecione um fornecedor valido."),
+      },
+      {
+        key: "idUnidadeConsumidora",
+        label: "Unidade consumidora",
+        placeholder: "Selecione a unidade consumidora",
+        type: "select",
+        options: resolvedUnidadeConsumidoraOptions,
+        section: sections.vinculos,
+        validate: (value, formData) => {
+          const tipoDespesa = resolveTipoDespesa(formData.idTipoDespesa);
+          return validateUnidadeConsumidora(
+            value,
+            formData,
+            unidadesConsumidoras,
+            tipoDespesa?.solicitaUc === 1
+          );
+        },
       },
       {
         key: "idUsuario",
         label: "Usuario responsavel",
-        placeholder: "Selecione o usuario",
+        placeholder: "Selecione o usuario responsavel",
         type: "select",
         required: true,
         options: resolvedUsuarioOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0 ? "Selecione um usuario valido." : undefined,
+        section: sections.vinculos,
+        validate: (value) => validatePositiveSelect(value, "Selecione um usuario valido."),
       },
       {
         key: "situacao",
         label: "Status financeiro",
-        placeholder: "Selecione o status",
+        placeholder: "Selecione o status financeiro",
         type: "select",
         required: true,
         options: STATUS_OPTIONS,
+        section: sections.status,
+        validate: (value) => validatePositiveSelect(value, "Selecione um status financeiro valido."),
       },
     ],
     [
@@ -222,9 +235,12 @@ export function useDespesaFormFields({
       resolvedOrcamentoOptions,
       resolvedTipoCodigoOptions,
       resolvedTipoDespesaOptions,
+      resolvedUnidadeConsumidoraOptions,
       resolvedUsuarioOptions,
       resolveTipoCodigo,
       resolveTipoDespesa,
+      sections,
+      unidadesConsumidoras,
     ]
   );
 }

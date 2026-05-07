@@ -64,7 +64,7 @@ export const buildDespesaFormObject = (
     codigo: despesa.raw.codigo === "0" ? "" : despesa.raw.codigo ?? "",
     idTipoCodigo: despesa.tipoCodigoId ?? "",
     idTipoDespesa: despesa.raw.idTipoDespesa ?? "",
-    uc: despesa.raw.uc ?? "",
+    idUnidadeConsumidora: despesa.raw.idUnidadeConsumidora ?? "",
     consumoPrevisto: despesa.raw.consumoPrevisto ?? despesa.raw.valor ?? "",
     // O backend antigo expunha dataEmicao; o frontend ainda aceita ambos.
     dataEmicao:

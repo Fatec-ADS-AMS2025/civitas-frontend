@@ -45,7 +45,7 @@ export const EMPTY_DESPESA_FORM: Record<string, unknown> = {
   codigo: "",
   idTipoCodigo: "",
   idTipoDespesa: "",
-  uc: "",
+  idUnidadeConsumidora: "",
   consumoPrevisto: "",
   dataEmicao: "",
   dataVencimento: "",

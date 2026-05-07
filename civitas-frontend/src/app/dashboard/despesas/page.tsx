@@ -21,8 +21,6 @@ import {
 } from "./despesas.constants";
 import { useDespesaFormFields } from "./useDespesaFormFields";
 import { useDespesasViewModel } from "./useDespesasViewModel";
-import { toPositiveNumber } from "./despesas.utils";
-import type { UcItem } from "./_components/DespesaForm";
 
 export default function Page() {
   const listSectionRef = useRef<HTMLElement | null>(null);
@@ -31,7 +29,6 @@ export default function Page() {
   const [listCodigoSearch, setListCodigoSearch] = useState("");
   const [listInstituicaoSearch, setListInstituicaoSearch] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedUc, setSelectedUc] = useState<UcItem | null>(null);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [viewingDespesa, setViewingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -58,6 +55,8 @@ export default function Page() {
     resolvedOrcamentoOptions: viewModel.resolvedOrcamentoOptions,
     resolvedFornecedorOptions: viewModel.resolvedFornecedorOptions,
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
+    resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
+    unidadesConsumidoras: dashboard.unidadesConsumidoras,
   });
 
   const headerConfig = useMemo(
@@ -108,19 +107,12 @@ export default function Page() {
   const handleCreateSubmit = async (formData: Record<string, unknown>) => {
     try {
       await dashboard.createDespesa(formData);
+      showToast("Despesa cadastrada com sucesso.", "success");
       setIsCreateModalOpen(false);
     } catch (submitError) {
+      console.error("Erro ao cadastrar despesa.", submitError);
       showToast(getSubmitErrorMessage(submitError, "Erro ao cadastrar despesa."), "error");
     }
-
-    const payload = {
-      uc: selectedUc,
-      valorDespesa: toPositiveNumber(formData.valorDespesa),
-      consumoPrevisto: toPositiveNumber(formData.consumoPrevisto),
-    };
-
-    console.log("Despesa UC - payload", payload);
-    setIsCreateModalOpen(false);
   };
 
   const handleEditSubmit = async (formData: Record<string, unknown>) => {
@@ -128,8 +120,10 @@ export default function Page() {
 
     try {
       await dashboard.updateDespesa(editingDespesa.id, formData);
+      showToast("Despesa atualizada com sucesso.", "success");
       setEditingDespesa(null);
     } catch (submitError) {
+      console.error("Erro ao atualizar despesa.", submitError);
       showToast(getSubmitErrorMessage(submitError, "Erro ao atualizar despesa."), "error");
     }
   };
@@ -142,7 +136,9 @@ export default function Page() {
 
     try {
       await dashboard.removeDespesa(despesa.id);
+      showToast("Despesa removida com sucesso.", "success");
     } catch (submitError) {
+      console.error("Erro ao remover despesa.", submitError);
       showToast(getSubmitErrorMessage(submitError, "Erro ao remover despesa."), "error");
     }
   };
@@ -233,5 +229,7 @@ export default function Page() {
   );
 }
 
-const getSubmitErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof Error ? error.message : fallback;
+const getSubmitErrorMessage = (error: unknown, fallback: string) => {
+  const message = error instanceof Error && error.message ? error.message : fallback;
+  return message;
+};

@@ -3,6 +3,7 @@ export default interface DespesaDTO {
   numeroDocumento?: string;
   codigo?: string;
   uc?: string;
+  idUnidadeConsumidora?: number;
   dataEmissao?: string;
   dataEmicao?: string;
   consumoPrevisto?: number;

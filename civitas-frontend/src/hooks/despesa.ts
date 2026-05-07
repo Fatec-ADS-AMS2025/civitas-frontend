@@ -98,6 +98,50 @@ export class DespesaService extends GenericService<DespesaDTO> {
     const payload = await response.json();
     return this.unwrapCollection<DespesaDTO>(payload);
   }
+
+  async createFromDashboard(data: DespesaDTO): Promise<DespesaDTO> {
+    const response = await fetch(this.getUrlEndpoint(), {
+      method: 'POST',
+      headers: this.createHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(data),
+    });
+
+    const payload = await this.handleResponse(response, {
+      showErrorToast: false,
+      showSuccessToast: false,
+    });
+    return this.unwrapItem<DespesaDTO>(payload);
+  }
+
+  async updateFromDashboard(id: number, data: Partial<DespesaDTO>): Promise<DespesaDTO> {
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
+      method: 'PUT',
+      headers: this.createHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(data),
+    });
+
+    const payload = await this.handleResponse(response, {
+      showErrorToast: false,
+      showSuccessToast: false,
+    });
+    return this.unwrapItem<DespesaDTO>(payload);
+  }
+
+  async alterarStatusFromDashboard(id: number, status: number): Promise<void> {
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}/status`, {
+      method: 'PATCH',
+      headers: this.createHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(status),
+    });
+
+    await this.handleResponse(response, { showErrorToast: false });
+  }
 }
 
 export const despesaService = new DespesaService();
