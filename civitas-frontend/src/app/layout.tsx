@@ -14,8 +14,10 @@ export const metadata: Metadata = {
 const themeInitializer = `
 (() => {
   const storageKey = "civitas-theme";
+  const contrastStorageKey = "app-high-contrast";
   const root = document.documentElement;
   const savedTheme = window.localStorage.getItem(storageKey);
+  const highContrastEnabled = window.localStorage.getItem(contrastStorageKey) === "true";
   const themeMode =
     savedTheme === "light" || savedTheme === "dark" || savedTheme === "system"
       ? savedTheme
@@ -29,7 +31,8 @@ const themeInitializer = `
 
   root.dataset.themeMode = themeMode;
   root.dataset.theme = resolvedTheme;
-  root.style.colorScheme = resolvedTheme;
+  root.dataset.contrast = highContrastEnabled ? "high" : "normal";
+  root.style.colorScheme = highContrastEnabled ? "dark" : resolvedTheme;
 })();
 `;
 
