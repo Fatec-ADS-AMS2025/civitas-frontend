@@ -50,13 +50,13 @@ type BaseTableProps<T extends TableRow> = {
 export type TableProps<T extends TableRow> = BaseTableProps<T> &
   (
     | {
-        paginationEnabled: true;
-        pagination: TablePaginationConfig;
-      }
+      paginationEnabled: true;
+      pagination: TablePaginationConfig;
+    }
     | {
-        paginationEnabled?: false;
-        pagination?: TablePaginationConfig;
-      }
+      paginationEnabled?: false;
+      pagination?: TablePaginationConfig;
+    }
   );
 
 const Table = <T extends TableRow,>({
@@ -297,9 +297,8 @@ const Table = <T extends TableRow,>({
                       {columns.map((column, columnIndex) => (
                         <td
                           key={column.id}
-                          className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${
-                            columnIndex === 0 ? "rounded-sm" : ""
-                          }`}
+                          className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${columnIndex === 0 ? "rounded-sm" : ""
+                            }`}
                         >
                           {renderCellValue(objeto, column)}
                         </td>
@@ -383,6 +382,20 @@ const Table = <T extends TableRow,>({
               })}
             </div>
           </div>
+          {shouldShowExportAction ? (
+            <div className="flex flex-col gap-3 border-b border-[var(--divider)] px-4 py-4 sm:flex-row sm:items-center sm:justify-start sm:px-5 lg:px-6">
+              <button
+                type="button"
+                onClick={() => setIsExportModalOpen(true)}
+                className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-5 py-2.5 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] sm:w-auto"
+              >
+                <span className="material-symbols-outlined text-base text-[var(--foreground)]">
+                  print
+                </span>
+                Exportar / Imprimir
+              </button>
+            </div>
+          ) : null}
         </>
       ) : null}
 

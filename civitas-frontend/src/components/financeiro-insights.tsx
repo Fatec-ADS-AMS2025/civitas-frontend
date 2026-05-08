@@ -132,7 +132,6 @@ export function DespesasRelacionadasTable({
         <table className="min-w-full border-separate border-spacing-0">
           <thead>
             <tr className="bg-[var(--surface-subtle)] text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
-              <th className="px-4 py-3">Registro</th>
               <th className="px-4 py-3">Codigo</th>
               <th className="px-4 py-3">Descricao</th>
               {showInstituicao ? <th className="px-4 py-3">Instituicao</th> : null}
@@ -148,11 +147,6 @@ export function DespesasRelacionadasTable({
                 key={`${despesa.id}-${despesa.codigoNormalizado}`}
                 className="border-t border-[var(--divider)] text-sm text-[var(--foreground)]"
               >
-                <td className="px-4 py-3">
-                  <span className="inline-flex rounded-sm border border-[var(--border-accent-amber)] bg-[var(--surface-accent-amber)] px-3 py-1 text-xs font-semibold text-[var(--text-accent-amber)]">
-                    {despesa.registro}
-                  </span>
-                </td>
                 <td className="px-4 py-3 font-semibold text-[var(--secundary-1)]">
                   {despesa.codigo}
                 </td>

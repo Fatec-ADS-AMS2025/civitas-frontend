@@ -15,12 +15,11 @@ export default function Modal({ value, setValue, children }: ModalProps) {
 
   useEffect(() => {
     setMounted(true);
-    const body = document.body;
-    const prev = body.style.overflow;
+    const prevDocumentOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden'
 
     return () => {
-      document.documentElement.style.overflow = prev
+      document.documentElement.style.overflow = prevDocumentOverflow
     }
   }, []);
 
@@ -42,18 +41,20 @@ export default function Modal({ value, setValue, children }: ModalProps) {
   };
 
   return createPortal(
-    <div className="civitas-overlay fixed inset-0 z-[9998] flex items-center justify-center overflow-y-auto p-4 backdrop-blur-[3px] md:p-8">
-      <div className="flex min-h-full items-center justify-center">
-        <div className="civitas-enter civitas-surface relative my-2 max-h-[calc(100vh-2rem)] min-w-0 w-full max-w-5xl overflow-y-auto p-5 text-[var(--foreground)] md:my-6 md:max-h-[calc(100vh-3rem)] md:p-7">
+    <div className="fixed inset-0 z-[9998] bg-[rgba(10,31,36,0.52)] backdrop-blur-[3px]">
+      <div className="flex min-h-full items-end justify-center p-3 sm:items-center sm:p-6">
+        <div className="civitas-enter civitas-surface relative flex min-w-0 w-full max-w-5xl flex-col overflow-hidden rounded-sm p-3 text-[var(--foreground)] shadow-[var(--shadow-lg)] max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-3rem)] sm:p-5 md:p-7">
           <button
-            className="civitas-action civitas-action--ghost absolute right-3 top-3 h-11 min-h-[44px] w-11 !rounded-sm !px-0 text-xl !shadow-none"
+            className="civitas-action civitas-action--ghost absolute right-3 top-3 h-11 min-h-[44px] w-11 !rounded-sm !px-0 text-xl !shadow-none z-[9999]"
             onClick={handleClose}
             aria-label="Fechar modal"
           >
             <span className="material-symbols-outlined !text-[20px]">close</span>
           </button>
-          {children}
-        </div>
+          <div className="min-h-0 flex-1 overflow-y-auto pt-10 sm:pt-8">
+            {children}
+          </div>
+        </div> 
       </div>
     </div>,
     document.body

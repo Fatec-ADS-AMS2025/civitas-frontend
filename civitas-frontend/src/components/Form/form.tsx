@@ -47,7 +47,11 @@ type FormFieldConfig = {
     inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
     maxLength?: number;
     options?: FormOption[];
+    resolveOptions?: (formData: Record<string, unknown>, mode: FormMode) => FormOption[];
     readOnlyInModes?: FormMode[];
+    resolveDisabled?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
+    clearOnDisable?: boolean;
+    clearOnInvalidOption?: boolean;
     validate?: ValidationFn;
     section?: string;
 }
@@ -106,6 +110,31 @@ export default function Form({
         return new Map(mergedFields.map((field) => [field.key, field]))
     }, [mergedFields])
 
+    const normalizedFormData = useMemo(
+        () => buildNormalizedFormData(formData, mergedFields, fieldMap, 'change'),
+        [fieldMap, formData, mergedFields]
+    )
+
+    const resolvedFields = useMemo(
+        () =>
+            mergedFields.map((field) => ({
+                ...field,
+                options: field.resolveOptions
+                    ? field.resolveOptions(normalizedFormData, mode)
+                    : field.options,
+                disabled:
+                    field.disabled ||
+                    (field.resolveDisabled
+                        ? field.resolveDisabled(normalizedFormData, mode)
+                        : false),
+            })),
+        [mergedFields, mode, normalizedFormData]
+    )
+
+    const resolvedFieldMap = useMemo(() => {
+        return new Map(resolvedFields.map((field) => [field.key, field]))
+    }, [resolvedFields])
+
     // Sincroniza estado inicial com objeto/camps fornecidos.
     useEffect(() => {
         if (isRecord(object)) {
@@ -125,9 +154,52 @@ export default function Form({
         setFormData({})
     }, [fieldMap, mergedFields, object])
 
+    useEffect(() => {
+        if (mode === 'view' || mode === 'delete') return
+
+        const nextUpdates: Record<string, unknown> = {}
+
+        resolvedFields.forEach((field) => {
+            if (field.type !== 'select') return
+
+            const currentValue = formData[field.key]
+            const hasCurrentValue =
+                currentValue !== undefined &&
+                currentValue !== null &&
+                String(currentValue).trim().length > 0
+
+            if (!hasCurrentValue) return
+
+            if (field.disabled && field.clearOnDisable) {
+                nextUpdates[field.key] = ''
+                return
+            }
+
+            if (field.clearOnInvalidOption) {
+                const hasMatchingOption = (field.options ?? []).some(
+                    (option) => String(option.value) === String(currentValue)
+                )
+
+                if (!hasMatchingOption) {
+                    nextUpdates[field.key] = ''
+                }
+            }
+        })
+
+        if (Object.keys(nextUpdates).length === 0) return
+
+        setFormData((previous) => {
+            const hasAnyChange = Object.entries(nextUpdates).some(
+                ([key, value]) => previous[key] !== value
+            )
+
+            return hasAnyChange ? { ...previous, ...nextUpdates } : previous
+        })
+    }, [formData, mode, resolvedFields])
+
     // Oculta identificadores implicitos, salvo override explicito.
     const fieldsToHide = hiddenFields ?? DEFAULT_HIDDEN_FIELDS
-    const visibleFields = mergedFields.filter((field) => !field.hidden && !fieldsToHide.includes(field.key))
+    const visibleFields = resolvedFields.filter((field) => !field.hidden && !fieldsToHide.includes(field.key))
 
     const isViewMode = mode === 'view'
     const isReadOnlyMode = mode === 'view' || mode === 'delete'
@@ -140,7 +212,7 @@ export default function Form({
     const validateFields = (fieldsForValidation: FormFieldConfig[]) => {
         const nextErrors: Record<string, string> = {}
         const validatedKeys = fieldsForValidation.map((field) => field.key)
-        const normalizedFormData = buildNormalizedFormData(formData, mergedFields, fieldMap, 'submit')
+        const normalizedFormData = buildNormalizedFormData(formData, resolvedFields, resolvedFieldMap, 'submit')
 
         fieldsForValidation.forEach((field) => {
             const value = normalizedFormData[field.key]
@@ -184,7 +256,7 @@ export default function Form({
         if (!onConfirm) return
         if (!validateFields(visibleFields)) return
 
-        const normalizedFormData = buildNormalizedFormData(formData, mergedFields, fieldMap, 'submit')
+        const normalizedFormData = buildNormalizedFormData(formData, resolvedFields, resolvedFieldMap, 'submit')
 
         setIsLoading(true)
         try {

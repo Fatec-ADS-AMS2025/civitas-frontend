@@ -4,7 +4,6 @@ import { SITUACAO_ATIVO } from "@/global/situacao";
 import type { SelectOption } from "./despesas.types";
 
 export const DESPESAS_EXPORT_COLUMNS: TableColumn[] = [
-  { id: "id", label: "Registro" },
   { id: "codigo", label: "Codigo" },
   { id: "tipoCodigo", label: "Tipo de codigo" },
   { id: "categoria", label: "Categoria" },
@@ -45,8 +44,12 @@ export const EMPTY_DESPESA_FORM: Record<string, unknown> = {
   codigo: "",
   idTipoCodigo: "",
   idTipoDespesa: "",
+  idUnidadeConsumidora: "",
   uc: "",
+  valorPrevisto: "",
+  valorPago: "",
   consumoPrevisto: "",
+  consumoReal: "",
   dataEmicao: "",
   dataVencimento: "",
   idInstituicao: "",

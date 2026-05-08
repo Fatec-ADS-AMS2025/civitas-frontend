@@ -1,16 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  normalizeDateInput,
-  normalizeDespesaPayload,
-  validateDespesaDateRange,
-  validateRequiredUc,
-} from "@/global/formPayload";
-import {
-  getSituacaoLabel,
-  SITUACAO_ATIVO,
-} from "@/global/situacao";
+import { digitsOnly, normalizeDateInput, toTrimmedText } from "@/global/formPayload";
+import { SITUACAO_ATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
@@ -18,7 +10,10 @@ import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
 import { tipoCodigoService } from "@/hooks/tipoCodigo";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
+import { unidadeConsumidoraService } from "@/hooks/unidadeConsumidora";
+import { unidadeMedidaService } from "@/hooks/unidadeMedida";
 import { usuarioService } from "@/hooks/usuario";
+import { authStorage } from "@/lib/auth-storage";
 import type DespesaDTO from "@/models/despesa";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
@@ -26,6 +21,8 @@ import type OrcamentoDTO from "@/models/orcamento";
 import type SecretariaDTO from "@/models/secretaria";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
+import type UnidadeMedidaDTO from "@/models/unidadeMedida";
 import type UsuarioDTO from "@/models/usuario";
 
 const SOLICITA_UC_SIM = 1;
@@ -73,6 +70,8 @@ type DashboardData = {
   instituicoes: InstituicaoDTO[];
   secretarias: SecretariaDTO[];
   fornecedores: FornecedorDTO[];
+  unidadesConsumidoras: UnidadeConsumidoraDTO[];
+  unidadesMedida: UnidadeMedidaDTO[];
   usuarios: UsuarioDTO[];
 };
 
@@ -84,6 +83,8 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   instituicoes: [],
   secretarias: [],
   fornecedores: [],
+  unidadesConsumidoras: [],
+  unidadesMedida: [],
   usuarios: [],
 };
 
@@ -130,12 +131,16 @@ const parseDateTimestamp = (value?: string): number => {
   return new Date(year, month - 1, day).getTime();
 };
 
+const ensureValidDate = (value?: string): string => {
+  return normalizeDateInput(value) ?? normalizeDateInput(new Date().toISOString()) ?? "2026-01-01";
+};
+
 const resolveDespesaDate = (despesa: DespesaDTO): string => {
   return (
-    normalizeDateInput(despesa.data) ??
     normalizeDateInput(despesa.dataVencimento) ??
     normalizeDateInput(despesa.dataEmissao) ??
     normalizeDateInput(despesa.dataEmicao) ??
+    normalizeDateInput(despesa.data) ??
     ""
   );
 };
@@ -143,13 +148,14 @@ const resolveDespesaDate = (despesa: DespesaDTO): string => {
 const resolveDespesaDescricao = (despesa: DespesaDTO): string => {
   return (
     despesa.descricao?.trim() ??
+    despesa.uc?.trim() ??
     despesa.numeroDocumento?.trim() ??
     `Despesa ${despesa.id}`
   );
 };
 
 const resolveDespesaValor = (despesa: DespesaDTO): number => {
-  return Number(despesa.valor ?? despesa.consumoPrevisto ?? 0);
+  return Number(despesa.valorPrevisto ?? despesa.valor ?? despesa.consumoPrevisto ?? 0);
 };
 
 const resolveDespesaStatus = (despesa: DespesaDTO): number => {
@@ -248,14 +254,20 @@ const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
 
 const buildDespesaRows = (
   despesas: DespesaDTO[],
+  unidadesConsumidorasMap: Map<number, UnidadeConsumidoraDTO>,
   tiposDespesaMap: Map<number, TipoDespesaDTO>,
   tipoCodigosMap: Map<number, TipoCodigoDTO>
 ): DespesaDashboardRow[] => {
   return despesas
     .map((despesa) => {
+      const unidadeConsumidora = despesa.idUnidadeConsumidora
+        ? unidadesConsumidorasMap.get(despesa.idUnidadeConsumidora)
+        : undefined;
+      const resolvedTipoDespesaId =
+        despesa.idTipoDespesa ?? unidadeConsumidora?.idTipoDespesa;
       const tipoDespesa =
-        despesa.idTipoDespesa !== undefined
-          ? tiposDespesaMap.get(despesa.idTipoDespesa)
+        resolvedTipoDespesaId !== undefined
+          ? tiposDespesaMap.get(resolvedTipoDespesaId)
           : undefined;
       const tipoCodigo =
         tipoDespesa?.idTipoCodigo !== undefined
@@ -265,6 +277,17 @@ const buildDespesaRows = (
       const resolvedValue = resolveDespesaValor(despesa);
       const situacao = resolveDespesaStatus(despesa);
       const solicitaUc = tipoDespesa?.solicitaUc === SOLICITA_UC_SIM;
+      const resolvedUc = toTrimmedText(despesa.uc) || unidadeConsumidora?.identificador || "";
+      const normalizedRaw: DespesaDTO = {
+        ...despesa,
+        idTipoDespesa: resolvedTipoDespesaId,
+        idInstituicao: despesa.idInstituicao ?? unidadeConsumidora?.idInstituicao,
+        idOrcamento: despesa.idOrcamento ?? unidadeConsumidora?.idOrcamento,
+        idFornecedor: despesa.idFornecedor ?? unidadeConsumidora?.idFornecedor,
+        idUnidadeConsumidora: despesa.idUnidadeConsumidora ?? unidadeConsumidora?.id,
+        uc: resolvedUc,
+        valor: despesa.valor ?? despesa.valorPrevisto,
+      };
 
       return {
         id: despesa.id,
@@ -278,7 +301,7 @@ const buildDespesaRows = (
           tipoCodigo?.nome?.trim() ||
           tipoCodigo?.descricao?.trim() ||
           "Tipo de codigo nao informado",
-        descricao: resolveDespesaDescricao(despesa),
+        descricao: resolveDespesaDescricao(normalizedRaw),
         valor: resolvedValue,
         valorFormatado: formatCurrency(resolvedValue),
         data: resolvedDate,
@@ -288,7 +311,7 @@ const buildDespesaRows = (
         solicitaUc,
         solicitaUcLabel: solicitaUc ? "Sim" : "Nao",
         numeroDocumento: despesa.numeroDocumento ?? "",
-        raw: despesa,
+        raw: normalizedRaw,
       };
     })
     .sort((current, next) => {
@@ -381,166 +404,121 @@ const matchesOrcamentoFilters = (
   return true;
 };
 
-const validateLookupRelationship = (
-  payload: DespesaDTO,
-  data: DashboardData,
-  selectedTipoCodigoId?: number
-): string | undefined => {
-  const tipoDespesa = data.tiposDespesa.find((item) => item.id === payload.idTipoDespesa);
-  if (!tipoDespesa) {
-    return "Selecione um tipo de despesa valido.";
-  }
-
-  if (
-    selectedTipoCodigoId &&
-    selectedTipoCodigoId > 0 &&
-    tipoDespesa.idTipoCodigo !== selectedTipoCodigoId
-  ) {
-    return "Selecione uma categoria compativel com o tipo de codigo informado.";
-  }
-
-  const orcamento = data.orcamentos.find(
-    (item) => item.idOrcamento === payload.idOrcamento
-  );
-  if (!orcamento) {
-    return "Selecione um orcamento valido.";
-  }
-
-  const instituicao = data.instituicoes.find((item) => item.id === payload.idInstituicao);
-  if (!instituicao) {
-    return "Selecione uma instituicao valida.";
-  }
-
-  const fornecedor = data.fornecedores.find(
-    (item) => item.idFornecedor === payload.idFornecedor
-  );
-  if (!fornecedor) {
-    return "Selecione um fornecedor valido.";
-  }
-
-  const usuario = data.usuarios.find((item) => item.id === payload.idUsuario);
-  if (!usuario) {
-    return "Selecione um usuario valido.";
-  }
-
-  if ((orcamento.idInstituicao ?? 0) !== payload.idInstituicao) {
-    return "O orcamento informado nao pertence a instituicao selecionada.";
-  }
-
-  if (
-    orcamento.idTipoDespesa &&
-    orcamento.idTipoDespesa > 0 &&
-    orcamento.idTipoDespesa !== payload.idTipoDespesa
-  ) {
-    return "O orcamento informado nao esta vinculado ao tipo de despesa selecionado.";
-  }
-
-  const ucError = validateRequiredUc(payload.uc, tipoDespesa.solicitaUc === SOLICITA_UC_SIM);
-  if (ucError) {
-    return ucError;
-  }
-
-  return undefined;
-};
-
 const buildDespesaPayload = (
   formData: Record<string, unknown>,
   data: DashboardData,
   currentDespesa?: DespesaDTO
 ): DespesaDTO => {
-  const normalizedPayload = normalizeDespesaPayload({
-    id: Number(formData.id ?? currentDespesa?.id ?? 0),
-    numeroDocumento:
-      formData.numeroDocumento ?? currentDespesa?.numeroDocumento ?? "",
-    codigo: formData.codigo ?? currentDespesa?.codigo ?? "",
-    uc: formData.uc ?? currentDespesa?.uc ?? "",
-    dataEmissao:
-      formData.dataEmissao ??
-      formData.dataEmicao ??
-      currentDespesa?.dataEmissao ??
-      currentDespesa?.dataEmicao ??
-      "",
-    dataEmicao:
-      formData.dataEmissao ??
-      formData.dataEmicao ??
-      currentDespesa?.dataEmissao ??
-      currentDespesa?.dataEmicao ??
-      "",
-    consumoPrevisto:
-      formData.consumoPrevisto ??
-      formData.valor ??
-      currentDespesa?.consumoPrevisto ??
-      currentDespesa?.valor ??
-      0,
-    dataVencimento:
-      formData.dataVencimento ??
-      currentDespesa?.dataVencimento ??
-      currentDespesa?.data ??
-      "",
-    status:
-      formData.status ??
-      formData.situacao ??
-      currentDespesa?.status ??
-      currentDespesa?.situacao ??
-      SITUACAO_ATIVO,
-    situacao: formData.situacao ?? currentDespesa?.situacao ?? SITUACAO_ATIVO,
-    idTipoDespesa: formData.idTipoDespesa ?? currentDespesa?.idTipoDespesa,
-    idOrcamento: formData.idOrcamento ?? currentDespesa?.idOrcamento,
-    idInstituicao: formData.idInstituicao ?? currentDespesa?.idInstituicao,
-    idFornecedor:
-      formData.idFornecedor ??
-      currentDespesa?.idFornecedor ??
-      currentDespesa?.fornecedorId,
-    idUsuario: formData.idUsuario ?? currentDespesa?.idUsuario,
-  }) as DespesaDTO;
+  const idUnidadeConsumidora = Number(
+    formData.idUnidadeConsumidora ?? currentDespesa?.idUnidadeConsumidora ?? 0
+  );
+  if (!Number.isFinite(idUnidadeConsumidora) || idUnidadeConsumidora <= 0) {
+    throw new Error("Selecione uma unidade consumidora valida.");
+  }
 
-  if (!normalizedPayload.numeroDocumento) {
+  const unidadeConsumidora = data.unidadesConsumidoras.find(
+    (item) => item.id === idUnidadeConsumidora
+  );
+  if (!unidadeConsumidora) {
+    throw new Error("A unidade consumidora selecionada nao foi encontrada.");
+  }
+
+  const valorPrevisto = Number(
+    formData.valorPrevisto ?? currentDespesa?.valorPrevisto ?? currentDespesa?.valor ?? 0
+  );
+  if (!Number.isFinite(valorPrevisto) || valorPrevisto <= 0) {
+    throw new Error("Informe um valor previsto maior que zero.");
+  }
+
+  const consumoPrevisto = Number(
+    formData.consumoPrevisto ?? currentDespesa?.consumoPrevisto ?? 0
+  );
+  if (!Number.isFinite(consumoPrevisto) || consumoPrevisto < 0) {
+    throw new Error("Consumo previsto nao pode ser negativo.");
+  }
+
+  const valorPago = Number(formData.valorPago ?? currentDespesa?.valorPago ?? 0);
+  if (!Number.isFinite(valorPago) || valorPago < 0) {
+    throw new Error("Valor pago nao pode ser negativo.");
+  }
+
+  const consumoReal = Number(formData.consumoReal ?? currentDespesa?.consumoReal ?? 0);
+  if (!Number.isFinite(consumoReal) || consumoReal < 0) {
+    throw new Error("Consumo real nao pode ser negativo.");
+  }
+
+  const numeroDocumentoInformado = digitsOnly(
+    formData.numeroDocumento ?? currentDespesa?.numeroDocumento ?? ""
+  );
+  if (!numeroDocumentoInformado) {
     throw new Error("Numero do documento deve conter apenas numeros.");
   }
 
-  if (!normalizedPayload.dataEmicao) {
-    throw new Error("Data de emissao invalida.");
+  const codigoInformado = toTrimmedText(
+    formData.codigo ?? currentDespesa?.codigo ?? unidadeConsumidora.identificador
+  ).slice(0, 100);
+
+  const usuarioResponsavelId =
+    Number(formData.idUsuario) ||
+    currentDespesa?.idUsuario ??
+    authStorage.get()?.id ??
+    data.usuarios.find((item) => item.situacao === SITUACAO_ATIVO)?.id;
+
+  if (!usuarioResponsavelId) {
+    throw new Error("Nao foi possivel identificar o usuario responsavel pela despesa.");
   }
 
-  if (!normalizedPayload.dataVencimento) {
-    throw new Error("Data de vencimento invalida.");
-  }
-
-  const dateRangeError = validateDespesaDateRange(
-    normalizedPayload.dataEmicao,
-    normalizedPayload.dataVencimento
+  const today = ensureValidDate();
+  const formDataDataEmissao =
+    typeof formData.dataEmissao === "string" ? formData.dataEmissao : undefined;
+  const formDataDataEmicao =
+    typeof formData.dataEmicao === "string" ? formData.dataEmicao : undefined;
+  const formDataDataVencimento =
+    typeof formData.dataVencimento === "string"
+      ? formData.dataVencimento
+      : undefined;
+  const dataEmissao = ensureValidDate(
+    formDataDataEmissao ??
+      formDataDataEmicao ??
+      currentDespesa?.dataEmissao ??
+      currentDespesa?.dataEmicao ??
+      today
+  );
+  const dataVencimento = ensureValidDate(
+    formDataDataVencimento ?? currentDespesa?.dataVencimento ?? today
+  );
+  const situacao = Number(
+    formData.status ??
+      formData.situacao ??
+      currentDespesa?.status ??
+      currentDespesa?.situacao ??
+      SITUACAO_ATIVO
   );
 
-  if (dateRangeError) {
-    throw new Error(dateRangeError);
-  }
-
-  const consumoPrevisto = Number(normalizedPayload.consumoPrevisto ?? 0);
-  if (Number.isNaN(consumoPrevisto) || consumoPrevisto < 0) {
-    throw new Error("Valor da despesa nao pode ser negativo.");
-  }
-
-  const selectedTipoCodigoId = Number(formData.idTipoCodigo ?? 0);
-  const lookupError = validateLookupRelationship(
-    normalizedPayload,
-    data,
-    Number.isFinite(selectedTipoCodigoId) ? selectedTipoCodigoId : 0
-  );
-  if (lookupError) {
-    throw new Error(lookupError);
+  if (!Number.isFinite(situacao) || situacao <= 0) {
+    throw new Error("Selecione um status financeiro valido.");
   }
 
   return {
-    ...normalizedPayload,
-    id: currentDespesa?.id ?? Number(normalizedPayload.id ?? 0),
+    id: currentDespesa?.id ?? 0,
+    numeroDocumento: numeroDocumentoInformado,
+    codigo: codigoInformado || unidadeConsumidora.identificador,
+    uc: toTrimmedText(formData.uc) || unidadeConsumidora.identificador,
+    dataEmissao,
+    dataEmicao: dataEmissao,
+    valorPrevisto,
+    valorPago,
     consumoPrevisto,
-    status: Number(normalizedPayload.status ?? normalizedPayload.situacao ?? SITUACAO_ATIVO),
-    situacao: Number(normalizedPayload.situacao ?? SITUACAO_ATIVO),
-    idTipoDespesa: Number(normalizedPayload.idTipoDespesa),
-    idOrcamento: Number(normalizedPayload.idOrcamento),
-    idInstituicao: Number(normalizedPayload.idInstituicao),
-    idFornecedor: Number(normalizedPayload.idFornecedor),
-    idUsuario: Number(normalizedPayload.idUsuario),
+    consumoReal,
+    dataVencimento,
+    status: situacao,
+    situacao,
+    idTipoDespesa: unidadeConsumidora.idTipoDespesa,
+    idOrcamento: unidadeConsumidora.idOrcamento,
+    idInstituicao: unidadeConsumidora.idInstituicao,
+    idFornecedor: unidadeConsumidora.idFornecedor,
+    idUsuario: usuarioResponsavelId,
+    idUnidadeConsumidora,
   };
 };
 
@@ -553,6 +531,8 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     instituicoes,
     secretarias,
     fornecedores,
+    unidadesConsumidoras,
+    unidadesMedida,
     usuarios,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
@@ -562,6 +542,8 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     instituicaoService.getAllData(),
     secretariaService.getAllData(),
     fornecedorService.getAllData(),
+    unidadeConsumidoraService.getAllActiveData(),
+    unidadeMedidaService.getAllData(),
     usuarioService.getAllData(),
   ]);
 
@@ -573,6 +555,8 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     instituicoes: instituicoes ?? [],
     secretarias: secretarias ?? [],
     fornecedores: fornecedores ?? [],
+    unidadesConsumidoras: unidadesConsumidoras ?? [],
+    unidadesMedida: unidadesMedida ?? [],
     usuarios: usuarios ?? [],
   };
 };
@@ -605,16 +589,39 @@ export const useDespesasDashboard = () => {
   }, [refetch]);
 
   const tiposDespesaMap = useMemo(() => {
-    return new Map(dashboardData.tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa]));
+    return new Map(
+      dashboardData.tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa])
+    );
   }, [dashboardData.tiposDespesa]);
 
   const tipoCodigosMap = useMemo(() => {
-    return new Map(dashboardData.tipoCodigos.map((tipoCodigo) => [tipoCodigo.id, tipoCodigo]));
+    return new Map(
+      dashboardData.tipoCodigos.map((tipoCodigo) => [tipoCodigo.id, tipoCodigo])
+    );
   }, [dashboardData.tipoCodigos]);
 
+  const unidadesConsumidorasMap = useMemo(() => {
+    return new Map(
+      dashboardData.unidadesConsumidoras.map((unidadeConsumidora) => [
+        unidadeConsumidora.id,
+        unidadeConsumidora,
+      ])
+    );
+  }, [dashboardData.unidadesConsumidoras]);
+
   const despesas = useMemo(() => {
-    return buildDespesaRows(dashboardData.despesas, tiposDespesaMap, tipoCodigosMap);
-  }, [dashboardData.despesas, tiposDespesaMap, tipoCodigosMap]);
+    return buildDespesaRows(
+      dashboardData.despesas,
+      unidadesConsumidorasMap,
+      tiposDespesaMap,
+      tipoCodigosMap
+    );
+  }, [
+    dashboardData.despesas,
+    tipoCodigosMap,
+    tiposDespesaMap,
+    unidadesConsumidorasMap,
+  ]);
 
   const filteredDespesas = useMemo(() => {
     return despesas.filter((despesa) => matchesDespesaFilters(despesa, filters));
@@ -685,10 +692,7 @@ export const useDespesasDashboard = () => {
       try {
         await despesaService.delete(id);
       } catch (error) {
-        if (
-          isHttpNotFoundError(error) ||
-          isHttpMethodNotAllowedError(error)
-        ) {
+        if (isHttpNotFoundError(error) || isHttpMethodNotAllowedError(error)) {
           await despesaService.alterarSituacao(id);
         } else {
           throw error;
@@ -711,6 +715,8 @@ export const useDespesasDashboard = () => {
       instituicoes: dashboardData.instituicoes,
       secretarias: dashboardData.secretarias,
       fornecedores: dashboardData.fornecedores,
+      unidadesConsumidoras: dashboardData.unidadesConsumidoras,
+      unidadesMedida: dashboardData.unidadesMedida,
       usuarios: dashboardData.usuarios,
       summary,
       loading,
@@ -734,6 +740,8 @@ export const useDespesasDashboard = () => {
       dashboardData.instituicoes,
       dashboardData.secretarias,
       dashboardData.fornecedores,
+      dashboardData.unidadesConsumidoras,
+      dashboardData.unidadesMedida,
       dashboardData.usuarios,
       summary,
       loading,

@@ -1,9 +1,13 @@
 import type { Dispatch, SetStateAction } from "react";
-import Form, { type FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import Form from "@/components/Form/form";
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import Modal from "@/components/modal";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
-import { EMPTY_DESPESA_FORM } from "../despesas.constants";
 import { buildDespesaFormObject } from "../despesas.utils";
+import DespesaForm, {
+  type DespesaResponsavelOption,
+  type DespesaUcOption,
+} from "./DespesaForm";
 
 type DespesaCrudModalsProps = {
   isCreateModalOpen: boolean;
@@ -12,7 +16,9 @@ type DespesaCrudModalsProps = {
   setEditingDespesa: Dispatch<SetStateAction<DespesaDashboardRow | null>>;
   viewingDespesa: DespesaDashboardRow | null;
   setViewingDespesa: Dispatch<SetStateAction<DespesaDashboardRow | null>>;
-  fields: ModalFieldConfig[];
+  unidadesConsumidoras: DespesaUcOption[];
+  usuarios: DespesaResponsavelOption[];
+  viewFields: ModalFieldConfig[];
   onCreateSubmit: (formData: Record<string, unknown>) => Promise<void>;
   onEditSubmit: (formData: Record<string, unknown>) => Promise<void>;
 };
@@ -24,7 +30,9 @@ export default function DespesaCrudModals({
   setEditingDespesa,
   viewingDespesa,
   setViewingDespesa,
-  fields,
+  unidadesConsumidoras,
+  usuarios,
+  viewFields,
   onCreateSubmit,
   onEditSubmit,
 }: DespesaCrudModalsProps) {
@@ -32,11 +40,10 @@ export default function DespesaCrudModals({
     <>
       {isCreateModalOpen ? (
         <Modal value={isCreateModalOpen} setValue={setIsCreateModalOpen}>
-          <Form
-            object={EMPTY_DESPESA_FORM}
-            name="despesa"
-            type="create"
-            fields={fields}
+          <DespesaForm
+            mode="create"
+            ucs={unidadesConsumidoras}
+            usuarios={usuarios}
             onCancel={() => setIsCreateModalOpen(false)}
             onConfirm={onCreateSubmit}
           />
@@ -45,11 +52,11 @@ export default function DespesaCrudModals({
 
       {editingDespesa ? (
         <Modal value={true} setValue={() => setEditingDespesa(null)}>
-          <Form
-            object={buildDespesaFormObject(editingDespesa)}
-            name="despesa"
-            type="edit"
-            fields={fields}
+          <DespesaForm
+            mode="edit"
+            ucs={unidadesConsumidoras}
+            usuarios={usuarios}
+            initialValues={buildDespesaFormObject(editingDespesa)}
             onCancel={() => setEditingDespesa(null)}
             onConfirm={onEditSubmit}
           />
@@ -62,7 +69,8 @@ export default function DespesaCrudModals({
             object={buildDespesaFormObject(viewingDespesa)}
             name="despesa"
             type="view"
-            fields={fields}
+            fields={viewFields}
+            hiddenFields={[]}
             onCancel={() => setViewingDespesa(null)}
           />
         </Modal>

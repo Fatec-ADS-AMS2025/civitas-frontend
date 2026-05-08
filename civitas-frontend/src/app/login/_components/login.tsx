@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Checkbox from '@/components/checkbox'
 import Button from '@/components/button'
 import { Input } from '@/components/Input'
 import useAuth from '@/hooks/useAuth'
 import { useAppNavigation } from '@/hooks/useNavigationProgress'
+import { credentialsStorage } from '@/lib/auth-storage'
 
 type FormErrors = {
 	email: string
@@ -21,6 +22,18 @@ export default function Login() {
 
 	const { push } = useAppNavigation()
 	const { login, isLoading, error: generalError, clearError } = useAuth()
+
+	useEffect(() => {
+		const savedCredentials = credentialsStorage.get()
+
+		if (!savedCredentials) {
+			return
+		}
+
+		setEmail(savedCredentials.email)
+		setPassword(savedCredentials.password)
+		setRememberMe(true)
+	}, [])
 
 	const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
@@ -44,10 +57,20 @@ export default function Login() {
 		}
 
 		try {
-			const result = await login({ email: email.trim(), password })
+			const normalizedEmail = email.trim()
+			const result = await login({ email: normalizedEmail, password })
 
 			if (!result) {
 				return
+			}
+
+			if (rememberMe) {
+				credentialsStorage.set({
+					email: normalizedEmail,
+					password,
+				})
+			} else {
+				credentialsStorage.clear()
 			}
 
 			push('/dashboard')

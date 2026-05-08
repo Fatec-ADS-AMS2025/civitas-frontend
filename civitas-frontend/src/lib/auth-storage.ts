@@ -1,4 +1,5 @@
 export const AUTH_STORAGE_KEY = 'civitas.auth.user';
+export const AUTH_CREDENTIALS_STORAGE_KEY = 'civitas.auth.credentials';
 
 export type AuthStorageUser = {
   id: number;
@@ -6,6 +7,11 @@ export type AuthStorageUser = {
   token: string;
   expiresAtUtc: string;
   tipoUsuario?: string;
+};
+
+export type AuthStoredCredentials = {
+  email: string;
+  password: string;
 };
 
 const isBrowser = () => typeof window !== 'undefined';
@@ -72,6 +78,57 @@ export const authStorage = {
       window.localStorage.removeItem(AUTH_STORAGE_KEY);
     } catch (error) {
       console.error('[authStorage] Falha ao remover usuario do localStorage.', error);
+    }
+  },
+};
+
+export const credentialsStorage = {
+  get(): AuthStoredCredentials | null {
+    if (!isBrowser()) return null;
+
+    try {
+      const raw = window.localStorage.getItem(AUTH_CREDENTIALS_STORAGE_KEY);
+      if (!raw) return null;
+
+      const parsed = JSON.parse(raw) as Partial<AuthStoredCredentials> | null;
+      if (
+        !parsed ||
+        typeof parsed.email !== 'string' ||
+        parsed.email.trim() === '' ||
+        typeof parsed.password !== 'string' ||
+        parsed.password.trim() === ''
+      ) {
+        console.warn('[credentialsStorage] Dados invalidos encontrados no localStorage. Limpando registro.');
+        window.localStorage.removeItem(AUTH_CREDENTIALS_STORAGE_KEY);
+        return null;
+      }
+
+      return {
+        email: parsed.email.trim(),
+        password: parsed.password,
+      };
+    } catch (error) {
+      console.error('[credentialsStorage] Falha ao ler credenciais salvas no localStorage.', error);
+      return null;
+    }
+  },
+
+  set(credentials: AuthStoredCredentials) {
+    if (!isBrowser()) return;
+    try {
+      window.localStorage.setItem(AUTH_CREDENTIALS_STORAGE_KEY, JSON.stringify(credentials));
+    } catch (error) {
+      console.error('[credentialsStorage] Falha ao salvar credenciais no localStorage.', error);
+      throw error;
+    }
+  },
+
+  clear() {
+    if (!isBrowser()) return;
+    try {
+      window.localStorage.removeItem(AUTH_CREDENTIALS_STORAGE_KEY);
+    } catch (error) {
+      console.error('[credentialsStorage] Falha ao remover credenciais do localStorage.', error);
     }
   },
 };
