@@ -1,272 +1,703 @@
 "use client";
 
-import React, { useMemo } from "react";
-import Form, { type FieldConfig } from "@/components/Form/form";
+import React, { useEffect, useMemo, useState } from "react";
+import Button from "@/components/button";
+import Input from "@/components/Input";
+import { digitsOnly, normalizeDateInput, validateDespesaDateRange } from "@/global/formPayload";
+import { authStorage } from "@/lib/auth-storage";
 
-export type UcItem = {
+export type DespesaUcOption = {
   id: number;
   identificador: string;
+  idInstituicao: number;
+  instituicaoNome: string;
+  idSecretaria: number;
+  secretariaNome: string;
+  idTipoCodigo?: number | null;
+  tipoCodigoNome: string;
+  idTipoDespesa: number;
+  tipoDespesaNome: string;
+  idUnidadeMedida?: number | null;
+  unidadeMedidaNome: string;
+  idFornecedor: number;
+  fornecedorNome: string;
+  idOrcamento: number;
+  orcamentoLabel: string;
 };
 
-export type DespesaFormValues = {
-  ucId: number | "";
-  ucIdentificador: string;
-  valorDespesa: number | "";
-  consumoPrevisto: number | "";
+export type DespesaResponsavelOption = {
+  value: number;
+  label: string;
 };
+
+export type DespesaFormMode = "create" | "edit" | "view";
+
+export type DespesaFormValues = Record<string, unknown> & {
+  idUnidadeConsumidora: number | "";
+  uc: string;
+  numeroDocumento: string;
+  codigo: string;
+  idTipoCodigo: number | "";
+  idTipoDespesa: number | "";
+  idInstituicao: number | "";
+  idOrcamento: number | "";
+  idFornecedor: number | "";
+  idUsuario: number | "";
+  valorPrevisto: number | "";
+  valorPago: number | "";
+  consumoPrevisto: number | "";
+  consumoReal: number | "";
+  dataEmicao: string;
+  dataVencimento: string;
+  situacao: number | "";
+  status: number | "";
+};
+
+export type DespesaFormInitialValues = Partial<DespesaFormValues>;
 
 type DespesaFormProps = {
-  ucs: UcItem[];
-  selectedUc: UcItem | null;
-  onSelectUc: (uc: UcItem) => void;
+  mode: DespesaFormMode;
+  ucs: DespesaUcOption[];
+  usuarios: DespesaResponsavelOption[];
+  initialValues?: DespesaFormInitialValues;
   onCancel: () => void;
-  onConfirm: (values: DespesaFormValues) => void;
+  onConfirm?: (values: DespesaFormValues) => Promise<void> | void;
 };
 
-// Mensagem padrao usada quando o usuario tenta confirmar sem UC selecionada.
-const ucSelectionMessage = "Selecione uma UC na tabela ao lado.";
+const STATUS_OPTIONS = [
+  { value: 1, label: "A pagar" },
+  { value: 2, label: "Paga" },
+  { value: 3, label: "Atrasada" },
+];
 
-// Valida se a UC foi escolhida e propagada aos campos somente leitura.
-const validateSelectedUc = (value: unknown, formData: Record<string, unknown>) => {
-  const ucId = Number(formData.ucId);
-  const hasUc = Number.isFinite(ucId) && ucId > 0;
-  const hasIdentifier = Boolean(String(value ?? "").trim());
+const getTodayDate = () => new Date().toISOString().slice(0, 10);
 
-  if (!hasUc || !hasIdentifier) {
-    return ucSelectionMessage;
-  }
+const toNumberOrEmpty = (value: unknown): number | "" => {
+  if (value === "" || value === undefined || value === null) return "";
+  const parsedValue = Number(value);
+  return Number.isFinite(parsedValue) ? parsedValue : "";
+};
 
-  return undefined;
+const buildInitialFormValues = (
+  initialValues: DespesaFormInitialValues | undefined,
+  currentUserId: number | null,
+  mode: DespesaFormMode
+): DespesaFormValues => {
+  const isCreateMode = mode === "create";
+  const defaultStatus = toNumberOrEmpty(
+    initialValues?.situacao ?? initialValues?.status ?? 1
+  );
+  return {
+    idUnidadeConsumidora: toNumberOrEmpty(initialValues?.idUnidadeConsumidora),
+    uc: String(initialValues?.uc ?? ""),
+    numeroDocumento: String(initialValues?.numeroDocumento ?? ""),
+    codigo: String(initialValues?.codigo ?? ""),
+    idTipoCodigo: toNumberOrEmpty(initialValues?.idTipoCodigo),
+    idTipoDespesa: toNumberOrEmpty(initialValues?.idTipoDespesa),
+    idInstituicao: toNumberOrEmpty(initialValues?.idInstituicao),
+    idOrcamento: toNumberOrEmpty(initialValues?.idOrcamento),
+    idFornecedor: toNumberOrEmpty(initialValues?.idFornecedor),
+    idUsuario: toNumberOrEmpty(initialValues?.idUsuario ?? currentUserId ?? ""),
+    valorPrevisto: toNumberOrEmpty(initialValues?.valorPrevisto),
+    valorPago: toNumberOrEmpty(initialValues?.valorPago ?? (isCreateMode ? 0 : "")),
+    consumoPrevisto: toNumberOrEmpty(initialValues?.consumoPrevisto),
+    consumoReal: toNumberOrEmpty(initialValues?.consumoReal ?? (isCreateMode ? 0 : "")),
+    dataEmicao: normalizeDateInput(initialValues?.dataEmicao) ?? getTodayDate(),
+    dataVencimento: normalizeDateInput(initialValues?.dataVencimento) ?? getTodayDate(),
+    situacao: defaultStatus,
+    status: defaultStatus,
+  };
 };
 
 const validatePositiveNumber = (value: unknown, label: string) => {
   const numericValue = Number(value);
-
-  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+  if (!Number.isFinite(numericValue) || numericValue <= 0)
     return `${label} deve ser maior que zero.`;
-  }
-
   return undefined;
 };
 
-const validateNonNegativeNumber = (value: unknown, label: string) => {
+const validateOptionalNonNegativeNumber = (value: unknown, label: string) => {
+  if (value === "" || value === undefined || value === null) return undefined;
   const numericValue = Number(value);
-
-  if (!Number.isFinite(numericValue) || numericValue < 0) {
+  if (!Number.isFinite(numericValue) || numericValue < 0)
     return `${label} nao pode ser negativo.`;
-  }
-
   return undefined;
 };
 
-// Rotulos curtos evitam quebra e mantem a primeira linha alinhada.
-// Campos de UC ficam somente leitura e os valores financeiros sao obrigatorios.
-const DESPESA_FORM_FIELDS: FieldConfig[] = [
-  {
-    key: "ucId",
-    label: "UC (ID)",
-    placeholder: "Selecione uma UC",
-    disabled: true,
-  },
-  {
-    key: "ucIdentificador",
-    label: "Identificador UC",
-    placeholder: "Selecione uma UC",
-    disabled: true,
-    required: true,
-    validate: validateSelectedUc,
-  },
-  {
-    key: "valorDespesa",
-    label: "Valor da despesa",
-    placeholder: "0,00",
-    type: "number",
-    mask: "currency",
-    inputMode: "decimal",
-    required: true,
-    validate: (value) => validatePositiveNumber(value, "Valor da despesa"),
-  },
-  {
-    key: "consumoPrevisto",
-    label: "Consumo previsto",
-    placeholder: "0",
-    type: "number",
-    inputMode: "decimal",
-    required: true,
-    validate: (value) => validateNonNegativeNumber(value, "Consumo previsto"),
-  },
-];
+const selectClassName =
+  "w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]";
 
-const getUcRowClassName = (isSelected: boolean) => {
-  // Destaque sutil, mas mais visivel: barra lateral + anel leve na selecao.
-  return `group cursor-pointer border-l-4 transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] ${
-    isSelected
-      ? "border-[var(--border-accent-teal)] bg-[var(--surface-subtle)] ring-1 ring-[var(--border-accent-teal)]"
-      : "border-transparent bg-[var(--surface-elevated)] hover:bg-[var(--surface-subtle)] ring-1 ring-transparent hover:ring-[var(--border-soft)]"
-  }`;
-};
+// ---------------------------------------------------------------------------
+// Subcomponentes internos
+// ---------------------------------------------------------------------------
 
-const ucActionButtonClassName =
-  "civitas-action civitas-action--ghost inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-xs font-semibold";
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-3 flex items-center gap-2">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)] whitespace-nowrap">
+        {children}
+      </p>
+      <div className="h-px flex-1 bg-[var(--border-soft)]" />
+    </div>
+  );
+}
+
+function ReadonlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-muted)]">
+        {label}
+      </span>
+      <div className="min-h-[36px] rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-2 text-sm text-[var(--foreground)] truncate">
+        {value || <span className="italic text-[var(--foreground-muted)]">—</span>}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Componente principal
+// ---------------------------------------------------------------------------
 
 export default function DespesaForm({
+  mode,
   ucs,
-  selectedUc,
-  onSelectUc,
+  usuarios,
+  initialValues,
   onCancel,
   onConfirm,
 }: DespesaFormProps) {
-  // Espelha a UC selecionada nos campos do formulario (somente leitura).
-  const formObject = useMemo(
+  const isViewMode = mode === "view";
+  const isCreateMode = mode === "create";
+
+  const [currentAuthUser, setCurrentAuthUser] = useState(() => authStorage.get());
+  const currentUserId = currentAuthUser?.id ?? null;
+
+  const [search, setSearch] = useState("");
+  const [selectedUc, setSelectedUc] = useState<DespesaUcOption | null>(null);
+  const [formValues, setFormValues] = useState<DespesaFormValues>(() =>
+    buildInitialFormValues(initialValues, currentUserId, mode)
+  );
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const filteredUcs = useMemo(() => {
+    const q = search.toLowerCase();
+    return ucs.filter(
+      (uc) =>
+        String(uc.id).includes(q) ||
+        uc.identificador.toLowerCase().includes(q)
+    );
+  }, [ucs, search]);
+
+  const selectedUcSummary = useMemo(
     () => ({
-      ucId: selectedUc?.id ?? "",
-      ucIdentificador: selectedUc?.identificador ?? "",
-      valorDespesa: "",
-      consumoPrevisto: "",
+      instituicao: selectedUc?.instituicaoNome ?? "",
+      secretaria: selectedUc?.secretariaNome ?? "",
+      tipoCodigo: selectedUc?.tipoCodigoNome ?? "",
+      tipoDespesa: selectedUc?.tipoDespesaNome ?? "",
+      unidadeMedida: selectedUc?.unidadeMedidaNome ?? "",
+      fornecedor: selectedUc?.fornecedorNome ?? "",
+      orcamento: selectedUc?.orcamentoLabel ?? "",
     }),
     [selectedUc]
   );
 
-  // Acessibilidade: permite selecionar por teclado com Enter/Espaco.
-  const handleRowKeyDown = (event: React.KeyboardEvent<HTMLTableRowElement>, uc: UcItem) => {
+  useEffect(() => {
+    setCurrentAuthUser(authStorage.get());
+  }, []);
+
+  useEffect(() => {
+    const nextValues = buildInitialFormValues(initialValues, currentUserId, mode);
+    setFormValues(nextValues);
+    setErrors({});
+    const initialUcId = Number(nextValues.idUnidadeConsumidora);
+    if (!Number.isFinite(initialUcId) || initialUcId <= 0) {
+      setSelectedUc(null);
+      return;
+    }
+    setSelectedUc(ucs.find((uc) => uc.id === initialUcId) ?? null);
+  }, [currentUserId, initialValues, mode, ucs]);
+
+  useEffect(() => {
+    if (!selectedUc) {
+      setFormValues((v) => ({
+        ...v,
+        idUnidadeConsumidora: "",
+        uc: "",
+        idTipoCodigo: "",
+        idTipoDespesa: "",
+        idInstituicao: "",
+        idOrcamento: "",
+        idFornecedor: "",
+      }));
+      return;
+    }
+    setFormValues((v) => ({
+      ...v,
+      idUnidadeConsumidora: selectedUc.id,
+      uc: selectedUc.identificador,
+      idTipoCodigo: selectedUc.idTipoCodigo ?? "",
+      idTipoDespesa: selectedUc.idTipoDespesa,
+      idInstituicao: selectedUc.idInstituicao,
+      idOrcamento: selectedUc.idOrcamento,
+      idFornecedor: selectedUc.idFornecedor,
+      codigo:
+        v.codigo && String(v.codigo).trim().length > 0
+          ? v.codigo
+          : selectedUc.identificador,
+    }));
+  }, [selectedUc]);
+
+  const handleSelectUc = (uc: DespesaUcOption) => {
+    if (isViewMode) return;
+    setSelectedUc(uc);
+    setErrors((e) => ({
+      ...e,
+      idUnidadeConsumidora: "",
+      uc: "",
+      idInstituicao: "",
+      idOrcamento: "",
+      idFornecedor: "",
+    }));
+  };
+
+  const handleRowKeyDown = (
+    event: React.KeyboardEvent<HTMLTableRowElement>,
+    uc: DespesaUcOption
+  ) => {
+    if (isViewMode) return;
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      onSelectUc(uc);
+      handleSelectUc(uc);
     }
   };
 
+  const handleValueChange = <K extends keyof DespesaFormValues>(
+    key: K,
+    value: DespesaFormValues[K]
+  ) => {
+    setFormValues((v) => ({ ...v, [key]: value }));
+    if (errors[key as string]) {
+      setErrors((e) => ({ ...e, [key]: "" }));
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isViewMode || !onConfirm) return;
+
+    const nextErrors: Record<string, string> = {};
+
+    if (!selectedUc) {
+      nextErrors.idUnidadeConsumidora = "Selecione uma UC na tabela ao lado.";
+    }
+
+    const numeroDocumento = digitsOnly(formValues.numeroDocumento);
+    if (!numeroDocumento)
+      nextErrors.numeroDocumento = "Numero do documento deve conter apenas numeros.";
+
+    if (String(formValues.codigo ?? "").trim().length > 100)
+      nextErrors.codigo = "Codigo deve ter no maximo 100 caracteres.";
+
+    const valorPrevistoError = validatePositiveNumber(formValues.valorPrevisto, "Valor previsto");
+    if (valorPrevistoError) nextErrors.valorPrevisto = valorPrevistoError;
+
+    const valorPagoError = validateOptionalNonNegativeNumber(formValues.valorPago, "Valor pago");
+    if (valorPagoError) nextErrors.valorPago = valorPagoError;
+
+    const consumoPrevistoError = validateOptionalNonNegativeNumber(formValues.consumoPrevisto, "Consumo previsto");
+    if (consumoPrevistoError) nextErrors.consumoPrevisto = consumoPrevistoError;
+
+    const consumoRealError = validateOptionalNonNegativeNumber(formValues.consumoReal, "Consumo real");
+    if (consumoRealError) nextErrors.consumoReal = consumoRealError;
+
+    const normalizedDataEmicao = normalizeDateInput(formValues.dataEmicao);
+    if (!normalizedDataEmicao) nextErrors.dataEmicao = "Data de emissao invalida.";
+
+    const normalizedDataVencimento = normalizeDateInput(formValues.dataVencimento);
+    if (!normalizedDataVencimento) nextErrors.dataVencimento = "Data de vencimento invalida.";
+
+    const dateRangeError = validateDespesaDateRange(normalizedDataEmicao, normalizedDataVencimento);
+    if (dateRangeError) nextErrors.dataVencimento = dateRangeError;
+
+    const resolvedResponsibleUserId =
+      Number(formValues.idUsuario) || currentUserId || authStorage.get()?.id || null;
+    if (!resolvedResponsibleUserId)
+      nextErrors.idUsuario = "Selecione um usuario responsavel.";
+
+    const resolvedStatus = isCreateMode ? 1 : Number(formValues.situacao);
+    if (!resolvedStatus) nextErrors.situacao = "Selecione um status financeiro.";
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    await onConfirm({
+      ...formValues,
+      numeroDocumento,
+      idUsuario: Number(resolvedResponsibleUserId),
+      valorPago: isCreateMode ? 0 : formValues.valorPago,
+      consumoReal: isCreateMode ? 0 : formValues.consumoReal,
+      dataEmicao: normalizedDataEmicao ?? "",
+      dataVencimento: normalizedDataVencimento ?? "",
+      status: resolvedStatus,
+      situacao: resolvedStatus,
+      uc: selectedUc?.identificador ?? formValues.uc,
+      idUnidadeConsumidora: selectedUc?.id ?? formValues.idUnidadeConsumidora,
+      idTipoCodigo: selectedUc?.idTipoCodigo ?? formValues.idTipoCodigo,
+      idTipoDespesa: selectedUc?.idTipoDespesa ?? formValues.idTipoDespesa,
+      idInstituicao: selectedUc?.idInstituicao ?? formValues.idInstituicao,
+      idOrcamento: selectedUc?.idOrcamento ?? formValues.idOrcamento,
+      idFornecedor: selectedUc?.idFornecedor ?? formValues.idFornecedor,
+    });
+  };
+
   return (
-    <div className="space-y-5">
-      <header>
+    <form className="flex h-full flex-col overflow-hidden" onSubmit={handleSubmit}>
+      {/* Header */}
+      <header className="flex-shrink-0 px-6 pt-5 pb-4 border-b border-[var(--border-soft)]">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
           Formulario de despesa
         </p>
-        <h3 className="mt-2 text-[28px] font-semibold text-[var(--secundary-1)]">
+        <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">
           Selecione uma UC e registre o gasto
         </h3>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-          Escolha a unidade consumidora ao lado e preencha os valores financeiros da
-          despesa para simular o cadastro.
+        <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
+          Escolha a unidade consumidora ao lado. Os vinculos da despesa serao
+          preenchidos automaticamente sempre que a UC for selecionada.
         </p>
       </header>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1.25fr)]">
-        <section className="civitas-surface rounded-sm border border-[var(--border-soft)] p-4 shadow-[var(--shadow-xs)]">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+      {/* Body: dois painéis lado a lado */}
+      <div className="grid min-h-0 flex-1 grid-cols-[300px_1fr] overflow-hidden">
+
+        {/* ── Painel esquerdo: lista de UCs ── */}
+        <div className="flex flex-col overflow-hidden border-r border-[var(--border-soft)]">
+          {/* Busca */}
+          <div className="flex-shrink-0 border-b border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
               Unidades consumidoras
             </p>
-            <h4 className="mt-2 text-lg font-semibold text-[var(--foreground)]">
-              Lista de UCs disponiveis
-            </h4>
-            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-              Clique em uma linha para selecionar a UC.
-            </p>
+            <div className="flex items-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-2.5 focus-within:border-[var(--primary-1)] focus-within:ring-4 focus-within:ring-[var(--focus-ring)] transition-all">
+              <span className="material-symbols-outlined !text-[16px] text-[var(--foreground-muted)]">
+                search
+              </span>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por ID ou identificador..."
+                className="w-full bg-transparent py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none"
+              />
+            </div>
           </div>
 
-          {/* Lista com scroll e cabecalho fixo para facilitar leitura. */}
-          <div className="mt-4 max-h-[360px] overflow-y-auto rounded-sm border border-[var(--border-soft)] bg-[var(--surface-default)]">
-            {ucs.length > 0 ? (
-              <table className="min-w-full border-separate border-spacing-0 text-left text-[var(--foreground)]">
-                <thead className="sticky top-0 z-10 bg-[var(--surface-subtle)] shadow-[var(--shadow-xs)]">
-                  <tr className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-                    <th className="px-4 py-3">ID</th>
-                    <th className="px-4 py-3">Identificador</th>
-                    <th className="px-4 py-3 text-right">Acao</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border-soft)]">
-                  {ucs.map((uc) => {
-                    const isSelected = selectedUc?.id === uc.id;
-                    // Texto do botao fica verde quando a UC ja esta selecionada.
-                    const actionTextClassName = isSelected
-                      ? "text-[var(--text-accent-teal)]"
-                      : "text-[var(--foreground)]";
-                    const selectedCellClassName = isSelected
-                      ? "text-[var(--text-accent-teal)]"
-                      : "text-[var(--foreground)]";
-                    const selectedMutedCellClassName = isSelected
-                      ? "text-[var(--text-accent-teal)]"
-                      : "text-[var(--foreground-muted)]";
-
-                    return (
-                      <tr
-                        key={uc.id}
-                        tabIndex={0}
-                        aria-selected={isSelected}
-                        className={getUcRowClassName(isSelected)}
-                        onClick={() => onSelectUc(uc)}
-                        onKeyDown={(event) => handleRowKeyDown(event, uc)}
-                      >
-                        <td className={`px-4 py-3 text-sm font-semibold ${selectedCellClassName}`}>
-                          {String(uc.id).padStart(3, "0")}
-                        </td>
-                        <td className={`px-4 py-3 text-sm ${selectedMutedCellClassName}`}>
-                          {uc.identificador}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          {/* Mantem o estilo do botao e evita selecionar duas vezes. */}
-                          <button
-                            type="button"
-                            className={`${ucActionButtonClassName} ${actionTextClassName}`}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onSelectUc(uc);
-                            }}
-                          >
-                            {isSelected ? (
-                              <>
-                                <span className="material-symbols-outlined !text-[16px]">check</span>
-                                Selecionada
-                              </>
-                            ) : (
-                              "Selecionar"
-                            )}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            ) : (
-              <div className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-6 text-center text-sm text-[var(--foreground-soft)]">
+          {/* Lista */}
+          <div className="flex-1 overflow-y-auto">
+            {ucs.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-[var(--foreground-muted)]">
                 Nenhuma UC disponivel no momento.
+              </p>
+            ) : filteredUcs.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-[var(--foreground-muted)]">
+                Nenhuma UC encontrada.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-1 p-2">
+                {filteredUcs.map((uc) => {
+                  const isSelected = selectedUc?.id === uc.id;
+                  return (
+                    <button
+                      key={uc.id}
+                      type="button"
+                      tabIndex={isViewMode ? -1 : 0}
+                      aria-selected={isSelected}
+                      disabled={isViewMode}
+                      onClick={() => handleSelectUc(uc)}
+                      onKeyDown={(e) => handleRowKeyDown(e as any, uc)}
+                      className={`flex w-full items-center gap-2.5 rounded-sm border px-3 py-2.5 text-left transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-default ${
+                        isSelected
+                          ? "border-[var(--border-accent-teal)] bg-[var(--surface-subtle)] ring-1 ring-[var(--border-accent-teal)]"
+                          : "border-transparent bg-transparent hover:border-[var(--border-soft)] hover:bg-[var(--surface-subtle)]"
+                      }`}
+                    >
+                      <span
+                        className={`min-w-[32px] text-[11px] font-semibold ${
+                          isSelected
+                            ? "text-[var(--text-accent-teal)]"
+                            : "text-[var(--foreground-muted)]"
+                        }`}
+                      >
+                        {String(uc.id).padStart(3, "0")}
+                      </span>
+                      <span
+                        className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm ${
+                          isSelected
+                            ? "font-semibold text-[var(--text-accent-teal)]"
+                            : "text-[var(--foreground)]"
+                        }`}
+                      >
+                        {uc.identificador}
+                      </span>
+                      {isSelected && (
+                        <span className="material-symbols-outlined !text-[14px] text-[var(--text-accent-teal)]">
+                          check
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
-        </section>
 
-        <section className="min-w-0 space-y-4">
-          {/* Resumo da UC selecionada para confirmar antes de preencher. */}
-          <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+          {errors.idUnidadeConsumidora && (
+            <p className="flex-shrink-0 border-t border-[var(--border-soft)] px-4 py-2.5 text-sm font-medium text-[#C23D3D]">
+              {errors.idUnidadeConsumidora}
+            </p>
+          )}
+        </div>
+
+        {/* ── Painel direito: UC selecionada + campos ── */}
+        <div className="flex flex-col overflow-hidden">
+          {/* Chip da UC */}
+          <div className="flex-shrink-0 border-b border-[var(--border-soft)] bg-[var(--surface-subtle)] px-5 py-3">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
               UC selecionada
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-              <span className="rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-1 font-semibold text-[var(--foreground)]">
-                {selectedUc ? String(selectedUc.id).padStart(3, "0") : "Sem selecao"}
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-sm border px-3 py-1 text-xs font-semibold transition-all ${
+                selectedUc
+                  ? "border-[var(--border-accent-teal)] bg-[var(--surface-subtle)] text-[var(--text-accent-teal)]"
+                  : "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground-muted)]"
+              }`}
+            >
+              <span className="material-symbols-outlined !text-[13px]">
+                {selectedUc ? "business" : "radio_button_unchecked"}
               </span>
-              <span className="text-[var(--foreground-muted)]">
-                {selectedUc ? selectedUc.identificador : "Selecione uma UC na lista"}
-              </span>
+              {selectedUc
+                ? `${String(selectedUc.id).padStart(3, "0")} — ${selectedUc.identificador}`
+                : "Sem selecao — clique em uma UC"}
             </div>
           </div>
-          {/* A chave reinicia o formulario quando a UC muda. */}
-          <Form
-            key={selectedUc?.id ?? "no-uc"}
-            object={formObject}
-            name="despesa-uc"
-            type="create"
-            fields={DESPESA_FORM_FIELDS}
-            onCancel={onCancel}
-            onConfirm={(data) => {
-              // O Form retorna um record generico; convertemos para o formato do formulario.
-              onConfirm(data as DespesaFormValues);
-            }}
-          />
-        </section>
+
+          {/* Scroll dos campos */}
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            {!selectedUc ? (
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+                <span className="material-symbols-outlined !text-[36px] text-[var(--foreground-muted)] opacity-30">
+                  corporate_fare
+                </span>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  Selecione uma Unidade Consumidora para preencher os dados da despesa
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {/* Vínculos */}
+                <div>
+                  <SectionLabel>Vinculos preenchidos pela UC</SectionLabel>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ReadonlyField
+                      label="UC (ID)"
+                      value={
+                        formValues.idUnidadeConsumidora
+                          ? String(formValues.idUnidadeConsumidora).padStart(3, "0")
+                          : ""
+                      }
+                    />
+                    <ReadonlyField label="Identificador UC" value={formValues.uc} />
+                    <ReadonlyField label="Instituicao" value={selectedUcSummary.instituicao} />
+                    <ReadonlyField label="Secretaria" value={selectedUcSummary.secretaria} />
+                    <ReadonlyField label="Tipo de codigo" value={selectedUcSummary.tipoCodigo} />
+                    <ReadonlyField label="Categoria" value={selectedUcSummary.tipoDespesa} />
+                    <ReadonlyField label="Orcamento" value={selectedUcSummary.orcamento} />
+                    <ReadonlyField label="Fornecedor" value={selectedUcSummary.fornecedor} />
+                  </div>
+                </div>
+
+                {/* Dados da despesa */}
+                <div>
+                  <SectionLabel>Dados da despesa</SectionLabel>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label="Numero do documento"
+                      placeholder="Somente numeros"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.numeroDocumento}
+                      error={errors.numeroDocumento}
+                      onChange={(e) => handleValueChange("numeroDocumento", e.target.value)}
+                    />
+                    <Input
+                      label="Data de emissao"
+                      type="date"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.dataEmicao}
+                      error={errors.dataEmicao}
+                      onChange={(e) => handleValueChange("dataEmicao", e.target.value)}
+                    />
+                    <Input
+                      label="Data de vencimento"
+                      type="date"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.dataVencimento}
+                      error={errors.dataVencimento}
+                      onChange={(e) => handleValueChange("dataVencimento", e.target.value)}
+                    />
+                    <Input
+                      label="Valor previsto em R$"
+                      placeholder="0,00"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.valorPrevisto}
+                      error={errors.valorPrevisto}
+                      onChange={(e) =>
+                        handleValueChange("valorPrevisto", e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                    />
+                    <Input
+                      label={`Consumo previsto em ${selectedUcSummary.unidadeMedida || "—"}`}
+                      placeholder="0"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.consumoPrevisto}
+                      error={errors.consumoPrevisto}
+                      onChange={(e) =>
+                        handleValueChange("consumoPrevisto", e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                    />
+
+                    {isCreateMode ? (
+                      <div className="col-span-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+                          Definicoes automaticas do cadastro
+                        </p>
+                        <div className="mt-2 space-y-1 text-sm text-[var(--foreground-muted)]">
+                          <p>
+                            Status inicial:{" "}
+                            <span className="font-semibold text-[var(--foreground)]">A pagar</span>
+                          </p>
+                          <p>
+                            Usuario responsavel:{" "}
+                            <span className="font-semibold text-[var(--foreground)]">
+                              {currentAuthUser?.nome ?? "Usuario autenticado"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Input
+                          label="Valor pago"
+                          placeholder="0,00"
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          step="0.01"
+                          disabled={isViewMode}
+                          value={formValues.valorPago}
+                          error={errors.valorPago}
+                          onChange={(e) =>
+                            handleValueChange("valorPago", e.target.value === "" ? "" : Number(e.target.value))
+                          }
+                        />
+                        <Input
+                          label="Consumo real"
+                          placeholder="0"
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          step="0.01"
+                          disabled={isViewMode}
+                          value={formValues.consumoReal}
+                          error={errors.consumoReal}
+                          onChange={(e) =>
+                            handleValueChange("consumoReal", e.target.value === "" ? "" : Number(e.target.value))
+                          }
+                        />
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
+                            Usuario responsavel
+                            {!isViewMode && <span className="ml-1 text-red-500">*</span>}
+                          </label>
+                          <select
+                            value={formValues.idUsuario}
+                            disabled={isViewMode}
+                            required={!isViewMode}
+                            className={selectClassName}
+                            onChange={(e) =>
+                              handleValueChange("idUsuario", e.target.value === "" ? "" : Number(e.target.value))
+                            }
+                          >
+                            <option value="">Selecione o usuario</option>
+                            {usuarios.map((u) => (
+                              <option key={u.value} value={u.value}>{u.label}</option>
+                            ))}
+                          </select>
+                          {errors.idUsuario && (
+                            <p className="text-sm font-medium text-[#C23D3D]">{errors.idUsuario}</p>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
+                            Status financeiro
+                            {!isViewMode && <span className="ml-1 text-red-500">*</span>}
+                          </label>
+                          <select
+                            value={formValues.situacao}
+                            disabled={isViewMode}
+                            required={!isViewMode}
+                            className={selectClassName}
+                            onChange={(e) =>
+                              handleValueChange("situacao", e.target.value === "" ? "" : Number(e.target.value))
+                            }
+                          >
+                            <option value="">Selecione o status</option>
+                            {STATUS_OPTIONS.map((s) => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                          </select>
+                          {errors.situacao && (
+                            <p className="text-sm font-medium text-[#C23D3D]">{errors.situacao}</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer com ações */}
+          <div className="flex flex-shrink-0 items-center justify-end gap-2 border-t border-[var(--divider)] bg-[var(--surface-subtle)] px-5 py-3">
+            <Button
+              variant="secondary"
+              onClick={onCancel}
+              type="button"
+            >
+              {isViewMode ? "Fechar" : "Cancelar"}
+            </Button>
+            {!isViewMode && (
+              <Button type="submit">
+                Confirmar
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }

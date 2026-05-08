@@ -28,19 +28,16 @@ const statusSearchOptions: FieldConfig["options"] = [
 ];
 
 const tipoInstituicaoColumns = [
-  { id: "id", label: "ID" },
   { id: "descricao", label: "Descricao" },
   { id: "situacaoLabel", label: "Situacao" },
 ];
 
 const tipoCodigoColumns = [
-  { id: "id", label: "ID" },
   { id: "nome", label: "Nome" },
   { id: "descricao", label: "Descricao" },
 ];
 
 const tipoDespesaColumns = [
-  { id: "id", label: "ID" },
   { id: "descricao", label: "Descricao" },
   { id: "solicitaUcLabel", label: "Solicita UC" },
   { id: "unidadeMedidaLabel", label: "Unidade de Medida" },
@@ -48,7 +45,6 @@ const tipoDespesaColumns = [
 ];
 
 const unidadeMedidaColumns = [
-  { id: "id", label: "ID" },
   { id: "descricao", label: "Descricao" },
   { id: "abreviatura", label: "Abreviatura" },
   { id: "situacaoLabel", label: "Situacao" },

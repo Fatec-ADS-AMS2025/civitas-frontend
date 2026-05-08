@@ -68,18 +68,16 @@ export default function DespesasTabelaRows({
           style={getEnterDelayStyle(index)}
           className={`${index < 6 ? "civitas-enter " : ""}despesas-table-row rounded-sm bg-[var(--surface-elevated)] shadow-[var(--shadow-xs)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]`}
         >
-          <td className="despesas-table-cell rounded-sm px-4 py-5">
-            <span className="despesas-table-record-badge inline-flex min-w-[84px] items-center justify-center rounded-sm border border-[var(--border-accent-amber)] bg-[var(--surface-accent-amber)] px-4 py-2 text-sm font-bold text-[var(--text-accent-amber)]">
-              {despesa.registro}
-            </span>
-          </td>
-          <td className="despesas-table-cell px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
+          <td className="px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
             {getDespesaCodigo(despesa)}
           </td>
           <td className="despesas-table-cell px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
             {despesa.tipoCodigoNome}
           </td>
-          <td className="despesas-table-cell px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
+          <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
+            {despesa.raw.consumoPrevisto != null ? despesa.raw.consumoPrevisto : "-"}
+          </td>
+          <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
             {despesa.categoria}
           </td>
           <td className="despesas-table-cell px-4 py-5 text-sm text-[var(--foreground-muted)]">
@@ -109,6 +107,10 @@ export default function DespesasTabelaRows({
   );
 }
 
+function getTipoCodigoLabel(idTipoCodigo: string) {
+
+}
+
 function RowActions({
   despesa,
   onView,
@@ -117,6 +119,7 @@ function RowActions({
 }: Omit<DespesasTabelaRowsProps, "loading" | "despesas" | "hasLocalListSearch"> & {
   despesa: DespesaDashboardRow;
 }) {
+
   return (
     <div className="flex items-center justify-center gap-2">
       <button

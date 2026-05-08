@@ -1,11 +1,15 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
-import { exportTableData, getSelectedColumns } from "@/components/Table/export-utils";
 import type { TableExportOptions } from "@/components/Table/export-types";
+import { exportTableData, getSelectedColumns } from "@/components/Table/export-utils";
 import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
-import { showToast } from "@/hooks/useToast";
 import { type DespesaDashboardRow, useDespesasDashboard } from "@/hooks/useDespesasDashboard";
+import { showToast } from "@/hooks/useToast";
+import type {
+  DespesaResponsavelOption,
+  DespesaUcOption,
+} from "./_components/DespesaForm";
 import {
   DespesaCrudModals,
   DespesasExportModal,
@@ -46,7 +50,7 @@ export default function Page() {
     listInstituicaoSearch,
   });
 
-  const despesaFormFields = useDespesaFormFields({
+  const despesaViewFields = useDespesaFormFields({
     tipoCodigos: dashboard.tipoCodigos,
     tiposDespesa: dashboard.tiposDespesa,
     resolvedTipoCodigoOptions: viewModel.resolvedTipoCodigoOptions,
@@ -59,6 +63,88 @@ export default function Page() {
     resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
     isOptionsLoading: dashboard.loading,
   });
+
+  const unidadeConsumidoraOptions = useMemo<DespesaUcOption[]>(() => {
+    const tipoDespesaMap = new Map(
+      dashboard.tiposDespesa.map((item) => [item.id, item] as const)
+    );
+    const unidadeMedidaMap = new Map(
+      dashboard.unidadesMedida.map((item) => [item.id, item] as const)
+    );
+    const tipoCodigoMap = new Map(
+      dashboard.tipoCodigos.map((item) => [item.id, item.nome] as const)
+    );
+    const instituicaoMap = new Map(
+      dashboard.instituicoes.map((item) => [item.id, item.nome] as const)
+    );
+    const secretariaMap = new Map(
+      dashboard.secretarias.map((item) => [item.idSecretaria, item.nome] as const)
+    );
+    const fornecedorMap = new Map(
+      dashboard.fornecedores.map(
+        (item) => [item.idFornecedor, item.nomeFantasia || item.nome] as const
+      )
+    );
+    const orcamentoMap = new Map(
+      dashboard.orcamentos.map((item) => {
+        const ano = item.anoOrcamento ?? item.ano;
+        return [item.idOrcamento, `#${String(item.idOrcamento).padStart(3, "0")} - ${ano}`] as const;
+      })
+    );
+
+    return dashboard.unidadesConsumidoras.map((item) => {
+      const tipoDespesa = tipoDespesaMap.get(item.idTipoDespesa);
+      const unidadeMedida = unidadeMedidaMap.get(tipoDespesa?.idUnidadeMedida ?? 0);
+
+      return {
+        id: item.id,
+        identificador: item.identificador,
+        idInstituicao: item.idInstituicao,
+        instituicaoNome:
+          instituicaoMap.get(item.idInstituicao) ?? `Instituicao #${item.idInstituicao}`,
+        idSecretaria: item.idSecretaria,
+        secretariaNome:
+          secretariaMap.get(item.idSecretaria) ?? `Secretaria #${item.idSecretaria}`,
+        idTipoCodigo: tipoDespesa?.idTipoCodigo ?? null,
+        tipoCodigoNome:
+          tipoCodigoMap.get(tipoDespesa?.idTipoCodigo ?? 0) ??
+          "Tipo nao informado",
+        idTipoDespesa: item.idTipoDespesa,
+        tipoDespesaNome:
+          tipoDespesa?.descricao ?? `Tipo #${item.idTipoDespesa}`,
+        idUnidadeMedida: tipoDespesa?.idUnidadeMedida ?? null,
+        unidadeMedidaNome:
+          unidadeMedida?.abreviatura?.trim() ||
+          unidadeMedida?.descricao?.trim() ||
+          "unidade",
+        idFornecedor: item.idFornecedor,
+        fornecedorNome:
+          fornecedorMap.get(item.idFornecedor) ?? `Fornecedor #${item.idFornecedor}`,
+        idOrcamento: item.idOrcamento,
+        orcamentoLabel:
+          orcamentoMap.get(item.idOrcamento) ??
+          `#${String(item.idOrcamento).padStart(3, "0")}`,
+      };
+    });
+  }, [
+    dashboard.fornecedores,
+    dashboard.instituicoes,
+    dashboard.orcamentos,
+    dashboard.secretarias,
+    dashboard.tipoCodigos,
+    dashboard.tiposDespesa,
+    dashboard.unidadesConsumidoras,
+    dashboard.unidadesMedida,
+  ]);
+
+  const usuarioOptions = useMemo<DespesaResponsavelOption[]>(
+    () =>
+      dashboard.usuarios.map((usuario) => ({
+        value: usuario.id,
+        label: usuario.nome,
+      })),
+    [dashboard.usuarios]
+  );
 
   const headerConfig = useMemo(
     () => ({
@@ -207,7 +293,9 @@ export default function Page() {
         setEditingDespesa={setEditingDespesa}
         viewingDespesa={viewingDespesa}
         setViewingDespesa={setViewingDespesa}
-        fields={despesaFormFields}
+        unidadesConsumidoras={unidadeConsumidoraOptions}
+        usuarios={usuarioOptions}
+        viewFields={despesaViewFields}
         onCreateSubmit={handleCreateSubmit}
         onEditSubmit={handleEditSubmit}
       />

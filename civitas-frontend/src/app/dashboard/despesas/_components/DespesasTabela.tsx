@@ -94,16 +94,16 @@ export default function DespesasTabela({
       <div className="despesas-table-scroll overflow-x-auto px-4 py-5 sm:px-6">
         <table className="min-w-full border-separate border-spacing-y-3">
           <thead>
-            <tr className="despesas-table-head text-left text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-              <th className="despesas-table-heading px-4 py-2">Registro</th>
-              <th className="despesas-table-heading px-4 py-2">Codigo</th>
-              <th className="despesas-table-heading px-4 py-2">Tipo codigo</th>
-              <th className="despesas-table-heading px-4 py-2">Categoria</th>
-              <th className="despesas-table-heading px-4 py-2">Descricao</th>
-              <th className="despesas-table-heading px-4 py-2">Valor</th>
-              <th className="despesas-table-heading px-4 py-2">Data</th>
-              <th className="despesas-table-heading px-4 py-2">Situacao</th>
-              <th className="despesas-table-heading px-4 py-2 text-center">Acao</th>
+            <tr className="text-left text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+              <th className="px-4 py-2">Codigo</th>
+              <th className="px-4 py-2">Tipo codigo</th>
+              <th className="px-4 py-2">Consumo Previsto</th>
+              <th className="px-4 py-2">Categoria</th>
+              <th className="px-4 py-2">Descricao</th>
+              <th className="px-4 py-2">Valor</th>
+              <th className="px-4 py-2">Data</th>
+              <th className="px-4 py-2">Situacao</th>
+              <th className="px-4 py-2 text-center">Acao</th>
             </tr>
           </thead>
           <tbody>

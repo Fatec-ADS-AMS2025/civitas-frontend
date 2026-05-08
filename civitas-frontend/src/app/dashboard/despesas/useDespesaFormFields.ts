@@ -76,7 +76,13 @@ export function useDespesaFormFields({
 
   return useMemo<ModalFieldConfig[]>(
     () => [
-      { key: "id", hidden: true },
+      {
+        key: "id",
+        label: "Registro",
+        placeholder: "Registro da despesa",
+        type: "number",
+        section: "Identificacao",
+      },
       {
         key: "documento",
         label: "Documento",
@@ -117,6 +123,7 @@ export function useDespesaFormFields({
         placeholder: "Somente numeros",
         mask: "integer",
         required: true,
+        section: "Identificacao",
         validate: (value) => {
           const normalizedValue = digitsOnly(value);
           if (!normalizedValue) return "Numero do documento deve conter apenas numeros.";
@@ -152,6 +159,7 @@ export function useDespesaFormFields({
         label: "Codigo de agrupamento",
         placeholder: "Ex.: 1001",
         mask: "integer",
+        section: "Identificacao",
       },
       {
         key: "idTipoCodigo",
@@ -159,6 +167,7 @@ export function useDespesaFormFields({
         placeholder: "Selecione um tipo de codigo",
         type: "select",
         required: true,
+        section: "Identificacao",
         options: resolvedTipoCodigoOptions,
         validate: (value, formData) => {
           if (toPositiveNumber(value) <= 0) {
@@ -179,6 +188,7 @@ export function useDespesaFormFields({
         placeholder: "Selecione um tipo de despesa",
         type: "select",
         required: true,
+        section: "Identificacao",
         options: resolvedTipoDespesaOptions,
         validate: (value, formData) => {
           if (toPositiveNumber(value) <= 0) {
@@ -200,28 +210,86 @@ export function useDespesaFormFields({
         },
       },
       {
-        key: "idUnidadeConsumidora",
-        label: "Unidade consumidora",
-        placeholder: "Selecione a unidade consumidora",
-        type: "select",
-        required: true,
-        options: resolvedUnidadeConsumidoraOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0
-            ? "Selecione uma unidade consumidora valida."
-            : undefined,
+        key: "uc",
+        label: "UC",
+        placeholder: "Informe a unidade consumidora",
+        section: "Vinculos",
+        validate: (value, formData) => {
+          const tipoDespesa = resolveTipoDespesa(formData.idTipoDespesa);
+          return validateRequiredUc(value, tipoDespesa?.solicitaUc === 1);
+        },
       },
       {
-        key: "consumoPrevisto",
-        label: "Valor",
+        key: "idUnidadeConsumidora",
+        label: "ID da unidade consumidora",
+        placeholder: "ID da UC vinculada",
+        type: "number",
+        section: "Vinculos",
+      },
+      {
+        key: "valorPrevisto",
+        label: "Valor previsto",
         placeholder: "0,00",
         type: "number",
         mask: "currency",
         required: true,
+        section: "Financeiro",
         validate: (value) => {
           const numericValue = Number(value);
           if (Number.isNaN(numericValue) || numericValue < 0) {
-            return "Valor da despesa nao pode ser negativo.";
+            return "Valor previsto nao pode ser negativo.";
+          }
+          return undefined;
+        },
+      },
+      {
+        key: "valorPago",
+        label: "Valor pago",
+        placeholder: "0,00",
+        type: "number",
+        mask: "currency",
+        section: "Financeiro",
+        validate: (value) => {
+          const numericValue = Number(value);
+          if (value === "" || value === undefined || value === null) {
+            return undefined;
+          }
+
+          if (Number.isNaN(numericValue) || numericValue < 0) {
+            return "Valor pago nao pode ser negativo.";
+          }
+          return undefined;
+        },
+      },
+      {
+        key: "consumoPrevisto",
+        label: "Consumo previsto",
+        placeholder: "0",
+        type: "number",
+        required: true,
+        section: "Financeiro",
+        validate: (value) => {
+          const numericValue = Number(value);
+          if (Number.isNaN(numericValue) || numericValue < 0) {
+            return "Consumo previsto nao pode ser negativo.";
+          }
+          return undefined;
+        },
+      },
+      {
+        key: "consumoReal",
+        label: "Consumo real",
+        placeholder: "0",
+        type: "number",
+        section: "Financeiro",
+        validate: (value) => {
+          const numericValue = Number(value);
+          if (value === "" || value === undefined || value === null) {
+            return undefined;
+          }
+
+          if (Number.isNaN(numericValue) || numericValue < 0) {
+            return "Consumo real nao pode ser negativo.";
           }
           return undefined;
         },
@@ -231,6 +299,7 @@ export function useDespesaFormFields({
         label: "Data de emissao",
         type: "date",
         required: true,
+        section: "Financeiro",
         validate: (value, formData) => {
           const normalizedDate = normalizeDateInput(value);
           if (!normalizedDate) return "Data de emissao invalida.";
@@ -242,6 +311,7 @@ export function useDespesaFormFields({
         label: "Data de vencimento",
         type: "date",
         required: true,
+        section: "Financeiro",
         validate: (value, formData) => {
           const normalizedDate = normalizeDateInput(value);
           if (!normalizedDate) return "Data de vencimento invalida.";
@@ -254,6 +324,7 @@ export function useDespesaFormFields({
         placeholder: "Selecione a instituicao",
         type: "select",
         required: true,
+        section: "Relacionamentos",
         options: resolvedInstituicaoOptions,
         validate: (value) =>
           toPositiveNumber(value) <= 0 ? "Selecione uma instituicao valida." : undefined,
@@ -264,6 +335,7 @@ export function useDespesaFormFields({
         placeholder: "Selecione o orcamento",
         type: "select",
         required: true,
+        section: "Relacionamentos",
         options: resolvedOrcamentoOptions,
         validate: (value) =>
           toPositiveNumber(value) <= 0 ? "Selecione um orcamento valido." : undefined,
@@ -274,6 +346,7 @@ export function useDespesaFormFields({
         placeholder: "Selecione o fornecedor",
         type: "select",
         required: true,
+        section: "Relacionamentos",
         options: resolvedFornecedorOptions,
         validate: (value) =>
           toPositiveNumber(value) <= 0 ? "Selecione um fornecedor valido." : undefined,
@@ -284,6 +357,7 @@ export function useDespesaFormFields({
         placeholder: "Selecione o usuario",
         type: "select",
         required: true,
+        section: "Relacionamentos",
         options: resolvedUsuarioOptions,
         validate: (value) =>
           toPositiveNumber(value) <= 0 ? "Selecione um usuario valido." : undefined,
@@ -294,6 +368,7 @@ export function useDespesaFormFields({
         placeholder: "Selecione o status",
         type: "select",
         required: true,
+        section: "Status",
         options: STATUS_OPTIONS,
       },
     ],
