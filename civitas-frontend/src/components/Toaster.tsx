@@ -38,16 +38,14 @@ export default function Toaster() {
 
   const bgClass =
     toast.type === "success"
-      ? "bg-green-600"
+      ? "civitas-toast civitas-toast--success"
       : toast.type === "error"
-      ? "bg-red-600"
-      : "bg-blue-600";
+      ? "civitas-toast civitas-toast--error"
+      : "civitas-toast civitas-toast--info";
 
   return (
-    <div className="fixed top-5 right-5 z-[9999]">
-      <div
-        className={`${bgClass} text-white px-4 py-3 rounded-sm shadow-lg min-w-[260px] max-w-[420px]`}
-      >
+    <div className="fixed right-3 top-3 z-[9999] sm:right-5 sm:top-5">
+      <div className={`${bgClass} px-4 py-3`}>
         <p className="text-sm font-medium">{toast.message}</p>
       </div>
     </div>

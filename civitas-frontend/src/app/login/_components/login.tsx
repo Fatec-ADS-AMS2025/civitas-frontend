@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Checkbox from '@/components/checkbox'
+import Button from '@/components/button'
 import { Input } from '@/components/Input'
 import useAuth from '@/hooks/useAuth'
 import { useAppNavigation } from '@/hooks/useNavigationProgress'
@@ -79,70 +80,66 @@ export default function Login() {
 	}
 
 	return (
-		<div className="flex w-full items-center h-screen justify-center p-4 sm:p-5 lg:w-1/2 lg:p-8 bg-secundary-1">
-			<div className="w-full max-w-md rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[0_6px_18px_rgba(15,43,49,0.04)] sm:p-8">
+		<div className="flex min-h-screen w-full overflow-x-hidden items-start justify-center bg-[var(--secundary-1)] px-4 py-8 sm:px-5 sm:py-10 lg:w-1/2 lg:items-center lg:px-8 lg:py-12">
+			<div className="w-full max-w-[min(28rem,calc(100vw-2rem))] rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[var(--shadow-sm)] sm:max-w-md sm:p-8">
 				<div className="mb-8">
 					<div className="mb-6 flex items-center gap-3">
 						<img src="/logo1.png" alt="Civitas Logo" className="h-10 w-10 object-contain" />
-						<span className="font-semibold text-[#004C57]">Civitas</span>
+						<span className="font-semibold text-[var(--secundary-1)]">Civitas</span>
 					</div>
-					<h2 className="mb-3 text-[30px] font-semibold text-[#1F2A32] sm:text-[34px]">Entrar</h2>
-					<p className="text-sm text-[#72808A]">Sistema de gerenciamento da Prefeitura de Jales</p>
+					<h2 className="mb-3 text-[30px] font-semibold text-[var(--foreground)] sm:text-[34px]">Entrar</h2>
+					<p className="text-sm text-[var(--foreground-muted)]">Sistema de gerenciamento da Prefeitura de Jales</p>
 				</div>
 
 				<form onSubmit={handleLogin} noValidate aria-busy={isLoading} className="space-y-5">
-					{generalError && <div className="rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">{generalError}</div>}
+					{generalError && <div className="civitas-error-banner px-3 py-2.5 text-sm">{generalError}</div>}
 
-					<div>
-						<label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">E-mail</label>
-						<Input
-							id="email"
-							type="email"
-							placeholder="Informe o e-mail"
-							value={email}
-							onChange={(event) => {
-								setEmail(event.target.value)
-								if (errors.email) setErrors((current) => ({ ...current, email: '' }))
-								if (generalError) clearError()
-							}}
-							disabled={isLoading}
-							autoComplete="email"
-							aria-invalid={Boolean(errors.email)}
-							error={errors.email}
-						/>
-					</div>
+					<Input
+						id="email"
+						type="email"
+						label="E-mail"
+						placeholder="Informe o e-mail"
+						value={email}
+						onChange={(event) => {
+							setEmail(event.target.value)
+							if (errors.email) setErrors((current) => ({ ...current, email: '' }))
+							if (generalError) clearError()
+						}}
+						disabled={isLoading}
+						autoComplete="email"
+						aria-invalid={Boolean(errors.email)}
+						error={errors.email}
+					/>
 
-					<div>
-						<label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">Senha</label>
-						<Input
-							id="password"
-							type="password"
-							placeholder="Informe a senha"
-							value={password}
-							onChange={(event) => {
-								setPassword(event.target.value)
-								if (errors.password) setErrors((current) => ({ ...current, password: '' }))
-								if (generalError) clearError()
-							}}
-							disabled={isLoading}
-							autoComplete="current-password"
-							aria-invalid={Boolean(errors.password)}
-							error={errors.password}
-						/>
-					</div>
+					<Input
+						id="password"
+						type="password"
+						label="Senha"
+						placeholder="Informe a senha"
+						value={password}
+						onChange={(event) => {
+							setPassword(event.target.value)
+							if (errors.password) setErrors((current) => ({ ...current, password: '' }))
+							if (generalError) clearError()
+						}}
+						disabled={isLoading}
+						autoComplete="current-password"
+						aria-invalid={Boolean(errors.password)}
+						error={errors.password}
+					/>
 
-					<div className="mt-6 flex items-center justify-between">
+					<div className="mt-6 flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<Checkbox id="rememberMe" label="Lembrar-me" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} disabled={isLoading} />
-						<Link href="/forgot-password" className="text-sm font-medium text-[#5D6A72] underline hover:text-[#004C57]">Esqueci a senha</Link>
+						<Link href="/forgot-password" className="w-full text-left text-sm font-medium text-[var(--foreground-muted)] underline underline-offset-2 hover:text-[var(--secundary-1)] sm:w-auto sm:text-right">Esqueci a senha</Link>
 					</div>
 
-					<button type="submit" disabled={isLoading} className="mt-6 w-full rounded-sm border border-[#004C57] bg-[#004C57] px-4 py-3 font-semibold text-white transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60">
+					<Button type="submit" variant="login" disabled={isLoading} className="mt-6 max-w-none">
 						{isLoading ? 'Entrando...' : 'Entrar'}
-					</button>
+					</Button>
 				</form>
 
 				<div className="mt-6 text-center">
-					<p className="text-sm text-[#5D6A72]">Ainda nao tem conta? <Link href="/signup" className="font-semibold text-[#004C57] underline hover:brightness-110">Criar conta</Link></p>
+					<p className="text-sm text-[var(--foreground-muted)]">Ainda nao tem conta? <Link href="/signup" className="font-semibold text-[var(--secundary-1)] underline hover:brightness-110">Criar conta</Link></p>
 				</div>
 			</div>
 		</div>

@@ -194,7 +194,7 @@ const Table = <T extends TableRow,>({
 
     if (column.id.toLowerCase() === "id" || column.id.toLowerCase().startsWith("id")) {
       return (
-        <span className="inline-flex min-w-[74px] justify-center rounded-sm border border-[#E8D79C] bg-[#FFF6D9] px-3 py-1.5 text-xs font-semibold leading-none text-[#5F4B00]">
+        <span className="civitas-chip civitas-chip--amber min-w-[74px] justify-center px-3 py-1.5 text-xs leading-none">
           #{String(cellText).padStart(3, "0")}
         </span>
       );
@@ -245,7 +245,7 @@ const Table = <T extends TableRow,>({
   };
 
   const actionButtonClassName =
-    "civitas-table__action flex h-9 w-9 cursor-pointer items-center justify-center rounded-sm border bg-[var(--surface-elevated)] transition-all duration-[var(--motion-duration-fast)] hover:bg-[var(--surface-subtle)] focus-visible:outline-none focus-visible:ring-4";
+    "civitas-table__action flex h-9 w-9 cursor-pointer items-center justify-center rounded-sm border transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4";
 
   const renderActionButton = (
     icon: string,
@@ -255,8 +255,8 @@ const Table = <T extends TableRow,>({
   ) => {
     const toneClassName =
       tone === "danger"
-        ? "border-[#F1D7D7] text-[#D06B6B] hover:bg-[#FFF8F8] focus-visible:ring-[#FF8A8A]/20"
-        : "border-[var(--border-soft)] text-[var(--secundary-1)] hover:bg-[var(--surface-subtle)] focus-visible:ring-[var(--focus-ring)]";
+        ? "civitas-action--danger"
+        : "border-[var(--border-soft)] bg-[var(--surface-elevated)] text-[var(--secundary-1)] hover:bg-[var(--surface-subtle)] focus-visible:ring-[var(--focus-ring)]";
 
     return (
       <button
@@ -275,7 +275,7 @@ const Table = <T extends TableRow,>({
         <>
           <div className="hidden md:block">
             <div className="w-full overflow-x-auto px-4 py-4 sm:px-5 lg:px-6">
-              <table className="min-w-[920px] w-full border-separate border-spacing-y-[10px] text-left text-[var(--foreground)]">
+              <table className="w-full min-w-[720px] border-separate border-spacing-y-[10px] text-left text-[var(--foreground)] lg:min-w-[860px]">
                 <thead>
                   <tr className="civitas-table__head text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                     {columns.map((column) => (
@@ -292,7 +292,7 @@ const Table = <T extends TableRow,>({
                     <tr
                       key={index}
                       style={getMotionStyle(index)}
-                      className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[#E3ECEE] transition-all duration-[var(--motion-duration-fast)] hover:bg-[#FCFEFE] hover:ring-[#D4E2E5]"
+                      className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:bg-[var(--surface-subtle)] hover:ring-[var(--border-default)]"
                     >
                       {columns.map((column, columnIndex) => (
                         <td
