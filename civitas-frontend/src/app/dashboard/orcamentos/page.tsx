@@ -38,7 +38,6 @@ const novoOrcamento = {
 };
 
 const columns = [
-  { id: "idOrcamento", label: "ID Orcamento" },
   { id: "anoOrcamento", label: "Ano" },
   { id: "valorOrcamento", label: "Valor" },
   { id: "instituicaoLabel", label: "Instituicao" },

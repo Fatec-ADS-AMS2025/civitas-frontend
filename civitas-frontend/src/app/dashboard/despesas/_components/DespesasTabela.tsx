@@ -95,7 +95,6 @@ export default function DespesasTabela({
         <table className="min-w-full border-separate border-spacing-y-3">
           <thead>
             <tr className="text-left text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-              <th className="px-4 py-2">Registro</th>
               <th className="px-4 py-2">Codigo</th>
               <th className="px-4 py-2">Tipo codigo</th>
               <th className="px-4 py-2">Consumo Previsto</th>

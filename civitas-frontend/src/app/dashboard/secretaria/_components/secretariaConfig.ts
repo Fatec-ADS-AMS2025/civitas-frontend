@@ -26,7 +26,6 @@ export const novaSecretaria = {
 };
 
 export const secretariaColumns = [
-  { id: "idSecretaria", label: "ID Secretaria" },
   { id: "nome", label: "Nome da Secretaria" },
   { id: "descricao", label: "Descricao" },
   { id: "cnpj", label: "CNPJ" },

@@ -26,7 +26,6 @@ const STATUS_OPTIONS = [{ value: "Ativo", label: "Ativo" }, { value: "Inativo", 
 const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = { page: 1, size: 20 };
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 const columns = [
-  { id: "id", label: "ID" },
   { id: "identificador", label: "Identificador" },
   { id: "instituicaoLabel", label: "Instituicao" },
   { id: "tipoDespesaLabel", label: "Tipo de Despesa" },

@@ -62,11 +62,6 @@ export default function DespesasTabelaRows({
           style={getEnterDelayStyle(index)}
           className={`${index < 6 ? "civitas-enter " : ""}rounded-sm bg-[var(--surface-elevated)] shadow-[var(--shadow-xs)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]`}
         >
-          <td className="rounded-sm px-4 py-5">
-            <span className="inline-flex min-w-[84px] items-center justify-center rounded-sm border border-[var(--border-accent-amber)] bg-[var(--surface-accent-amber)] px-4 py-2 text-sm font-bold text-[var(--text-accent-amber)]">
-              {despesa.registro}
-            </span>
-          </td>
           <td className="px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
             {getDespesaCodigo(despesa)}
           </td>

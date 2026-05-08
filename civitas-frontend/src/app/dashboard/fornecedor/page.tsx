@@ -53,7 +53,6 @@ const novoFornecedor = {
 };
 
 const columns = [
-  { id: "idFornecedor", label: "ID Fornecedor" },
   { id: "nomeFantasia", label: "Nome Fantasia" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },

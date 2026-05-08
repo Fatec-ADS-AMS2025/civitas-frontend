@@ -70,15 +70,10 @@ const STATUS_OPTIONS = [
   { value: 3, label: "Atrasada" },
 ];
 
-const ucSelectionMessage = "Selecione uma UC na tabela ao lado.";
-
 const getTodayDate = () => new Date().toISOString().slice(0, 10);
 
 const toNumberOrEmpty = (value: unknown): number | "" => {
-  if (value === "" || value === undefined || value === null) {
-    return "";
-  }
-
+  if (value === "" || value === undefined || value === null) return "";
   const parsedValue = Number(value);
   return Number.isFinite(parsedValue) ? parsedValue : "";
 };
@@ -92,7 +87,6 @@ const buildInitialFormValues = (
   const defaultStatus = toNumberOrEmpty(
     initialValues?.situacao ?? initialValues?.status ?? 1
   );
-
   return {
     idUnidadeConsumidora: toNumberOrEmpty(initialValues?.idUnidadeConsumidora),
     uc: String(initialValues?.uc ?? ""),
@@ -109,8 +103,7 @@ const buildInitialFormValues = (
     consumoPrevisto: toNumberOrEmpty(initialValues?.consumoPrevisto),
     consumoReal: toNumberOrEmpty(initialValues?.consumoReal ?? (isCreateMode ? 0 : "")),
     dataEmicao: normalizeDateInput(initialValues?.dataEmicao) ?? getTodayDate(),
-    dataVencimento:
-      normalizeDateInput(initialValues?.dataVencimento) ?? getTodayDate(),
+    dataVencimento: normalizeDateInput(initialValues?.dataVencimento) ?? getTodayDate(),
     situacao: defaultStatus,
     status: defaultStatus,
   };
@@ -118,42 +111,53 @@ const buildInitialFormValues = (
 
 const validatePositiveNumber = (value: unknown, label: string) => {
   const numericValue = Number(value);
-
-  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+  if (!Number.isFinite(numericValue) || numericValue <= 0)
     return `${label} deve ser maior que zero.`;
-  }
-
   return undefined;
 };
 
 const validateOptionalNonNegativeNumber = (value: unknown, label: string) => {
-  if (value === "" || value === undefined || value === null) {
-    return undefined;
-  }
-
+  if (value === "" || value === undefined || value === null) return undefined;
   const numericValue = Number(value);
-  if (!Number.isFinite(numericValue) || numericValue < 0) {
+  if (!Number.isFinite(numericValue) || numericValue < 0)
     return `${label} nao pode ser negativo.`;
-  }
-
   return undefined;
 };
 
-const getUcRowClassName = (isSelected: boolean, disabled: boolean) => {
-  return `group border-l-4 transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] ${
-    disabled ? "cursor-default" : "cursor-pointer"
-  } ${
-    isSelected
-      ? "border-[var(--border-accent-teal)] bg-[var(--surface-subtle)] ring-1 ring-[var(--border-accent-teal)]"
-      : "border-transparent bg-[var(--surface-elevated)] ring-1 ring-transparent hover:bg-[var(--surface-subtle)] hover:ring-[var(--border-soft)]"
-  }`;
-};
-
-const ucActionButtonClassName =
-  "civitas-action civitas-action--ghost inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-xs font-semibold";
-
 const selectClassName =
   "w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]";
+
+// ---------------------------------------------------------------------------
+// Subcomponentes internos
+// ---------------------------------------------------------------------------
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-3 flex items-center gap-2">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)] whitespace-nowrap">
+        {children}
+      </p>
+      <div className="h-px flex-1 bg-[var(--border-soft)]" />
+    </div>
+  );
+}
+
+function ReadonlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--foreground-muted)]">
+        {label}
+      </span>
+      <div className="min-h-[36px] rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-2 text-sm text-[var(--foreground)] truncate">
+        {value || <span className="italic text-[var(--foreground-muted)]">—</span>}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Componente principal
+// ---------------------------------------------------------------------------
 
 export default function DespesaForm({
   mode,
@@ -165,13 +169,25 @@ export default function DespesaForm({
 }: DespesaFormProps) {
   const isViewMode = mode === "view";
   const isCreateMode = mode === "create";
+
   const [currentAuthUser, setCurrentAuthUser] = useState(() => authStorage.get());
   const currentUserId = currentAuthUser?.id ?? null;
+
+  const [search, setSearch] = useState("");
   const [selectedUc, setSelectedUc] = useState<DespesaUcOption | null>(null);
   const [formValues, setFormValues] = useState<DespesaFormValues>(() =>
     buildInitialFormValues(initialValues, currentUserId, mode)
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const filteredUcs = useMemo(() => {
+    const q = search.toLowerCase();
+    return ucs.filter(
+      (uc) =>
+        String(uc.id).includes(q) ||
+        uc.identificador.toLowerCase().includes(q)
+    );
+  }, [ucs, search]);
 
   const selectedUcSummary = useMemo(
     () => ({
@@ -194,20 +210,18 @@ export default function DespesaForm({
     const nextValues = buildInitialFormValues(initialValues, currentUserId, mode);
     setFormValues(nextValues);
     setErrors({});
-
     const initialUcId = Number(nextValues.idUnidadeConsumidora);
     if (!Number.isFinite(initialUcId) || initialUcId <= 0) {
       setSelectedUc(null);
       return;
     }
-
     setSelectedUc(ucs.find((uc) => uc.id === initialUcId) ?? null);
   }, [currentUserId, initialValues, mode, ucs]);
 
   useEffect(() => {
     if (!selectedUc) {
-      setFormValues((currentValues) => ({
-        ...currentValues,
+      setFormValues((v) => ({
+        ...v,
         idUnidadeConsumidora: "",
         uc: "",
         idTipoCodigo: "",
@@ -218,9 +232,8 @@ export default function DespesaForm({
       }));
       return;
     }
-
-    setFormValues((currentValues) => ({
-      ...currentValues,
+    setFormValues((v) => ({
+      ...v,
       idUnidadeConsumidora: selectedUc.id,
       uc: selectedUc.identificador,
       idTipoCodigo: selectedUc.idTipoCodigo ?? "",
@@ -229,38 +242,17 @@ export default function DespesaForm({
       idOrcamento: selectedUc.idOrcamento,
       idFornecedor: selectedUc.idFornecedor,
       codigo:
-        currentValues.codigo && String(currentValues.codigo).trim().length > 0
-          ? currentValues.codigo
+        v.codigo && String(v.codigo).trim().length > 0
+          ? v.codigo
           : selectedUc.identificador,
     }));
   }, [selectedUc]);
 
-  const handleRowKeyDown = (
-    event: React.KeyboardEvent<HTMLTableRowElement>,
-    uc: DespesaUcOption
-  ) => {
-    if (isViewMode) return;
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setSelectedUc(uc);
-      setErrors((currentErrors) => ({
-        ...currentErrors,
-        idUnidadeConsumidora: "",
-        uc: "",
-        idInstituicao: "",
-        idOrcamento: "",
-        idFornecedor: "",
-      }));
-    }
-  };
-
   const handleSelectUc = (uc: DespesaUcOption) => {
     if (isViewMode) return;
-
     setSelectedUc(uc);
-    setErrors((currentErrors) => ({
-      ...currentErrors,
+    setErrors((e) => ({
+      ...e,
       idUnidadeConsumidora: "",
       uc: "",
       idInstituicao: "",
@@ -269,120 +261,80 @@ export default function DespesaForm({
     }));
   };
 
+  const handleRowKeyDown = (
+    event: React.KeyboardEvent<HTMLTableRowElement>,
+    uc: DespesaUcOption
+  ) => {
+    if (isViewMode) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleSelectUc(uc);
+    }
+  };
+
   const handleValueChange = <K extends keyof DespesaFormValues>(
     key: K,
     value: DespesaFormValues[K]
   ) => {
-    setFormValues((currentValues) => ({
-      ...currentValues,
-      [key]: value,
-    }));
-
+    setFormValues((v) => ({ ...v, [key]: value }));
     if (errors[key as string]) {
-      setErrors((currentErrors) => ({
-        ...currentErrors,
-        [key]: "",
-      }));
+      setErrors((e) => ({ ...e, [key]: "" }));
     }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isViewMode || !onConfirm) return;
-    
 
     const nextErrors: Record<string, string> = {};
+
     if (!selectedUc) {
-      nextErrors.idUnidadeConsumidora = ucSelectionMessage;
-      nextErrors.uc = ucSelectionMessage;
+      nextErrors.idUnidadeConsumidora = "Selecione uma UC na tabela ao lado.";
     }
 
     const numeroDocumento = digitsOnly(formValues.numeroDocumento);
-    if (!numeroDocumento) {
+    if (!numeroDocumento)
       nextErrors.numeroDocumento = "Numero do documento deve conter apenas numeros.";
-    }
 
-    if (String(formValues.codigo ?? "").trim().length > 100) {
+    if (String(formValues.codigo ?? "").trim().length > 100)
       nextErrors.codigo = "Codigo deve ter no maximo 100 caracteres.";
-    }
 
-    const valorPrevistoError = validatePositiveNumber(
-      formValues.valorPrevisto,
-      "Valor previsto"
-    );
-    if (valorPrevistoError) {
-      nextErrors.valorPrevisto = valorPrevistoError;
-    }
+    const valorPrevistoError = validatePositiveNumber(formValues.valorPrevisto, "Valor previsto");
+    if (valorPrevistoError) nextErrors.valorPrevisto = valorPrevistoError;
 
-    const valorPagoError = validateOptionalNonNegativeNumber(
-      formValues.valorPago,
-      "Valor pago"
-    );
-    if (valorPagoError) {
-      nextErrors.valorPago = valorPagoError;
-    }
+    const valorPagoError = validateOptionalNonNegativeNumber(formValues.valorPago, "Valor pago");
+    if (valorPagoError) nextErrors.valorPago = valorPagoError;
 
-    const consumoPrevistoError = validateOptionalNonNegativeNumber(
-      formValues.consumoPrevisto,
-      "Consumo previsto"
-    );
-    if (consumoPrevistoError) {
-      nextErrors.consumoPrevisto = consumoPrevistoError;
-    }
+    const consumoPrevistoError = validateOptionalNonNegativeNumber(formValues.consumoPrevisto, "Consumo previsto");
+    if (consumoPrevistoError) nextErrors.consumoPrevisto = consumoPrevistoError;
 
-    const consumoRealError = validateOptionalNonNegativeNumber(
-      formValues.consumoReal,
-      "Consumo real"
-    );
-    if (consumoRealError) {
-      nextErrors.consumoReal = consumoRealError;
-    }
+    const consumoRealError = validateOptionalNonNegativeNumber(formValues.consumoReal, "Consumo real");
+    if (consumoRealError) nextErrors.consumoReal = consumoRealError;
 
     const normalizedDataEmicao = normalizeDateInput(formValues.dataEmicao);
-    if (!normalizedDataEmicao) {
-      nextErrors.dataEmicao = "Data de emissao invalida.";
-    }
+    if (!normalizedDataEmicao) nextErrors.dataEmicao = "Data de emissao invalida.";
 
     const normalizedDataVencimento = normalizeDateInput(formValues.dataVencimento);
-    if (!normalizedDataVencimento) {
-      nextErrors.dataVencimento = "Data de vencimento invalida.";
-    }
+    if (!normalizedDataVencimento) nextErrors.dataVencimento = "Data de vencimento invalida.";
 
-    const dateRangeError = validateDespesaDateRange(
-      normalizedDataEmicao,
-      normalizedDataVencimento
-    );
-    if (dateRangeError) {
-      nextErrors.dataVencimento = dateRangeError;
-    }
+    const dateRangeError = validateDespesaDateRange(normalizedDataEmicao, normalizedDataVencimento);
+    if (dateRangeError) nextErrors.dataVencimento = dateRangeError;
 
     const resolvedResponsibleUserId =
-      Number(formValues.idUsuario) ||
-      currentUserId ||
-      authStorage.get()?.id ||
-      null;
-
-    if (!resolvedResponsibleUserId) {
+      Number(formValues.idUsuario) || currentUserId || authStorage.get()?.id || null;
+    if (!resolvedResponsibleUserId)
       nextErrors.idUsuario = "Selecione um usuario responsavel.";
-    }
 
-    const resolvedStatus = isCreateMode
-      ? 1
-      : Number(formValues.situacao);
-
-    if (!resolvedStatus) {
-      nextErrors.situacao = "Selecione um status financeiro.";
-    }
+    const resolvedStatus = isCreateMode ? 1 : Number(formValues.situacao);
+    if (!resolvedStatus) nextErrors.situacao = "Selecione um status financeiro.";
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    const finalResponsibleUserId = Number(resolvedResponsibleUserId);
-
     await onConfirm({
       ...formValues,
       numeroDocumento,
-      idUsuario: finalResponsibleUserId,
+      idUsuario: Number(resolvedResponsibleUserId),
       valorPago: isCreateMode ? 0 : formValues.valorPago,
       consumoReal: isCreateMode ? 0 : formValues.consumoReal,
       dataEmicao: normalizedDataEmicao ?? "",
@@ -400,416 +352,351 @@ export default function DespesaForm({
   };
 
   return (
-    <form className="flex max-h-[72vh] flex-col" onSubmit={handleSubmit}>
-      <header>
+    <form className="flex h-full flex-col overflow-hidden" onSubmit={handleSubmit}>
+      {/* Header */}
+      <header className="flex-shrink-0 px-6 pt-5 pb-4 border-b border-[var(--border-soft)]">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
           Formulario de despesa
         </p>
-        <h3 className="mt-2 text-[28px] font-semibold text-[var(--secundary-1)]">
+        <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">
           Selecione uma UC e registre o gasto
         </h3>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
+        <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
           Escolha a unidade consumidora ao lado. Os vinculos da despesa serao
           preenchidos automaticamente sempre que a UC for selecionada.
         </p>
       </header>
 
-      <div className="mt-5 grid min-h-0 flex-1 gap-6 overflow-y-auto lg:grid-cols-2">
-        <section className="civitas-surface rounded-sm border h-full max-h-[400px] flex flex-col p-4">
-          <div className="mt-4">
-            <h4 className="mt-2 text-lg font-semibold text-[var(--foreground)]">
-              Lista de Unidades Consumidoras disponiveis
-            </h4>
-            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-              Clique em uma linha para selecionar a UC.
+      {/* Body: dois painéis lado a lado */}
+      <div className="grid min-h-0 flex-1 grid-cols-[300px_1fr] overflow-hidden">
+
+        {/* ── Painel esquerdo: lista de UCs ── */}
+        <div className="flex flex-col overflow-hidden border-r border-[var(--border-soft)]">
+          {/* Busca */}
+          <div className="flex-shrink-0 border-b border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+              Unidades consumidoras
             </p>
+            <div className="flex items-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-2.5 focus-within:border-[var(--primary-1)] focus-within:ring-4 focus-within:ring-[var(--focus-ring)] transition-all">
+              <span className="material-symbols-outlined !text-[16px] text-[var(--foreground-muted)]">
+                search
+              </span>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por ID ou identificador..."
+                className="w-full bg-transparent py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none"
+              />
+            </div>
           </div>
 
-          <div className="mt-4 overflow-y-auto rounded-sm border border-[var(--border-soft)] bg-[var(--surface-default)]">
-            {ucs.length > 0 ? (
-              <table className="min-w-full border-separate border-spacing-0 text-left text-[var(--foreground)]">
-                <thead className="sticky top-0 z-10 bg-[var(--surface-subtle)] shadow-[var(--shadow-xs)]">
-                  <tr className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-                    <th className="px-4 py-3">ID</th>
-                    <th className="px-4 py-3">Identificador</th>
-                    <th className="px-4 py-3 text-right">Acao</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border-soft)]">
-                  {ucs.map((uc) => {
-                    const isSelected = selectedUc?.id === uc.id;
-                    const actionTextClassName = isSelected
-                      ? "text-[var(--text-accent-teal)]"
-                      : "text-[var(--foreground)]";
-                    const selectedCellClassName = isSelected
-                      ? "text-[var(--text-accent-teal)]"
-                      : "text-[var(--foreground)]";
-                    const selectedMutedCellClassName = isSelected
-                      ? "text-[var(--text-accent-teal)]"
-                      : "text-[var(--foreground-muted)]";
-
-                    return (
-                      <tr
-                        key={uc.id}
-                        tabIndex={isViewMode ? -1 : 0}
-                        aria-selected={isSelected}
-                        className={getUcRowClassName(isSelected, isViewMode)}
-                        onClick={() => handleSelectUc(uc)}
-                        onKeyDown={(event) => handleRowKeyDown(event, uc)}
-                      >
-                        <td className={`px-4 py-3 text-sm font-semibold ${selectedCellClassName}`}>
-                          {String(uc.id).padStart(3, "0")}
-                        </td>
-                        <td className={`px-4 py-3 text-sm ${selectedMutedCellClassName}`}>
-                          {uc.identificador}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <button
-                            type="button"
-                            disabled={isViewMode}
-                            className={`${ucActionButtonClassName} ${actionTextClassName}`}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleSelectUc(uc);
-                            }}
-                          >
-                            {isSelected ? (
-                              <>
-                                <span className="material-symbols-outlined !text-[16px]">
-                                  check
-                                </span>
-                                Selecionada
-                              </>
-                            ) : (
-                              "Selecionar"
-                            )}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            ) : (
-              <div className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-6 text-center text-sm text-[var(--foreground-soft)]">
+          {/* Lista */}
+          <div className="flex-1 overflow-y-auto">
+            {ucs.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-[var(--foreground-muted)]">
                 Nenhuma UC disponivel no momento.
+              </p>
+            ) : filteredUcs.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-[var(--foreground-muted)]">
+                Nenhuma UC encontrada.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-1 p-2">
+                {filteredUcs.map((uc) => {
+                  const isSelected = selectedUc?.id === uc.id;
+                  return (
+                    <button
+                      key={uc.id}
+                      type="button"
+                      tabIndex={isViewMode ? -1 : 0}
+                      aria-selected={isSelected}
+                      disabled={isViewMode}
+                      onClick={() => handleSelectUc(uc)}
+                      onKeyDown={(e) => handleRowKeyDown(e as any, uc)}
+                      className={`flex w-full items-center gap-2.5 rounded-sm border px-3 py-2.5 text-left transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-default ${
+                        isSelected
+                          ? "border-[var(--border-accent-teal)] bg-[var(--surface-subtle)] ring-1 ring-[var(--border-accent-teal)]"
+                          : "border-transparent bg-transparent hover:border-[var(--border-soft)] hover:bg-[var(--surface-subtle)]"
+                      }`}
+                    >
+                      <span
+                        className={`min-w-[32px] text-[11px] font-semibold ${
+                          isSelected
+                            ? "text-[var(--text-accent-teal)]"
+                            : "text-[var(--foreground-muted)]"
+                        }`}
+                      >
+                        {String(uc.id).padStart(3, "0")}
+                      </span>
+                      <span
+                        className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm ${
+                          isSelected
+                            ? "font-semibold text-[var(--text-accent-teal)]"
+                            : "text-[var(--foreground)]"
+                        }`}
+                      >
+                        {uc.identificador}
+                      </span>
+                      {isSelected && (
+                        <span className="material-symbols-outlined !text-[14px] text-[var(--text-accent-teal)]">
+                          check
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {errors.idUnidadeConsumidora ? (
-            <p className="mt-3 text-sm font-medium text-[#C23D3D]">
+          {errors.idUnidadeConsumidora && (
+            <p className="flex-shrink-0 border-t border-[var(--border-soft)] px-4 py-2.5 text-sm font-medium text-[#C23D3D]">
               {errors.idUnidadeConsumidora}
             </p>
-          ) : null}
-        </section>
+          )}
+        </div>
 
-        <section className="min-w-0">
-          <div className="civitas-surface rounded-sm border border-[var(--border-soft)] p-4 shadow-[var(--shadow-xs)] relative">
-            <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4 mb-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-                Unidade consumidora selecionada
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                <span className="rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-1 font-semibold text-[var(--foreground)]">
-                  {selectedUc ? String(selectedUc.id).padStart(3, "0") : "Sem selecao"}
-                </span>
-                <span className="text-[var(--foreground-muted)]">
-                  {selectedUc ? selectedUc.identificador : "Selecione uma UC na lista"}
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-5">
-              <div>
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-                  Vinculos preenchidos pela UC
-                </p>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Input
-                    label="UC (ID)"
-                    placeholder="Selecione uma UC"
-                    disabled
-                    value={
-                      formValues.idUnidadeConsumidora
-                        ? String(formValues.idUnidadeConsumidora).padStart(3, "0")
-                        : ""
-                    }
-                  />
-                  <Input
-                    label="Identificador UC"
-                    placeholder="Selecione uma UC"
-                    disabled
-                    value={formValues.uc}
-                    error={errors.uc}
-                  />
-                  <Input
-                    label="Instituicao"
-                    placeholder="Selecione uma UC"
-                    disabled
-                    value={selectedUcSummary.instituicao}
-                  />
-                  <Input
-                    label="Secretaria"
-                    placeholder="Selecione uma UC"
-                    disabled
-                    value={selectedUcSummary.secretaria}
-                  />
-                  <Input
-                    label="Tipo de codigo"
-                    placeholder="Selecione uma UC"
-                    disabled
-                    value={selectedUcSummary.tipoCodigo}
-                  />
-                  <Input
-                    label="Categoria"
-                    placeholder="Selecione uma UC"
-                    disabled
-                    value={selectedUcSummary.tipoDespesa}
-                  />
-                  <Input
-                    label="Orcamento"
-                    placeholder="Selecione uma UC"
-                    disabled
-                    value={selectedUcSummary.orcamento}
-                  />
-                  <Input
-                    label="Fornecedor"
-                    placeholder="Selecione uma UC"
-                    disabled
-                    value={selectedUcSummary.fornecedor}
-                  />
-                </div>
-              </div>
-
-              {selectedUc ? (
-              <div>
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-                  Dados da despesa
-                </p>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Input
-                    label="Numero do documento"
-                    placeholder="Somente numeros"
-                    required={!isViewMode}
-                    disabled={isViewMode}
-                    value={formValues.numeroDocumento}
-                    error={errors.numeroDocumento}
-                    onChange={(event) =>
-                      handleValueChange("numeroDocumento", event.target.value)
-                    }
-                  />
-                  {/* <Input
-                    label="Codigo"
-                    placeholder="Codigo de agrupamento"
-                    disabled={isViewMode}
-                    value={formValues.codigo}
-                    error={errors.codigo}
-                    onChange={(event) => handleValueChange("codigo", event.target.value)}
-                  /> */}
-                  <Input
-                    label="Data de emissao"
-                    type="date"
-                    required={!isViewMode}
-                    disabled={isViewMode}
-                    value={formValues.dataEmicao}
-                    error={errors.dataEmicao}
-                    onChange={(event) => handleValueChange("dataEmicao", event.target.value)}
-                  />
-                  <Input
-                    label="Data de vencimento"
-                    type="date"
-                    required={!isViewMode}
-                    disabled={isViewMode}
-                    value={formValues.dataVencimento}
-                    error={errors.dataVencimento}
-                    onChange={(event) =>
-                      handleValueChange("dataVencimento", event.target.value)
-                    }
-                  />
-                  <Input
-                    label={`Valor Previsto em R$`}
-                    placeholder="0,00"
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="0.01"
-                    required={!isViewMode}
-                    disabled={isViewMode}
-                    value={formValues.valorPrevisto}
-                    error={errors.valorPrevisto}
-                    onChange={(event) =>
-                      handleValueChange(
-                        "valorPrevisto",
-                        event.target.value === "" ? "" : Number(event.target.value)
-                      )
-                    }
-                  />
-                  <Input
-                    label={`Consumo Previsto em ${selectedUcSummary.unidadeMedida || ""}`}
-                    placeholder="0"
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    step="0.01"
-                    required={!isViewMode}
-                    disabled={isViewMode}
-                    value={formValues.consumoPrevisto}
-                    error={errors.consumoPrevisto}
-                    onChange={(event) =>
-                      handleValueChange(
-                        "consumoPrevisto",
-                        event.target.value === "" ? "" : Number(event.target.value)
-                      )
-                    }
-                  />
-                  {isCreateMode ? (
-                    <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4 md:col-span-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-                        Definicoes automaticas do cadastro
-                      </p>
-                      <div className="mt-2 space-y-1 text-sm text-[var(--foreground-muted)]">
-                        <p>
-                          Status inicial:{" "}
-                          <span className="font-semibold text-[var(--foreground)]">
-                            A pagar
-                          </span>
-                        </p>
-                        <p>
-                          Usuario responsavel:{" "}
-                          <span className="font-semibold text-[var(--foreground)]">
-                            {currentAuthUser?.nome ?? "Usuario autenticado"}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <Input
-                        label="Valor pago"
-                        placeholder="0,00"
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        step="0.01"
-                        disabled={isViewMode}
-                        value={formValues.valorPago}
-                        error={errors.valorPago}
-                        onChange={(event) =>
-                          handleValueChange(
-                            "valorPago",
-                            event.target.value === "" ? "" : Number(event.target.value)
-                          )
-                        }
-                      />
-                      <Input
-                        label="Consumo real"
-                        placeholder="0"
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        step="0.01"
-                        disabled={isViewMode}
-                        value={formValues.consumoReal}
-                        error={errors.consumoReal}
-                        onChange={(event) =>
-                          handleValueChange(
-                            "consumoReal",
-                            event.target.value === "" ? "" : Number(event.target.value)
-                          )
-                        }
-                      />
-
-                      <div className="w-full">
-                        <label className="mb-2 block text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
-                          Usuario responsavel
-                          {!isViewMode ? <span className="ml-1 text-red-500">*</span> : null}
-                        </label>
-                        <select
-                          value={formValues.idUsuario}
-                          disabled={isViewMode}
-                          required={!isViewMode}
-                          className={selectClassName}
-                          onChange={(event) =>
-                            handleValueChange(
-                              "idUsuario",
-                              event.target.value === "" ? "" : Number(event.target.value)
-                            )
-                          }
-                        >
-                          <option value="">Selecione o usuario</option>
-                          {usuarios.map((usuario) => (
-                            <option key={usuario.value} value={usuario.value}>
-                              {usuario.label}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.idUsuario ? (
-                          <p className="mt-1.5 text-sm font-medium text-[#C23D3D]">
-                            {errors.idUsuario}
-                          </p>
-                        ) : null}
-                      </div>
-
-                      <div className="w-full">
-                        <label className="mb-2 block text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
-                          Status financeiro
-                          {!isViewMode ? <span className="ml-1 text-red-500">*</span> : null}
-                        </label>
-                        <select
-                          value={formValues.situacao}
-                          disabled={isViewMode}
-                          required={!isViewMode}
-                          className={selectClassName}
-                          onChange={(event) =>
-                            handleValueChange(
-                              "situacao",
-                              event.target.value === "" ? "" : Number(event.target.value)
-                            )
-                          }
-                        >
-                          <option value="">Selecione o status</option>
-                          {STATUS_OPTIONS.map((status) => (
-                            <option key={status.value} value={status.value}>
-                              {status.label}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.situacao ? (
-                          <p className="mt-1.5 text-sm font-medium text-[#C23D3D]">
-                            {errors.situacao}
-                          </p>
-                        ) : null}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-              ) : (
-                <div className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-6 text-center text-sm text-[var(--foreground-soft)]">
-                  Selecione uma Unidade Consumidora para preencher os dados da despesa
-                </div>
-              )}
-            </div>
-
-            <div className="mt-5 flex flex-col gap-3 border-t border-[var(--divider)] pt-5 md:flex-row">
-              <Button
-                variant="secondary"
-                className="!w-full !max-w-none"
-                onClick={onCancel}
-                type="button"
-              >
-                {isViewMode ? "Fechar" : "Cancelar"}
-              </Button>
-
-              {isViewMode ? null : (
-                <Button className="!w-full !max-w-none" type="submit">
-                  Confirmar
-                </Button>
-              )}
+        {/* ── Painel direito: UC selecionada + campos ── */}
+        <div className="flex flex-col overflow-hidden">
+          {/* Chip da UC */}
+          <div className="flex-shrink-0 border-b border-[var(--border-soft)] bg-[var(--surface-subtle)] px-5 py-3">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+              UC selecionada
+            </p>
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-sm border px-3 py-1 text-xs font-semibold transition-all ${
+                selectedUc
+                  ? "border-[var(--border-accent-teal)] bg-[var(--surface-subtle)] text-[var(--text-accent-teal)]"
+                  : "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground-muted)]"
+              }`}
+            >
+              <span className="material-symbols-outlined !text-[13px]">
+                {selectedUc ? "business" : "radio_button_unchecked"}
+              </span>
+              {selectedUc
+                ? `${String(selectedUc.id).padStart(3, "0")} — ${selectedUc.identificador}`
+                : "Sem selecao — clique em uma UC"}
             </div>
           </div>
-        </section>
+
+          {/* Scroll dos campos */}
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            {!selectedUc ? (
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+                <span className="material-symbols-outlined !text-[36px] text-[var(--foreground-muted)] opacity-30">
+                  corporate_fare
+                </span>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  Selecione uma Unidade Consumidora para preencher os dados da despesa
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {/* Vínculos */}
+                <div>
+                  <SectionLabel>Vinculos preenchidos pela UC</SectionLabel>
+                  <div className="grid grid-cols-2 gap-3">
+                    <ReadonlyField
+                      label="UC (ID)"
+                      value={
+                        formValues.idUnidadeConsumidora
+                          ? String(formValues.idUnidadeConsumidora).padStart(3, "0")
+                          : ""
+                      }
+                    />
+                    <ReadonlyField label="Identificador UC" value={formValues.uc} />
+                    <ReadonlyField label="Instituicao" value={selectedUcSummary.instituicao} />
+                    <ReadonlyField label="Secretaria" value={selectedUcSummary.secretaria} />
+                    <ReadonlyField label="Tipo de codigo" value={selectedUcSummary.tipoCodigo} />
+                    <ReadonlyField label="Categoria" value={selectedUcSummary.tipoDespesa} />
+                    <ReadonlyField label="Orcamento" value={selectedUcSummary.orcamento} />
+                    <ReadonlyField label="Fornecedor" value={selectedUcSummary.fornecedor} />
+                  </div>
+                </div>
+
+                {/* Dados da despesa */}
+                <div>
+                  <SectionLabel>Dados da despesa</SectionLabel>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label="Numero do documento"
+                      placeholder="Somente numeros"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.numeroDocumento}
+                      error={errors.numeroDocumento}
+                      onChange={(e) => handleValueChange("numeroDocumento", e.target.value)}
+                    />
+                    <Input
+                      label="Data de emissao"
+                      type="date"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.dataEmicao}
+                      error={errors.dataEmicao}
+                      onChange={(e) => handleValueChange("dataEmicao", e.target.value)}
+                    />
+                    <Input
+                      label="Data de vencimento"
+                      type="date"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.dataVencimento}
+                      error={errors.dataVencimento}
+                      onChange={(e) => handleValueChange("dataVencimento", e.target.value)}
+                    />
+                    <Input
+                      label="Valor previsto em R$"
+                      placeholder="0,00"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.valorPrevisto}
+                      error={errors.valorPrevisto}
+                      onChange={(e) =>
+                        handleValueChange("valorPrevisto", e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                    />
+                    <Input
+                      label={`Consumo previsto em ${selectedUcSummary.unidadeMedida || "—"}`}
+                      placeholder="0"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      step="0.01"
+                      required={!isViewMode}
+                      disabled={isViewMode}
+                      value={formValues.consumoPrevisto}
+                      error={errors.consumoPrevisto}
+                      onChange={(e) =>
+                        handleValueChange("consumoPrevisto", e.target.value === "" ? "" : Number(e.target.value))
+                      }
+                    />
+
+                    {isCreateMode ? (
+                      <div className="col-span-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+                          Definicoes automaticas do cadastro
+                        </p>
+                        <div className="mt-2 space-y-1 text-sm text-[var(--foreground-muted)]">
+                          <p>
+                            Status inicial:{" "}
+                            <span className="font-semibold text-[var(--foreground)]">A pagar</span>
+                          </p>
+                          <p>
+                            Usuario responsavel:{" "}
+                            <span className="font-semibold text-[var(--foreground)]">
+                              {currentAuthUser?.nome ?? "Usuario autenticado"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Input
+                          label="Valor pago"
+                          placeholder="0,00"
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          step="0.01"
+                          disabled={isViewMode}
+                          value={formValues.valorPago}
+                          error={errors.valorPago}
+                          onChange={(e) =>
+                            handleValueChange("valorPago", e.target.value === "" ? "" : Number(e.target.value))
+                          }
+                        />
+                        <Input
+                          label="Consumo real"
+                          placeholder="0"
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          step="0.01"
+                          disabled={isViewMode}
+                          value={formValues.consumoReal}
+                          error={errors.consumoReal}
+                          onChange={(e) =>
+                            handleValueChange("consumoReal", e.target.value === "" ? "" : Number(e.target.value))
+                          }
+                        />
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
+                            Usuario responsavel
+                            {!isViewMode && <span className="ml-1 text-red-500">*</span>}
+                          </label>
+                          <select
+                            value={formValues.idUsuario}
+                            disabled={isViewMode}
+                            required={!isViewMode}
+                            className={selectClassName}
+                            onChange={(e) =>
+                              handleValueChange("idUsuario", e.target.value === "" ? "" : Number(e.target.value))
+                            }
+                          >
+                            <option value="">Selecione o usuario</option>
+                            {usuarios.map((u) => (
+                              <option key={u.value} value={u.value}>{u.label}</option>
+                            ))}
+                          </select>
+                          {errors.idUsuario && (
+                            <p className="text-sm font-medium text-[#C23D3D]">{errors.idUsuario}</p>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
+                            Status financeiro
+                            {!isViewMode && <span className="ml-1 text-red-500">*</span>}
+                          </label>
+                          <select
+                            value={formValues.situacao}
+                            disabled={isViewMode}
+                            required={!isViewMode}
+                            className={selectClassName}
+                            onChange={(e) =>
+                              handleValueChange("situacao", e.target.value === "" ? "" : Number(e.target.value))
+                            }
+                          >
+                            <option value="">Selecione o status</option>
+                            {STATUS_OPTIONS.map((s) => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                          </select>
+                          {errors.situacao && (
+                            <p className="text-sm font-medium text-[#C23D3D]">{errors.situacao}</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer com ações */}
+          <div className="flex flex-shrink-0 items-center justify-end gap-2 border-t border-[var(--divider)] bg-[var(--surface-subtle)] px-5 py-3">
+            <Button
+              variant="secondary"
+              onClick={onCancel}
+              type="button"
+            >
+              {isViewMode ? "Fechar" : "Cancelar"}
+            </Button>
+            {!isViewMode && (
+              <Button type="submit">
+                Confirmar
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     </form>
   );
