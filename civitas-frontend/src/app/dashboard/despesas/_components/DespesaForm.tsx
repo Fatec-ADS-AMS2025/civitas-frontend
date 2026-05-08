@@ -17,6 +17,8 @@ export type DespesaUcOption = {
   tipoCodigoNome: string;
   idTipoDespesa: number;
   tipoDespesaNome: string;
+  idUnidadeMedida?: number | null;
+  unidadeMedidaNome: string;
   idFornecedor: number;
   fornecedorNome: string;
   idOrcamento: number;
@@ -177,6 +179,7 @@ export default function DespesaForm({
       secretaria: selectedUc?.secretariaNome ?? "",
       tipoCodigo: selectedUc?.tipoCodigoNome ?? "",
       tipoDespesa: selectedUc?.tipoDespesaNome ?? "",
+      unidadeMedida: selectedUc?.unidadeMedidaNome ?? "",
       fornecedor: selectedUc?.fornecedorNome ?? "",
       orcamento: selectedUc?.orcamentoLabel ?? "",
     }),
@@ -285,8 +288,8 @@ export default function DespesaForm({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("asdasda")
     if (isViewMode || !onConfirm) return;
+    
 
     const nextErrors: Record<string, string> = {};
     if (!selectedUc) {
@@ -579,6 +582,7 @@ export default function DespesaForm({
                 </div>
               </div>
 
+              {selectedUc ? (
               <div>
                 <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
                   Dados da despesa
@@ -595,14 +599,14 @@ export default function DespesaForm({
                       handleValueChange("numeroDocumento", event.target.value)
                     }
                   />
-                  <Input
+                  {/* <Input
                     label="Codigo"
                     placeholder="Codigo de agrupamento"
                     disabled={isViewMode}
                     value={formValues.codigo}
                     error={errors.codigo}
                     onChange={(event) => handleValueChange("codigo", event.target.value)}
-                  />
+                  /> */}
                   <Input
                     label="Data de emissao"
                     type="date"
@@ -624,7 +628,7 @@ export default function DespesaForm({
                     }
                   />
                   <Input
-                    label="Valor previsto"
+                    label={`Valor Previsto em R$`}
                     placeholder="0,00"
                     type="number"
                     inputMode="decimal"
@@ -642,7 +646,7 @@ export default function DespesaForm({
                     }
                   />
                   <Input
-                    label="Consumo previsto"
+                    label={`Consumo Previsto em ${selectedUcSummary.unidadeMedida || ""}`}
                     placeholder="0"
                     type="number"
                     inputMode="decimal"
@@ -781,6 +785,11 @@ export default function DespesaForm({
                   )}
                 </div>
               </div>
+              ) : (
+                <div className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-6 text-center text-sm text-[var(--foreground-soft)]">
+                  Selecione uma Unidade Consumidora para preencher os dados da despesa
+                </div>
+              )}
             </div>
 
             <div className="mt-5 flex flex-col gap-3 border-t border-[var(--divider)] pt-5 md:flex-row">

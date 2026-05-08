@@ -11,6 +11,7 @@ import { secretariaService } from "@/hooks/secretaria";
 import { tipoCodigoService } from "@/hooks/tipoCodigo";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import { unidadeConsumidoraService } from "@/hooks/unidadeConsumidora";
+import { unidadeMedidaService } from "@/hooks/unidadeMedida";
 import { usuarioService } from "@/hooks/usuario";
 import { authStorage } from "@/lib/auth-storage";
 import type DespesaDTO from "@/models/despesa";
@@ -21,6 +22,7 @@ import type SecretariaDTO from "@/models/secretaria";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
 import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
+import type UnidadeMedidaDTO from "@/models/unidadeMedida";
 import type UsuarioDTO from "@/models/usuario";
 
 const SOLICITA_UC_SIM = 1;
@@ -69,6 +71,7 @@ type DashboardData = {
   secretarias: SecretariaDTO[];
   fornecedores: FornecedorDTO[];
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
+  unidadesMedida: UnidadeMedidaDTO[];
   usuarios: UsuarioDTO[];
 };
 
@@ -81,6 +84,7 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   secretarias: [],
   fornecedores: [],
   unidadesConsumidoras: [],
+  unidadesMedida: [],
   usuarios: [],
 };
 
@@ -528,6 +532,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretarias,
     fornecedores,
     unidadesConsumidoras,
+    unidadesMedida,
     usuarios,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
@@ -538,6 +543,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretariaService.getAllData(),
     fornecedorService.getAllData(),
     unidadeConsumidoraService.getAllActiveData(),
+    unidadeMedidaService.getAllData(),
     usuarioService.getAllData(),
   ]);
 
@@ -550,6 +556,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     secretarias: secretarias ?? [],
     fornecedores: fornecedores ?? [],
     unidadesConsumidoras: unidadesConsumidoras ?? [],
+    unidadesMedida: unidadesMedida ?? [],
     usuarios: usuarios ?? [],
   };
 };
@@ -709,6 +716,7 @@ export const useDespesasDashboard = () => {
       secretarias: dashboardData.secretarias,
       fornecedores: dashboardData.fornecedores,
       unidadesConsumidoras: dashboardData.unidadesConsumidoras,
+      unidadesMedida: dashboardData.unidadesMedida,
       usuarios: dashboardData.usuarios,
       summary,
       loading,
@@ -733,6 +741,7 @@ export const useDespesasDashboard = () => {
       dashboardData.secretarias,
       dashboardData.fornecedores,
       dashboardData.unidadesConsumidoras,
+      dashboardData.unidadesMedida,
       dashboardData.usuarios,
       summary,
       loading,

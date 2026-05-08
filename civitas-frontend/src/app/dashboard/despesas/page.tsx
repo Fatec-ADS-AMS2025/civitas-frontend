@@ -65,6 +65,9 @@ export default function Page() {
     const tipoDespesaMap = new Map(
       dashboard.tiposDespesa.map((item) => [item.id, item] as const)
     );
+    const unidadeMedidaMap = new Map(
+      dashboard.unidadesMedida.map((item) => [item.id, item] as const)
+    );
     const tipoCodigoMap = new Map(
       dashboard.tipoCodigos.map((item) => [item.id, item.nome] as const)
     );
@@ -86,30 +89,40 @@ export default function Page() {
       })
     );
 
-    return dashboard.unidadesConsumidoras.map((item) => ({
-      id: item.id,
-      identificador: item.identificador,
-      idInstituicao: item.idInstituicao,
-      instituicaoNome:
-        instituicaoMap.get(item.idInstituicao) ?? `Instituicao #${item.idInstituicao}`,
-      idSecretaria: item.idSecretaria,
-      secretariaNome:
-        secretariaMap.get(item.idSecretaria) ?? `Secretaria #${item.idSecretaria}`,
-      idTipoCodigo: tipoDespesaMap.get(item.idTipoDespesa)?.idTipoCodigo ?? null,
-      tipoCodigoNome:
-        tipoCodigoMap.get(tipoDespesaMap.get(item.idTipoDespesa)?.idTipoCodigo ?? 0) ??
-        "Tipo nao informado",
-      idTipoDespesa: item.idTipoDespesa,
-      tipoDespesaNome:
-        tipoDespesaMap.get(item.idTipoDespesa)?.descricao ?? `Tipo #${item.idTipoDespesa}`,
-      idFornecedor: item.idFornecedor,
-      fornecedorNome:
-        fornecedorMap.get(item.idFornecedor) ?? `Fornecedor #${item.idFornecedor}`,
-      idOrcamento: item.idOrcamento,
-      orcamentoLabel:
-        orcamentoMap.get(item.idOrcamento) ??
-        `#${String(item.idOrcamento).padStart(3, "0")}`,
-    }));
+    return dashboard.unidadesConsumidoras.map((item) => {
+      const tipoDespesa = tipoDespesaMap.get(item.idTipoDespesa);
+      const unidadeMedida = unidadeMedidaMap.get(tipoDespesa?.idUnidadeMedida ?? 0);
+
+      return {
+        id: item.id,
+        identificador: item.identificador,
+        idInstituicao: item.idInstituicao,
+        instituicaoNome:
+          instituicaoMap.get(item.idInstituicao) ?? `Instituicao #${item.idInstituicao}`,
+        idSecretaria: item.idSecretaria,
+        secretariaNome:
+          secretariaMap.get(item.idSecretaria) ?? `Secretaria #${item.idSecretaria}`,
+        idTipoCodigo: tipoDespesa?.idTipoCodigo ?? null,
+        tipoCodigoNome:
+          tipoCodigoMap.get(tipoDespesa?.idTipoCodigo ?? 0) ??
+          "Tipo nao informado",
+        idTipoDespesa: item.idTipoDespesa,
+        tipoDespesaNome:
+          tipoDespesa?.descricao ?? `Tipo #${item.idTipoDespesa}`,
+        idUnidadeMedida: tipoDespesa?.idUnidadeMedida ?? null,
+        unidadeMedidaNome:
+          unidadeMedida?.abreviatura?.trim() ||
+          unidadeMedida?.descricao?.trim() ||
+          "unidade",
+        idFornecedor: item.idFornecedor,
+        fornecedorNome:
+          fornecedorMap.get(item.idFornecedor) ?? `Fornecedor #${item.idFornecedor}`,
+        idOrcamento: item.idOrcamento,
+        orcamentoLabel:
+          orcamentoMap.get(item.idOrcamento) ??
+          `#${String(item.idOrcamento).padStart(3, "0")}`,
+      };
+    });
   }, [
     dashboard.fornecedores,
     dashboard.instituicoes,
@@ -118,6 +131,7 @@ export default function Page() {
     dashboard.tipoCodigos,
     dashboard.tiposDespesa,
     dashboard.unidadesConsumidoras,
+    dashboard.unidadesMedida,
   ]);
 
   const usuarioOptions = useMemo<DespesaResponsavelOption[]>(

@@ -98,6 +98,7 @@ export default function DespesasTabela({
               <th className="px-4 py-2">Registro</th>
               <th className="px-4 py-2">Codigo</th>
               <th className="px-4 py-2">Tipo codigo</th>
+              <th className="px-4 py-2">Consumo Previsto</th>
               <th className="px-4 py-2">Categoria</th>
               <th className="px-4 py-2">Descricao</th>
               <th className="px-4 py-2">Valor</th>

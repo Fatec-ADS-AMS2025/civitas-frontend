@@ -74,6 +74,9 @@ export default function DespesasTabelaRows({
             {despesa.tipoCodigoNome}
           </td>
           <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
+            {despesa.raw.consumoPrevisto != null ? despesa.raw.consumoPrevisto : "-"}
+          </td>
+          <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
             {despesa.categoria}
           </td>
           <td className="px-4 py-5 text-sm text-[var(--foreground-muted)]">
@@ -103,6 +106,10 @@ export default function DespesasTabelaRows({
   );
 }
 
+function getTipoCodigoLabel(idTipoCodigo: string) {
+
+}
+
 function RowActions({
   despesa,
   onView,
@@ -111,6 +118,7 @@ function RowActions({
 }: Omit<DespesasTabelaRowsProps, "loading" | "despesas" | "hasLocalListSearch"> & {
   despesa: DespesaDashboardRow;
 }) {
+
   return (
     <div className="flex items-center justify-center gap-2">
       <button
