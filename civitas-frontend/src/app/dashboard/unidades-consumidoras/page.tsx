@@ -14,6 +14,11 @@ import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import { unidadeConsumidoraService } from "@/hooks/unidadeConsumidora";
+import FornecedorDTO from "@/models/fornecedor";
+import InstituicaoDTO from "@/models/instituicao";
+import OrcamentoDTO from "@/models/orcamento";
+import SecretariaDTO from "@/models/secretaria";
+import TipoDespesaDTO from "@/models/tipoDespesa";
 import UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 
 // Filtro local de status para busca avançada.
@@ -35,8 +40,23 @@ const novaUnidadeConsumidora = { id: 0, identificador: "", idInstituicao: "", id
 const toLabel = (label: string, situacao?: number) => situacao === SITUACAO_INATIVO ? `${label} (${getSituacaoLabel(situacao)})` : label;
 type UnidadeConsumidoraRow = UnidadeConsumidoraDTO & { instituicaoLabel: string; tipoDespesaLabel: string; secretariaLabel: string; orcamentoLabel: string; fornecedorLabel: string; situacaoLabel: string };
 type PaginationState = Pick<PaginatedResult<UnidadeConsumidoraRow>, "currentPage" | "pageSize" | "totalPages" | "totalRecords">;
+type UnidadeConsumidoraLookups = {
+  instituicoes: InstituicaoDTO[];
+  tiposDespesa: TipoDespesaDTO[];
+  secretarias: SecretariaDTO[];
+  orcamentos: OrcamentoDTO[];
+  fornecedores: FornecedorDTO[];
+  unidadesConsumidoras: UnidadeConsumidoraDTO[];
+};
 const emptyPagination: PaginationState = { currentPage: 1, pageSize: 20, totalPages: 0, totalRecords: 0 };
 const shouldLoadPreviousPage = (pageResult: PaginatedResult<UnidadeConsumidoraRow>) => pageResult.totalRecords > 0 && pageResult.totalPages > 0 && pageResult.items.length === 0 && pageResult.currentPage > pageResult.totalPages;
+const emptyLookups: UnidadeConsumidoraLookups = { instituicoes: [], tiposDespesa: [], secretarias: [], orcamentos: [], fornecedores: [], unidadesConsumidoras: [] };
+const toPositiveNumber = (value: unknown): number | null => {
+  const parsedValue = Number(value);
+  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : null;
+};
+const hasDependentSelections = (formData: Record<string, unknown>) =>
+  toPositiveNumber(formData.idInstituicao) !== null && toPositiveNumber(formData.idTipoDespesa) !== null;
 
 export default function Page() {
   const [data, setData] = useState<UnidadeConsumidoraRow[]>([]);
@@ -44,27 +64,89 @@ export default function Page() {
   const [campos, setCampos] = useState<FieldConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lookups, setLookups] = useState<{ instituicoes: any[]; tiposDespesa: any[]; secretarias: any[]; orcamentos: any[]; fornecedores: any[] }>(
-    { instituicoes: [], tiposDespesa: [], secretarias: [], orcamentos: [], fornecedores: [] }
-  );
+  const [lookups, setLookups] = useState<UnidadeConsumidoraLookups>(emptyLookups);
   const [pagination, setPagination] = useState<PaginationState>(emptyPagination);
 
-  const { instituicoes, tiposDespesa, secretarias, orcamentos, fornecedores } = lookups;
+  const { instituicoes, tiposDespesa, secretarias, orcamentos, fornecedores, unidadesConsumidoras } = lookups;
   const instituicaoOptions = useMemo(() => instituicoes.map((item) => ({ value: item.id, label: toLabel(item.nome, item.situacao) })), [instituicoes]);
   const tipoDespesaOptions = useMemo(() => tiposDespesa.map((item) => ({ value: item.id, label: toLabel(item.descricao, item.situacao) })), [tiposDespesa]);
   const secretariaOptions = useMemo(() => secretarias.map((item) => ({ value: item.idSecretaria, label: toLabel(item.nome, item.situacao) })), [secretarias]);
   const orcamentoOptions = useMemo(() => orcamentos.map((item) => ({ value: item.idOrcamento, label: toLabel(`Orcamento #${item.idOrcamento}`, item.situacao) })), [orcamentos]);
   const fornecedorOptions = useMemo(() => fornecedores.map((item) => ({ value: item.idFornecedor, label: toLabel(item.nomeFantasia || item.nome, item.situacao) })), [fornecedores]);
+  const instituicaoMap = useMemo(() => new Map(instituicoes.map((item) => [item.id, item] as const)), [instituicoes]);
+
+  const getSecretariaOptionsForSelection = (formData: Record<string, unknown>) => {
+    if (!hasDependentSelections(formData)) return [];
+
+    const instituicaoId = toPositiveNumber(formData.idInstituicao);
+    if (!instituicaoId) return [];
+
+    const secretariaId = instituicaoMap.get(instituicaoId)?.idSecretaria;
+    if (!secretariaId) return [];
+
+    return secretariaOptions.filter((item) => Number(item.value) === secretariaId);
+  };
+
+  const getOrcamentoOptionsForSelection = (formData: Record<string, unknown>) => {
+    if (!hasDependentSelections(formData)) return [];
+
+    const instituicaoId = toPositiveNumber(formData.idInstituicao);
+    const tipoDespesaId = toPositiveNumber(formData.idTipoDespesa);
+    if (!instituicaoId || !tipoDespesaId) return [];
+
+    return orcamentoOptions.filter((item) => {
+      const orcamento = orcamentos.find((entry) => entry.idOrcamento === Number(item.value));
+      return orcamento?.idInstituicao === instituicaoId && orcamento?.idTipoDespesa === tipoDespesaId;
+    });
+  };
+
+  const getFornecedorOptionsForSelection = (formData: Record<string, unknown>) => {
+    if (!hasDependentSelections(formData)) return [];
+
+    // Gambiarra gulosa: por regra operacional atual, o cadastro de UC precisa listar
+    // todos os fornecedores existentes aqui, sem restringir pelos vinculos ja usados.
+    return fornecedorOptions;
+  };
 
   const formFields = useMemo<ModalFieldConfig[]>(() => [
     { key: "id", hidden: true },
     { key: "identificador", label: "Identificador", placeholder: "Identificador da unidade consumidora", required: true },
     { key: "idInstituicao", label: "Instituicao", placeholder: "Selecione a instituicao", type: "select", required: true, options: instituicaoOptions },
     { key: "idTipoDespesa", label: "Tipo de Despesa", placeholder: "Selecione o tipo de despesa", type: "select", required: true, options: tipoDespesaOptions },
-    { key: "idSecretaria", label: "Secretaria", placeholder: "Selecione a secretaria", type: "select", required: true, options: secretariaOptions },
-    { key: "idOrcamento", label: "Orcamento", placeholder: "Selecione o orcamento", type: "select", required: true, options: orcamentoOptions },
-    { key: "idFornecedor", label: "Fornecedor", placeholder: "Selecione o fornecedor", type: "select", required: true, options: fornecedorOptions },
-  ], [fornecedorOptions, instituicaoOptions, orcamentoOptions, secretariaOptions, tipoDespesaOptions]);
+    {
+      key: "idSecretaria",
+      label: "Secretaria",
+      placeholder: "Selecione a secretaria",
+      type: "select",
+      required: true,
+      resolveOptions: getSecretariaOptionsForSelection,
+      resolveDisabled: (formData) => !hasDependentSelections(formData),
+      clearOnDisable: true,
+      clearOnInvalidOption: true,
+    },
+    {
+      key: "idOrcamento",
+      label: "Orcamento",
+      placeholder: "Selecione o orcamento",
+      type: "select",
+      required: true,
+      resolveOptions: getOrcamentoOptionsForSelection,
+      resolveDisabled: (formData) => !hasDependentSelections(formData),
+      clearOnDisable: true,
+      clearOnInvalidOption: true,
+    },
+    {
+      key: "idFornecedor",
+      label: "Fornecedor",
+      placeholder: "Selecione o fornecedor",
+      type: "select",
+      required: true,
+      resolveOptions: getFornecedorOptionsForSelection,
+      resolveDisabled: (formData) => !hasDependentSelections(formData),
+      clearOnDisable: true,
+      clearOnInvalidOption: true,
+    },
+  ], [fornecedorOptions, getFornecedorOptionsForSelection, getOrcamentoOptionsForSelection, getSecretariaOptionsForSelection, instituicaoOptions, tipoDespesaOptions]);
 
   // Mapeia IDs de lookups para labels legíveis na tabela.
   const mapRows = (items: UnidadeConsumidoraDTO[], lkp = lookups) => {
@@ -88,15 +170,23 @@ export default function Page() {
   const loadData = async (query: ListQuery = { page: pagination.currentPage, size: pagination.pageSize }) => {
     try {
       setLoading(true);
-      const [page, inst, tipos, secs, orcs, fornecs] = await Promise.all([
+      const [page, inst, tipos, secs, orcs, fornecs, ucsAtivas] = await Promise.all([
         unidadeConsumidoraService.getPage(query),
         instituicaoService.getAll(),
         tipoDespesaService.getAll(),
         secretariaService.getAll(),
         orcamentoService.getAll(),
         fornecedorService.getAll(),
+        unidadeConsumidoraService.getAllActiveData({ size: 100 }),
       ]);
-      const nextLookups = { instituicoes: inst, tiposDespesa: tipos, secretarias: secs, orcamentos: orcs, fornecedores: fornecs };
+      const nextLookups: UnidadeConsumidoraLookups = {
+        instituicoes: inst,
+        tiposDespesa: tipos,
+        secretarias: secs,
+        orcamentos: orcs,
+        fornecedores: fornecs,
+        unidadesConsumidoras: ucsAtivas,
+      };
       let rows = mapRows(page.items, nextLookups);
       // Se a página ficou vazia após alguma ação, volta para a última disponível.
       if (shouldLoadPreviousPage({ ...page, items: rows })) {
@@ -106,7 +196,7 @@ export default function Page() {
       } else {
         setPagination({ currentPage: page.currentPage, pageSize: page.pageSize, totalPages: page.totalPages, totalRecords: page.totalRecords });
       }
-      setLookups(nextLookups as typeof lookups);
+      setLookups(nextLookups);
       setData(rows);
       setFilteredData(rows);
       setError(null);
