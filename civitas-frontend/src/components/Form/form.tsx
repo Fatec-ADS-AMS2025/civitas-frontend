@@ -70,6 +70,7 @@ type FormProps = {
     fields?: FormFieldConfig[];
     validationSchema?: Record<string, ValidationFn>;
     hiddenFields?: string[];
+    extraContent?: React.ReactNode;
     onCancel?: () => void;
     onConfirm?: (data: Record<string, unknown>) => Promise<unknown> | unknown;
 }
@@ -84,6 +85,7 @@ export default function Form({
     fields,
     validationSchema,
     hiddenFields,
+    extraContent,
     onCancel,
     onConfirm,
 }: FormProps) {
@@ -307,6 +309,7 @@ export default function Form({
             name={name}
             isLoading={isLoading}
             isViewMode={isViewMode}
+            extraContent={extraContent}
             onCancel={onCancel}
             onSubmit={handleSubmit}
         />
