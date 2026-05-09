@@ -27,10 +27,16 @@ export default function DespesasTabelaRows({
     return (
       <>
         {Array.from({ length: 4 }).map((_, rowIndex) => (
-          <tr key={`loading-row-${rowIndex}`} className="rounded-sm bg-[var(--surface-subtle)]">
+          <tr
+            key={`loading-row-${rowIndex}`}
+            className="despesas-table-row despesas-table-row--loading rounded-sm bg-[var(--surface-subtle)]"
+          >
             {Array.from({ length: 9 }).map((__, cellIndex) => (
-              <td key={`loading-cell-${rowIndex}-${cellIndex}`} className="px-4 py-5">
-                <div className="h-5 animate-pulse rounded-sm bg-[var(--border-soft)]" />
+              <td
+                key={`loading-cell-${rowIndex}-${cellIndex}`}
+                className="despesas-table-cell px-4 py-5"
+              >
+                <div className="despesas-table-skeleton h-5 animate-pulse rounded-sm bg-[var(--border-soft)]" />
               </td>
             ))}
           </tr>
@@ -44,7 +50,7 @@ export default function DespesasTabelaRows({
       <tr>
         <td
           colSpan={9}
-          className="rounded-sm border border-dashed border-[var(--border-default)] px-4 py-10 text-center text-[var(--foreground-soft)]"
+          className="despesas-table-empty rounded-sm border border-dashed border-[var(--border-default)] px-4 py-10 text-center text-[var(--foreground-soft)]"
         >
           {hasLocalListSearch
             ? "Nenhuma despesa encontrada para o codigo ou instituicao informados."
@@ -60,12 +66,12 @@ export default function DespesasTabelaRows({
         <tr
           key={despesa.id}
           style={getEnterDelayStyle(index)}
-          className={`${index < 6 ? "civitas-enter " : ""}rounded-sm bg-[var(--surface-elevated)] shadow-[var(--shadow-xs)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]`}
+          className={`${index < 6 ? "civitas-enter " : ""}despesas-table-row rounded-sm bg-[var(--surface-elevated)] shadow-[var(--shadow-xs)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]`}
         >
           <td className="px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
             {getDespesaCodigo(despesa)}
           </td>
-          <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
+          <td className="despesas-table-cell px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
             {despesa.tipoCodigoNome}
           </td>
           <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
@@ -74,25 +80,25 @@ export default function DespesasTabelaRows({
           <td className="px-4 py-5 text-sm font-semibold text-[var(--foreground)]">
             {despesa.categoria}
           </td>
-          <td className="px-4 py-5 text-sm text-[var(--foreground-muted)]">
+          <td className="despesas-table-cell px-4 py-5 text-sm text-[var(--foreground-muted)]">
             {despesa.descricao}
           </td>
-          <td className="px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
+          <td className="despesas-table-cell px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
             {despesa.valorFormatado}
           </td>
-          <td className="px-4 py-5 text-sm text-[var(--foreground-muted)]">
+          <td className="despesas-table-cell px-4 py-5 text-sm text-[var(--foreground-muted)]">
             {despesa.dataFormatada}
           </td>
-          <td className="px-4 py-5">
+          <td className="despesas-table-cell px-4 py-5">
             <span
-              className={`civitas-badge min-w-[84px] ${getStatusBadgeClassName(
+              className={`despesas-table-status-badge civitas-badge min-w-[84px] ${getStatusBadgeClassName(
                 despesa.situacao
               )}`}
             >
               {despesa.situacaoLabel}
             </span>
           </td>
-          <td className="rounded-sm px-4 py-5">
+          <td className="despesas-table-cell rounded-sm px-4 py-5">
             <RowActions despesa={despesa} onView={onView} onEdit={onEdit} onDelete={onDelete} />
           </td>
         </tr>
@@ -119,7 +125,7 @@ function RowActions({
       <button
         type="button"
         onClick={() => onView(despesa)}
-        className={ICON_BUTTON_CLASS_NAME}
+        className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
         aria-label={`Visualizar ${despesa.registro}`}
       >
         <span className="material-symbols-outlined !text-[18px]">visibility</span>
@@ -127,7 +133,7 @@ function RowActions({
       <button
         type="button"
         onClick={() => onEdit(despesa)}
-        className={ICON_BUTTON_CLASS_NAME}
+        className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
         aria-label={`Editar ${despesa.registro}`}
       >
         <span className="material-symbols-outlined !text-[18px]">edit</span>
@@ -135,7 +141,7 @@ function RowActions({
       <button
         type="button"
         onClick={() => onDelete(despesa)}
-        className="flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--status-inactive-text)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-danger-soft)] hover:shadow-[var(--shadow-sm)]"
+        className="despesas-table-action despesas-table-action--danger flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--status-inactive-text)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-danger-soft)] hover:shadow-[var(--shadow-sm)]"
         aria-label={`Remover ${despesa.registro}`}
       >
         <span className="material-symbols-outlined !text-[18px]">delete</span>

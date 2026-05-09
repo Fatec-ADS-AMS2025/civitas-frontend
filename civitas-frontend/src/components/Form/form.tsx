@@ -4,6 +4,8 @@ import FormModal from './form-modal'
 import {
     getSectionOrder,
     groupFieldsBySection,
+    isFieldRequired,
+    isFieldValueEmpty,
     isRecord,
     toLabel,
 } from './form-utils'
@@ -39,11 +41,13 @@ type FormFieldConfig = {
     key: string;
     label?: string;
     placeholder?: string;
-    type?: 'text' | 'email' | 'number' | 'password' | 'tel' | 'date' | 'select' | 'textarea';
+    type?: 'text' | 'email' | 'number' | 'password' | 'tel' | 'date' | 'select' | 'textarea' | 'documento';
     mask?: InputMask;
     required?: boolean;
+    requiredInModes?: FormMode[];
     hidden?: boolean;
     disabled?: boolean;
+    accept?: string;
     inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
     maxLength?: number;
     options?: FormOption[];
@@ -217,9 +221,7 @@ export default function Form({
         fieldsForValidation.forEach((field) => {
             const value = normalizedFormData[field.key]
             const fieldLabel = field.label ?? toLabel(field.key)
-            const valueAsText = value === undefined || value === null ? '' : String(value).trim()
-
-            if (field.required && valueAsText.length === 0 && !isViewMode && mode !== 'delete') {
+            if (isFieldRequired(field, mode) && isFieldValueEmpty(field, value) && !isViewMode && mode !== 'delete') {
                 nextErrors[field.key] = `${fieldLabel} é obrigatório.`
                 return
             }
@@ -270,12 +272,14 @@ export default function Form({
 
     // Normaliza o valor no change para manter estado consistente.
     const handleInputChange = (field: FormFieldConfig, value: unknown) => {
-        const normalizedValue = normalizeFieldValue(field, value, 'change')
+        const normalizedValue = normalizeFieldValue(field, value, 'change', formData)
 
-        setFormData((prev) => ({
-            ...prev,
-            [field.key]: normalizedValue,
-        }))
+        setFormData((prev) => {
+            return {
+                ...prev,
+                [field.key]: normalizedValue,
+            }
+        })
 
         if (errors[field.key]) {
             setErrors((prev) => ({ ...prev, [field.key]: '' }))

@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Button from "@/components/button";
+import DocumentoField, { type DocumentoFieldValue } from "@/components/Form/documento-field";
+import type { FormFieldConfig } from "@/components/Form/form";
 import Input from "@/components/Input";
 import { digitsOnly, normalizeDateInput, validateDespesaDateRange } from "@/global/formPayload";
 import { authStorage } from "@/lib/auth-storage";
@@ -30,12 +32,19 @@ export type DespesaResponsavelOption = {
   label: string;
 };
 
+export type DespesaFluxoOption = {
+  value: number | string;
+  label: string;
+};
+
 export type DespesaFormMode = "create" | "edit" | "view";
 
 export type DespesaFormValues = Record<string, unknown> & {
   idUnidadeConsumidora: number | "";
   uc: string;
   numeroDocumento: string;
+  documento: DocumentoFieldValue | "";
+  idFluxo: number | "";
   codigo: string;
   idTipoCodigo: number | "";
   idTipoDespesa: number | "";
@@ -59,6 +68,7 @@ type DespesaFormProps = {
   mode: DespesaFormMode;
   ucs: DespesaUcOption[];
   usuarios: DespesaResponsavelOption[];
+  fluxos: DespesaFluxoOption[];
   initialValues?: DespesaFormInitialValues;
   onCancel: () => void;
   onConfirm?: (values: DespesaFormValues) => Promise<void> | void;
@@ -91,6 +101,8 @@ const buildInitialFormValues = (
     idUnidadeConsumidora: toNumberOrEmpty(initialValues?.idUnidadeConsumidora),
     uc: String(initialValues?.uc ?? ""),
     numeroDocumento: String(initialValues?.numeroDocumento ?? ""),
+    documento: (initialValues?.documento as DocumentoFieldValue | "") ?? "",
+    idFluxo: toNumberOrEmpty(initialValues?.idFluxo),
     codigo: String(initialValues?.codigo ?? ""),
     idTipoCodigo: toNumberOrEmpty(initialValues?.idTipoCodigo),
     idTipoDespesa: toNumberOrEmpty(initialValues?.idTipoDespesa),
@@ -122,6 +134,18 @@ const validateOptionalNonNegativeNumber = (value: unknown, label: string) => {
   if (!Number.isFinite(numericValue) || numericValue < 0)
     return `${label} nao pode ser negativo.`;
   return undefined;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
+const resolveDocumentoValue = (value: unknown): DocumentoFieldValue | null => {
+  if (!isRecord(value)) return null;
+  if (typeof value.digitalizacao !== "string" || value.digitalizacao.trim().length === 0) {
+    return null;
+  }
+  return value as DocumentoFieldValue;
 };
 
 const selectClassName =
@@ -163,6 +187,7 @@ export default function DespesaForm({
   mode,
   ucs,
   usuarios,
+  fluxos,
   initialValues,
   onCancel,
   onConfirm,
@@ -179,6 +204,15 @@ export default function DespesaForm({
     buildInitialFormValues(initialValues, currentUserId, mode)
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const documentoField: FormFieldConfig = useMemo(
+    () => ({
+      key: "documento",
+      label: "Documento",
+      type: "documento",
+      accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
+    }),
+    []
+  );
 
   const filteredUcs = useMemo(() => {
     const q = search.toLowerCase();
@@ -296,6 +330,18 @@ export default function DespesaForm({
     if (!numeroDocumento)
       nextErrors.numeroDocumento = "Numero do documento deve conter apenas numeros.";
 
+    const hasDocumentoInput = formValues.documento !== "" && formValues.documento !== undefined && formValues.documento !== null;
+    const documentoValue = resolveDocumentoValue(formValues.documento);
+    if (isCreateMode || hasDocumentoInput) {
+      if (!documentoValue) {
+        nextErrors.documento = "Selecione um arquivo e aguarde a conversao para Base64.";
+      }
+
+      if (!Number(formValues.idFluxo)) {
+        nextErrors.idFluxo = "Selecione um fluxo valido.";
+      }
+    }
+
     if (String(formValues.codigo ?? "").trim().length > 100)
       nextErrors.codigo = "Codigo deve ter no maximo 100 caracteres.";
 
@@ -331,9 +377,20 @@ export default function DespesaForm({
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
+    const resolvedDocumento = documentoValue
+      ? {
+          ...documentoValue,
+          numeroDocumento: Number(numeroDocumento),
+          idFornecedor: Number(selectedUc?.idFornecedor ?? formValues.idFornecedor ?? 0),
+          idFluxo: Number(formValues.idFluxo),
+        }
+      : formValues.documento;
+
     await onConfirm({
       ...formValues,
+      documento: resolvedDocumento,
       numeroDocumento,
+      idFluxo: formValues.idFluxo,
       idUsuario: Number(resolvedResponsibleUserId),
       valorPago: isCreateMode ? 0 : formValues.valorPago,
       consumoReal: isCreateMode ? 0 : formValues.consumoReal,
@@ -576,6 +633,54 @@ export default function DespesaForm({
                         handleValueChange("consumoPrevisto", e.target.value === "" ? "" : Number(e.target.value))
                       }
                     />
+
+                    {!isViewMode ? (
+                      <div className="col-span-2 grid gap-3 md:grid-cols-2">
+                        <div>
+                          <DocumentoField
+                            field={documentoField}
+                            value={formValues.documento}
+                            error={errors.documento}
+                            onChange={(field, value) =>
+                              handleValueChange(
+                                field.key as "documento",
+                                value as DocumentoFieldValue | ""
+                              )
+                            }
+                            disabled={isViewMode}
+                            required={isCreateMode}
+                            label="Documento"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
+                            Fluxo do documento
+                            {!isViewMode && (isCreateMode || formValues.documento) && (
+                              <span className="ml-1 text-red-500">*</span>
+                            )}
+                          </label>
+                          <select
+                            value={formValues.idFluxo}
+                            disabled={isViewMode}
+                            className={selectClassName}
+                            onChange={(e) =>
+                              handleValueChange("idFluxo", e.target.value === "" ? "" : Number(e.target.value))
+                            }
+                          >
+                            <option value="">Selecione o fluxo</option>
+                            {fluxos.map((fluxo) => (
+                              <option key={fluxo.value} value={fluxo.value}>
+                                {fluxo.label}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.idFluxo && (
+                            <p className="text-sm font-medium text-[#C23D3D]">{errors.idFluxo}</p>
+                          )}
+                        </div>
+                      </div>
+                    ) : null}
 
                     {isCreateMode ? (
                       <div className="col-span-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import type { DocumentoFieldValue } from "@/components/Form/documento-field";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import {
   digitsOnly,
@@ -23,6 +24,10 @@ type UseDespesaFormFieldsInput = {
   resolvedOrcamentoOptions: SelectOption[];
   resolvedFornecedorOptions: SelectOption[];
   resolvedUsuarioOptions: SelectOption[];
+  resolvedFluxoOptions: SelectOption[];
+  resolvedUnidadeConsumidoraOptions: SelectOption[];
+  isOptionsLoading?: boolean;
+  hideDocumento?: boolean;
 };
 
 export function useDespesaFormFields({
@@ -34,7 +39,23 @@ export function useDespesaFormFields({
   resolvedOrcamentoOptions,
   resolvedFornecedorOptions,
   resolvedUsuarioOptions,
+  resolvedFluxoOptions,
+  resolvedUnidadeConsumidoraOptions,
+  isOptionsLoading = false,
+  hideDocumento = false,
 }: UseDespesaFormFieldsInput): ModalFieldConfig[] {
+  const isDocumentoValue = useCallback(
+    (value: unknown): value is DocumentoFieldValue => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return false;
+      }
+
+      const documento = value as Partial<DocumentoFieldValue>;
+      return typeof documento.digitalizacao === "string" && documento.digitalizacao.trim().length > 0;
+    },
+    []
+  );
+
   const resolveTipoDespesa = useCallback(
     (value: unknown) => {
       const tipoDespesaId = Number(value);
@@ -51,6 +72,11 @@ export function useDespesaFormFields({
     [tipoCodigos]
   );
 
+  const resolveDocumento = useCallback(
+    (value: unknown) => (isDocumentoValue(value) ? value : undefined),
+    [isDocumentoValue]
+  );
+
   return useMemo<ModalFieldConfig[]>(
     () => [
       {
@@ -59,6 +85,41 @@ export function useDespesaFormFields({
         placeholder: "Registro da despesa",
         type: "number",
         section: "Identificacao",
+      },
+      {
+        key: "documento",
+        label: "Documento",
+        placeholder: "Selecione um arquivo",
+        type: "documento",
+        hidden: hideDocumento,
+        requiredInModes: ["create"],
+        accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
+        validate: (value, formData, mode) => {
+          const documento = resolveDocumento(value);
+          const hasDocumentInput = value !== "" && value !== undefined && value !== null;
+
+          if (mode !== "create" && !hasDocumentInput) {
+            return undefined;
+          }
+
+          if (!documento) {
+            return "Selecione um arquivo e aguarde a conversao para Base64.";
+          }
+
+          if (!digitsOnly(formData.numeroDocumento)) {
+            return "Informe o numero do documento antes de enviar.";
+          }
+
+          if (toPositiveNumber(formData.idFornecedor) <= 0) {
+            return "Selecione um fornecedor valido para vincular o documento.";
+          }
+
+          if (toPositiveNumber(formData.idFluxo) <= 0) {
+            return "Selecione um fluxo valido para vincular o documento.";
+          }
+
+          return undefined;
+        },
       },
       {
         key: "numeroDocumento",
@@ -73,6 +134,27 @@ export function useDespesaFormFields({
           if (normalizedValue.length > 100) {
             return "Numero do documento deve ter no maximo 100 caracteres.";
           }
+          return undefined;
+        },
+      },
+      {
+        key: "idFluxo",
+        label: "Fluxo",
+        placeholder: "Selecione o fluxo",
+        type: "select",
+        requiredInModes: ["create"],
+        disabled: isOptionsLoading,
+        options: resolvedFluxoOptions,
+        validate: (value, formData, mode) => {
+          const hasDocumentInput =
+            formData.documento !== "" &&
+            formData.documento !== undefined &&
+            formData.documento !== null;
+
+          if ((mode === "create" || hasDocumentInput) && toPositiveNumber(value) <= 0) {
+            return "Selecione um fluxo valido.";
+          }
+
           return undefined;
         },
       },
@@ -297,10 +379,14 @@ export function useDespesaFormFields({
     [
       resolvedFornecedorOptions,
       resolvedInstituicaoOptions,
+      resolvedFluxoOptions,
       resolvedOrcamentoOptions,
       resolvedTipoCodigoOptions,
       resolvedTipoDespesaOptions,
       resolvedUsuarioOptions,
+      resolvedUnidadeConsumidoraOptions,
+      isOptionsLoading,
+      resolveDocumento,
       resolveTipoCodigo,
       resolveTipoDespesa,
     ]

@@ -42,7 +42,7 @@ export default function FormModal({
 }: FormModalProps) {
     // Título do modal varia por modo e entidade.
     const title = mode === 'create' ? 'Cadastro' : `${modeLabels[mode]} ${name ?? ''}`
-    
+
 
     return (
         <>
@@ -64,6 +64,7 @@ export default function FormModal({
                     <div className='flex flex-col gap-4 pb-4'>
                         {groupedFields.noSection.length > 0 && (
                             <FormSection
+                                isSubmitting={isLoading}
                                 fields={groupedFields.noSection}
                                 formData={formData}
                                 errors={errors}
@@ -76,6 +77,7 @@ export default function FormModal({
                         {sectionOrder.map((sectionName) => (
                             <FormSection
                                 key={sectionName}
+                                isSubmitting={isLoading}
                                 sectionTitle={sectionName}
                                 fields={groupedFields.sections[sectionName] ?? []}
                                 formData={formData}
@@ -90,20 +92,20 @@ export default function FormModal({
 
                 <div className='mt-4 shrink-0 border-t border-[var(--divider)] pt-5'>
                     <div className='flex flex-col gap-3 md:flex-row'>
-                    <Button
-                        variant='secondary'
-                        className='!w-full !max-w-none'
-                        onClick={onCancel}
-                        type='button'
-                    >
-                        {mode === 'view' ? 'Fechar' : 'Cancelar'}
-                    </Button>
-
-                    {isViewMode ? null : (
-                        <Button className='!w-full !max-w-none' type='submit' disabled={isLoading}>
-                            {isLoading ? 'Processando...' : mode === 'delete' ? 'Confirmar exclusao' : 'Confirmar'}
+                        <Button
+                            variant='secondary'
+                            className='!w-full !max-w-none'
+                            onClick={onCancel}
+                            type='button'
+                        >
+                            {mode === 'view' ? 'Fechar' : 'Cancelar'}
                         </Button>
-                    )}
+
+                        {isViewMode ? null : (
+                            <Button className='!w-full !max-w-none' type='submit' disabled={isLoading}>
+                                {isLoading ? 'Processando...' : mode === 'delete' ? 'Confirmar exclusao' : 'Confirmar'}
+                            </Button>
+                        )}
                     </div>
                 </div>
             </form>

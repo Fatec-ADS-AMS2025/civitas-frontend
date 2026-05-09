@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { digitsOnly, normalizeDateInput, toTrimmedText } from "@/global/formPayload";
 import { SITUACAO_ATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
+import { documentoService } from "@/hooks/documento";
+import { fluxoService } from "@/hooks/fluxo";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
@@ -15,6 +17,8 @@ import { unidadeMedidaService } from "@/hooks/unidadeMedida";
 import { usuarioService } from "@/hooks/usuario";
 import { authStorage } from "@/lib/auth-storage";
 import type DespesaDTO from "@/models/despesa";
+import type DocumentoDTO from "@/models/documento";
+import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -73,6 +77,7 @@ type DashboardData = {
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   unidadesMedida: UnidadeMedidaDTO[];
   usuarios: UsuarioDTO[];
+  fluxos: FluxoDTO[];
 };
 
 const EMPTY_DASHBOARD_DATA: DashboardData = {
@@ -86,6 +91,7 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   unidadesConsumidoras: [],
   unidadesMedida: [],
   usuarios: [],
+  fluxos: [],
 };
 
 const DEFAULT_FILTERS: DespesasDashboardFilters = {
@@ -238,6 +244,35 @@ const logOptionalDashboardWarning = (message: string, error: unknown): void => {
   if (process.env.NODE_ENV === "development") {
     console.warn(message, error);
   }
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
+const toPositiveNumber = (value: unknown): number => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
+};
+
+const resolveSelectedDocumento = (
+  value: unknown
+): Pick<DocumentoDTO, "numeroDocumento" | "idFornecedor"> | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const numeroDocumento = Number(value.numeroDocumento);
+  const idFornecedor = Number(value.idFornecedor);
+
+  if (!Number.isFinite(numeroDocumento) || numeroDocumento <= 0) {
+    return null;
+  }
+
+  return {
+    numeroDocumento,
+    idFornecedor: Number.isFinite(idFornecedor) ? idFornecedor : 0,
+  };
 };
 
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
@@ -522,6 +557,62 @@ const buildDespesaPayload = (
   };
 };
 
+const buildDocumentoPayload = (
+  formData: Record<string, unknown>,
+  despesaPayload: DespesaDTO,
+  required: boolean
+): DocumentoDTO | null => {
+  if (!isRecord(formData.documento)) {
+    if (required) {
+      throw new Error("Selecione um documento para anexar a despesa.");
+    }
+
+    return null;
+  }
+
+  const digitalizacao =
+    typeof formData.documento.digitalizacao === "string"
+      ? formData.documento.digitalizacao.trim()
+      : "";
+
+  if (!digitalizacao) {
+    if (required) {
+      throw new Error("Documento selecionado ainda nao foi convertido para Base64.");
+    }
+
+    return null;
+  }
+
+  const numeroDocumento = Number(
+    formData.documento.numeroDocumento ?? despesaPayload.numeroDocumento
+  );
+  const idFornecedor = Number(
+    formData.documento.idFornecedor ?? despesaPayload.idFornecedor
+  );
+  const idFluxo = Number(formData.documento.idFluxo ?? formData.idFluxo);
+
+  if (!Number.isFinite(numeroDocumento) || numeroDocumento <= 0) {
+    throw new Error("Numero do documento deve conter apenas numeros.");
+  }
+
+  if (!Number.isFinite(idFornecedor) || idFornecedor <= 0) {
+    throw new Error("Selecione um fornecedor valido para o documento.");
+  }
+
+  if (!Number.isFinite(idFluxo) || idFluxo <= 0) {
+    throw new Error("Selecione um fluxo valido para o documento.");
+  }
+
+  // O endpoint de documentos aceita o arquivo como string Base64 e desserializa para byte[] no backend.
+  return {
+    idDocumento: 0,
+    digitalizacao,
+    numeroDocumento,
+    idFornecedor,
+    idFluxo,
+  };
+};
+
 const loadDashboardData = async (): Promise<DashboardData> => {
   const [
     despesasTodas,
@@ -531,9 +622,11 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     instituicoes,
     secretarias,
     fornecedores,
-    unidadesConsumidoras,
+    unidadesConsumidorasAtivas,
     unidadesMedida,
     usuarios,
+    fluxos,
+    unidadesConsumidorasAll,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
     tipoCodigoService.getAllOptional(),
@@ -545,6 +638,8 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadeConsumidoraService.getAllActiveData(),
     unidadeMedidaService.getAllData(),
     usuarioService.getAllData(),
+    fluxoService.getAllData(),
+    unidadeConsumidoraService.getAllData(),
   ]);
 
   return {
@@ -555,11 +650,27 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     instituicoes: instituicoes ?? [],
     secretarias: secretarias ?? [],
     fornecedores: fornecedores ?? [],
-    unidadesConsumidoras: unidadesConsumidoras ?? [],
+    unidadesConsumidoras: unidadesConsumidorasAtivas ?? unidadesConsumidorasAll ?? [],
     unidadesMedida: unidadesMedida ?? [],
     usuarios: usuarios ?? [],
+    fluxos: fluxos ?? [],
   };
 };
+
+const buildDespesaApiPayload = (payload: DespesaDTO): DespesaDTO => ({
+  id: Number(payload.id ?? 0),
+  numeroDocumento: payload.numeroDocumento ?? "",
+  codigo: payload.codigo ?? "",
+  dataEmissao: payload.dataEmissao ?? payload.dataEmicao ?? "",
+  valorPrevisto: Number(payload.valorPrevisto ?? payload.consumoPrevisto ?? 0),
+  valorPago: Number(payload.valorPago ?? 0),
+  consumoPrevisto: Number(payload.consumoPrevisto ?? payload.valorPrevisto ?? 0),
+  consumoReal: Number(payload.consumoReal ?? 0),
+  dataVencimento: payload.dataVencimento ?? "",
+  status: Number(payload.status ?? payload.situacao ?? SITUACAO_ATIVO),
+  idUsuario: Number(payload.idUsuario),
+  idUnidadeConsumidora: Number(payload.idUnidadeConsumidora),
+});
 
 export const useDespesasDashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData>(EMPTY_DASHBOARD_DATA);
@@ -661,10 +772,17 @@ export const useDespesasDashboard = () => {
   const createDespesa = useCallback(
     async (formData: Record<string, unknown>) => {
       const payload = buildDespesaPayload(formData, dashboardData);
-      await despesaService.createData({
+      const documentoPayload = buildDocumentoPayload(formData, payload, true);
+
+      if (!documentoPayload) {
+        throw new Error("Selecione um documento para anexar a despesa.");
+      }
+
+      await documentoService.createData(documentoPayload);
+      await despesaService.createData(buildDespesaApiPayload({
         ...payload,
         id: 0,
-      });
+      }));
       await refetch();
     },
     [dashboardData, refetch]
@@ -678,10 +796,16 @@ export const useDespesasDashboard = () => {
       }
 
       const payload = buildDespesaPayload(formData, dashboardData, currentDespesa);
-      await despesaService.updateData(id, {
+      const documentoPayload = buildDocumentoPayload(formData, payload, false);
+
+      if (documentoPayload) {
+        await documentoService.createData(documentoPayload);
+      }
+
+      await despesaService.updateData(id, buildDespesaApiPayload({
         ...payload,
         id,
-      });
+      }));
       await refetch();
     },
     [dashboardData, refetch]
@@ -718,6 +842,7 @@ export const useDespesasDashboard = () => {
       unidadesConsumidoras: dashboardData.unidadesConsumidoras,
       unidadesMedida: dashboardData.unidadesMedida,
       usuarios: dashboardData.usuarios,
+      fluxos: dashboardData.fluxos,
       summary,
       loading,
       error,
@@ -743,6 +868,7 @@ export const useDespesasDashboard = () => {
       dashboardData.unidadesConsumidoras,
       dashboardData.unidadesMedida,
       dashboardData.usuarios,
+      dashboardData.fluxos,
       summary,
       loading,
       error,

@@ -59,6 +59,10 @@ export default function Page() {
     resolvedOrcamentoOptions: viewModel.resolvedOrcamentoOptions,
     resolvedFornecedorOptions: viewModel.resolvedFornecedorOptions,
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
+    resolvedFluxoOptions: viewModel.resolvedFluxoOptions,
+    resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
+    isOptionsLoading: dashboard.loading,
+    hideDocumento: true,
   });
 
   const unidadeConsumidoraOptions = useMemo<DespesaUcOption[]>(() => {
@@ -292,6 +296,7 @@ export default function Page() {
         setViewingDespesa={setViewingDespesa}
         unidadesConsumidoras={unidadeConsumidoraOptions}
         usuarios={usuarioOptions}
+        fluxos={viewModel.resolvedFluxoOptions}
         viewFields={despesaViewFields}
         onCreateSubmit={handleCreateSubmit}
         onEditSubmit={handleEditSubmit}
