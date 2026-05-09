@@ -1,11 +1,7 @@
 "use client";
 
-import { SecretariaPageContent } from "./_components";
-import { useSecretariaPage } from "@/hooks/useSecretariaPage";
-import { secretariaSearchFields } from "./_components/secretariaConfig";
+import SecretariaContent from "./_components/SecretariaContent";
 
-export default function SecretariaPage() {
-  const secretariaPage = useSecretariaPage(secretariaSearchFields);
-
-  return <SecretariaPageContent {...secretariaPage} />;
+export default function Page() {
+  return <SecretariaContent />;
 }
