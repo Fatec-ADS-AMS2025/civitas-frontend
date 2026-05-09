@@ -26,6 +26,7 @@ type UseDespesaFormFieldsInput = {
   resolvedFluxoOptions: SelectOption[];
   resolvedUnidadeConsumidoraOptions: SelectOption[];
   isOptionsLoading?: boolean;
+  hideDocumento?: boolean;
 };
 
 export function useDespesaFormFields({
@@ -40,6 +41,7 @@ export function useDespesaFormFields({
   resolvedFluxoOptions,
   resolvedUnidadeConsumidoraOptions,
   isOptionsLoading = false,
+  hideDocumento = false,
 }: UseDespesaFormFieldsInput): ModalFieldConfig[] {
   const isDocumentoValue = useCallback(
     (value: unknown): value is DocumentoFieldValue => {
@@ -88,6 +90,7 @@ export function useDespesaFormFields({
         label: "Documento",
         placeholder: "Selecione um arquivo",
         type: "documento",
+        hidden: hideDocumento,
         requiredInModes: ["create"],
         accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
         validate: (value, formData, mode) => {

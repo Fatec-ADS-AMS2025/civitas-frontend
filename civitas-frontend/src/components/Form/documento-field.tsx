@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useId, useMemo, useRef } from "react";
+import React, { useId, useMemo, useRef, useState } from "react";
 import type { FormFieldConfig } from "./form";
 import { getFieldErrorId } from "./form-utils";
 
@@ -117,6 +117,16 @@ export default function DocumentoField({
   const hasFile = Boolean(documento?.digitalizacao);
   const isConverting = status === "loading";
   const isDisabled = disabled || isConverting;
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const previewUrl = useMemo(() => {
+    if (!documento?.digitalizacao || !documento?.fileType) return "";
+    return `data:${documento.fileType};base64,${documento.digitalizacao}`;
+  }, [documento?.digitalizacao, documento?.fileType]);
+
+  const isImagePreview = Boolean(documento?.fileType?.startsWith("image/"));
+  const isPdfPreview = Boolean(documento?.fileType?.includes("pdf"));
+  const canPreview = hasFile && (isImagePreview || isPdfPreview);
 
   const statusMessage = useMemo(() => {
     if (status === "loading") return "Convertendo arquivo para Base64...";
@@ -175,6 +185,7 @@ export default function DocumentoField({
       inputRef.current.value = "";
     }
 
+    setIsPreviewOpen(false);
     onChange(field, "");
   };
 
@@ -226,6 +237,20 @@ export default function DocumentoField({
               {hasFile ? "Trocar arquivo" : "Escolher arquivo"}
             </button>
 
+            {canPreview ? (
+              <button
+                type="button"
+                disabled={isDisabled}
+                onClick={() => setIsPreviewOpen((current) => !current)}
+                className="civitas-action civitas-action--ghost min-h-10 rounded-sm px-3 text-xs font-semibold"
+              >
+                <span className="material-symbols-outlined !text-[18px]" aria-hidden="true">
+                  {isPreviewOpen ? "visibility_off" : "visibility"}
+                </span>
+                {isPreviewOpen ? "Ocultar" : "Pre-visualizar"}
+              </button>
+            ) : null}
+
             {documento ? (
               <button
                 type="button"
@@ -260,6 +285,26 @@ export default function DocumentoField({
               <strong className="font-semibold text-[var(--foreground)]">Status:</strong>{" "}
               {statusMessage}
             </span>
+          </div>
+        ) : null}
+
+        {canPreview && isPreviewOpen ? (
+          <div className="mt-3 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3">
+            {isImagePreview ? (
+              <img
+                src={previewUrl}
+                alt={documento?.fileName ?? "Pre-visualizacao"}
+                className="max-h-[320px] w-full rounded-sm object-contain"
+              />
+            ) : null}
+
+            {isPdfPreview ? (
+              <iframe
+                title={documento?.fileName ?? "Pre-visualizacao"}
+                src={previewUrl}
+                className="h-[360px] w-full rounded-sm border border-[var(--border-default)]"
+              />
+            ) : null}
           </div>
         ) : null}
       </div>

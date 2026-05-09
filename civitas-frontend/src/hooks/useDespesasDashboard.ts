@@ -78,7 +78,6 @@ type DashboardData = {
   unidadesMedida: UnidadeMedidaDTO[];
   usuarios: UsuarioDTO[];
   fluxos: FluxoDTO[];
-  unidadesConsumidoras: UnidadeConsumidoraDTO[];
 };
 
 const EMPTY_DASHBOARD_DATA: DashboardData = {
@@ -93,7 +92,6 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   unidadesMedida: [],
   usuarios: [],
   fluxos: [],
-  unidadesConsumidoras: [],
 };
 
 const DEFAULT_FILTERS: DespesasDashboardFilters = {
@@ -293,8 +291,7 @@ const buildDespesaRows = (
   despesas: DespesaDTO[],
   unidadesConsumidorasMap: Map<number, UnidadeConsumidoraDTO>,
   tiposDespesaMap: Map<number, TipoDespesaDTO>,
-  tipoCodigosMap: Map<number, TipoCodigoDTO>,
-  unidadesConsumidorasMap: Map<number, UnidadeConsumidoraDTO>
+  tipoCodigosMap: Map<number, TipoCodigoDTO>
 ): DespesaDashboardRow[] => {
   return despesas
     .map((despesa) => {
@@ -625,11 +622,11 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     instituicoes,
     secretarias,
     fornecedores,
-    unidadesConsumidoras,
+    unidadesConsumidorasAtivas,
     unidadesMedida,
     usuarios,
     fluxos,
-    unidadesConsumidoras,
+    unidadesConsumidorasAll,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
     tipoCodigoService.getAllOptional(),
@@ -653,11 +650,10 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     instituicoes: instituicoes ?? [],
     secretarias: secretarias ?? [],
     fornecedores: fornecedores ?? [],
-    unidadesConsumidoras: unidadesConsumidoras ?? [],
+    unidadesConsumidoras: unidadesConsumidorasAtivas ?? unidadesConsumidorasAll ?? [],
     unidadesMedida: unidadesMedida ?? [],
     usuarios: usuarios ?? [],
     fluxos: fluxos ?? [],
-    unidadesConsumidoras: unidadesConsumidoras ?? [],
   };
 };
 
@@ -847,7 +843,6 @@ export const useDespesasDashboard = () => {
       unidadesMedida: dashboardData.unidadesMedida,
       usuarios: dashboardData.usuarios,
       fluxos: dashboardData.fluxos,
-      unidadesConsumidoras: dashboardData.unidadesConsumidoras,
       summary,
       loading,
       error,
@@ -874,7 +869,6 @@ export const useDespesasDashboard = () => {
       dashboardData.unidadesMedida,
       dashboardData.usuarios,
       dashboardData.fluxos,
-      dashboardData.unidadesConsumidoras,
       summary,
       loading,
       error,
