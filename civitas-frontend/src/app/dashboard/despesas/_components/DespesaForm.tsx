@@ -33,7 +33,7 @@ export type DespesaResponsavelOption = {
 };
 
 export type DespesaFluxoOption = {
-  value: number;
+  value: number | string;
   label: string;
 };
 
@@ -641,7 +641,12 @@ export default function DespesaForm({
                             field={documentoField}
                             value={formValues.documento}
                             error={errors.documento}
-                            onChange={(field, value) => handleValueChange(field.key as "documento", value)}
+                            onChange={(field, value) =>
+                              handleValueChange(
+                                field.key as "documento",
+                                value as DocumentoFieldValue | ""
+                              )
+                            }
                             disabled={isViewMode}
                             required={isCreateMode}
                             label="Documento"
