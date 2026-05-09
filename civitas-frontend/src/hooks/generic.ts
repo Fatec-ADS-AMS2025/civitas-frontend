@@ -1,4 +1,5 @@
 import { showToast } from "@/hooks/useToast";
+import { authStorage } from "@/lib/auth-storage";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
 
@@ -28,11 +29,20 @@ export interface ListQuery {
 
 interface HandleResponseOptions {
   showSuccessToast?: boolean;
+  showErrorToast?: boolean;
 }
 
 const DEFAULT_LIST_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
   page: 1,
   size: 100,
+};
+
+const isDevelopmentEnvironment = process.env.NODE_ENV === "development";
+
+const logHandledFallback = (message: string, error: unknown): void => {
+  if (isDevelopmentEnvironment) {
+    console.warn(message, error);
+  }
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -108,6 +118,41 @@ const isHttpNotFoundError = (error: unknown): boolean => {
   return error instanceof Error && error.message.includes("HTTP 404");
 };
 
+const getHttpStatusFromError = (error: unknown): number | null => {
+  if (!(error instanceof Error)) return null;
+
+  const matchedStatus = error.message.match(/HTTP\s+(\d+)/i);
+  if (!matchedStatus) return null;
+
+  const status = Number(matchedStatus[1]);
+  return Number.isFinite(status) ? status : null;
+};
+
+const isInactiveRecord = (value: unknown): boolean => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const statusValue =
+    value.situacao ??
+    value.status ??
+    value.ativo ??
+    value.estado ??
+    value.situacaoLabel ??
+    value.statusLabel;
+
+  if (statusValue === 2 || statusValue === false) {
+    return true;
+  }
+
+  if (typeof statusValue === "string") {
+    const normalized = statusValue.trim().toLowerCase();
+    return normalized === "2" || normalized === "inativo" || normalized === "inactive";
+  }
+
+  return false;
+};
+
 const toQueryString = (
   query: ListQuery | undefined,
   defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY
@@ -133,6 +178,17 @@ export class GenericService<T> {
 
   protected getUrlEndpoint(): string {
     return `${BASE_URL}/${this.endpoint}`;
+  }
+
+  protected createHeaders(init?: HeadersInit): Headers {
+    const headers = new Headers(init);
+    const authenticatedUser = authStorage.get();
+
+    if (authenticatedUser?.token) {
+      headers.set("Authorization", `Bearer ${authenticatedUser.token}`);
+    }
+
+    return headers;
   }
 
   protected async handleResponse<R = unknown>(
@@ -163,7 +219,9 @@ export class GenericService<T> {
         response.status
       );
 
-      showToast(message, "error");
+      if (options.showErrorToast !== false) {
+        showToast(message, "error");
+      }
 
       throw new Error(`HTTP ${response.status}: ${message}`);
     }
@@ -251,20 +309,46 @@ export class GenericService<T> {
     return payload as R;
   }
 
-  async getAll(query?: ListQuery): Promise<T[]> {
-    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
-    const payload = await this.handleResponse(response);
+  protected async requestCollection(
+    query?: ListQuery,
+    options: HandleResponseOptions = {}
+  ): Promise<T[]> {
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
+
+    const payload = await this.handleResponse(response, options);
     return this.unwrapCollection<T>(payload);
   }
 
+  protected async requestItem(
+    id: number,
+    options: HandleResponseOptions = {}
+  ): Promise<T> {
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
+      headers: this.createHeaders(),
+    });
+
+    const payload = await this.handleResponse(response, options);
+    return this.unwrapItem<T>(payload);
+  }
+
+  async getAll(query?: ListQuery): Promise<T[]> {
+    return this.requestCollection(query);
+  }
+
   async getPage(query?: ListQuery): Promise<PaginatedResult<T>> {
-    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
     const payload = await this.handleResponse(response);
     return this.normalizePaginatedResult<T>(payload, query);
   }
 
   async getAllEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
-    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`);
+    const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
     const payload = await this.handleResponse(response);
     const envelope = this.toEnvelope<unknown>(payload);
 
@@ -275,46 +359,49 @@ export class GenericService<T> {
   }
 
   async getInactive(query?: ListQuery): Promise<T[]> {
-    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
-    const payload = await this.handleResponse(response);
+    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
+    const payload = await this.handleResponse(response, { showErrorToast: false });
     return this.unwrapCollection<T>(payload);
   }
 
   async getInactiveEnvelope(query?: ListQuery): Promise<ResponseEnvelope<T[]>> {
-    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`);
-    const payload = await this.handleResponse(response);
+    const response = await fetch(`${this.getUrlEndpoint()}/inativos${toQueryString(query)}`, {
+      headers: this.createHeaders(),
+    });
+    const payload = await this.handleResponse(response, { showErrorToast: false });
     const envelope = this.toEnvelope<unknown>(payload);
+    const items = this.unwrapCollection<T>(payload);
 
     return {
       ...envelope,
-      data: this.unwrapCollection<T>(payload),
+      data: items,
     };
   }
 
   async getAllData(query?: ListQuery): Promise<T[]> {
     try {
-      return await this.getAll(query);
+      return await this.requestCollection(query, { showErrorToast: false });
     } catch (error) {
-      console.error(`Erro ao listar ${this.endpoint}:`, error);
+      logHandledFallback(`Erro ao listar ${this.endpoint}:`, error);
       return [];
     }
   }
 
   async getById(id: number): Promise<T> {
-    const response = await fetch(`${this.getUrlEndpoint()}/${id}`);
-    const payload = await this.handleResponse(response);
-    return this.unwrapItem<T>(payload);
+    return this.requestItem(id);
   }
 
   async getByIdData(id: number): Promise<T | null> {
     try {
-      return await this.getById(id);
+      return await this.requestItem(id, { showErrorToast: false });
     } catch (error) {
       if (isHttpNotFoundError(error)) {
         return null;
       }
 
-      console.error(`Erro ao buscar ${this.endpoint} por ID ${id}:`, error);
+      logHandledFallback(`Erro ao buscar ${this.endpoint} por ID ${id}:`, error);
       return null;
     }
   }
@@ -322,9 +409,9 @@ export class GenericService<T> {
   async create(data: unknown): Promise<T> {
     const response = await fetch(this.getUrlEndpoint(), {
       method: "POST",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -335,9 +422,9 @@ export class GenericService<T> {
   async createEnvelope(data: unknown): Promise<ResponseEnvelope<T>> {
     const response = await fetch(this.getUrlEndpoint(), {
       method: "POST",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -363,9 +450,9 @@ export class GenericService<T> {
   async update(id: number, data: Partial<T>): Promise<T> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "PUT",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -376,9 +463,9 @@ export class GenericService<T> {
   async updateEnvelope(id: number, data: Partial<T>): Promise<ResponseEnvelope<T>> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "PUT",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -404,6 +491,7 @@ export class GenericService<T> {
   async delete(id: number): Promise<void> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "DELETE",
+      headers: this.createHeaders(),
     });
 
     await this.handleResponse(response, { showSuccessToast: true });
@@ -412,9 +500,9 @@ export class GenericService<T> {
   async patch(id: number, data: Partial<T>): Promise<T> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: "PATCH",
-      headers: {
+      headers: this.createHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify(data),
     });
 
@@ -435,6 +523,7 @@ export class GenericService<T> {
   async alterarSituacao(id: number): Promise<void> {
     const response = await fetch(`${this.getUrlEndpoint()}/situacao/${id}`, {
       method: "PATCH",
+      headers: this.createHeaders(),
     });
 
     await this.handleResponse(response, { showSuccessToast: true });
@@ -443,6 +532,7 @@ export class GenericService<T> {
   async alterarSituacaoEnvelope(id: number): Promise<ResponseEnvelope<unknown>> {
     const response = await fetch(`${this.getUrlEndpoint()}/situacao/${id}`, {
       method: "PATCH",
+      headers: this.createHeaders(),
     });
 
     const payload = await this.handleResponse(response, { showSuccessToast: true });

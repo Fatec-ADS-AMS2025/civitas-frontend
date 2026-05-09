@@ -1,113 +1,71 @@
-"use client"
-import React, { useRef } from 'react'
-import { usePathname } from 'next/navigation'
-import Sidebar from '@/components/Sidebar/sidebar';
-import { useRouter } from "next/navigation";
+"use client";
+
+import React, { useEffect } from "react";
+import Sidebar from "@/components/Sidebar/sidebar";
+import {
+  DashboardHeaderProvider,
+  DashboardPageHeader,
+} from "@/components/dashboard/dashboard-header";
+import useAuth from "@/hooks/useAuth";
+import { useAppNavigation } from "@/hooks/useNavigationProgress";
+
 
 export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { isAuthenticated, isHydrated, logout } = useAuth();
+  const { push, replace } = useAppNavigation();
 
-  const paiRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      replace("/login");
+    }
+  }, [isAuthenticated, isHydrated, replace]);
 
-  const router = useRouter();
-  const pathname = usePathname() || "/dashboard";
-  const parts = pathname.split("/").filter(Boolean);
-  const currentPage = parts[parts.length - 1] ?? "dashboard";
+  if (!isHydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--surface-page)]">
+        <div className="civitas-surface px-5 py-4 text-sm font-medium text-[var(--foreground-muted)]">
+          Carregando sessao...
+        </div>
+      </div>
+    );
+  }
 
-  const pageMeta: Record<string, { title: string; breadcrumbs: string[] }> = {
-    dashboard: {
-      title: "Dashboard",
-      breadcrumbs: ["Home"],
-    },
-    despesas: {
-      title: "Listagem de Despesa",
-      breadcrumbs: ["Home", "Listagem", "Tipo Despesa"],
-    },
-    secretaria: {
-      title: "Secretaria",
-      breadcrumbs: ["Home", "Secretaria"],
-    },
-    instituicoes: {
-      title: "Instituicoes",
-      breadcrumbs: ["Home", "Instituicoes"],
-    },
-    fornecedor: {
-      title: "Fornecedor",
-      breadcrumbs: ["Home", "Fornecedor"],
-    },
-    fornecedores: {
-      title: "Fornecedores",
-      breadcrumbs: ["Home", "Fornecedores"],
-    },
-    orcamentos: {
-      title: "Orcamentos",
-      breadcrumbs: ["Home", "Orcamentos"],
-    },
-    financeiro: {
-      title: "Financeiro",
-      breadcrumbs: ["Home", "Financeiro"],
-    },
-    configuracoes: {
-      title: "Configuracoes",
-      breadcrumbs: ["Home", "Configuracoes"],
-    },
-    usuarios: {
-      title: "Usuarios",
-      breadcrumbs: ["Home", "Usuarios"],
-    },
-  };
-
-  const currentMeta = pageMeta[currentPage] ?? {
-    title: currentPage,
-    breadcrumbs: parts.map((item) => item.charAt(0).toUpperCase() + item.slice(1)),
-  };
-
-  const alterarPagina = (index: number) => {
-    const target = `/${parts.slice(0, index + 1).join("/")}`;
-    router.push(target);
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (
-    <div className="dashboard-shell flex min-h-screen w-full bg-[#F8FAFA]">
+    <DashboardHeaderProvider>
+      <div className="dashboard-shell flex min-h-screen w-full bg-[var(--surface-page)]">
+        <Sidebar />
+        <button 
+          className="civitas-action civitas-action--primary fixed right-4 top-4 z-[9997] gap-2 px-4 py-2 sm:right-6 sm:top-5"
+          onClick={() => {
+            logout();
+            push("/login");
+          }}
+        >
+          Sair
+          <span className="material-symbols-outlined text-[20px]">logout</span>
+        </button>
+        <div
+          data-contrast-target="content"
+          className="dashboard-content-region"
+        >
+          <div className="dashboard-content-shell">
+            <DashboardPageHeader />
 
-      <Sidebar />
-
-      <div
-        ref={paiRef}
-        data-contrast-target="content"
-        className="w-full flex-1 sm:ml-[92px] lg:pr-[78px] 2xl:pr-[86px]"
-      >
-        <div className="mx-auto w-full max-w-[1680px] px-4 pb-8 pt-5 sm:px-5 lg:px-8 lg:pt-6 2xl:px-10">
-          <div className='mb-6 sm:mb-7'>
-            <h1 className='text-[30px] font-bold capitalize text-[#004D4D] sm:text-[34px] lg:text-[38px]'>
-              {currentMeta.title}
-            </h1>
-
-            <div className='mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1'>
-              {parts.map((item, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => alterarPagina(index)}
-                  className='cursor-pointer text-sm capitalize text-[#718089] opacity-90 transition-colors duration-200 hover:text-[#004D4D] hover:opacity-100'
-                >
-                  {item}
-                  {index < parts.length - 1 && <span className="px-1 text-[#9AA8B0]">/</span>}
-                </button>
-              ))}
+            <div className="w-full">
+              {children}
             </div>
-
-          </div>
-
-          <div className='w-full'>
-            {children}
           </div>
         </div>
       </div>
+    </DashboardHeaderProvider>
 
-    </div>
-  )
+  );
 }

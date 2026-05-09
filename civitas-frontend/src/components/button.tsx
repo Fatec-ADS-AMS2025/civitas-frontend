@@ -17,14 +17,17 @@ function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-base font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#58AFAE]/30 disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex w-full items-center justify-center gap-2 rounded-sm border px-4 py-2.5 text-sm font-semibold transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50";
 
   const variants: Record<ButtonVariant, string> = {
-    primary: "bg-secundary-1 text-white hover:bg-primary-1",
-    secondary: "bg-primary-2 text-white hover:bg-secundary-2",
-    tertiary: "bg-primary-1 text-white hover:bg-secundary-1",
+    primary:
+      "border-[var(--secundary-1)] bg-[var(--secundary-1)] text-[var(--text-on-brand)] hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)]",
+    secondary:
+      "border-[var(--tone-amber-border)] bg-[var(--tone-amber-bg)] text-[var(--tone-amber-text)] hover:bg-[color-mix(in_srgb,var(--tone-amber-bg)_84%,var(--surface-elevated)_16%)]",
+    tertiary:
+      "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-subtle)]",
     login:
-      "bg-secundary-1 max-w-[601px] rounded-full py-4 text-[20px] font-semibold text-white hover:brightness-95 sm:text-[24px]",
+      "max-w-[601px] rounded-sm border-[var(--secundary-1)] bg-[var(--secundary-1)] py-3.5 text-base font-semibold text-[var(--text-on-brand)] hover:bg-[color-mix(in_srgb,var(--secundary-1)_92%,black_8%)] sm:text-lg",
   };
 
   return (

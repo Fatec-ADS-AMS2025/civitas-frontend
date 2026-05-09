@@ -14,33 +14,34 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     cpf: "",
     telefone: "",
   });
-
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     onSearch(filters);
-  }, [filters]);
+  }, [filters, onSearch]);
 
   const handleChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleFieldKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const form = e.currentTarget.form ?? e.currentTarget.closest('form, div');
-      if (!form) return;
-      const selectors = 'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])';
-      const focusables = Array.from(form.querySelectorAll<HTMLElement>(selectors)).filter((el) => el.offsetParent !== null);
-      const index = focusables.indexOf(e.currentTarget as HTMLElement);
-      const next = focusables[index + 1];
-      if (next) {
-        next.focus();
-      }
-    }
-  };
+  const handleFieldKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    if (e.key !== "Enter") return;
 
-  const toggleAdvanced = () => setShowAdvanced((prev) => !prev);
+    e.preventDefault();
+    const form = e.currentTarget.form ?? e.currentTarget.closest("form, div");
+    if (!form) return;
+
+    const selectors =
+      "input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])";
+    const focusables = Array.from(form.querySelectorAll<HTMLElement>(selectors)).filter(
+      (element) => element.offsetParent !== null,
+    );
+    const index = focusables.indexOf(e.currentTarget as HTMLElement);
+    const next = focusables[index + 1];
+    if (next) next.focus();
+  };
 
   const clearFilters = () => {
     setFilters({
@@ -51,22 +52,22 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="bg-[#393939] rounded-2xl p-5 shadow-lg w-full flex flex-col gap-4">
-      {/* Cabeçalho */}
+    <div className="civitas-surface flex w-full flex-col gap-4 p-5">
       <div>
-        <p className="text-white text-base">Busca:</p>
-        <p className="text-sm text-gray-400 -mt-1">Aqui você busca e filtra</p>
+        <p className="text-base font-semibold text-[var(--foreground)]">Busca:</p>
+        <p className="-mt-1 text-sm text-[var(--foreground-muted)]">
+          Aqui voce busca e filtra
+        </p>
       </div>
 
-      {/* Linha principal */}
-      <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
+      <div className="flex w-full flex-col gap-3 md:flex-row md:items-center">
         <input
           type="text"
           placeholder="Nome"
           value={filters.nome}
           onChange={(e) => handleChange("nome", e.target.value)}
           onKeyDown={handleFieldKeyDown}
-          className="rounded-full px-4 py-2 text-sm max-w-md md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+          className="civitas-control max-w-md flex-1 px-4 py-2 text-sm md:w-auto"
         />
 
         <input
@@ -75,45 +76,45 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           value={filters.cpf}
           onChange={(e) => handleChange("cpf", e.target.value)}
           onKeyDown={handleFieldKeyDown}
-          className="rounded-full px-4 py-2 text-sm max-w-sm md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+          className="civitas-control max-w-sm flex-1 px-4 py-2 text-sm md:w-auto"
         />
 
-        <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
+        <div className="flex w-full flex-col gap-3 sm:flex-row md:ml-auto md:w-auto">
           <button
+            type="button"
             onClick={() => alert("Levar para a tela de cadastro")}
-            className="bg-primary-1 hover:bg-primary-1/80 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            className="civitas-action civitas-action--primary flex w-full items-center justify-center gap-2 px-5 py-2 font-semibold sm:w-auto"
           >
-            <span className="material-symbols-outlined text-white text-base">add</span>
+            <span className="material-symbols-outlined text-base">add</span>
             Cadastrar
           </button>
 
           <button
-            onClick={toggleAdvanced}
-            className="border border-gray-400 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-full flex items-center justify-center gap-2 transition w-full sm:w-auto"
+            type="button"
+            onClick={() => setShowAdvanced((prev) => !prev)}
+            className="civitas-action civitas-action--secondary flex w-full items-center justify-center gap-2 px-5 py-2 font-semibold sm:w-auto"
           >
-            <span className="material-symbols-outlined text-white text-base">filter_alt</span>
+            <span className="material-symbols-outlined text-base">filter_alt</span>
             {showAdvanced ? "Ocultar" : "Filtrar"}
           </button>
         </div>
       </div>
 
-      {/* Filtro avançado */}
       {showAdvanced && (
-        <div className="flex flex-col md:flex-row md:items-center gap-3 border-t border-gray-600 pt-4 animate-fadeIn">
-          {/* Apenas telefone */}
+        <div className="flex w-full flex-col gap-3 border-t border-[var(--divider)] pt-4 md:flex-row md:items-center">
           <input
             type="text"
             placeholder="Telefone"
             value={filters.telefone}
             onChange={(e) => handleChange("telefone", e.target.value)}
             onKeyDown={handleFieldKeyDown}
-            className="rounded-full px-4 py-2 text-sm w-full md:w-auto flex-1 outline-none bg-white text-black placeholder-gray-500"
+            className="civitas-control w-full flex-1 px-4 py-2 text-sm md:w-auto"
           />
 
-          {/* Botão limpar verde */}
           <button
+            type="button"
             onClick={clearFilters}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-full transition w-full md:w-auto"
+            className="civitas-action civitas-action--ghost w-full px-5 py-2 font-semibold md:w-auto"
           >
             Limpar
           </button>

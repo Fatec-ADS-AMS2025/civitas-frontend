@@ -1,10 +1,17 @@
 export default interface DespesaDTO {
   id: number;
   numeroDocumento?: string;
+  codigo?: string;
+  valorPrevisto?: number;
+  valorPago?: number;
   uc?: string;
+  idUnidadeConsumidora?: number;
+  dataEmissao?: string;
   dataEmicao?: string;
   consumoPrevisto?: number;
+  consumoReal?: number;
   dataVencimento?: string;
+  status?: number;
   situacao?: number;
   idTipoDespesa?: number;
   idOrcamento?: number;

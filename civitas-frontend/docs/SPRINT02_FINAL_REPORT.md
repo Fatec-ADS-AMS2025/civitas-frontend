@@ -8,7 +8,7 @@ Criar um campo de input funcional e estilizado para o sistema Civitas. O input d
 ### ✅ 1. Input implementado e estilizado conforme padrões do sistema
 - [x] Design seguindo a identidade visual do Civitas
 - [x] Cores consistentes com o design system (teal/verde-azulado)
-- [x] Bordas totalmente arredondadas (`rounded-full`)
+- [x] Bordas totalmente arredondadas (`rounded-sm`)
 - [x] Espaçamentos e tipografia padronizados
 - [x] Estados visuais bem definidos (normal, foco, erro, desabilitado)
 
@@ -107,7 +107,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 ### Dimensões
 - **Padding**: `px-4 py-3` (16px horizontal, 12px vertical)
-- **Border Radius**: `rounded-full` (totalmente arredondado)
+- **Border Radius**: `rounded-sm` (totalmente arredondado)
 - **Width**: `w-full` (largura total do container)
 - **Margin Bottom**: `mb-4` (16px entre campos)
 
