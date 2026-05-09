@@ -23,10 +23,11 @@ const resolveTheme = (themeMode: ThemeMode): ResolvedTheme =>
 const applyTheme = (themeMode: ThemeMode) => {
   const resolvedTheme = resolveTheme(themeMode);
   const root = document.documentElement;
+  const isHighContrast = root.dataset.contrast === "high";
 
   root.dataset.themeMode = themeMode;
   root.dataset.theme = resolvedTheme;
-  root.style.colorScheme = resolvedTheme;
+  root.style.colorScheme = isHighContrast ? "dark" : resolvedTheme;
 
   return resolvedTheme;
 };

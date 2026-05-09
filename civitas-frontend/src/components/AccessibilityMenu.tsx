@@ -1,15 +1,23 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
 
 const MIN_FONT = 14
 const DEFAULT_FONT = 16
 const MAX_FONT = 22
+
 const updateAccessibilityScale = (size: number) => {
   const scale = Number((size / DEFAULT_FONT).toFixed(3))
   document.documentElement.style.setProperty('--accessibility-font-size', `${size}px`)
   document.documentElement.style.setProperty('--accessibility-ui-scale', String(scale))
+}
+
+const syncRootColorScheme = (root: HTMLElement, forceHighContrast: boolean) => {
+  root.style.colorScheme = forceHighContrast
+    ? 'dark'
+    : root.dataset.theme === 'dark'
+      ? 'dark'
+      : 'light'
 }
 
 type AccessibilityActionProps = {
@@ -33,7 +41,12 @@ function AccessibilityAction({
         type="button"
         onClick={onClick}
         aria-label={ariaLabel}
-        className={`flex h-10 w-10 items-center justify-center rounded-sm text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] bg-primary-1 text-white`}
+        aria-pressed={isActive}
+        className={`flex h-10 w-10 items-center justify-center rounded-sm border text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] ${
+          isActive
+            ? "border-[var(--secundary-1)] bg-[var(--secundary-1)] text-[var(--text-on-brand)]"
+            : "border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--foreground)] hover:bg-[var(--surface-subtle)]"
+        }`}
       >
         {children}
       </button>
@@ -43,7 +56,7 @@ function AccessibilityAction({
           pointer-events-none absolute right-[calc(100%+10px)] top-1/2 -translate-y-1/2 translate-x-1
           whitespace-nowrap rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)]
           px-3 py-1.5 text-xs font-medium text-[var(--foreground)]
-          opacity-0 shadow-[0_6px_18px_rgba(15,43,49,0.08)] transition-all duration-150
+          opacity-0 shadow-[var(--shadow-sm)] transition-all duration-150
           group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100
         "
       >
@@ -56,21 +69,11 @@ function AccessibilityAction({
 export default function AccessibilityMenu() {
   const [fontSize, setFontSize] = useState(DEFAULT_FONT)
   const [highContrast, setHighContrast] = useState(false)
-  const pathname = usePathname()
 
   const applyContrast = (enabled: boolean) => {
-    const mainTarget = document.getElementById('conteudo-principal')
-    const dashboardTarget = document.querySelector<HTMLElement>('[data-contrast-target="content"]')
-    const resolvedTarget = dashboardTarget ?? mainTarget
-
-    mainTarget?.classList.remove('high-contrast-shell')
-    mainTarget?.classList.remove('high-contrast')
-    dashboardTarget?.classList.remove('high-contrast')
-
-    if (enabled) {
-      mainTarget?.classList.add('high-contrast-shell')
-      resolvedTarget?.classList.add('high-contrast')
-    }
+    const root = document.documentElement
+    root.dataset.contrast = enabled ? 'high' : 'normal'
+    syncRootColorScheme(root, enabled)
   }
 
   useEffect(() => {
@@ -88,12 +91,14 @@ export default function AccessibilityMenu() {
     if (savedContrast === 'true') {
       setHighContrast(true)
       applyContrast(true)
+    } else {
+      applyContrast(false)
     }
   }, [])
 
   useEffect(() => {
     applyContrast(highContrast)
-  }, [highContrast, pathname])
+  }, [highContrast])
 
   const updateFontSize = (size: number) => {
     const next = Math.max(MIN_FONT, Math.min(MAX_FONT, size))
@@ -117,9 +122,9 @@ export default function AccessibilityMenu() {
       aria-label="Menu de acessibilidade"
       className="
         fixed bottom-4 right-4 z-[120]
-        flex flex-col gap-2 rounded-sm
-        border border-[var(--border-soft)] bg-secundary-1
-        p-2 shadow-[0_10px_24px_rgba(15,43,49,0.10)]
+        flex max-w-[calc(100vw-1rem)] flex-col gap-2 rounded-sm
+        border border-[var(--border-soft)] bg-[var(--surface-elevated)]
+        p-2 shadow-[var(--shadow-sm)]
         backdrop-blur-[6px]
         sm:bottom-5 sm:right-5
       "
@@ -162,7 +167,7 @@ export default function AccessibilityMenu() {
           "
         >
           <span className="absolute left-0 top-0 h-full w-1/2 bg-current" />
-          <span className="absolute right-0 top-0 h-full w-1/2 bg-white" />
+          <span className="absolute right-0 top-0 h-full w-1/2 bg-[var(--surface-elevated)]" />
         </span>
       </AccessibilityAction>
     </aside>

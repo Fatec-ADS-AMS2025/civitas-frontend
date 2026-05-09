@@ -50,13 +50,13 @@ type BaseTableProps<T extends TableRow> = {
 export type TableProps<T extends TableRow> = BaseTableProps<T> &
   (
     | {
-        paginationEnabled: true;
-        pagination: TablePaginationConfig;
-      }
+      paginationEnabled: true;
+      pagination: TablePaginationConfig;
+    }
     | {
-        paginationEnabled?: false;
-        pagination?: TablePaginationConfig;
-      }
+      paginationEnabled?: false;
+      pagination?: TablePaginationConfig;
+    }
   );
 
 const Table = <T extends TableRow,>({
@@ -194,7 +194,7 @@ const Table = <T extends TableRow,>({
 
     if (column.id.toLowerCase() === "id" || column.id.toLowerCase().startsWith("id")) {
       return (
-        <span className="inline-flex min-w-[74px] justify-center rounded-sm border border-[#E8D79C] bg-[#FFF6D9] px-3 py-1.5 text-xs font-semibold leading-none text-[#5F4B00]">
+        <span className="civitas-chip civitas-chip--amber min-w-[74px] justify-center px-3 py-1.5 text-xs leading-none">
           #{String(cellText).padStart(3, "0")}
         </span>
       );
@@ -245,7 +245,7 @@ const Table = <T extends TableRow,>({
   };
 
   const actionButtonClassName =
-    "civitas-table__action flex h-9 w-9 cursor-pointer items-center justify-center rounded-sm border bg-[var(--surface-elevated)] transition-all duration-[var(--motion-duration-fast)] hover:bg-[var(--surface-subtle)] focus-visible:outline-none focus-visible:ring-4";
+    "civitas-table__action flex h-9 w-9 cursor-pointer items-center justify-center rounded-sm border transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4";
 
   const renderActionButton = (
     icon: string,
@@ -255,8 +255,8 @@ const Table = <T extends TableRow,>({
   ) => {
     const toneClassName =
       tone === "danger"
-        ? "border-[#F1D7D7] text-[#D06B6B] hover:bg-[#FFF8F8] focus-visible:ring-[#FF8A8A]/20"
-        : "border-[var(--border-soft)] text-[var(--secundary-1)] hover:bg-[var(--surface-subtle)] focus-visible:ring-[var(--focus-ring)]";
+        ? "civitas-action--danger"
+        : "border-[var(--border-soft)] bg-[var(--surface-elevated)] text-[var(--secundary-1)] hover:bg-[var(--surface-subtle)] focus-visible:ring-[var(--focus-ring)]";
 
     return (
       <button
@@ -275,7 +275,7 @@ const Table = <T extends TableRow,>({
         <>
           <div className="hidden md:block">
             <div className="w-full overflow-x-auto px-4 py-4 sm:px-5 lg:px-6">
-              <table className="min-w-[920px] w-full border-separate border-spacing-y-[10px] text-left text-[var(--foreground)]">
+              <table className="w-full min-w-[720px] border-separate border-spacing-y-[10px] text-left text-[var(--foreground)] lg:min-w-[860px]">
                 <thead>
                   <tr className="civitas-table__head text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                     {columns.map((column) => (
@@ -292,14 +292,13 @@ const Table = <T extends TableRow,>({
                     <tr
                       key={index}
                       style={getMotionStyle(index)}
-                      className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[#E3ECEE] transition-all duration-[var(--motion-duration-fast)] hover:bg-[#FCFEFE] hover:ring-[#D4E2E5]"
+                      className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:bg-[var(--surface-subtle)] hover:ring-[var(--border-default)]"
                     >
                       {columns.map((column, columnIndex) => (
                         <td
                           key={column.id}
-                          className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${
-                            columnIndex === 0 ? "rounded-sm" : ""
-                          }`}
+                          className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${columnIndex === 0 ? "rounded-sm" : ""
+                            }`}
                         >
                           {renderCellValue(objeto, column)}
                         </td>
@@ -383,6 +382,20 @@ const Table = <T extends TableRow,>({
               })}
             </div>
           </div>
+          {shouldShowExportAction ? (
+            <div className="flex flex-col gap-3 border-b border-[var(--divider)] px-4 py-4 sm:flex-row sm:items-center sm:justify-start sm:px-5 lg:px-6">
+              <button
+                type="button"
+                onClick={() => setIsExportModalOpen(true)}
+                className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-5 py-2.5 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] sm:w-auto"
+              >
+                <span className="material-symbols-outlined text-base text-[var(--foreground)]">
+                  print
+                </span>
+                Exportar / Imprimir
+              </button>
+            </div>
+          ) : null}
         </>
       ) : null}
 

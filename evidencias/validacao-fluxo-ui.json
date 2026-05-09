@@ -1,0 +1,52 @@
+{
+  "numeroDocumento": 20260721,
+  "codigo": "716801",
+  "arquivoInicial": "documento-local-inicial-20260721.txt",
+  "arquivoFinal": "documento-local-final-20260721.txt",
+  "documentoPayloadTemFormatoEsperado": true,
+  "despesaPayloadSemDocumento": true,
+  "ordemEndpoints": [
+    "documentos",
+    "despesas"
+  ],
+  "validacoes": [
+    "Tela de despesas abriu autenticada em modo escuro.",
+    "Cadastro bloqueou envio sem documento.",
+    "Arquivo local inicial foi convertido para Base64.",
+    "Arquivo local foi alterado e substituiu a selecao anterior.",
+    "POST /api/documentos ocorreu antes de POST /api/despesas.",
+    "POST /api/despesas nao enviou campo documento.",
+    "Despesa cadastrada apareceu na listagem.",
+    "Alto contraste e viewport mobile foram capturados."
+  ],
+  "consoleMessages": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    }
+  ]
+}

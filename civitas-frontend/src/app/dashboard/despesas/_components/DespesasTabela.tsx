@@ -32,9 +32,9 @@ export default function DespesasTabela({
   return (
     <section
       ref={listSectionRef}
-      className="civitas-table-shell civitas-enter overflow-hidden rounded-sm"
+      className="despesas-table-section civitas-table-shell civitas-enter overflow-hidden rounded-sm"
     >
-      <div className="border-b border-[var(--divider)] px-5 py-5 sm:px-6">
+      <div className="despesas-table-header border-b border-[var(--divider)] px-5 py-5 sm:px-6">
         <h3 className="text-[36px] font-bold leading-none text-[var(--secundary-1)]">
           Listagem de despesas
         </h3>
@@ -45,7 +45,7 @@ export default function DespesasTabela({
         </p>
       </div>
 
-      <div className="grid gap-4 border-b border-[var(--divider)] px-4 py-4 sm:px-5 lg:grid-cols-[1fr_1fr_auto] lg:px-6">
+      <div className="despesas-table-filterbar grid gap-4 border-b border-[var(--divider)] px-4 py-4 sm:px-5 lg:grid-cols-[1fr_1fr_auto] lg:px-6">
         <Input
           value={search.codigoSearch}
           onChange={(event) => search.setCodigoSearch(event.target.value)}
@@ -71,7 +71,7 @@ export default function DespesasTabela({
       </div>
 
       {canExport ? (
-        <div className="flex flex-col gap-3 border-b border-[var(--divider)] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 lg:px-6">
+        <div className="despesas-table-exportbar flex flex-col gap-3 border-b border-[var(--divider)] px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-5 lg:px-6">
           <button
             type="button"
             onClick={onOpenExport}
@@ -91,13 +91,13 @@ export default function DespesasTabela({
         </div>
       ) : null}
 
-      <div className="overflow-x-auto px-4 py-5 sm:px-6">
+      <div className="despesas-table-scroll overflow-x-auto px-4 py-5 sm:px-6">
         <table className="min-w-full border-separate border-spacing-y-3">
           <thead>
             <tr className="text-left text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-              <th className="px-4 py-2">Registro</th>
               <th className="px-4 py-2">Codigo</th>
               <th className="px-4 py-2">Tipo codigo</th>
+              <th className="px-4 py-2">Consumo Previsto</th>
               <th className="px-4 py-2">Categoria</th>
               <th className="px-4 py-2">Descricao</th>
               <th className="px-4 py-2">Valor</th>
@@ -119,7 +119,7 @@ export default function DespesasTabela({
         </table>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-[var(--divider)] bg-[var(--surface-subtle)] px-5 py-4 text-sm text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="despesas-table-footer flex flex-col gap-2 border-t border-[var(--divider)] bg-[var(--surface-subtle)] px-5 py-4 text-sm text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <span>{tableData.listResume}</span>
         <span>Ultima atualizacao: {tableData.lastUpdatedLabel}</span>
       </div>

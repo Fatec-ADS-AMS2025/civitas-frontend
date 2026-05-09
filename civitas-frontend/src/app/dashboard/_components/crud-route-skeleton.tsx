@@ -17,7 +17,7 @@ function Surface({
 }>) {
   return (
     <div
-      className={`skeleton-loader rounded-sm border border-[#E4EEF0] bg-white p-5 shadow-[0_12px_28px_rgba(0,0,0,0.05)] ${className}`.trim()}
+      className={`skeleton-loader rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] ${className}`.trim()}
     >
       {children}
     </div>
@@ -51,7 +51,7 @@ export default function CrudRouteSkeleton({
           <SkeletonBlock className="h-12 w-full rounded-sm md:w-32" />
         </div>
 
-        <div className="flex flex-wrap gap-3 border-t border-[#E6EFF1] pt-4">
+        <div className="flex flex-wrap gap-3 border-t border-[var(--divider)] pt-4">
           {Array.from({ length: filters }).map((_, index) => (
             <SkeletonBlock
               key={`crud-filter-${index}`}
@@ -63,7 +63,7 @@ export default function CrudRouteSkeleton({
       </Surface>
 
       <Surface className="overflow-hidden p-0">
-        <div className="border-b border-[#E6EFF1] px-5 py-5">
+        <div className="border-b border-[var(--divider)] px-5 py-5">
           <SkeletonBlock className="h-7 w-52" />
           <SkeletonBlock className="mt-3 h-4 w-80 max-w-full" />
         </div>
@@ -81,7 +81,7 @@ export default function CrudRouteSkeleton({
           {Array.from({ length: rows }).map((_, rowIndex) => (
             <div
               key={`crud-row-${rowIndex}`}
-              className="grid gap-3 rounded-sm border border-[#E6EFF1] bg-[#FCFEFE] px-4 py-4"
+              className="civitas-card-soft grid gap-3 px-4 py-4"
               style={{ gridTemplateColumns: tableColumns }}
             >
               {Array.from({ length: columns }).map((__, columnIndex) => (
@@ -100,7 +100,7 @@ export default function CrudRouteSkeleton({
           ))}
         </div>
 
-        <div className="border-t border-[#E6EFF1] bg-[#FBFDFD] px-5 py-4">
+        <div className="border-t border-[var(--divider)] bg-[var(--surface-subtle)] px-5 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <SkeletonBlock className="h-4 w-48" />
             <div className="flex items-center gap-2">

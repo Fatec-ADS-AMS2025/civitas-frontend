@@ -1,4 +1,4 @@
-import type { FormFieldConfig } from './form'
+import type { FormFieldConfig, FormMode } from './form'
 
 export type GroupedFields = {
     noSection: FormFieldConfig[]
@@ -49,6 +49,20 @@ export const toInputValue = (value: unknown): string => {
 }
 
 export const getFieldErrorId = (fieldKey: string) => `${fieldKey}-error`
+
+export const isFieldRequired = (field: FormFieldConfig, mode: FormMode): boolean => {
+    return Boolean(field.required || field.requiredInModes?.includes(mode))
+}
+
+export const isFieldValueEmpty = (field: FormFieldConfig, value: unknown): boolean => {
+    if (field.type === 'documento') {
+        if (!isRecord(value)) return true
+        return typeof value.digitalizacao !== 'string' || value.digitalizacao.trim().length === 0
+    }
+
+    if (value === undefined || value === null) return true
+    return String(value).trim().length === 0
+}
 
 // Usa auto-fit para manter o grid legivel em forms grandes.
 export const getGridColsClass = (): string => {

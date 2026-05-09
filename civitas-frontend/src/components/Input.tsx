@@ -23,7 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className="civitas-input__label mb-2 block text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]"
           >
             {label}
-            {props.required && <span className="text-red-500 ml-1">*</span>}
+            {props.required && <span className="ml-1 text-[var(--tone-danger-text)]">*</span>}
           </label>
         )}
         <input
@@ -41,21 +41,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             focus:border-[var(--primary-1)]
             focus:outline-none
             focus:ring-4 focus:ring-[var(--focus-ring)]
-            disabled:bg-[#F4F6F8]
-            disabled:text-[#9AA5AD]
             disabled:cursor-not-allowed
-            disabled:border-[#E3E7EA]
-            disabled:placeholder:text-[#AAB3BA]
             placeholder:text-[var(--foreground-soft)]
             transition-all duration-[var(--motion-duration-fast)]
-            ${error ? 'border-red-300 bg-red-50/90 focus:border-red-400 focus:bg-red-50 focus:ring-red-200' : ''}
+            ${error ? 'civitas-input--error' : ''}
             ${className}
           `.trim().replace(/\s+/g, ' ')}
           aria-describedby={error ? errorId : describedBy}
           {...props}
         />
         {error && (
-          <p id={errorId} className="civitas-input__error mt-1.5 text-sm font-medium text-[#C23D3D]">
+          <p id={errorId} className="civitas-input__error mt-1.5 text-sm font-medium text-[var(--tone-danger-text)]">
             {error}
           </p>
         )}

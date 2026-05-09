@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
+import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -19,6 +20,7 @@ type UseDespesasOptionsInput = {
   instituicoes: InstituicaoDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
+  fluxos: FluxoDTO[];
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   activeModalDespesa: DespesaDashboardRow | null;
 };
@@ -30,6 +32,7 @@ export function useDespesasOptions({
   instituicoes,
   fornecedores,
   usuarios,
+  fluxos,
   unidadesConsumidoras,
   activeModalDespesa,
 }: UseDespesasOptionsInput) {
@@ -71,14 +74,21 @@ export function useDespesasOptions({
     [usuarios]
   );
 
+  const fluxoOptions = useMemo<SelectOption[]>(
+    () =>
+      fluxos.map((fluxo) => ({
+        value: fluxo.idFluxo,
+        label: `#${String(fluxo.idFluxo).padStart(3, "0")} - Status ${fluxo.status} - Consumo ${fluxo.consumo}`,
+      })),
+    [fluxos]
+  );
+
   const unidadeConsumidoraOptions = useMemo<SelectOption[]>(
     () =>
-      unidadesConsumidoras
-        .filter((item) => !item.excluido)
-        .map((item) => ({
-          value: item.id,
-          label: item.identificador || `UC #${item.id}`,
-        })),
+      unidadesConsumidoras.map((unidadeConsumidora) => ({
+        value: unidadeConsumidora.id,
+        label: `#${String(unidadeConsumidora.id).padStart(3, "0")} - ${unidadeConsumidora.identificador}`,
+      })),
     [unidadesConsumidoras]
   );
 
@@ -168,8 +178,8 @@ export function useDespesasOptions({
       ensureOption(
         unidadeConsumidoraOptions,
         activeModalDespesa?.raw.idUnidadeConsumidora,
-        activeModalDespesa?.raw.idUnidadeConsumidora
-          ? `UC #${activeModalDespesa.raw.idUnidadeConsumidora}`
+        activeModalDespesa?.raw.uc
+          ? `Unidade ${activeModalDespesa.raw.uc}`
           : "Unidade consumidora atual"
       ),
     [activeModalDespesa, unidadeConsumidoraOptions]
@@ -184,6 +194,7 @@ export function useDespesasOptions({
     resolvedOrcamentoOptions,
     resolvedFornecedorOptions,
     resolvedUsuarioOptions,
+    resolvedFluxoOptions: fluxoOptions,
     resolvedUnidadeConsumidoraOptions,
   };
 }

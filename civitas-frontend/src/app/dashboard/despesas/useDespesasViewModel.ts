@@ -7,6 +7,7 @@ import type {
   DespesaDashboardSummary,
 } from "@/hooks/useDespesasDashboard";
 import type FornecedorDTO from "@/models/fornecedor";
+import type FluxoDTO from "@/models/fluxo";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
 import type SecretariaDTO from "@/models/secretaria";
@@ -35,6 +36,7 @@ type UseDespesasViewModelInput = {
   secretarias: SecretariaDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
+  fluxos: FluxoDTO[];
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   summary: DespesaDashboardSummary;
   lastUpdatedAt: string | null;
@@ -56,6 +58,7 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
     secretarias,
     fornecedores,
     usuarios,
+    fluxos,
     unidadesConsumidoras,
     summary,
     lastUpdatedAt,
@@ -85,6 +88,7 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
     instituicoes,
     fornecedores,
     usuarios,
+    fluxos,
     unidadesConsumidoras,
     activeModalDespesa,
   });
