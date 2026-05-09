@@ -5,6 +5,7 @@ export default interface DespesaDTO {
   valorPrevisto?: number;
   valorPago?: number;
   uc?: string;
+  idUnidadeConsumidora?: number;
   dataEmissao?: string;
   dataEmicao?: string;
   consumoPrevisto?: number;
@@ -17,7 +18,6 @@ export default interface DespesaDTO {
   idInstituicao?: number;
   idFornecedor?: number;
   idUsuario?: number;
-  idUnidadeConsumidora?: number;
 
   // Legacy fields still consumed by existing financial UI mapping.
   descricao?: string;
