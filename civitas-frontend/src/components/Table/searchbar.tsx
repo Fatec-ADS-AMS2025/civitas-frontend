@@ -134,7 +134,7 @@ const SearchBar = ({
           key={field.key}
           value={fieldValue}
           onChange={(e) => handleAdvancedChange(field.key, e.target.value)}
-          className="civitas-searchbar__field w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
+          className="civitas-searchbar__field civitas-control w-full flex-1 px-4 py-2.5 text-sm md:w-auto"
           onKeyDown={handleFieldKeyDown}
         >
           <option value="">{field.placeholder}</option>
@@ -155,16 +155,16 @@ const SearchBar = ({
         placeholder={field.placeholder}
         onChange={(e) => handleAdvancedChange(field.key, e.target.value)}
         onKeyDown={handleFieldKeyDown}
-        className="civitas-searchbar__field w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] placeholder-[#97A6AE] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
+        className="civitas-searchbar__field civitas-control w-full flex-1 px-4 py-2.5 text-sm md:w-auto"
       />
     );
   };
 
   return (
-    <div className="civitas-searchbar skeleton flex w-full flex-col gap-4 rounded-[24px] border border-[#E4EEF0] bg-white p-5 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
-      <div>
-        <p className="civitas-searchbar__title text-base font-semibold text-[#1F2A32]">Busca</p>
-        <p className="civitas-searchbar__description -mt-1 text-sm text-[#8FA0A8]">Busca global + filtros avancados</p>
+    <div className="civitas-searchbar civitas-surface civitas-enter flex w-full flex-col gap-4 p-5">
+      <div className="civitas-panel-header">
+        <p className="civitas-searchbar__title text-base font-semibold text-[var(--foreground)]">Busca</p>
+        <p className="civitas-searchbar__description -mt-1 text-sm text-[var(--foreground-soft)]">Busca global + filtros avancados</p>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
@@ -173,7 +173,7 @@ const SearchBar = ({
           value={globalQuery}
           placeholder={globalPlaceholder}
           onChange={(e) => setGlobalQuery(e.target.value)}
-          className="civitas-searchbar__field w-full flex-1 rounded-2xl border border-[#D5E3E6] bg-white px-4 py-2.5 text-sm text-[#1F2A32] placeholder-[#97A6AE] outline-none transition focus:border-[#58AFAE] focus:ring-4 focus:ring-[#58AFAE]/20 md:w-auto"
+          className="civitas-searchbar__field civitas-control w-full flex-1 px-4 py-2.5 text-sm md:w-auto"
         />
 
         <div className="flex flex-col sm:flex-row gap-3 md:ml-auto w-full md:w-auto">
@@ -181,9 +181,9 @@ const SearchBar = ({
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="civitas-searchbar__action civitas-searchbar__action--primary flex w-full items-center justify-center gap-2 rounded-2xl bg-[#58AFAE] px-5 py-2.5 font-semibold text-white transition hover:brightness-95 sm:w-auto"
+              className="civitas-searchbar__action civitas-action civitas-action--primary flex w-full sm:w-auto"
             >
-              <span className="material-symbols-outlined text-white text-base">add</span>
+              <span className="material-symbols-outlined text-base text-inherit">add</span>
               Cadastrar
             </button>
           )}
@@ -192,9 +192,9 @@ const SearchBar = ({
             <button
               type="button"
               onClick={toggleAdvanced}
-              className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] sm:w-auto"
+              className="civitas-searchbar__action civitas-action civitas-action--ghost flex w-full sm:w-auto"
             >
-              <span className="material-symbols-outlined text-[#1F2A32] text-base">
+              <span className="material-symbols-outlined text-base text-inherit">
                 filter_alt
               </span>
               {showAdvanced ? "Ocultar" : "Filtrar"}
@@ -204,12 +204,12 @@ const SearchBar = ({
       </div>
 
       {showAdvanced && hasAnyField && (
-        <div className="civitas-searchbar__advanced animate-fadeIn flex flex-col gap-3 border-t border-[#E5EEF0] pt-4 md:flex-row md:items-center">
+        <div className="civitas-searchbar__advanced civitas-enter flex flex-col gap-3 border-t border-[var(--divider)] pt-4 md:flex-row md:items-center">
           {campos.map((field) => renderField(field))}
           <button
             type="button"
             onClick={clearFilters}
-            className="civitas-searchbar__action w-full rounded-2xl border border-[#D5E3E6] bg-white px-5 py-2.5 font-semibold text-[#1F2A32] transition hover:bg-[#F7FAFB] md:w-auto"
+            className="civitas-searchbar__action civitas-action civitas-action--ghost w-full md:w-auto"
           >
             Limpar
           </button>

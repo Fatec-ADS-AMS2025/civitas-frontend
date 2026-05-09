@@ -28,6 +28,31 @@ export interface FinanceiroResumoDTO {
   periodoFim?: string;
 }
 
+export interface SecretariaGastosDTO {
+  idSecretaria: number;
+  nomeSecretaria: string;
+  quantidadeInstituicoes: number;
+  quantidadeDespesas: number;
+  totalGastos: number;
+}
+
+export interface InstituicaoGastosDTO {
+  idInstituicao: number;
+  nomeInstituicao: string;
+  quantidadeDespesas: number;
+  totalGastos: number;
+}
+
+export interface FinanceiroInstituicaoMacroDTO extends InstituicaoGastosDTO {
+  secretariaId?: number;
+  secretariaNome: string;
+}
+
+export interface FinanceiroPanoramaDTO {
+  secretarias: SecretariaGastosDTO[];
+  instituicoes: FinanceiroInstituicaoMacroDTO[];
+}
+
 export interface FinanceiroPayloadDTO {
   tipo: 'despesa' | 'orcamento';
   descricao?: string;

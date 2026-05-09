@@ -1,17 +1,10 @@
 "use client";
 
+import { UsuariosContent } from "./_components/UsuariosContent";
 import { useUsuariosPage } from "./_components/useUsuariosPage";
 
-import { UsuariosContent } from "./_components/UsuariosContent";
-
 export default function Page() {
+  const controller = useUsuariosPage();
 
-  const controller =
-    useUsuariosPage();
-
-  return (
-    <UsuariosContent
-      {...controller}
-    />
-  );
+  return <UsuariosContent {...controller} />;
 }

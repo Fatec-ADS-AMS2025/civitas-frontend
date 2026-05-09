@@ -1,7 +1,7 @@
 "use client";
 
-import { useDespesaPage } from "./_components/useDespesaPage";
 import { DespesaContent } from "./_components/DespesaContent";
+import { useDespesaPage } from "./_components/useDespesaPage";
 
 export default function Page() {
   const {

@@ -1,3 +1,5 @@
+"use client";
+
 import OrcamentosContent from "./_components/OrcamentosContent";
 
 export default function Page() {

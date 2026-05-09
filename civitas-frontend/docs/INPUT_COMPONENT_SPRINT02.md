@@ -119,7 +119,7 @@ const handleEmailChange = (e) => {
 ### Responsividade
 - Largura total (`w-full`) no container
 - Padding adequado (px-4 py-3)
-- Bordas arredondadas (rounded-lg)
+- Bordas arredondadas (rounded-sm)
 - Espaçamento entre campos (mb-4)
 
 ## Acessibilidade

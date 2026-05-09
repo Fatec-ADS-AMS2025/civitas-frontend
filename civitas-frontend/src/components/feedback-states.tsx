@@ -31,12 +31,12 @@ type ErrorStateProps = {
 function StateContainer({ children, tone = "neutral" }: StateContainerProps) {
   const toneClasses =
     tone === "error"
-      ? "border-[#F3D3D3] bg-[#FFF7F7]"
-      : "border-[#DDEEEF] bg-[#FBFEFE]";
+      ? "border-[var(--tone-danger-border)] bg-[var(--surface-danger-soft)]"
+      : "border-[var(--border-soft)] bg-[var(--surface-elevated)]";
 
   return (
     <div
-      className={`civitas-state rounded-[24px] border px-5 py-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)] ${toneClasses}`}
+      className={`civitas-state civitas-enter rounded-sm border px-5 py-6 ${toneClasses}`}
       role="status"
       aria-live="polite"
     >
@@ -47,19 +47,19 @@ function StateContainer({ children, tone = "neutral" }: StateContainerProps) {
 
 export function LoadingState({
   title = "Carregando dados",
-  description = "Aguarde enquanto atualizamos as informacoes desta tela.",
+  description = "Aguarde enquanto os dados sao carregados.",
   rows = 5,
   cols = 4,
 }: LoadingStateProps) {
   return (
     <StateContainer>
       <div className="mb-5 flex items-start gap-3">
-        <div className="civitas-state__icon flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#E8F5F5] text-[#0B6470]">
+        <div className="civitas-state__icon flex h-11 w-11 shrink-0 items-center justify-center rounded-sm bg-[var(--surface-subtle)] text-[var(--secundary-1)]">
           <span className="material-symbols-outlined !text-[22px]">progress_activity</span>
         </div>
         <div>
-          <h3 className="civitas-state__title text-lg font-semibold text-[#1F2A32]">{title}</h3>
-          <p className="civitas-state__description mt-1 text-sm text-[#6B7280]">{description}</p>
+          <h3 className="civitas-state__title text-base font-semibold text-[var(--foreground)]">{title}</h3>
+          <p className="civitas-state__description mt-1 text-sm text-[var(--foreground-muted)]">{description}</p>
         </div>
       </div>
 
@@ -70,17 +70,17 @@ export function LoadingState({
 
 export function EmptyState({
   title = "Nenhum resultado encontrado",
-  description = "Ajuste os filtros ou cadastre um novo item para preencher esta area.",
+  description = "Ajuste os filtros ou cadastre um item para continuar.",
   action,
 }: EmptyStateProps) {
   return (
     <StateContainer>
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="civitas-state__icon flex h-14 w-14 items-center justify-center rounded-full bg-[#F3F9FA] text-[#0B6470]">
+        <div className="civitas-state__icon flex h-12 w-12 items-center justify-center rounded-sm bg-[var(--surface-subtle)] text-[var(--secundary-1)]">
           <span className="material-symbols-outlined !text-[28px]">inventory_2</span>
         </div>
-        <h3 className="civitas-state__title mt-4 text-lg font-semibold text-[#1F2A32]">{title}</h3>
-        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[#6B7280]">{description}</p>
+        <h3 className="civitas-state__title mt-4 text-base font-semibold text-[var(--foreground)]">{title}</h3>
+        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[var(--foreground-muted)]">{description}</p>
         {action ? <div className="mt-5">{action}</div> : null}
       </div>
     </StateContainer>
@@ -89,23 +89,23 @@ export function EmptyState({
 
 export function ErrorState({
   title = "Nao foi possivel carregar os dados",
-  description = "Tente novamente em instantes. Se o problema continuar, revise os filtros ou a conexao.",
+  description = "Tente novamente. Se o problema continuar, revise a conexao ou os filtros.",
   actionLabel = "Tentar novamente",
   onRetry,
 }: ErrorStateProps) {
   return (
     <StateContainer tone="error">
       <div className="flex flex-col items-center justify-center text-center">
-        <div className="civitas-state__icon flex h-14 w-14 items-center justify-center rounded-full bg-[#FFE8E8] text-[#C23D3D]">
+        <div className="civitas-state__icon flex h-12 w-12 items-center justify-center rounded-sm bg-[var(--tone-danger-bg)] text-[var(--tone-danger-text)]">
           <span className="material-symbols-outlined !text-[28px]">error</span>
         </div>
-        <h3 className="civitas-state__title mt-4 text-lg font-semibold text-[#842D2D]">{title}</h3>
-        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[#9B4C4C]">{description}</p>
+        <h3 className="civitas-state__title mt-4 text-base font-semibold text-[var(--tone-danger-text)]">{title}</h3>
+        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[var(--tone-danger-text)]">{description}</p>
         {onRetry ? (
           <button
             type="button"
             onClick={onRetry}
-            className="civitas-state__action mt-5 rounded-full bg-[#C23D3D] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 focus:outline-none focus:ring-4 focus:ring-[#C23D3D]/20"
+            className="civitas-state__action civitas-action civitas-action--danger mt-5 px-4 py-2.5 text-sm"
           >
             {actionLabel}
           </button>

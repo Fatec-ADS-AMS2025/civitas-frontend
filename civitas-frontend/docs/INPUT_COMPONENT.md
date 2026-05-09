@@ -192,7 +192,7 @@ export default function FormularioCompleto() {
       
       <button 
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+        className="w-full bg-blue-600 text-white py-2 px-4 rounded-sm hover:bg-blue-700"
       >
         Enviar
       </button>
@@ -225,7 +225,7 @@ O componente é totalmente responsivo:
 ```css
 /* Estilo base */
 .input-base {
-  @apply w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-200 bg-white text-gray-900 placeholder-gray-400;
+  @apply w-full px-4 py-2 border rounded-sm focus:outline-none focus:ring-2 transition-colors duration-200 bg-white text-gray-900 placeholder-gray-400;
 }
 
 /* Estado desabilitado */

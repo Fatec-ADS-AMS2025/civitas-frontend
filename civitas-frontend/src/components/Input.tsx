@@ -20,10 +20,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={stableInputId}
-            className="civitas-input__label mb-2 block text-sm font-semibold capitalize tracking-[0.01em] text-[#4D5A63]"
+            className="civitas-input__label mb-2 block text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]"
           >
             {label}
-            {props.required && <span className="text-red-500 ml-1">*</span>}
+            {props.required && <span className="ml-1 text-[var(--tone-danger-text)]">*</span>}
           </label>
         )}
         <input
@@ -32,30 +32,26 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={`
             civitas-input
             w-full
-            min-h-[46px]
-            rounded-2xl
-            border border-[#CFE3E3]
-            bg-white
-            px-4 py-3
-            text-[15px] text-[#22313A]
-            shadow-[0_2px_10px_rgba(0,0,0,0.03)]
-            focus:border-[#58AFAE]
+            min-h-[44px]
+            rounded-sm
+            border border-[var(--border-default)]
+            bg-[var(--surface-elevated)]
+            px-3.5 py-2.5
+            text-sm text-[var(--foreground)]
+            focus:border-[var(--primary-1)]
             focus:outline-none
-            focus:ring-4 focus:ring-[#58AFAE]/20
-            disabled:bg-[#F4F6F8]
-            disabled:text-[#9AA5AD]
+            focus:ring-4 focus:ring-[var(--focus-ring)]
             disabled:cursor-not-allowed
-            disabled:border-[#E3E7EA]
-            disabled:placeholder:text-[#AAB3BA]
-            transition-all duration-200
-            ${error ? 'border-red-400 bg-red-50 focus:border-red-500 focus:bg-red-50 focus:ring-red-200' : ''}
+            placeholder:text-[var(--foreground-soft)]
+            transition-all duration-[var(--motion-duration-fast)]
+            ${error ? 'civitas-input--error' : ''}
             ${className}
           `.trim().replace(/\s+/g, ' ')}
           aria-describedby={error ? errorId : describedBy}
           {...props}
         />
         {error && (
-          <p id={errorId} className="civitas-input__error mt-1.5 text-sm font-medium text-red-600">
+          <p id={errorId} className="civitas-input__error mt-1.5 text-sm font-medium text-[var(--tone-danger-text)]">
             {error}
           </p>
         )}

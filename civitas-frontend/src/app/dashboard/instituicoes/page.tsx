@@ -1,3 +1,5 @@
+"use client";
+
 import InstituicoesContent from "./_components/InstituicoesContent";
 
 export default function Page() {
