@@ -8,7 +8,6 @@ import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
-import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 import type UsuarioDTO from "@/models/usuario";
 import type { SelectOption } from "./despesas.types";
 import { ensureOption, formatCurrency } from "./despesas.utils";
@@ -21,7 +20,6 @@ type UseDespesasOptionsInput = {
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
   fluxos: FluxoDTO[];
-  unidadesConsumidoras: UnidadeConsumidoraDTO[];
   activeModalDespesa: DespesaDashboardRow | null;
 };
 
@@ -33,7 +31,6 @@ export function useDespesasOptions({
   fornecedores,
   usuarios,
   fluxos,
-  unidadesConsumidoras,
   activeModalDespesa,
 }: UseDespesasOptionsInput) {
   const tipoDespesaOptions = useMemo<SelectOption[]>(
@@ -81,15 +78,6 @@ export function useDespesasOptions({
         label: `#${String(fluxo.idFluxo).padStart(3, "0")} - Status ${fluxo.status} - Consumo ${fluxo.consumo}`,
       })),
     [fluxos]
-  );
-
-  const unidadeConsumidoraOptions = useMemo<SelectOption[]>(
-    () =>
-      unidadesConsumidoras.map((unidadeConsumidora) => ({
-        value: unidadeConsumidora.id,
-        label: `#${String(unidadeConsumidora.id).padStart(3, "0")} - ${unidadeConsumidora.identificador}`,
-      })),
-    [unidadesConsumidoras]
   );
 
   const orcamentoOptions = useMemo<SelectOption[]>(
@@ -173,18 +161,6 @@ export function useDespesasOptions({
     [activeModalDespesa, usuarioOptions]
   );
 
-  const resolvedUnidadeConsumidoraOptions = useMemo(
-    () =>
-      ensureOption(
-        unidadeConsumidoraOptions,
-        activeModalDespesa?.raw.idUnidadeConsumidora,
-        activeModalDespesa?.raw.uc
-          ? `Unidade ${activeModalDespesa.raw.uc}`
-          : "Unidade consumidora atual"
-      ),
-    [activeModalDespesa, unidadeConsumidoraOptions]
-  );
-
   return {
     tipoDespesaOptions,
     tipoCodigoOptions,
@@ -195,6 +171,5 @@ export function useDespesasOptions({
     resolvedFornecedorOptions,
     resolvedUsuarioOptions,
     resolvedFluxoOptions: fluxoOptions,
-    resolvedUnidadeConsumidoraOptions,
   };
 }

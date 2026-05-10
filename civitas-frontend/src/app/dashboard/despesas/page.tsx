@@ -60,7 +60,6 @@ export default function Page() {
     resolvedFornecedorOptions: viewModel.resolvedFornecedorOptions,
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
     resolvedFluxoOptions: viewModel.resolvedFluxoOptions,
-    resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
     isOptionsLoading: dashboard.loading,
     hideDocumento: true,
   });

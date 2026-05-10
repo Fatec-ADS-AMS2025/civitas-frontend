@@ -118,41 +118,6 @@ const isHttpNotFoundError = (error: unknown): boolean => {
   return error instanceof Error && error.message.includes("HTTP 404");
 };
 
-const getHttpStatusFromError = (error: unknown): number | null => {
-  if (!(error instanceof Error)) return null;
-
-  const matchedStatus = error.message.match(/HTTP\s+(\d+)/i);
-  if (!matchedStatus) return null;
-
-  const status = Number(matchedStatus[1]);
-  return Number.isFinite(status) ? status : null;
-};
-
-const isInactiveRecord = (value: unknown): boolean => {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  const statusValue =
-    value.situacao ??
-    value.status ??
-    value.ativo ??
-    value.estado ??
-    value.situacaoLabel ??
-    value.statusLabel;
-
-  if (statusValue === 2 || statusValue === false) {
-    return true;
-  }
-
-  if (typeof statusValue === "string") {
-    const normalized = statusValue.trim().toLowerCase();
-    return normalized === "2" || normalized === "inativo" || normalized === "inactive";
-  }
-
-  return false;
-};
-
 const toQueryString = (
   query: ListQuery | undefined,
   defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY

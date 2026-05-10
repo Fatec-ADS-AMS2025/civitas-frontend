@@ -25,7 +25,6 @@ type UseDespesaFormFieldsInput = {
   resolvedFornecedorOptions: SelectOption[];
   resolvedUsuarioOptions: SelectOption[];
   resolvedFluxoOptions: SelectOption[];
-  resolvedUnidadeConsumidoraOptions: SelectOption[];
   isOptionsLoading?: boolean;
   hideDocumento?: boolean;
 };
@@ -40,7 +39,6 @@ export function useDespesaFormFields({
   resolvedFornecedorOptions,
   resolvedUsuarioOptions,
   resolvedFluxoOptions,
-  resolvedUnidadeConsumidoraOptions,
   isOptionsLoading = false,
   hideDocumento = false,
 }: UseDespesaFormFieldsInput): ModalFieldConfig[] {
@@ -384,7 +382,6 @@ export function useDespesaFormFields({
       resolvedTipoCodigoOptions,
       resolvedTipoDespesaOptions,
       resolvedUsuarioOptions,
-      resolvedUnidadeConsumidoraOptions,
       isOptionsLoading,
       resolveDocumento,
       resolveTipoCodigo,

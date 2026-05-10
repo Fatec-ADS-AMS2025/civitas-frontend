@@ -142,20 +142,6 @@ const Table = <T extends TableRow,>({
     };
   };
 
-  const getStatusValue = (objeto: T) => {
-    const record = toRecord(objeto);
-    return record.status ?? record.situacao ?? record.ativo ?? record.estado ?? null;
-  };
-
-  const isStatusColumn = (columnId: string) => {
-    const normalized = columnId.toLowerCase();
-    return (
-      normalized === "status" ||
-      normalized === "statuslabel" ||
-      normalized === "situacao" ||
-      normalized === "situacaolabel"
-    );
-  };
   const renderStatusBadge = (status: unknown) => {
     const baseStatusText = getStatusText(status);
     if (!baseStatusText) return null;

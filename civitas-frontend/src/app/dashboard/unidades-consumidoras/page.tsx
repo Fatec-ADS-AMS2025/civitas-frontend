@@ -45,11 +45,10 @@ type UnidadeConsumidoraLookups = {
   secretarias: SecretariaDTO[];
   orcamentos: OrcamentoDTO[];
   fornecedores: FornecedorDTO[];
-  unidadesConsumidoras: UnidadeConsumidoraDTO[];
 };
 const emptyPagination: PaginationState = { currentPage: 1, pageSize: 20, totalPages: 0, totalRecords: 0 };
 const shouldLoadPreviousPage = (pageResult: PaginatedResult<UnidadeConsumidoraRow>) => pageResult.totalRecords > 0 && pageResult.totalPages > 0 && pageResult.items.length === 0 && pageResult.currentPage > pageResult.totalPages;
-const emptyLookups: UnidadeConsumidoraLookups = { instituicoes: [], tiposDespesa: [], secretarias: [], orcamentos: [], fornecedores: [], unidadesConsumidoras: [] };
+const emptyLookups: UnidadeConsumidoraLookups = { instituicoes: [], tiposDespesa: [], secretarias: [], orcamentos: [], fornecedores: [] };
 const toPositiveNumber = (value: unknown): number | null => {
   const parsedValue = Number(value);
   return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : null;
@@ -66,7 +65,7 @@ export default function Page() {
   const [lookups, setLookups] = useState<UnidadeConsumidoraLookups>(emptyLookups);
   const [pagination, setPagination] = useState<PaginationState>(emptyPagination);
 
-  const { instituicoes, tiposDespesa, secretarias, orcamentos, fornecedores, unidadesConsumidoras } = lookups;
+  const { instituicoes, tiposDespesa, secretarias, orcamentos, fornecedores } = lookups;
   const instituicaoOptions = useMemo(() => instituicoes.map((item) => ({ value: item.id, label: toLabel(item.nome, item.situacao) })), [instituicoes]);
   const tipoDespesaOptions = useMemo(() => tiposDespesa.map((item) => ({ value: item.id, label: toLabel(item.descricao, item.situacao) })), [tiposDespesa]);
   const secretariaOptions = useMemo(() => secretarias.map((item) => ({ value: item.idSecretaria, label: toLabel(item.nome, item.situacao) })), [secretarias]);
@@ -169,14 +168,13 @@ export default function Page() {
   const loadData = async (query: ListQuery = { page: pagination.currentPage, size: pagination.pageSize }) => {
     try {
       setLoading(true);
-      const [page, inst, tipos, secs, orcs, fornecs, ucsAtivas] = await Promise.all([
+      const [page, inst, tipos, secs, orcs, fornecs] = await Promise.all([
         unidadeConsumidoraService.getPage(query),
         instituicaoService.getAll(),
         tipoDespesaService.getAll(),
         secretariaService.getAll(),
         orcamentoService.getAll(),
         fornecedorService.getAll(),
-        unidadeConsumidoraService.getAllActiveData({ size: 100 }),
       ]);
       const nextLookups: UnidadeConsumidoraLookups = {
         instituicoes: inst,
@@ -184,7 +182,6 @@ export default function Page() {
         secretarias: secs,
         orcamentos: orcs,
         fornecedores: fornecs,
-        unidadesConsumidoras: ucsAtivas,
       };
       let rows = mapRows(page.items, nextLookups);
       // Se a página ficou vazia após alguma ação, volta para a última disponível.
