@@ -11,6 +11,8 @@ export default interface DespesaDTO {
   consumoPrevisto?: number;
   consumoReal?: number;
   dataVencimento?: string;
+  // Data de pagamento usada para impedir reclassificacao automatica como atrasada.
+  dataPagamento?: string;
   status?: number;
   situacao?: number;
   idTipoDespesa?: number;

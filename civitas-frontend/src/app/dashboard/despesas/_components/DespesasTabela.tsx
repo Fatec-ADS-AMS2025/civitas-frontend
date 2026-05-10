@@ -15,6 +15,7 @@ type DespesasTabelaProps = {
   onView: (despesa: DespesaDashboardRow) => void;
   onEdit: (despesa: DespesaDashboardRow) => void;
   onDelete: (despesa: DespesaDashboardRow) => void;
+  onPayment: (despesa: DespesaDashboardRow) => void;
 };
 
 export default function DespesasTabela({
@@ -28,6 +29,7 @@ export default function DespesasTabela({
   onView,
   onEdit,
   onDelete,
+  onPayment,
 }: DespesasTabelaProps) {
   return (
     <section
@@ -114,6 +116,7 @@ export default function DespesasTabela({
               onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}
+              onPayment={onPayment}
             />
           </tbody>
         </table>

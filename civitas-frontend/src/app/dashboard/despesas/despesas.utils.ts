@@ -96,6 +96,11 @@ export const getStatusBadgeClassName = (status: number): string => {
   return "civitas-badge--status-neutral";
 };
 
+// Pendente = A pagar (1) ou Atrasada (3).
+export const isPendingDespesa = (status: number): boolean => {
+  return status === 1 || status === 3;
+};
+
 export const mapDespesaToExportRow = (
   despesa: DespesaDashboardRow
 ): DespesaExportRow => ({

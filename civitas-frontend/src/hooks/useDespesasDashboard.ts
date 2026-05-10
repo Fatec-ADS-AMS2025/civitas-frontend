@@ -546,6 +546,8 @@ const buildDespesaPayload = (
     consumoPrevisto,
     consumoReal,
     dataVencimento,
+    dataPagamento:
+      typeof formData.dataPagamento === "string" ? formData.dataPagamento : currentDespesa?.dataPagamento,
     status: situacao,
     situacao,
     idTipoDespesa: unidadeConsumidora.idTipoDespesa,
@@ -667,6 +669,7 @@ const buildDespesaApiPayload = (payload: DespesaDTO): DespesaDTO => ({
   consumoPrevisto: Number(payload.consumoPrevisto ?? payload.valorPrevisto ?? 0),
   consumoReal: Number(payload.consumoReal ?? 0),
   dataVencimento: payload.dataVencimento ?? "",
+  dataPagamento: payload.dataPagamento ?? undefined,
   status: Number(payload.status ?? payload.situacao ?? SITUACAO_ATIVO),
   idUsuario: Number(payload.idUsuario),
   idUnidadeConsumidora: Number(payload.idUnidadeConsumidora),
@@ -811,16 +814,92 @@ export const useDespesasDashboard = () => {
     [dashboardData, refetch]
   );
 
+  // Fluxo de pagamento: exige comprovante, cria documento e define status=2 com dataPagamento.
+  const updateDespesaPagamento = useCallback(
+    async (
+      id: number,
+      overrides: { valorPago?: number; consumoReal?: number; documento?: unknown }
+    ) => {
+      const currentDespesa = dashboardData.despesas.find((despesa) => despesa.id === id);
+      if (!currentDespesa) {
+        throw new Error(`Despesa ${id} nao encontrada.`);
+      }
+
+      const fluxoPago = dashboardData.fluxos.find((fluxo) => Number(fluxo.status) === 2);
+      if (!fluxoPago) {
+        throw new Error("Nenhum fluxo de pagamento disponivel para anexar o comprovante.");
+      }
+
+      const documentoValue = overrides.documento as {
+        digitalizacao?: string;
+        fileName?: string;
+        fileType?: string;
+        fileSize?: number;
+      } | null;
+      const digitalizacao = documentoValue?.digitalizacao?.trim() ?? "";
+      if (!digitalizacao) {
+        throw new Error("Anexe o comprovante de pagamento.");
+      }
+
+      const numeroDocumento = digitsOnly(currentDespesa.numeroDocumento ?? "");
+      if (!numeroDocumento) {
+        throw new Error("Numero do documento deve conter apenas numeros.");
+      }
+
+      // Resolve fornecedor pela UC quando a despesa nao traz esse campo.
+      const unidadeConsumidora = dashboardData.unidadesConsumidoras.find(
+        (item) => item.id === currentDespesa.idUnidadeConsumidora
+      );
+      const idFornecedor = Number(
+        currentDespesa.idFornecedor ?? unidadeConsumidora?.idFornecedor ?? 0
+      );
+      if (!Number.isFinite(idFornecedor) || idFornecedor <= 0) {
+        throw new Error("Fornecedor da despesa nao foi identificado.");
+      }
+
+      await documentoService.createData({
+        idDocumento: 0,
+        digitalizacao,
+        numeroDocumento: Number(numeroDocumento),
+        idFornecedor,
+        idFluxo: fluxoPago.idFluxo,
+      });
+
+      const today = new Date().toISOString().slice(0, 10);
+      const payload = buildDespesaPayload(
+        {
+          status: 2,
+          situacao: 2,
+          valorPago: overrides.valorPago ?? 0,
+          consumoReal: overrides.consumoReal ?? 0,
+          dataPagamento: today,
+        },
+        dashboardData,
+        currentDespesa
+      );
+
+      await despesaService.updateData(
+        id,
+        buildDespesaApiPayload({
+          ...payload,
+          id,
+        })
+      );
+      await refetch();
+    },
+    [dashboardData, refetch]
+  );
+
+  // A API nao expõe DELETE para despesas; exibe mensagem clara.
   const removeDespesa = useCallback(
     async (id: number) => {
       try {
         await despesaService.delete(id);
       } catch (error) {
         if (isHttpNotFoundError(error) || isHttpMethodNotAllowedError(error)) {
-          await despesaService.alterarSituacao(id);
-        } else {
-          throw error;
+          throw new Error("Exclusao de despesa nao esta disponivel na API.");
         }
+        throw error;
       }
 
       await refetch();
@@ -853,6 +932,7 @@ export const useDespesasDashboard = () => {
       refetch,
       createDespesa,
       updateDespesa,
+      updateDespesaPagamento,
       removeDespesa,
     }),
     [
@@ -878,6 +958,7 @@ export const useDespesasDashboard = () => {
       refetch,
       createDespesa,
       updateDespesa,
+      updateDespesaPagamento,
       removeDespesa,
     ]
   );
