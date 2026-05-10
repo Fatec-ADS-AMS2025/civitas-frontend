@@ -107,10 +107,6 @@ export default function DespesasTabelaRows({
   );
 }
 
-function getTipoCodigoLabel(idTipoCodigo: string) {
-
-}
-
 function RowActions({
   despesa,
   onView,
@@ -119,7 +115,6 @@ function RowActions({
 }: Omit<DespesasTabelaRowsProps, "loading" | "despesas" | "hasLocalListSearch"> & {
   despesa: DespesaDashboardRow;
 }) {
-
   return (
     <div className="flex items-center justify-center gap-2">
       <button

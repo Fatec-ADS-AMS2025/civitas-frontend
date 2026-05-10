@@ -27,11 +27,6 @@ const toOptionalNumber = (value: unknown): number | undefined => {
   return Number.isNaN(parsedValue) ? undefined : parsedValue;
 };
 
-const toOptionalString = (value: unknown): string | undefined => {
-  const normalizedValue = toTrimmedString(value);
-  return normalizedValue ? normalizedValue : undefined;
-};
-
 export const digitsOnly = (value: unknown): string => {
   return toTrimmedString(value).replace(/\D/g, "");
 };

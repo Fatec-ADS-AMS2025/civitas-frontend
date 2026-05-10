@@ -250,31 +250,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
 
-const toPositiveNumber = (value: unknown): number => {
-  const numericValue = Number(value);
-  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
-};
-
-const resolveSelectedDocumento = (
-  value: unknown
-): Pick<DocumentoDTO, "numeroDocumento" | "idFornecedor"> | null => {
-  if (!isRecord(value)) {
-    return null;
-  }
-
-  const numeroDocumento = Number(value.numeroDocumento);
-  const idFornecedor = Number(value.idFornecedor);
-
-  if (!Number.isFinite(numeroDocumento) || numeroDocumento <= 0) {
-    return null;
-  }
-
-  return {
-    numeroDocumento,
-    idFornecedor: Number.isFinite(idFornecedor) ? idFornecedor : 0,
-  };
-};
-
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
   try {
     return (await despesaService.getInactiveOptional()) ?? [];
