@@ -365,7 +365,8 @@ const buildDespesaRows = (
   tiposDespesaMap: Map<number, TipoDespesaDTO>,
   tipoCodigosMap: Map<number, TipoCodigoDTO>,
   instituicoesMap: Map<number, InstituicaoDTO>,
-  secretariasMap: Map<number, SecretariaDTO>
+  secretariasMap: Map<number, SecretariaDTO>,
+  documentosMap: Map<string, DocumentoDTO>
 ): DespesaDashboardRow[] => {
   return despesas
     .map((despesa) => {
@@ -392,6 +393,14 @@ const buildDespesaRows = (
       const secretariaId =
         instituicao?.idSecretaria ?? unidadeConsumidora?.idSecretaria ?? null;
       const secretaria = secretariaId ? secretariasMap.get(secretariaId) : undefined;
+      const resolvedFornecedorId =
+        despesa.idFornecedor ?? unidadeConsumidora?.idFornecedor ?? 0;
+      const documento =
+        despesa.documento ??
+        documentosMap.get(
+          buildDocumentoKey(despesa.numeroDocumento, resolvedFornecedorId)
+        ) ??
+        null;
       const normalizedRaw: DespesaDTO = {
         ...despesa,
         idTipoDespesa: resolvedTipoDespesaId,
@@ -839,6 +848,19 @@ export const useDespesasDashboard = () => {
     );
   }, [dashboardData.secretarias]);
 
+  const documentosMap = useMemo(() => {
+    const nextMap = new Map<string, DocumentoDTO>();
+
+    dashboardData.documentos.forEach((documento) => {
+      const key = buildDocumentoKey(documento.numeroDocumento, documento.idFornecedor);
+      if (key) {
+        nextMap.set(key, documento);
+      }
+    });
+
+    return nextMap;
+  }, [dashboardData.documentos]);
+
   const despesas = useMemo(() => {
     return buildDespesaRows(
       dashboardData.despesas,
@@ -846,10 +868,12 @@ export const useDespesasDashboard = () => {
       tiposDespesaMap,
       tipoCodigosMap,
       instituicoesMap,
-      secretariasMap
+      secretariasMap,
+      documentosMap
     );
   }, [
     dashboardData.despesas,
+    documentosMap,
     instituicoesMap,
     secretariasMap,
     tipoCodigosMap,
