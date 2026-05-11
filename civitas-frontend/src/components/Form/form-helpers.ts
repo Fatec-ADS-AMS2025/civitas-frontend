@@ -31,7 +31,6 @@ const normalizeDocumentValue = (
     digitalizacao: typeof value.digitalizacao === 'string' ? value.digitalizacao : '',
     numeroDocumento: toPositiveNumberOrZero(value.numeroDocumento, source.numeroDocumento),
     idFornecedor: toPositiveNumberOrZero(value.idFornecedor, source.idFornecedor, source.fornecedorId),
-    idFluxo: toPositiveNumberOrZero(value.idFluxo, source.idFluxo),
 })
 
 const resolveDocumentFieldValue = (

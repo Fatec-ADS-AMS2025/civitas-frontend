@@ -67,7 +67,7 @@ export default function Sidebar() {
           </button>
 
           <div className="sidebar-scroll-shell min-h-0 flex-1 overflow-hidden">
-            <nav className="sidebar-scroll civitas-scrollbar flex h-full min-h-0 flex-col gap-1 overflow-y-auto pr-1.5">
+            <nav className="sidebar-scroll group-hover:civitas-scrollbar flex h-full min-h-0 flex-col gap-1 group-hover:overflow-y-auto pr-1.5">
               {navigationItems.map((item) => {
                 const isActive = normalizePath(item.path) === normalizedPath;
 

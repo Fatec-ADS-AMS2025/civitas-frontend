@@ -62,7 +62,6 @@ export const buildDespesaFormObject = (
     id: despesa.id,
     documento: "",
     numeroDocumento: despesa.raw.numeroDocumento ?? "",
-    idFluxo: "",
     codigo: despesa.raw.codigo === "0" ? "" : despesa.raw.codigo ?? "",
     idTipoCodigo: despesa.tipoCodigoId ?? "",
     idTipoDespesa: despesa.raw.idTipoDespesa ?? "",
@@ -94,6 +93,11 @@ export const getStatusBadgeClassName = (status: number): string => {
   if (status === 2) return "civitas-badge--status-active";
   if (status === 3) return "civitas-badge--status-inactive";
   return "civitas-badge--status-neutral";
+};
+
+// Pendente = A pagar (1) ou Atrasada (3).
+export const isPendingDespesa = (status: number): boolean => {
+  return status === 1 || status === 3;
 };
 
 export const mapDespesaToExportRow = (

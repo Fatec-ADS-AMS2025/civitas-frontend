@@ -4,6 +4,7 @@ import { ICON_BUTTON_CLASS_NAME } from "../despesas.constants";
 import {
   getDespesaCodigo,
   getStatusBadgeClassName,
+  isPendingDespesa,
 } from "../despesas.utils";
 
 type DespesasTabelaRowsProps = {
@@ -13,6 +14,7 @@ type DespesasTabelaRowsProps = {
   onView: (despesa: DespesaDashboardRow) => void;
   onEdit: (despesa: DespesaDashboardRow) => void;
   onDelete: (despesa: DespesaDashboardRow) => void;
+  onPayment: (despesa: DespesaDashboardRow) => void;
 };
 
 export default function DespesasTabelaRows({
@@ -22,6 +24,7 @@ export default function DespesasTabelaRows({
   onView,
   onEdit,
   onDelete,
+  onPayment,
 }: DespesasTabelaRowsProps) {
   if (loading) {
     return (
@@ -66,7 +69,10 @@ export default function DespesasTabelaRows({
         <tr
           key={despesa.id}
           style={getEnterDelayStyle(index)}
-          className={`${index < 6 ? "civitas-enter " : ""}despesas-table-row rounded-sm bg-[var(--surface-elevated)] shadow-[var(--shadow-xs)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]`}
+          className={`${index < 6 ? "civitas-enter " : ""}despesas-table-row ${
+            // Destaque pendentes (A pagar/Atrasada) para facilitar a leitura.
+            isPendingDespesa(despesa.situacao) ? "despesas-table-row--pending " : ""
+          }rounded-sm bg-[var(--surface-elevated)] shadow-[var(--shadow-xs)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-subtle)] hover:shadow-[var(--shadow-sm)]`}
         >
           <td className="px-4 py-5 text-sm font-semibold text-[var(--secundary-1)]">
             {getDespesaCodigo(despesa)}
@@ -99,7 +105,13 @@ export default function DespesasTabelaRows({
             </span>
           </td>
           <td className="despesas-table-cell rounded-sm px-4 py-5">
-            <RowActions despesa={despesa} onView={onView} onEdit={onEdit} onDelete={onDelete} />
+            <RowActions
+              despesa={despesa}
+              onView={onView}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onPayment={onPayment}
+            />
           </td>
         </tr>
       ))}
@@ -112,6 +124,7 @@ function RowActions({
   onView,
   onEdit,
   onDelete,
+  onPayment,
 }: Omit<DespesasTabelaRowsProps, "loading" | "despesas" | "hasLocalListSearch"> & {
   despesa: DespesaDashboardRow;
 }) {
@@ -132,6 +145,15 @@ function RowActions({
         aria-label={`Editar ${despesa.registro}`}
       >
         <span className="material-symbols-outlined !text-[18px]">edit</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => onPayment(despesa)}
+        className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
+        aria-label={`Atualizar pagamento ${despesa.registro}`}
+      >
+        {/* Acao dedicada ao fluxo de pagamento */}
+        <span className="material-symbols-outlined !text-[18px]">payments</span>
       </button>
       <button
         type="button"

@@ -11,7 +11,6 @@ export type DocumentoFieldValue = {
   digitalizacao: string;
   numeroDocumento: number;
   idFornecedor: number;
-  idFluxo: number;
   fileName?: string;
   fileType?: string;
   fileSize?: number;
@@ -46,7 +45,6 @@ const getDocumentoValue = (value: unknown): DocumentoFieldValue | null => {
     digitalizacao: typeof value.digitalizacao === "string" ? value.digitalizacao : "",
     numeroDocumento: toNumber(value.numeroDocumento),
     idFornecedor: toNumber(value.idFornecedor),
-    idFluxo: toNumber(value.idFluxo),
     fileName: typeof value.fileName === "string" ? value.fileName : undefined,
     fileType: typeof value.fileType === "string" ? value.fileType : undefined,
     fileSize: toNumber(value.fileSize),
@@ -148,7 +146,6 @@ export default function DocumentoField({
       digitalizacao: "",
       numeroDocumento: documento?.numeroDocumento ?? 0,
       idFornecedor: documento?.idFornecedor ?? 0,
-      idFluxo: documento?.idFluxo ?? 0,
       fileName: file.name,
       fileType: file.type || "Tipo nao informado",
       fileSize: file.size,

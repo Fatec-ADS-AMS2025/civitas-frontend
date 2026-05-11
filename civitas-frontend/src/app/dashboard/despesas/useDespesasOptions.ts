@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
-import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -11,6 +10,7 @@ import type TipoDespesaDTO from "@/models/tipoDespesa";
 import type UsuarioDTO from "@/models/usuario";
 import type { SelectOption } from "./despesas.types";
 import { ensureOption, formatCurrency } from "./despesas.utils";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 
 type UseDespesasOptionsInput = {
   tipoCodigos: TipoCodigoDTO[];
@@ -19,7 +19,7 @@ type UseDespesasOptionsInput = {
   instituicoes: InstituicaoDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
-  fluxos: FluxoDTO[];
+  unidadesConsumidoras: UnidadeConsumidoraDTO[];
   activeModalDespesa: DespesaDashboardRow | null;
 };
 
@@ -30,7 +30,7 @@ export function useDespesasOptions({
   instituicoes,
   fornecedores,
   usuarios,
-  fluxos,
+  unidadesConsumidoras,
   activeModalDespesa,
 }: UseDespesasOptionsInput) {
   const tipoDespesaOptions = useMemo<SelectOption[]>(
@@ -71,13 +71,13 @@ export function useDespesasOptions({
     [usuarios]
   );
 
-  const fluxoOptions = useMemo<SelectOption[]>(
+  const unidadeConsumidoraOptions = useMemo<SelectOption[]>(
     () =>
-      fluxos.map((fluxo) => ({
-        value: fluxo.idFluxo,
-        label: `#${String(fluxo.idFluxo).padStart(3, "0")} - Status ${fluxo.status} - Consumo ${fluxo.consumo}`,
+      unidadesConsumidoras.map((unidadeConsumidora) => ({
+        value: unidadeConsumidora.id,
+        label: `#${String(unidadeConsumidora.id).padStart(3, "0")} - ${unidadeConsumidora.identificador}`,
       })),
-    [fluxos]
+    [unidadesConsumidoras]
   );
 
   const orcamentoOptions = useMemo<SelectOption[]>(
@@ -161,6 +161,18 @@ export function useDespesasOptions({
     [activeModalDespesa, usuarioOptions]
   );
 
+  const resolvedUnidadeConsumidoraOptions = useMemo(
+    () =>
+      ensureOption(
+        unidadeConsumidoraOptions,
+        activeModalDespesa?.raw.idUnidadeConsumidora,
+        activeModalDespesa?.raw.idUnidadeConsumidora
+          ? `Unidade consumidora #${activeModalDespesa.raw.idUnidadeConsumidora}`
+          : "Unidade consumidora atual"
+      ),
+    [activeModalDespesa, unidadeConsumidoraOptions]
+  );
+
   return {
     tipoDespesaOptions,
     tipoCodigoOptions,
@@ -170,6 +182,6 @@ export function useDespesasOptions({
     resolvedOrcamentoOptions,
     resolvedFornecedorOptions,
     resolvedUsuarioOptions,
-    resolvedFluxoOptions: fluxoOptions,
+    resolvedUnidadeConsumidoraOptions,
   };
 }

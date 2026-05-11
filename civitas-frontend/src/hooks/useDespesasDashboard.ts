@@ -5,7 +5,6 @@ import { digitsOnly, normalizeDateInput, toTrimmedText } from "@/global/formPayl
 import { SITUACAO_ATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
 import { documentoService } from "@/hooks/documento";
-import { fluxoService } from "@/hooks/fluxo";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
@@ -18,7 +17,6 @@ import { usuarioService } from "@/hooks/usuario";
 import { authStorage } from "@/lib/auth-storage";
 import type DespesaDTO from "@/models/despesa";
 import type DocumentoDTO from "@/models/documento";
-import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -77,7 +75,6 @@ type DashboardData = {
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   unidadesMedida: UnidadeMedidaDTO[];
   usuarios: UsuarioDTO[];
-  fluxos: FluxoDTO[];
 };
 
 const EMPTY_DASHBOARD_DATA: DashboardData = {
@@ -91,7 +88,6 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   unidadesConsumidoras: [],
   unidadesMedida: [],
   usuarios: [],
-  fluxos: [],
 };
 
 const DEFAULT_FILTERS: DespesasDashboardFilters = {
@@ -248,6 +244,11 @@ const logOptionalDashboardWarning = (message: string, error: unknown): void => {
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
+const toPositiveNumber = (value: unknown): number => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
 };
 
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
@@ -521,6 +522,8 @@ const buildDespesaPayload = (
     consumoPrevisto,
     consumoReal,
     dataVencimento,
+    dataPagamento:
+      typeof formData.dataPagamento === "string" ? formData.dataPagamento : currentDespesa?.dataPagamento,
     status: situacao,
     situacao,
     idTipoDespesa: unidadeConsumidora.idTipoDespesa,
@@ -564,7 +567,6 @@ const buildDocumentoPayload = (
   const idFornecedor = Number(
     formData.documento.idFornecedor ?? despesaPayload.idFornecedor
   );
-  const idFluxo = Number(formData.documento.idFluxo ?? formData.idFluxo);
 
   if (!Number.isFinite(numeroDocumento) || numeroDocumento <= 0) {
     throw new Error("Numero do documento deve conter apenas numeros.");
@@ -574,17 +576,12 @@ const buildDocumentoPayload = (
     throw new Error("Selecione um fornecedor valido para o documento.");
   }
 
-  if (!Number.isFinite(idFluxo) || idFluxo <= 0) {
-    throw new Error("Selecione um fluxo valido para o documento.");
-  }
-
-  // O endpoint de documentos aceita o arquivo como string Base64 e desserializa para byte[] no backend.
+  // O backend atual relaciona documento e despesa pelo numeroDocumento e pelo fornecedor.
   return {
     idDocumento: 0,
     digitalizacao,
     numeroDocumento,
     idFornecedor,
-    idFluxo,
   };
 };
 
@@ -600,7 +597,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadesConsumidorasAtivas,
     unidadesMedida,
     usuarios,
-    fluxos,
     unidadesConsumidorasAll,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
@@ -613,7 +609,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadeConsumidoraService.getAllActiveData(),
     unidadeMedidaService.getAllData(),
     usuarioService.getAllData(),
-    fluxoService.getAllData(),
     unidadeConsumidoraService.getAllData(),
   ]);
 
@@ -628,7 +623,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadesConsumidoras: unidadesConsumidorasAtivas ?? unidadesConsumidorasAll ?? [],
     unidadesMedida: unidadesMedida ?? [],
     usuarios: usuarios ?? [],
-    fluxos: fluxos ?? [],
   };
 };
 
@@ -642,6 +636,7 @@ const buildDespesaApiPayload = (payload: DespesaDTO): DespesaDTO => ({
   consumoPrevisto: Number(payload.consumoPrevisto ?? payload.valorPrevisto ?? 0),
   consumoReal: Number(payload.consumoReal ?? 0),
   dataVencimento: payload.dataVencimento ?? "",
+  dataPagamento: payload.dataPagamento ?? undefined,
   status: Number(payload.status ?? payload.situacao ?? SITUACAO_ATIVO),
   idUsuario: Number(payload.idUsuario),
   idUnidadeConsumidora: Number(payload.idUnidadeConsumidora),
@@ -786,16 +781,86 @@ export const useDespesasDashboard = () => {
     [dashboardData, refetch]
   );
 
+  // Pagamento da despesa: exige comprovante, cria documento e define status=2 com dataPagamento.
+  const updateDespesaPagamento = useCallback(
+    async (
+      id: number,
+      overrides: { valorPago?: number; consumoReal?: number; documento?: unknown }
+    ) => {
+      const currentDespesa = dashboardData.despesas.find((despesa) => despesa.id === id);
+      if (!currentDespesa) {
+        throw new Error(`Despesa ${id} nao encontrada.`);
+      }
+
+      const documentoValue = overrides.documento as {
+        digitalizacao?: string;
+        fileName?: string;
+        fileType?: string;
+        fileSize?: number;
+      } | null;
+      const digitalizacao = documentoValue?.digitalizacao?.trim() ?? "";
+      if (!digitalizacao) {
+        throw new Error("Anexe o comprovante de pagamento.");
+      }
+
+      const numeroDocumento = digitsOnly(currentDespesa.numeroDocumento ?? "");
+      if (!numeroDocumento) {
+        throw new Error("Numero do documento deve conter apenas numeros.");
+      }
+
+      // Resolve fornecedor pela UC quando a despesa nao traz esse campo.
+      const unidadeConsumidora = dashboardData.unidadesConsumidoras.find(
+        (item) => item.id === currentDespesa.idUnidadeConsumidora
+      );
+      const idFornecedor = Number(
+        currentDespesa.idFornecedor ?? unidadeConsumidora?.idFornecedor ?? 0
+      );
+      if (!Number.isFinite(idFornecedor) || idFornecedor <= 0) {
+        throw new Error("Fornecedor da despesa nao foi identificado.");
+      }
+
+      await documentoService.createData({
+        idDocumento: 0,
+        digitalizacao,
+        numeroDocumento: Number(numeroDocumento),
+        idFornecedor,
+      });
+
+      const today = new Date().toISOString().slice(0, 10);
+      const payload = buildDespesaPayload(
+        {
+          status: 2,
+          situacao: 2,
+          valorPago: overrides.valorPago ?? 0,
+          consumoReal: overrides.consumoReal ?? 0,
+          dataPagamento: today,
+        },
+        dashboardData,
+        currentDespesa
+      );
+
+      await despesaService.updateData(
+        id,
+        buildDespesaApiPayload({
+          ...payload,
+          id,
+        })
+      );
+      await refetch();
+    },
+    [dashboardData, refetch]
+  );
+
+  // A API nao expõe DELETE para despesas; exibe mensagem clara.
   const removeDespesa = useCallback(
     async (id: number) => {
       try {
         await despesaService.delete(id);
       } catch (error) {
         if (isHttpNotFoundError(error) || isHttpMethodNotAllowedError(error)) {
-          await despesaService.alterarSituacao(id);
-        } else {
-          throw error;
+          throw new Error("Exclusao de despesa nao esta disponivel na API.");
         }
+        throw error;
       }
 
       await refetch();
@@ -817,7 +882,6 @@ export const useDespesasDashboard = () => {
       unidadesConsumidoras: dashboardData.unidadesConsumidoras,
       unidadesMedida: dashboardData.unidadesMedida,
       usuarios: dashboardData.usuarios,
-      fluxos: dashboardData.fluxos,
       summary,
       loading,
       error,
@@ -828,6 +892,7 @@ export const useDespesasDashboard = () => {
       refetch,
       createDespesa,
       updateDespesa,
+      updateDespesaPagamento,
       removeDespesa,
     }),
     [
@@ -843,7 +908,6 @@ export const useDespesasDashboard = () => {
       dashboardData.unidadesConsumidoras,
       dashboardData.unidadesMedida,
       dashboardData.usuarios,
-      dashboardData.fluxos,
       summary,
       loading,
       error,
@@ -853,6 +917,7 @@ export const useDespesasDashboard = () => {
       refetch,
       createDespesa,
       updateDespesa,
+      updateDespesaPagamento,
       removeDespesa,
     ]
   );

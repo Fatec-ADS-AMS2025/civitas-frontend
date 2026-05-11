@@ -1,17 +1,21 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { TableExportOptions } from "@/components/Table/export-types";
+import Button from "@/components/button";
 import { exportTableData, getSelectedColumns } from "@/components/Table/export-utils";
+import Modal from "@/components/modal";
 import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
 import { type DespesaDashboardRow, useDespesasDashboard } from "@/hooks/useDespesasDashboard";
 import { showToast } from "@/hooks/useToast";
+import { normalizeDateInput } from "@/global/formPayload";
 import type {
   DespesaResponsavelOption,
   DespesaUcOption,
 } from "./_components/DespesaForm";
 import {
   DespesaCrudModals,
+  DespesaPagamentoModal,
   DespesasExportModal,
   DespesasFiltros,
   DespesasLoadingState,
@@ -35,6 +39,10 @@ export default function Page() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [viewingDespesa, setViewingDespesa] = useState<DespesaDashboardRow | null>(null);
+  const [paymentDespesa, setPaymentDespesa] = useState<DespesaDashboardRow | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isOverdueWarningOpen, setIsOverdueWarningOpen] = useState(false);
+  const overdueWarningShownRef = useRef(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -59,7 +67,7 @@ export default function Page() {
     resolvedOrcamentoOptions: viewModel.resolvedOrcamentoOptions,
     resolvedFornecedorOptions: viewModel.resolvedFornecedorOptions,
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
-    resolvedFluxoOptions: viewModel.resolvedFluxoOptions,
+    resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
     isOptionsLoading: dashboard.loading,
     hideDocumento: true,
   });
@@ -136,6 +144,14 @@ export default function Page() {
     dashboard.unidadesConsumidoras,
     dashboard.unidadesMedida,
   ]);
+
+  const paymentUnidadeMedidaNome = useMemo(() => {
+    if (!paymentDespesa?.raw.idUnidadeConsumidora) return undefined;
+
+    return unidadeConsumidoraOptions.find(
+      (item) => item.id === paymentDespesa.raw.idUnidadeConsumidora
+    )?.unidadeMedidaNome;
+  }, [paymentDespesa, unidadeConsumidoraOptions]);
 
   const usuarioOptions = useMemo<DespesaResponsavelOption[]>(
     () =>
@@ -224,6 +240,36 @@ export default function Page() {
     }
   };
 
+  const handleOpenPaymentModal = (despesa: DespesaDashboardRow) => {
+    setPaymentDespesa(despesa);
+    setIsPaymentModalOpen(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+    setPaymentDespesa(null);
+  };
+
+  // Modal de pagamento mapeia apenas valores pagos + comprovante para o fluxo dedicado.
+  const handlePaymentSubmit = async (values: {
+    valorPago: number | "";
+    consumoReal: number | "";
+    documento: unknown;
+  }) => {
+    if (!paymentDespesa) return;
+
+    try {
+      await dashboard.updateDespesaPagamento(paymentDespesa.id, {
+        valorPago: values.valorPago === "" ? 0 : Number(values.valorPago),
+        consumoReal: values.consumoReal === "" ? 0 : Number(values.consumoReal),
+        documento: values.documento,
+      });
+      handleClosePaymentModal();
+    } catch (submitError) {
+      showToast(getSubmitErrorMessage(submitError, "Erro ao atualizar pagamento."), "error");
+    }
+  };
+
   const handleExport = async ({ outputType, scope, selectedColumnIds }: TableExportOptions) => {
     const rows = scope === "all" ? viewModel.allExportRows : viewModel.filteredExportRows;
     const selectedColumns = getSelectedColumns(DESPESAS_EXPORT_COLUMNS, selectedColumnIds);
@@ -246,6 +292,23 @@ export default function Page() {
       setIsExporting(false);
     }
   };
+
+  const hasOverdue = dashboard.despesas.some((despesa) => {
+    if (despesa.situacao === 3) return true;
+    if (despesa.situacao === 2) return false;
+    const dueTimestamp = getDespesaDueTimestamp(despesa);
+    const todayTimestamp = getDateTimestamp(new Date().toISOString());
+    if (dueTimestamp === null || todayTimestamp === null) return false;
+    return dueTimestamp < todayTimestamp;
+  });
+
+  useEffect(() => {
+    if (dashboard.loading || overdueWarningShownRef.current) return;
+    overdueWarningShownRef.current = true;
+    if (hasOverdue) {
+      setIsOverdueWarningOpen(true);
+    }
+  }, [dashboard.loading, hasOverdue]);
 
   if (dashboard.loading && dashboard.filteredDespesas.length === 0 && !dashboard.error) {
     return <DespesasLoadingState />;
@@ -284,6 +347,7 @@ export default function Page() {
         onView={setViewingDespesa}
         onEdit={setEditingDespesa}
         onDelete={(despesa) => void handleDelete(despesa)}
+        onPayment={handleOpenPaymentModal}
       />
 
       <DespesaCrudModals
@@ -295,11 +359,41 @@ export default function Page() {
         setViewingDespesa={setViewingDespesa}
         unidadesConsumidoras={unidadeConsumidoraOptions}
         usuarios={usuarioOptions}
-        fluxos={viewModel.resolvedFluxoOptions}
         viewFields={despesaViewFields}
         onCreateSubmit={handleCreateSubmit}
         onEditSubmit={handleEditSubmit}
       />
+
+        <DespesaPagamentoModal
+          open={isPaymentModalOpen}
+          despesa={paymentDespesa}
+          unidadeMedidaNome={paymentUnidadeMedidaNome}
+          onClose={handleClosePaymentModal}
+          onConfirm={handlePaymentSubmit}
+        />
+
+      {isOverdueWarningOpen ? (
+        <Modal value={isOverdueWarningOpen} setValue={setIsOverdueWarningOpen}>
+          <div className="flex h-full flex-col gap-6">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+                Aviso automatico
+              </p>
+              <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">
+                Despesas vencidas encontradas
+              </h3>
+              <p className="mt-2 text-sm text-[var(--foreground-muted)]">
+                Existem despesas atrasadas. Revise os lancamentos pendentes de pagamento.
+              </p>
+            </div>
+            <div className="flex justify-end">
+              <Button type="button" onClick={() => setIsOverdueWarningOpen(false)}>
+                Entendi
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
 
       <DespesasExportModal
         open={isExportModalOpen}
@@ -315,3 +409,21 @@ export default function Page() {
 
 const getSubmitErrorMessage = (error: unknown, fallback: string) =>
   error instanceof Error ? error.message : fallback;
+
+const getDateTimestamp = (value?: string | null): number | null => {
+  const normalizedDate = normalizeDateInput(value ?? undefined);
+  if (!normalizedDate) return null;
+
+  const [year, month, day] = normalizedDate.split("-").map(Number);
+  const timestamp = new Date(year, month - 1, day).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
+};
+
+const getDespesaDueTimestamp = (despesa: DespesaDashboardRow): number | null => {
+  return (
+    getDateTimestamp(despesa.raw.dataVencimento) ??
+    getDateTimestamp(despesa.raw.dataEmissao) ??
+    getDateTimestamp(despesa.raw.dataEmicao) ??
+    getDateTimestamp(despesa.raw.data)
+  );
+};

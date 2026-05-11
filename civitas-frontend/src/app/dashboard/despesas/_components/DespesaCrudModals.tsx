@@ -5,7 +5,6 @@ import Modal from "@/components/modal";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { buildDespesaFormObject } from "../despesas.utils";
 import DespesaForm, {
-  type DespesaFluxoOption,
   type DespesaResponsavelOption,
   type DespesaUcOption,
 } from "./DespesaForm";
@@ -19,7 +18,6 @@ type DespesaCrudModalsProps = {
   setViewingDespesa: Dispatch<SetStateAction<DespesaDashboardRow | null>>;
   unidadesConsumidoras: DespesaUcOption[];
   usuarios: DespesaResponsavelOption[];
-  fluxos: DespesaFluxoOption[];
   viewFields: ModalFieldConfig[];
   onCreateSubmit: (formData: Record<string, unknown>) => Promise<void>;
   onEditSubmit: (formData: Record<string, unknown>) => Promise<void>;
@@ -34,7 +32,6 @@ export default function DespesaCrudModals({
   setViewingDespesa,
   unidadesConsumidoras,
   usuarios,
-  fluxos,
   viewFields,
   onCreateSubmit,
   onEditSubmit,
@@ -47,7 +44,6 @@ export default function DespesaCrudModals({
             mode="create"
             ucs={unidadesConsumidoras}
             usuarios={usuarios}
-            fluxos={fluxos}
             onCancel={() => setIsCreateModalOpen(false)}
             onConfirm={onCreateSubmit}
           />
@@ -60,7 +56,6 @@ export default function DespesaCrudModals({
             mode="edit"
             ucs={unidadesConsumidoras}
             usuarios={usuarios}
-            fluxos={fluxos}
             initialValues={buildDespesaFormObject(editingDespesa)}
             onCancel={() => setEditingDespesa(null)}
             onConfirm={onEditSubmit}
