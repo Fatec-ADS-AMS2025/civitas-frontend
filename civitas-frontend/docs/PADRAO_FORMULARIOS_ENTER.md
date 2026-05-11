@@ -54,11 +54,6 @@ Garantir comportamento consistente e acessivel para envio de formularios no fron
 - "Cadastrar", "Filtrar" e "Limpar" sao `type="button"`.
 - Modal segue fora do `form` para evitar aninhamento de formularios.
 
-### `src/components/Table/searchbar_Forne.tsx`
-- Mesmo padrao do SearchBar principal.
-- `onSearch` acionado por submit (Enter ou botao "Buscar").
-- `clearFilters` limpa e reaplica busca sem gambiarras de teclado.
-
 ## Excecoes intencionais
 
 - Escape no `Form` (modal CRUD): cancela/fecha formulario.

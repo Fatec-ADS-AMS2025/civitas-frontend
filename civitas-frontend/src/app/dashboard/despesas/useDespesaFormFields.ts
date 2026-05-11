@@ -356,7 +356,6 @@ export function useDespesaFormFields({
       resolvedTipoCodigoOptions,
       resolvedTipoDespesaOptions,
       resolvedUsuarioOptions,
-      resolvedUnidadeConsumidoraOptions,
       isOptionsLoading,
       resolveDocumento,
       resolveTipoCodigo,

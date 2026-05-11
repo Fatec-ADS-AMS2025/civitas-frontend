@@ -206,7 +206,6 @@ export default function Form({
     const visibleFields = resolvedFields.filter((field) => !field.hidden && !fieldsToHide.includes(field.key))
 
     const isViewMode = mode === 'view'
-    const isReadOnlyMode = mode === 'view' || mode === 'delete'
 
     useEffect(() => {
         setErrors({})

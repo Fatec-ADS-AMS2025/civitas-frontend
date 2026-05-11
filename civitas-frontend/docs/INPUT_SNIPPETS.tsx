@@ -77,7 +77,7 @@
 import { useState } from 'react';
 import { Input } from '@/components/Input';
 
-function FormularioExemplo() {
+export function FormularioExemplo() {
   const [dados, setDados] = useState({
     nome: '',
     email: '',

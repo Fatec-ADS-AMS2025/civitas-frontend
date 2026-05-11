@@ -7,7 +7,6 @@ import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
-import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 import type UsuarioDTO from "@/models/usuario";
 import type { SelectOption } from "./despesas.types";
 import { ensureOption, formatCurrency } from "./despesas.utils";
@@ -159,18 +158,6 @@ export function useDespesasOptions({
           : "Usuario atual"
       ),
     [activeModalDespesa, usuarioOptions]
-  );
-
-  const resolvedUnidadeConsumidoraOptions = useMemo(
-    () =>
-      ensureOption(
-        unidadeConsumidoraOptions,
-        activeModalDespesa?.raw.idUnidadeConsumidora,
-        activeModalDespesa?.raw.uc
-          ? `Unidade ${activeModalDespesa.raw.uc}`
-          : "Unidade consumidora atual"
-      ),
-    [activeModalDespesa, unidadeConsumidoraOptions]
   );
 
   return {
