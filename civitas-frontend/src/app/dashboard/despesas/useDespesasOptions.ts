@@ -10,6 +10,7 @@ import type TipoDespesaDTO from "@/models/tipoDespesa";
 import type UsuarioDTO from "@/models/usuario";
 import type { SelectOption } from "./despesas.types";
 import { ensureOption, formatCurrency } from "./despesas.utils";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 
 type UseDespesasOptionsInput = {
   tipoCodigos: TipoCodigoDTO[];
@@ -158,6 +159,18 @@ export function useDespesasOptions({
           : "Usuario atual"
       ),
     [activeModalDespesa, usuarioOptions]
+  );
+
+  const resolvedUnidadeConsumidoraOptions = useMemo(
+    () =>
+      ensureOption(
+        unidadeConsumidoraOptions,
+        activeModalDespesa?.raw.idUnidadeConsumidora,
+        activeModalDespesa?.raw.idUnidadeConsumidora
+          ? `Unidade consumidora #${activeModalDespesa.raw.idUnidadeConsumidora}`
+          : "Unidade consumidora atual"
+      ),
+    [activeModalDespesa, unidadeConsumidoraOptions]
   );
 
   return {

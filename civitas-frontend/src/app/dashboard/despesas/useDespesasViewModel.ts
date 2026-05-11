@@ -12,6 +12,7 @@ import type OrcamentoDTO from "@/models/orcamento";
 import type SecretariaDTO from "@/models/secretaria";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 import type UsuarioDTO from "@/models/usuario";
 import { buildFinanceRelations } from "@/lib/financeiro-relations";
 import { MAX_EXPLORER_ITEMS } from "./despesas.constants";
