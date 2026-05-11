@@ -27,6 +27,7 @@ import {
   DESPESAS_EXPORT_TITLE,
   INITIAL_FILTER_FORM,
 } from "./despesas.constants";
+import { formatCurrency } from "./despesas.utils";
 import { useDespesaFormFields } from "./useDespesaFormFields";
 import { useDespesasViewModel } from "./useDespesasViewModel";
 
@@ -207,6 +208,17 @@ export default function Page() {
     dashboard.clearFilters();
   };
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      dashboard.applyFilters({
+        ...filterForm,
+        search: filterForm.search.trim(),
+      });
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [dashboard.applyFilters, filterForm]);
+
   const handleCreateSubmit = async (formData: Record<string, unknown>) => {
     try {
       await dashboard.createDespesa(formData);
@@ -293,14 +305,30 @@ export default function Page() {
     }
   };
 
-  const hasOverdue = dashboard.despesas.some((despesa) => {
-    if (despesa.situacao === 3) return true;
-    if (despesa.situacao === 2) return false;
-    const dueTimestamp = getDespesaDueTimestamp(despesa);
-    const todayTimestamp = getDateTimestamp(new Date().toISOString());
-    if (dueTimestamp === null || todayTimestamp === null) return false;
-    return dueTimestamp < todayTimestamp;
-  });
+  const overdueDespesas = useMemo(
+    () => dashboard.despesas.filter(isDespesaOverdueForWarning),
+    [dashboard.despesas]
+  );
+  const overdueTotal = useMemo(
+    () => overdueDespesas.reduce((total, despesa) => total + despesa.valor, 0),
+    [overdueDespesas]
+  );
+  const hasOverdue = overdueDespesas.length > 0;
+
+  const handleShowOverdueDespesas = () => {
+    const overdueFilter = {
+      ...INITIAL_FILTER_FORM,
+      vencimento: "atrasadas",
+    };
+
+    setFilterForm(overdueFilter);
+    dashboard.applyFilters(overdueFilter);
+    setIsOverdueWarningOpen(false);
+
+    window.requestAnimationFrame(() => {
+      listSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   useEffect(() => {
     if (dashboard.loading || overdueWarningShownRef.current) return;
@@ -321,6 +349,10 @@ export default function Page() {
         setFilterForm={setFilterForm}
         tipoCodigoOptions={viewModel.tipoCodigoOptions}
         tipoDespesaOptions={viewModel.tipoDespesaOptions}
+        instituicaoOptions={viewModel.instituicaoOptions}
+        secretariaOptions={viewModel.secretariaOptions}
+        filteredCount={dashboard.filteredDespesas.length}
+        totalCount={dashboard.despesas.length}
         onApply={handleApplyFilters}
         onClear={handleClearFilters}
         onRefresh={() => void dashboard.refetch()}
@@ -375,20 +407,95 @@ export default function Page() {
       {isOverdueWarningOpen ? (
         <Modal value={isOverdueWarningOpen} setValue={setIsOverdueWarningOpen}>
           <div className="flex h-full flex-col gap-6">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-                Aviso automatico
-              </p>
-              <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">
-                Despesas vencidas encontradas
-              </h3>
-              <p className="mt-2 text-sm text-[var(--foreground-muted)]">
-                Existem despesas atrasadas. Revise os lancamentos pendentes de pagamento.
-              </p>
+            <div className="rounded-sm border border-[var(--tone-danger-border)] bg-[var(--tone-danger-bg)] p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--surface-elevated)] text-[var(--tone-danger-text)]">
+                  <span className="material-symbols-outlined !text-[28px]">
+                    notification_important
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--tone-danger-text)]">
+                    Aviso automatico
+                  </p>
+                  <h3 className="mt-1.5 text-2xl font-semibold text-[var(--foreground)]">
+                    Existem despesas vencidas
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                    Revise os lancamentos pendentes antes de continuar a rotina de
+                    pagamento. O filtro de vencidas usa status atrasado e tambem
+                    datas vencidas que ainda estao como a pagar.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-end">
-              <Button type="button" onClick={() => setIsOverdueWarningOpen(false)}>
-                Entendi
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
+                <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
+                  Quantidade
+                </span>
+                <strong className="mt-2 block text-3xl text-[var(--secundary-1)]">
+                  {overdueDespesas.length}
+                </strong>
+              </div>
+              <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
+                <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
+                  Valor previsto
+                </span>
+                <strong className="mt-2 block text-3xl text-[var(--secundary-1)]">
+                  {formatCurrency(overdueTotal)}
+                </strong>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h4 className="text-sm font-semibold text-[var(--foreground)]">
+                  Primeiras despesas vencidas
+                </h4>
+                <span className="text-xs text-[var(--foreground-soft)]">
+                  {Math.min(overdueDespesas.length, 4)} exibida
+                  {Math.min(overdueDespesas.length, 4) === 1 ? "" : "s"}
+                </span>
+              </div>
+              <ul className="divide-y divide-[var(--divider)] rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)]">
+                {overdueDespesas.slice(0, 4).map((despesa) => (
+                  <li
+                    key={despesa.id}
+                    className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div>
+                      <span className="text-sm font-semibold text-[var(--foreground)]">
+                        {despesa.registro} - {despesa.descricao}
+                      </span>
+                      <p className="text-xs text-[var(--foreground-soft)]">
+                        {despesa.instituicaoNome} | {despesa.secretariaNome}
+                      </p>
+                    </div>
+                    <div className="text-left sm:text-right">
+                      <span className="block text-sm font-semibold text-[var(--tone-danger-text)]">
+                        {despesa.valorFormatado}
+                      </span>
+                      <span className="text-xs text-[var(--foreground-soft)]">
+                        Venc.: {formatDespesaWarningDate(despesa)}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => setIsOverdueWarningOpen(false)}
+              >
+                Fechar
+              </Button>
+              <Button type="button" onClick={handleShowOverdueDespesas}>
+                Ver despesas vencidas
               </Button>
             </div>
           </div>
@@ -426,4 +533,28 @@ const getDespesaDueTimestamp = (despesa: DespesaDashboardRow): number | null => 
     getDateTimestamp(despesa.raw.dataEmicao) ??
     getDateTimestamp(despesa.raw.data)
   );
+};
+
+const isDespesaOverdueForWarning = (despesa: DespesaDashboardRow): boolean => {
+  if (despesa.situacao === 3) return true;
+  if (despesa.situacao === 2) return false;
+
+  const dueTimestamp = getDespesaDueTimestamp(despesa);
+  const todayTimestamp = getDateTimestamp(new Date().toISOString());
+  if (dueTimestamp === null || todayTimestamp === null) return false;
+  return dueTimestamp < todayTimestamp;
+};
+
+const formatDespesaWarningDate = (despesa: DespesaDashboardRow): string => {
+  const normalizedDate =
+    normalizeDateInput(despesa.raw.dataVencimento) ??
+    normalizeDateInput(despesa.raw.dataEmissao) ??
+    normalizeDateInput(despesa.raw.dataEmicao) ??
+    normalizeDateInput(despesa.raw.data);
+
+  if (!normalizedDate) return "Nao informado";
+
+  const [year, month, day] = normalizedDate.split("-");
+  if (!year || !month || !day) return normalizedDate;
+  return `${day}/${month}/${year}`;
 };

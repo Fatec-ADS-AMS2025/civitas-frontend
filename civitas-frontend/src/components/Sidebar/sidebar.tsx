@@ -41,7 +41,7 @@ export default function Sidebar() {
     <>
       <aside
         aria-label="Sidebar"
-        className="group hidden h-[calc(100vh-1.5rem)] w-[78px] shrink-0 select-none flex-col justify-between overflow-hidden rounded-sm border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] transition-all duration-200 ease-out sm:fixed sm:left-3 sm:top-3 sm:z-[110] sm:flex sm:hover:w-[256px] sm:focus-within:w-[256px]"
+        className="group hidden h-[calc(100vh-1.5rem)] w-[78px] shrink-0 select-none flex-col justify-between overflow-hidden rounded-sm border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] transition-all duration-200 ease-out sm:fixed sm:left-3 sm:top-3 sm:z-[110] sm:flex sm:hover:w-[256px]"
         style={{ boxShadow: "var(--sidebar-shadow)" }}
       >
         <div className="flex min-h-0 flex-1 flex-col gap-4 px-3 pb-3 pt-5">
@@ -49,7 +49,7 @@ export default function Sidebar() {
             <div className="flex h-10 w-11 items-center justify-center overflow-hidden rounded-sm bg-transparent">
               <img src="/logo.png" alt="Logo Civitas" className="size-full object-contain" />
             </div>
-            <div className="font-title w-0 overflow-hidden whitespace-nowrap text-xl font-semibold text-[var(--sidebar-text)] opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
+            <div className="font-title w-0 overflow-hidden whitespace-nowrap text-xl font-semibold text-[var(--sidebar-text)] hidden transition-all duration-200 sm:group-hover:w-auto sm:group-hover:flex sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
               Civitas
             </div>
           </div>

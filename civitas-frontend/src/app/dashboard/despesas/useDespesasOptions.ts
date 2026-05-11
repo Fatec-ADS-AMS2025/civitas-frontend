@@ -5,6 +5,7 @@ import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
+import type SecretariaDTO from "@/models/secretaria";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
 import type UsuarioDTO from "@/models/usuario";
@@ -17,6 +18,7 @@ type UseDespesasOptionsInput = {
   tiposDespesa: TipoDespesaDTO[];
   orcamentos: OrcamentoDTO[];
   instituicoes: InstituicaoDTO[];
+  secretarias: SecretariaDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
@@ -28,6 +30,7 @@ export function useDespesasOptions({
   tiposDespesa,
   orcamentos,
   instituicoes,
+  secretarias,
   fornecedores,
   usuarios,
   unidadesConsumidoras,
@@ -55,6 +58,15 @@ export function useDespesasOptions({
   const instituicaoOptions = useMemo<SelectOption[]>(
     () => instituicoes.map((item) => ({ value: item.id, label: item.nome })),
     [instituicoes]
+  );
+
+  const secretariaOptions = useMemo<SelectOption[]>(
+    () =>
+      secretarias.map((item) => ({
+        value: item.idSecretaria,
+        label: item.nome || item.descricao || `Secretaria #${item.idSecretaria}`,
+      })),
+    [secretarias]
   );
 
   const fornecedorOptions = useMemo<SelectOption[]>(
@@ -176,6 +188,8 @@ export function useDespesasOptions({
   return {
     tipoDespesaOptions,
     tipoCodigoOptions,
+    instituicaoOptions,
+    secretariaOptions,
     resolvedTipoDespesaOptions,
     resolvedTipoCodigoOptions,
     resolvedInstituicaoOptions,
