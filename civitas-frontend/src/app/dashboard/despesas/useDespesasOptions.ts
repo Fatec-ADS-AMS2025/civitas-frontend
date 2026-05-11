@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
-import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -20,7 +19,6 @@ type UseDespesasOptionsInput = {
   instituicoes: InstituicaoDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
-  fluxos: FluxoDTO[];
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   activeModalDespesa: DespesaDashboardRow | null;
 };
@@ -32,7 +30,6 @@ export function useDespesasOptions({
   instituicoes,
   fornecedores,
   usuarios,
-  fluxos,
   unidadesConsumidoras,
   activeModalDespesa,
 }: UseDespesasOptionsInput) {
@@ -72,15 +69,6 @@ export function useDespesasOptions({
   const usuarioOptions = useMemo<SelectOption[]>(
     () => usuarios.map((item) => ({ value: item.id, label: item.nome })),
     [usuarios]
-  );
-
-  const fluxoOptions = useMemo<SelectOption[]>(
-    () =>
-      fluxos.map((fluxo) => ({
-        value: fluxo.idFluxo,
-        label: `#${String(fluxo.idFluxo).padStart(3, "0")} - Status ${fluxo.status} - Consumo ${fluxo.consumo}`,
-      })),
-    [fluxos]
   );
 
   const unidadeConsumidoraOptions = useMemo<SelectOption[]>(
@@ -194,7 +182,6 @@ export function useDespesasOptions({
     resolvedOrcamentoOptions,
     resolvedFornecedorOptions,
     resolvedUsuarioOptions,
-    resolvedFluxoOptions: fluxoOptions,
     resolvedUnidadeConsumidoraOptions,
   };
 }

@@ -67,7 +67,6 @@ export default function Page() {
     resolvedOrcamentoOptions: viewModel.resolvedOrcamentoOptions,
     resolvedFornecedorOptions: viewModel.resolvedFornecedorOptions,
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
-    resolvedFluxoOptions: viewModel.resolvedFluxoOptions,
     resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
     isOptionsLoading: dashboard.loading,
     hideDocumento: true,
@@ -145,6 +144,14 @@ export default function Page() {
     dashboard.unidadesConsumidoras,
     dashboard.unidadesMedida,
   ]);
+
+  const paymentUnidadeMedidaNome = useMemo(() => {
+    if (!paymentDespesa?.raw.idUnidadeConsumidora) return undefined;
+
+    return unidadeConsumidoraOptions.find(
+      (item) => item.id === paymentDespesa.raw.idUnidadeConsumidora
+    )?.unidadeMedidaNome;
+  }, [paymentDespesa, unidadeConsumidoraOptions]);
 
   const usuarioOptions = useMemo<DespesaResponsavelOption[]>(
     () =>
@@ -352,18 +359,18 @@ export default function Page() {
         setViewingDespesa={setViewingDespesa}
         unidadesConsumidoras={unidadeConsumidoraOptions}
         usuarios={usuarioOptions}
-        fluxos={viewModel.resolvedFluxoOptions}
         viewFields={despesaViewFields}
         onCreateSubmit={handleCreateSubmit}
         onEditSubmit={handleEditSubmit}
       />
 
-      <DespesaPagamentoModal
-        open={isPaymentModalOpen}
-        despesa={paymentDespesa}
-        onClose={handleClosePaymentModal}
-        onConfirm={handlePaymentSubmit}
-      />
+        <DespesaPagamentoModal
+          open={isPaymentModalOpen}
+          despesa={paymentDespesa}
+          unidadeMedidaNome={paymentUnidadeMedidaNome}
+          onClose={handleClosePaymentModal}
+          onConfirm={handlePaymentSubmit}
+        />
 
       {isOverdueWarningOpen ? (
         <Modal value={isOverdueWarningOpen} setValue={setIsOverdueWarningOpen}>

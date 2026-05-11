@@ -32,11 +32,6 @@ export type DespesaResponsavelOption = {
   label: string;
 };
 
-export type DespesaFluxoOption = {
-  value: number | string;
-  label: string;
-};
-
 export type DespesaFormMode = "create" | "edit" | "view";
 
 export type DespesaFormValues = Record<string, unknown> & {
@@ -44,7 +39,6 @@ export type DespesaFormValues = Record<string, unknown> & {
   uc: string;
   numeroDocumento: string;
   documento: DocumentoFieldValue | "";
-  idFluxo: number | "";
   codigo: string;
   idTipoCodigo: number | "";
   idTipoDespesa: number | "";
@@ -68,17 +62,10 @@ type DespesaFormProps = {
   mode: DespesaFormMode;
   ucs: DespesaUcOption[];
   usuarios: DespesaResponsavelOption[];
-  fluxos: DespesaFluxoOption[];
   initialValues?: DespesaFormInitialValues;
   onCancel: () => void;
   onConfirm?: (values: DespesaFormValues) => Promise<void> | void;
 };
-
-const STATUS_OPTIONS = [
-  { value: 1, label: "A pagar" },
-  { value: 2, label: "Paga" },
-  { value: 3, label: "Atrasada" },
-];
 
 const getTodayDate = () => new Date().toISOString().slice(0, 10);
 
@@ -102,7 +89,6 @@ const buildInitialFormValues = (
     uc: String(initialValues?.uc ?? ""),
     numeroDocumento: String(initialValues?.numeroDocumento ?? ""),
     documento: (initialValues?.documento as DocumentoFieldValue | "") ?? "",
-    idFluxo: toNumberOrEmpty(initialValues?.idFluxo),
     codigo: String(initialValues?.codigo ?? ""),
     idTipoCodigo: toNumberOrEmpty(initialValues?.idTipoCodigo),
     idTipoDespesa: toNumberOrEmpty(initialValues?.idTipoDespesa),
@@ -148,9 +134,6 @@ const resolveDocumentoValue = (value: unknown): DocumentoFieldValue | null => {
   return value as DocumentoFieldValue;
 };
 
-const selectClassName =
-  "w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]";
-
 // ---------------------------------------------------------------------------
 // Subcomponentes internos
 // ---------------------------------------------------------------------------
@@ -187,7 +170,6 @@ export default function DespesaForm({
   mode,
   ucs,
   usuarios,
-  fluxos,
   initialValues,
   onCancel,
   onConfirm,
@@ -336,10 +318,6 @@ export default function DespesaForm({
       if (!documentoValue) {
         nextErrors.documento = "Selecione um arquivo e aguarde a conversao para Base64.";
       }
-
-      if (!Number(formValues.idFluxo)) {
-        nextErrors.idFluxo = "Selecione um fluxo valido.";
-      }
     }
 
     if (String(formValues.codigo ?? "").trim().length > 100)
@@ -382,7 +360,6 @@ export default function DespesaForm({
           ...documentoValue,
           numeroDocumento: Number(numeroDocumento),
           idFornecedor: Number(selectedUc?.idFornecedor ?? formValues.idFornecedor ?? 0),
-          idFluxo: Number(formValues.idFluxo),
         }
       : formValues.documento;
 
@@ -390,7 +367,6 @@ export default function DespesaForm({
       ...formValues,
       documento: resolvedDocumento,
       numeroDocumento,
-      idFluxo: formValues.idFluxo,
       idUsuario: Number(resolvedResponsibleUserId),
       valorPago: isCreateMode ? 0 : formValues.valorPago,
       consumoReal: isCreateMode ? 0 : formValues.consumoReal,
@@ -635,151 +611,23 @@ export default function DespesaForm({
                     />
 
                     {!isViewMode ? (
-                      <div className="col-span-2 grid gap-3 md:grid-cols-2">
-                        <div>
-                          <DocumentoField
-                            field={documentoField}
-                            value={formValues.documento}
-                            error={errors.documento}
-                            onChange={(field, value) =>
-                              handleValueChange(
-                                field.key as "documento",
-                                value as DocumentoFieldValue | ""
-                              )
-                            }
-                            disabled={isViewMode}
-                            required={isCreateMode}
-                            label="Documento"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
-                            Fluxo do documento
-                            {!isViewMode && (isCreateMode || formValues.documento) && (
-                              <span className="ml-1 text-red-500">*</span>
-                            )}
-                          </label>
-                          <select
-                            value={formValues.idFluxo}
-                            disabled={isViewMode}
-                            className={selectClassName}
-                            onChange={(e) =>
-                              handleValueChange("idFluxo", e.target.value === "" ? "" : Number(e.target.value))
-                            }
-                          >
-                            <option value="">Selecione o fluxo</option>
-                            {fluxos.map((fluxo) => (
-                              <option key={fluxo.value} value={fluxo.value}>
-                                {fluxo.label}
-                              </option>
-                            ))}
-                          </select>
-                          {errors.idFluxo && (
-                            <p className="text-sm font-medium text-[#C23D3D]">{errors.idFluxo}</p>
-                          )}
-                        </div>
+                      <div className="col-span-2">
+                        <DocumentoField
+                          field={documentoField}
+                          value={formValues.documento}
+                          error={errors.documento}
+                          onChange={(field, value) =>
+                            handleValueChange(
+                              field.key as "documento",
+                              value as DocumentoFieldValue | ""
+                            )
+                          }
+                          disabled={isViewMode}
+                          required={isCreateMode}
+                          label="Documento"
+                        />
                       </div>
                     ) : null}
-
-                    {isCreateMode ? (
-                      <div className="col-span-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-                          Definicoes automaticas do cadastro
-                        </p>
-                        <div className="mt-2 space-y-1 text-sm text-[var(--foreground-muted)]">
-                          <p>
-                            Status inicial:{" "}
-                            <span className="font-semibold text-[var(--foreground)]">A pagar</span>
-                          </p>
-                          <p>
-                            Usuario responsavel:{" "}
-                            <span className="font-semibold text-[var(--foreground)]">
-                              {currentAuthUser?.nome ?? "Usuario autenticado"}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <Input
-                          label="Valor pago"
-                          placeholder="0,00"
-                          type="number"
-                          inputMode="decimal"
-                          min="0"
-                          step="0.01"
-                          disabled={isViewMode}
-                          value={formValues.valorPago}
-                          error={errors.valorPago}
-                          onChange={(e) =>
-                            handleValueChange("valorPago", e.target.value === "" ? "" : Number(e.target.value))
-                          }
-                        />
-                        <Input
-                          label="Consumo real"
-                          placeholder="0"
-                          type="number"
-                          inputMode="decimal"
-                          min="0"
-                          step="0.01"
-                          disabled={isViewMode}
-                          value={formValues.consumoReal}
-                          error={errors.consumoReal}
-                          onChange={(e) =>
-                            handleValueChange("consumoReal", e.target.value === "" ? "" : Number(e.target.value))
-                          }
-                        />
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
-                            Usuario responsavel
-                            {!isViewMode && <span className="ml-1 text-red-500">*</span>}
-                          </label>
-                          <select
-                            value={formValues.idUsuario}
-                            disabled={isViewMode}
-                            required={!isViewMode}
-                            className={selectClassName}
-                            onChange={(e) =>
-                              handleValueChange("idUsuario", e.target.value === "" ? "" : Number(e.target.value))
-                            }
-                          >
-                            <option value="">Selecione o usuario</option>
-                            {usuarios.map((u) => (
-                              <option key={u.value} value={u.value}>{u.label}</option>
-                            ))}
-                          </select>
-                          {errors.idUsuario && (
-                            <p className="text-sm font-medium text-[#C23D3D]">{errors.idUsuario}</p>
-                          )}
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-sm font-semibold capitalize tracking-[0.01em] text-[var(--foreground-muted)]">
-                            Status financeiro
-                            {!isViewMode && <span className="ml-1 text-red-500">*</span>}
-                          </label>
-                          <select
-                            value={formValues.situacao}
-                            disabled={isViewMode}
-                            required={!isViewMode}
-                            className={selectClassName}
-                            onChange={(e) =>
-                              handleValueChange("situacao", e.target.value === "" ? "" : Number(e.target.value))
-                            }
-                          >
-                            <option value="">Selecione o status</option>
-                            {STATUS_OPTIONS.map((s) => (
-                              <option key={s.value} value={s.value}>{s.label}</option>
-                            ))}
-                          </select>
-                          {errors.situacao && (
-                            <p className="text-sm font-medium text-[#C23D3D]">{errors.situacao}</p>
-                          )}
-                        </div>
-                      </>
-                    )}
                   </div>
                 </div>
               </div>

@@ -28,6 +28,7 @@ type PaymentTouched = {
 type DespesaPagamentoModalProps = {
   open: boolean;
   despesa: DespesaDashboardRow | null;
+  unidadeMedidaNome?: string;
   onClose: () => void;
   onConfirm: (values: PaymentValues) => Promise<void> | void;
 };
@@ -41,8 +42,8 @@ const toNumberOrEmpty = (value: unknown): number | "" => {
 // Modal de pagamento usa apenas valores pagos + comprovante; status e tratado no submit.
 const buildInitialValues = (despesa: DespesaDashboardRow | null): PaymentValues => {
   return {
-    valorPago: toNumberOrEmpty(despesa?.raw.valorPago ?? 0),
-    consumoReal: toNumberOrEmpty(despesa?.raw.consumoReal ?? 0),
+    valorPago: "",
+    consumoReal: "",
     documento: "",
   };
 };
@@ -68,6 +69,7 @@ const resolveDocumentoValue = (value: unknown): DocumentoFieldValue | null => {
 export default function DespesaPagamentoModal({
   open,
   despesa,
+  unidadeMedidaNome,
   onClose,
   onConfirm,
 }: DespesaPagamentoModalProps) {
@@ -101,8 +103,8 @@ export default function DespesaPagamentoModal({
     event.preventDefault();
 
     const nextErrors: PaymentErrors = {};
-    const currentValorPago = despesa.raw.valorPago ?? 0;
-    const currentConsumoReal = despesa.raw.consumoReal ?? 0;
+    const currentValorPago = despesa.raw.valorPago;
+    const currentConsumoReal = despesa.raw.consumoReal;
     const resolvedValorPago = touched.valorPago
       ? values.valorPago === "" ? "" : Number(values.valorPago)
       : Number(currentValorPago);
@@ -130,6 +132,31 @@ export default function DespesaPagamentoModal({
       documento: documentoValue ?? "",
     });
   };
+
+  // Verificação se já está pago
+  if ((despesa.raw.status) === 2) {
+    return (
+      <Modal value={open} setValue={onClose}>
+        <div className="flex h-full flex-col">
+          <header className="flex-shrink-0 border-b border-[var(--border-soft)] pb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+              Pagamento de despesa
+            </p>
+            <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">
+              Essa despesa já está paga!
+            </h3>
+
+            <p>{despesa.raw.dataPagamento}</p>
+            <p>{despesa.raw.valorPago}</p>
+            {despesa.raw.consumoReal !== undefined && (
+              <p>{despesa.raw.consumoReal}</p>
+            )}
+
+          </header>
+        </div>
+      </Modal>
+    )
+  }
 
   return (
     <Modal value={open} setValue={onClose}>
@@ -169,7 +196,7 @@ export default function DespesaPagamentoModal({
               }}
             />
             <Input
-              label="Consumo real"
+              label={`Consumo real em ${unidadeMedidaNome || "unidade"}`}
               placeholder="0"
               type="number"
               inputMode="decimal"

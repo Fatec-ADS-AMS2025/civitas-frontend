@@ -3,5 +3,5 @@ export default interface DocumentoDTO {
   digitalizacao: string;
   numeroDocumento: number;
   idFornecedor: number;
-  idFluxo: number;
+  idFluxo?: number;
 }

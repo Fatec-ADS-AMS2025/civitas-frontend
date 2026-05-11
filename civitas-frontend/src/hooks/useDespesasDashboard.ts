@@ -5,7 +5,6 @@ import { digitsOnly, normalizeDateInput, toTrimmedText } from "@/global/formPayl
 import { SITUACAO_ATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
 import { documentoService } from "@/hooks/documento";
-import { fluxoService } from "@/hooks/fluxo";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
@@ -18,7 +17,6 @@ import { usuarioService } from "@/hooks/usuario";
 import { authStorage } from "@/lib/auth-storage";
 import type DespesaDTO from "@/models/despesa";
 import type DocumentoDTO from "@/models/documento";
-import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -77,7 +75,6 @@ type DashboardData = {
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   unidadesMedida: UnidadeMedidaDTO[];
   usuarios: UsuarioDTO[];
-  fluxos: FluxoDTO[];
 };
 
 const EMPTY_DASHBOARD_DATA: DashboardData = {
@@ -91,7 +88,6 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   unidadesConsumidoras: [],
   unidadesMedida: [],
   usuarios: [],
-  fluxos: [],
 };
 
 const DEFAULT_FILTERS: DespesasDashboardFilters = {
@@ -253,26 +249,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 const toPositiveNumber = (value: unknown): number => {
   const numericValue = Number(value);
   return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
-};
-
-const resolveSelectedDocumento = (
-  value: unknown
-): Pick<DocumentoDTO, "numeroDocumento" | "idFornecedor"> | null => {
-  if (!isRecord(value)) {
-    return null;
-  }
-
-  const numeroDocumento = Number(value.numeroDocumento);
-  const idFornecedor = Number(value.idFornecedor);
-
-  if (!Number.isFinite(numeroDocumento) || numeroDocumento <= 0) {
-    return null;
-  }
-
-  return {
-    numeroDocumento,
-    idFornecedor: Number.isFinite(idFornecedor) ? idFornecedor : 0,
-  };
 };
 
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
@@ -591,7 +567,6 @@ const buildDocumentoPayload = (
   const idFornecedor = Number(
     formData.documento.idFornecedor ?? despesaPayload.idFornecedor
   );
-  const idFluxo = Number(formData.documento.idFluxo ?? formData.idFluxo);
 
   if (!Number.isFinite(numeroDocumento) || numeroDocumento <= 0) {
     throw new Error("Numero do documento deve conter apenas numeros.");
@@ -601,17 +576,12 @@ const buildDocumentoPayload = (
     throw new Error("Selecione um fornecedor valido para o documento.");
   }
 
-  if (!Number.isFinite(idFluxo) || idFluxo <= 0) {
-    throw new Error("Selecione um fluxo valido para o documento.");
-  }
-
-  // O endpoint de documentos aceita o arquivo como string Base64 e desserializa para byte[] no backend.
+  // O backend atual relaciona documento e despesa pelo numeroDocumento e pelo fornecedor.
   return {
     idDocumento: 0,
     digitalizacao,
     numeroDocumento,
     idFornecedor,
-    idFluxo,
   };
 };
 
@@ -627,7 +597,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadesConsumidorasAtivas,
     unidadesMedida,
     usuarios,
-    fluxos,
     unidadesConsumidorasAll,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
@@ -640,7 +609,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadeConsumidoraService.getAllActiveData(),
     unidadeMedidaService.getAllData(),
     usuarioService.getAllData(),
-    fluxoService.getAllData(),
     unidadeConsumidoraService.getAllData(),
   ]);
 
@@ -655,7 +623,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadesConsumidoras: unidadesConsumidorasAtivas ?? unidadesConsumidorasAll ?? [],
     unidadesMedida: unidadesMedida ?? [],
     usuarios: usuarios ?? [],
-    fluxos: fluxos ?? [],
   };
 };
 
@@ -814,7 +781,7 @@ export const useDespesasDashboard = () => {
     [dashboardData, refetch]
   );
 
-  // Fluxo de pagamento: exige comprovante, cria documento e define status=2 com dataPagamento.
+  // Pagamento da despesa: exige comprovante, cria documento e define status=2 com dataPagamento.
   const updateDespesaPagamento = useCallback(
     async (
       id: number,
@@ -823,11 +790,6 @@ export const useDespesasDashboard = () => {
       const currentDespesa = dashboardData.despesas.find((despesa) => despesa.id === id);
       if (!currentDespesa) {
         throw new Error(`Despesa ${id} nao encontrada.`);
-      }
-
-      const fluxoPago = dashboardData.fluxos.find((fluxo) => Number(fluxo.status) === 2);
-      if (!fluxoPago) {
-        throw new Error("Nenhum fluxo de pagamento disponivel para anexar o comprovante.");
       }
 
       const documentoValue = overrides.documento as {
@@ -862,7 +824,6 @@ export const useDespesasDashboard = () => {
         digitalizacao,
         numeroDocumento: Number(numeroDocumento),
         idFornecedor,
-        idFluxo: fluxoPago.idFluxo,
       });
 
       const today = new Date().toISOString().slice(0, 10);
@@ -921,7 +882,6 @@ export const useDespesasDashboard = () => {
       unidadesConsumidoras: dashboardData.unidadesConsumidoras,
       unidadesMedida: dashboardData.unidadesMedida,
       usuarios: dashboardData.usuarios,
-      fluxos: dashboardData.fluxos,
       summary,
       loading,
       error,
@@ -948,7 +908,6 @@ export const useDespesasDashboard = () => {
       dashboardData.unidadesConsumidoras,
       dashboardData.unidadesMedida,
       dashboardData.usuarios,
-      dashboardData.fluxos,
       summary,
       loading,
       error,
