@@ -42,58 +42,49 @@ export default function SecretariaInstituicoesView({
           Nenhuma instituicao vinculada a esta secretaria.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          {instituicoes.map((instituicao) => (
-            <article
+        <ul className="divide-y divide-[var(--divider)] overflow-hidden rounded-sm border border-[var(--divider)] bg-[var(--surface-subtle)]">
+          {instituicoes.map((instituicao, index) => (
+            <li
               key={instituicao.id}
-              className="rounded-sm border border-[var(--divider)] bg-[var(--surface-subtle)] p-4"
+              className="grid gap-4 px-4 py-4 md:grid-cols-[auto_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] md:items-center"
             >
-              <div className="mb-3 flex flex-col gap-1">
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">
+              <span className="flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] text-sm font-semibold text-[var(--secundary-1)]">
+                {index + 1}
+              </span>
+
+              <div className="min-w-0">
+                <h4 className="truncate text-sm font-semibold text-[var(--foreground)]">
                   {instituicao.nome || "Instituicao sem nome"}
                 </h4>
-                <span className="text-xs text-[var(--foreground-soft)]">
-                  {getSituacaoLabel(instituicao.situacao)}
+                <p className="mt-1 text-xs text-[var(--foreground-soft)]">
+                  {getSituacaoLabel(instituicao.situacao)} | CNPJ:{" "}
+                  {instituicao.cnpj || "Nao informado"}
+                </p>
+              </div>
+
+              <div className="min-w-0">
+                <span className="block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
+                  Localidade
+                </span>
+                <span className="mt-1 block truncate text-sm text-[var(--foreground)]">
+                  {getInstituicaoLocalidade(instituicao)}
                 </span>
               </div>
 
-              <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
-                    CNPJ
-                  </dt>
-                  <dd className="break-words text-[var(--foreground)]">
-                    {instituicao.cnpj || "Nao informado"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
-                    Localidade
-                  </dt>
-                  <dd className="break-words text-[var(--foreground)]">
-                    {getInstituicaoLocalidade(instituicao)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
-                    Telefone
-                  </dt>
-                  <dd className="break-words text-[var(--foreground)]">
-                    {instituicao.telefone || "Nao informado"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
-                    E-mail
-                  </dt>
-                  <dd className="break-words text-[var(--foreground)]">
-                    {instituicao.email || "Nao informado"}
-                  </dd>
-                </div>
-              </dl>
-            </article>
+              <div className="min-w-0">
+                <span className="block text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
+                  Contato
+                </span>
+                <span className="mt-1 block truncate text-sm text-[var(--foreground)]">
+                  {instituicao.telefone || "Telefone nao informado"}
+                </span>
+                <span className="mt-0.5 block truncate text-xs text-[var(--foreground-soft)]">
+                  {instituicao.email || "E-mail nao informado"}
+                </span>
+              </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   );

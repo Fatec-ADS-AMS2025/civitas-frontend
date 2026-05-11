@@ -33,9 +33,12 @@ export type DespesasDashboardFilters = {
   search: string;
   dataInicio: string;
   dataFim: string;
+  idInstituicao: string;
+  idSecretaria: string;
   idTipoCodigo: string;
   idTipoDespesa: string;
   situacao: string;
+  vencimento: string;
   solicitaUc: string;
 };
 
@@ -51,6 +54,10 @@ export type DespesaDashboardRow = {
   categoria: string;
   tipoCodigoId: number | null;
   tipoCodigoNome: string;
+  instituicaoId: number | null;
+  instituicaoNome: string;
+  secretariaId: number | null;
+  secretariaNome: string;
   descricao: string;
   valor: number;
   valorFormatado: string;
@@ -97,9 +104,12 @@ const DEFAULT_FILTERS: DespesasDashboardFilters = {
   search: "",
   dataInicio: "",
   dataFim: "",
+  idInstituicao: "",
+  idSecretaria: "",
   idTipoCodigo: "",
   idTipoDespesa: "",
   situacao: "",
+  vencimento: "",
   solicitaUc: "",
 };
 
@@ -215,6 +225,58 @@ const matchesDateRange = (
   return true;
 };
 
+const getTodayTimestamp = (): number => {
+  const today = normalizeDateInput(new Date().toISOString()) ?? "";
+  return parseDateTimestamp(today);
+};
+
+const isDespesaOverdue = (row: DespesaDashboardRow): boolean => {
+  if (row.situacao === 3) return true;
+  if (row.situacao === 2) return false;
+
+  const dueTimestamp = parseDateTimestamp(row.raw.dataVencimento ?? row.data);
+  const todayTimestamp = getTodayTimestamp();
+
+  if (Number.isNaN(dueTimestamp) || Number.isNaN(todayTimestamp)) {
+    return false;
+  }
+
+  return dueTimestamp < todayTimestamp;
+};
+
+const matchesVencimentoFilter = (
+  row: DespesaDashboardRow,
+  vencimento: string
+): boolean => {
+  if (!vencimento) return true;
+
+  const dueTimestamp = parseDateTimestamp(row.raw.dataVencimento ?? row.data);
+  const todayTimestamp = getTodayTimestamp();
+  const dayInMs = 24 * 60 * 60 * 1000;
+
+  if (vencimento === "atrasadas") {
+    return isDespesaOverdue(row);
+  }
+
+  if (vencimento === "semData") {
+    return Number.isNaN(dueTimestamp);
+  }
+
+  if (row.situacao === 2 || Number.isNaN(dueTimestamp) || Number.isNaN(todayTimestamp)) {
+    return false;
+  }
+
+  if (vencimento === "hoje") {
+    return dueTimestamp === todayTimestamp;
+  }
+
+  if (vencimento === "proximos7") {
+    return dueTimestamp >= todayTimestamp && dueTimestamp <= todayTimestamp + 7 * dayInMs;
+  }
+
+  return true;
+};
+
 const mergeUniqueById = (despesas: DespesaDTO[]): DespesaDTO[] => {
   return Array.from(new Map(despesas.map((despesa) => [despesa.id, despesa])).values());
 };
@@ -302,7 +364,8 @@ const buildDespesaRows = (
   unidadesConsumidorasMap: Map<number, UnidadeConsumidoraDTO>,
   tiposDespesaMap: Map<number, TipoDespesaDTO>,
   tipoCodigosMap: Map<number, TipoCodigoDTO>,
-  documentosMap: Map<string, DocumentoDTO>
+  instituicoesMap: Map<number, InstituicaoDTO>,
+  secretariasMap: Map<number, SecretariaDTO>
 ): DespesaDashboardRow[] => {
   return despesas
     .map((despesa) => {
@@ -324,15 +387,15 @@ const buildDespesaRows = (
       const situacao = resolveDespesaStatus(despesa);
       const solicitaUc = tipoDespesa?.solicitaUc === SOLICITA_UC_SIM;
       const resolvedUc = toTrimmedText(despesa.uc) || unidadeConsumidora?.identificador || "";
-      const resolvedFornecedorId = despesa.idFornecedor ?? unidadeConsumidora?.idFornecedor ?? 0;
-      const documento =
-        despesa.documento ??
-        documentosMap.get(buildDocumentoKey(despesa.numeroDocumento, resolvedFornecedorId)) ??
-        null;
+      const instituicaoId = despesa.idInstituicao ?? unidadeConsumidora?.idInstituicao ?? null;
+      const instituicao = instituicaoId ? instituicoesMap.get(instituicaoId) : undefined;
+      const secretariaId =
+        instituicao?.idSecretaria ?? unidadeConsumidora?.idSecretaria ?? null;
+      const secretaria = secretariaId ? secretariasMap.get(secretariaId) : undefined;
       const normalizedRaw: DespesaDTO = {
         ...despesa,
         idTipoDespesa: resolvedTipoDespesaId,
-        idInstituicao: despesa.idInstituicao ?? unidadeConsumidora?.idInstituicao,
+        idInstituicao: instituicaoId ?? undefined,
         idOrcamento: despesa.idOrcamento ?? unidadeConsumidora?.idOrcamento,
         idFornecedor: resolvedFornecedorId,
         idUnidadeConsumidora: despesa.idUnidadeConsumidora ?? unidadeConsumidora?.id,
@@ -353,6 +416,14 @@ const buildDespesaRows = (
           tipoCodigo?.nome?.trim() ||
           tipoCodigo?.descricao?.trim() ||
           "Tipo de codigo nao informado",
+        instituicaoId,
+        instituicaoNome:
+          instituicao?.nome?.trim() ||
+          (instituicaoId ? `Instituicao #${instituicaoId}` : "Instituicao nao informada"),
+        secretariaId,
+        secretariaNome:
+          secretaria?.nome?.trim() ||
+          (secretariaId ? `Secretaria #${secretariaId}` : "Secretaria nao informada"),
         descricao: resolveDespesaDescricao(normalizedRaw),
         valor: resolvedValue,
         valorFormatado: formatCurrency(resolvedValue),
@@ -392,7 +463,7 @@ const matchesDespesaFilters = (
 ): boolean => {
   const searchTerm = normalizeText(filters.search);
   const searchTarget = normalizeText(
-    `${row.descricao} ${row.numeroDocumento} ${row.id} ${row.categoria} ${row.tipoCodigoNome} ${row.raw.codigo ?? ""} ${row.raw.uc ?? ""}`
+    `${row.descricao} ${row.numeroDocumento} ${row.id} ${row.categoria} ${row.tipoCodigoNome} ${row.instituicaoNome} ${row.secretariaNome} ${row.raw.codigo ?? ""} ${row.raw.uc ?? ""}`
   );
 
   if (searchTerm && !searchTarget.includes(searchTerm)) {
@@ -402,6 +473,18 @@ const matchesDespesaFilters = (
   if (!matchesDateRange(row.data, filters.dataInicio, filters.dataFim)) {
     const hasAnyDateFilter = Boolean(filters.dataInicio || filters.dataFim);
     if (hasAnyDateFilter) return false;
+  }
+
+  if (filters.idInstituicao) {
+    if ((row.instituicaoId ?? 0) !== Number(filters.idInstituicao)) {
+      return false;
+    }
+  }
+
+  if (filters.idSecretaria) {
+    if ((row.secretariaId ?? 0) !== Number(filters.idSecretaria)) {
+      return false;
+    }
   }
 
   if (filters.idTipoDespesa) {
@@ -418,6 +501,10 @@ const matchesDespesaFilters = (
   }
 
   if (filters.situacao && row.situacao !== Number(filters.situacao)) {
+    return false;
+  }
+
+  if (!matchesVencimentoFilter(row, filters.vencimento)) {
     return false;
   }
 
@@ -739,18 +826,18 @@ export const useDespesasDashboard = () => {
     );
   }, [dashboardData.unidadesConsumidoras]);
 
-  const documentosMap = useMemo(() => {
-    const nextMap = new Map<string, DocumentoDTO>();
+  const instituicoesMap = useMemo(() => {
+    return new Map(dashboardData.instituicoes.map((instituicao) => [instituicao.id, instituicao]));
+  }, [dashboardData.instituicoes]);
 
-    dashboardData.documentos.forEach((documento) => {
-      const key = buildDocumentoKey(documento.numeroDocumento, documento.idFornecedor);
-      if (key) {
-        nextMap.set(key, documento);
-      }
-    });
-
-    return nextMap;
-  }, [dashboardData.documentos]);
+  const secretariasMap = useMemo(() => {
+    return new Map(
+      dashboardData.secretarias.map((secretaria) => [
+        secretaria.idSecretaria,
+        secretaria,
+      ])
+    );
+  }, [dashboardData.secretarias]);
 
   const despesas = useMemo(() => {
     return buildDespesaRows(
@@ -758,11 +845,13 @@ export const useDespesasDashboard = () => {
       unidadesConsumidorasMap,
       tiposDespesaMap,
       tipoCodigosMap,
-      documentosMap
+      instituicoesMap,
+      secretariasMap
     );
   }, [
     dashboardData.despesas,
-    documentosMap,
+    instituicoesMap,
+    secretariasMap,
     tipoCodigosMap,
     tiposDespesaMap,
     unidadesConsumidorasMap,

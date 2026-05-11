@@ -33,24 +33,16 @@ type DespesaPagamentoModalProps = {
   onConfirm: (values: PaymentValues) => Promise<void> | void;
 };
 
-const toNumberOrEmpty = (value: unknown): number | "" => {
-  if (value === "" || value === undefined || value === null) return "";
-  const parsedValue = Number(value);
-  return Number.isFinite(parsedValue) ? parsedValue : "";
-};
-
-// Modal de pagamento usa apenas valores pagos + comprovante; status e tratado no submit.
-const buildInitialValues = (despesa: DespesaDashboardRow | null): PaymentValues => {
-  return {
-    valorPago: "",
-    consumoReal: "",
-    documento: "",
-  };
-};
+const buildInitialValues = (): PaymentValues => ({
+  valorPago: "",
+  consumoReal: "",
+  documento: "",
+});
 
 const validatePositive = (value: number | "", label: string): string | undefined => {
-  if (value === "") return `${label} e obrigatorio.`;
-  if (Number(value) <= 0) return `${label} deve ser maior que zero.`;
+  const numericValue = Number(value);
+  if (value === "" || !Number.isFinite(numericValue)) return `${label} e obrigatorio.`;
+  if (numericValue <= 0) return `${label} deve ser maior que zero.`;
   return undefined;
 };
 
@@ -73,7 +65,7 @@ export default function DespesaPagamentoModal({
   onClose,
   onConfirm,
 }: DespesaPagamentoModalProps) {
-  const [values, setValues] = useState<PaymentValues>(() => buildInitialValues(despesa));
+  const [values, setValues] = useState<PaymentValues>(buildInitialValues);
   const [errors, setErrors] = useState<PaymentErrors>({});
   const [touched, setTouched] = useState<PaymentTouched>({
     valorPago: false,
@@ -91,26 +83,23 @@ export default function DespesaPagamentoModal({
 
   useEffect(() => {
     if (!open) return;
-    setValues(buildInitialValues(despesa));
+    setValues(buildInitialValues());
     setErrors({});
     setTouched({ valorPago: false, consumoReal: false });
   }, [despesa, open]);
 
   if (!open || !despesa) return null;
 
-  // Garante validacao do pagamento antes de disparar o update.
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors: PaymentErrors = {};
-    const currentValorPago = despesa.raw.valorPago;
-    const currentConsumoReal = despesa.raw.consumoReal;
     const resolvedValorPago = touched.valorPago
       ? values.valorPago === "" ? "" : Number(values.valorPago)
-      : Number(currentValorPago);
+      : Number(despesa.raw.valorPago);
     const resolvedConsumoReal = touched.consumoReal
       ? values.consumoReal === "" ? "" : Number(values.consumoReal)
-      : Number(currentConsumoReal);
+      : Number(despesa.raw.consumoReal);
     const documentoValue = resolveDocumentoValue(values.documento);
 
     const valorPagoError = validatePositive(resolvedValorPago, "Valor pago");
@@ -133,29 +122,63 @@ export default function DespesaPagamentoModal({
     });
   };
 
-  // Verificação se já está pago
-  if ((despesa.raw.status) === 2) {
+  if (isDespesaPaid(despesa)) {
     return (
       <Modal value={open} setValue={onClose}>
-        <div className="flex h-full flex-col">
-          <header className="flex-shrink-0 border-b border-[var(--border-soft)] pb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-              Pagamento de despesa
-            </p>
-            <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">
-              Essa despesa já está paga!
-            </h3>
-
-            <p>{despesa.raw.dataPagamento}</p>
-            <p>{despesa.raw.valorPago}</p>
-            {despesa.raw.consumoReal !== undefined && (
-              <p>{despesa.raw.consumoReal}</p>
-            )}
-
+        <div className="flex h-full flex-col gap-6">
+          <header className="rounded-sm border border-[var(--tone-success-border)] bg-[var(--tone-success-bg)] p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--surface-elevated)] text-[var(--tone-success-text)]">
+                <span className="material-symbols-outlined !text-[28px]">verified</span>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--tone-success-text)]">
+                  Pagamento de despesa
+                </p>
+                <h3 className="mt-1.5 text-2xl font-semibold text-[var(--foreground)]">
+                  Esta despesa ja esta paga
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                  O registro {despesa.registro} ja possui baixa de pagamento. Para
+                  alterar dados financeiros, use a edicao da despesa.
+                </p>
+              </div>
+            </div>
           </header>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <PaymentInfoCard label="Registro" value={despesa.registro} />
+            <PaymentInfoCard
+              label="Data do pagamento"
+              value={formatPaymentDate(despesa.raw.dataPagamento)}
+            />
+            <PaymentInfoCard
+              label="Valor pago"
+              value={formatPaymentCurrency(despesa.raw.valorPago)}
+            />
+            <PaymentInfoCard
+              label={`Consumo real em ${unidadeMedidaNome || "unidade"}`}
+              value={formatPaymentNumber(despesa.raw.consumoReal)}
+            />
+          </div>
+
+          <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
+            <p className="text-sm font-semibold text-[var(--foreground)]">
+              {despesa.descricao}
+            </p>
+            <p className="mt-1 text-xs text-[var(--foreground-soft)]">
+              Documento: {despesa.numeroDocumento || "Nao informado"}
+            </p>
+          </div>
+
+          <div className="flex justify-end border-t border-[var(--divider)] pt-4">
+            <Button variant="tertiary" type="button" onClick={onClose}>
+              Fechar
+            </Button>
+          </div>
         </div>
       </Modal>
-    )
+    );
   }
 
   return (
@@ -244,3 +267,46 @@ export default function DespesaPagamentoModal({
     </Modal>
   );
 }
+
+function PaymentInfoCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
+      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
+        {label}
+      </span>
+      <strong className="mt-2 block text-lg text-[var(--foreground)]">{value}</strong>
+    </div>
+  );
+}
+
+const isDespesaPaid = (despesa: DespesaDashboardRow): boolean => {
+  return Number(despesa.raw.status ?? despesa.raw.situacao ?? despesa.situacao) === 2;
+};
+
+const formatPaymentCurrency = (value: unknown): string => {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue <= 0) return "Nao informado";
+
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(numericValue);
+};
+
+const formatPaymentNumber = (value: unknown): string => {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue <= 0) return "Nao informado";
+
+  return new Intl.NumberFormat("pt-BR", {
+    maximumFractionDigits: 2,
+  }).format(numericValue);
+};
+
+const formatPaymentDate = (value?: string): string => {
+  if (!value) return "Nao informada";
+
+  const [year, month, day] = value.slice(0, 10).split("-");
+  if (!year || !month || !day) return value;
+
+  return `${day}/${month}/${year}`;
+};

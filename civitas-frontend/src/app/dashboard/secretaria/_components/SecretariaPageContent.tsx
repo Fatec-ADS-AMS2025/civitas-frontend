@@ -1,14 +1,13 @@
 "use client";
 
-import { SearchBar } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { SkeletonTable } from "@/components/skeleton";
 import type { useSecretariaPage } from "@/hooks/useSecretariaPage";
 import {
-  novaSecretaria,
   secretariaColumns,
   secretariaFormFields,
 } from "./secretariaConfig";
+import SecretariaFilters from "./SecretariaFilters";
 import SecretariaInstituicoesView from "./SecretariaInstituicoesView";
 import SecretariaRelationshipCards from "./SecretariaRelationshipCards";
 
@@ -28,10 +27,8 @@ export default function SecretariaPageContent({
   cardFilteredSecretarias,
   secretariaMetrics,
   cardFilter,
-  campos,
   setFilteredData,
   setCardFilter,
-  setCampos,
   loading,
   error,
   handleCreate,
@@ -53,13 +50,9 @@ export default function SecretariaPageContent({
         onFilterChange={setCardFilter}
       />
 
-      <SearchBar
-        model={novaSecretaria}
-        dados={cardFilteredSecretarias}
-        setDados={setFilteredData}
-        campos={campos}
-        formFields={secretariaFormFields}
-        setCampos={setCampos}
+      <SecretariaFilters
+        data={cardFilteredSecretarias}
+        setData={setFilteredData}
         onCadastrar={handleCreate}
       />
 

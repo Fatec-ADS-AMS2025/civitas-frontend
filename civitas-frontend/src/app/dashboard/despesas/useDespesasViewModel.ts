@@ -83,6 +83,7 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
     tiposDespesa,
     orcamentos,
     instituicoes,
+    secretarias,
     fornecedores,
     usuarios,
     unidadesConsumidoras,
