@@ -4,4 +4,9 @@ export default interface DocumentoDTO {
   numeroDocumento: number;
   idFornecedor: number;
   idFluxo?: number;
+  fileName?: string;
+  fileType?: string;
+  fileSize?: number;
+  isPersisted?: boolean;
+  status?: "idle" | "loading" | "ready" | "error";
 }

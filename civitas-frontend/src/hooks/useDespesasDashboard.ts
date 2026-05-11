@@ -61,6 +61,7 @@ export type DespesaDashboardRow = {
   solicitaUc: boolean;
   solicitaUcLabel: string;
   numeroDocumento: string;
+  documento: DocumentoDTO | null;
   raw: DespesaDTO;
 };
 
@@ -75,6 +76,7 @@ type DashboardData = {
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   unidadesMedida: UnidadeMedidaDTO[];
   usuarios: UsuarioDTO[];
+  documentos: DocumentoDTO[];
 };
 
 const EMPTY_DASHBOARD_DATA: DashboardData = {
@@ -88,6 +90,7 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   unidadesConsumidoras: [],
   unidadesMedida: [],
   usuarios: [],
+  documentos: [],
 };
 
 const DEFAULT_FILTERS: DespesasDashboardFilters = {
@@ -251,6 +254,25 @@ const toPositiveNumber = (value: unknown): number => {
   return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
 };
 
+const buildDocumentoKey = (numeroDocumento: unknown, idFornecedor: unknown): string => {
+  const numero = Number(digitsOnly(numeroDocumento ?? ""));
+  const fornecedor = Number(idFornecedor);
+  if (!Number.isFinite(numero) || numero <= 0 || !Number.isFinite(fornecedor) || fornecedor <= 0) {
+    return "";
+  }
+
+  return `${numero}:${fornecedor}`;
+};
+
+const normalizeDocumentoForUi = (documento: DocumentoDTO): DocumentoDTO => ({
+  ...documento,
+  digitalizacao: typeof documento.digitalizacao === "string" ? documento.digitalizacao : "",
+  fileName: documento.fileName ?? `documento-${documento.numeroDocumento || documento.idDocumento}.pdf`,
+  fileType: documento.fileType ?? "application/pdf",
+  status: "ready",
+  isPersisted: true,
+});
+
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
   try {
     return (await despesaService.getInactiveOptional()) ?? [];
@@ -263,11 +285,24 @@ const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
   }
 };
 
+const safeLoadDocumentos = async (): Promise<DocumentoDTO[]> => {
+  try {
+    return (await documentoService.getAllDocumentsData()) ?? [];
+  } catch (error) {
+    if (!isHttpNotFoundError(error) && !isHttpBadRequestError(error)) {
+      logOptionalDashboardWarning("Erro ao carregar documentos de despesas:", error);
+    }
+
+    return [];
+  }
+};
+
 const buildDespesaRows = (
   despesas: DespesaDTO[],
   unidadesConsumidorasMap: Map<number, UnidadeConsumidoraDTO>,
   tiposDespesaMap: Map<number, TipoDespesaDTO>,
-  tipoCodigosMap: Map<number, TipoCodigoDTO>
+  tipoCodigosMap: Map<number, TipoCodigoDTO>,
+  documentosMap: Map<string, DocumentoDTO>
 ): DespesaDashboardRow[] => {
   return despesas
     .map((despesa) => {
@@ -289,15 +324,21 @@ const buildDespesaRows = (
       const situacao = resolveDespesaStatus(despesa);
       const solicitaUc = tipoDespesa?.solicitaUc === SOLICITA_UC_SIM;
       const resolvedUc = toTrimmedText(despesa.uc) || unidadeConsumidora?.identificador || "";
+      const resolvedFornecedorId = despesa.idFornecedor ?? unidadeConsumidora?.idFornecedor ?? 0;
+      const documento =
+        despesa.documento ??
+        documentosMap.get(buildDocumentoKey(despesa.numeroDocumento, resolvedFornecedorId)) ??
+        null;
       const normalizedRaw: DespesaDTO = {
         ...despesa,
         idTipoDespesa: resolvedTipoDespesaId,
         idInstituicao: despesa.idInstituicao ?? unidadeConsumidora?.idInstituicao,
         idOrcamento: despesa.idOrcamento ?? unidadeConsumidora?.idOrcamento,
-        idFornecedor: despesa.idFornecedor ?? unidadeConsumidora?.idFornecedor,
+        idFornecedor: resolvedFornecedorId,
         idUnidadeConsumidora: despesa.idUnidadeConsumidora ?? unidadeConsumidora?.id,
         uc: resolvedUc,
         valor: despesa.valor ?? despesa.valorPrevisto,
+        documento,
       };
 
       return {
@@ -322,6 +363,7 @@ const buildDespesaRows = (
         solicitaUc,
         solicitaUcLabel: solicitaUc ? "Sim" : "Nao",
         numeroDocumento: despesa.numeroDocumento ?? "",
+        documento,
         raw: normalizedRaw,
       };
     })
@@ -548,6 +590,10 @@ const buildDocumentoPayload = (
     return null;
   }
 
+  if (formData.documento.isPersisted === true) {
+    return null;
+  }
+
   const digitalizacao =
     typeof formData.documento.digitalizacao === "string"
       ? formData.documento.digitalizacao.trim()
@@ -598,6 +644,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadesMedida,
     usuarios,
     unidadesConsumidorasAll,
+    documentos,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
     tipoCodigoService.getAllOptional(),
@@ -610,6 +657,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadeMedidaService.getAllData(),
     usuarioService.getAllData(),
     unidadeConsumidoraService.getAllData(),
+    safeLoadDocumentos(),
   ]);
 
   return {
@@ -623,6 +671,7 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadesConsumidoras: unidadesConsumidorasAtivas ?? unidadesConsumidorasAll ?? [],
     unidadesMedida: unidadesMedida ?? [],
     usuarios: usuarios ?? [],
+    documentos: (documentos ?? []).map(normalizeDocumentoForUi),
   };
 };
 
@@ -690,15 +739,30 @@ export const useDespesasDashboard = () => {
     );
   }, [dashboardData.unidadesConsumidoras]);
 
+  const documentosMap = useMemo(() => {
+    const nextMap = new Map<string, DocumentoDTO>();
+
+    dashboardData.documentos.forEach((documento) => {
+      const key = buildDocumentoKey(documento.numeroDocumento, documento.idFornecedor);
+      if (key) {
+        nextMap.set(key, documento);
+      }
+    });
+
+    return nextMap;
+  }, [dashboardData.documentos]);
+
   const despesas = useMemo(() => {
     return buildDespesaRows(
       dashboardData.despesas,
       unidadesConsumidorasMap,
       tiposDespesaMap,
-      tipoCodigosMap
+      tipoCodigosMap,
+      documentosMap
     );
   }, [
     dashboardData.despesas,
+    documentosMap,
     tipoCodigosMap,
     tiposDespesaMap,
     unidadesConsumidorasMap,

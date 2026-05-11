@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useId, useMemo, useState } from "react";
 import Button from "@/components/button";
 import DocumentoField, { type DocumentoFieldValue } from "@/components/Form/documento-field";
 import type { FormFieldConfig } from "@/components/Form/form";
@@ -33,6 +33,7 @@ export type DespesaResponsavelOption = {
 };
 
 export type DespesaFormMode = "create" | "edit" | "view";
+export type DespesaUcSelectorVariant = "list" | "combobox";
 
 export type DespesaFormValues = Record<string, unknown> & {
   idUnidadeConsumidora: number | "";
@@ -63,6 +64,7 @@ type DespesaFormProps = {
   ucs: DespesaUcOption[];
   usuarios: DespesaResponsavelOption[];
   initialValues?: DespesaFormInitialValues;
+  ucSelectorVariant?: DespesaUcSelectorVariant;
   onCancel: () => void;
   onConfirm?: (values: DespesaFormValues) => Promise<void> | void;
 };
@@ -162,6 +164,189 @@ function ReadonlyField({ label, value }: { label: string; value: string }) {
   );
 }
 
+function UcCombobox({
+  ucs,
+  selectedUc,
+  disabled,
+  error,
+  onSelect,
+}: {
+  ucs: DespesaUcOption[];
+  selectedUc: DespesaUcOption | null;
+  disabled: boolean;
+  error?: string;
+  onSelect: (uc: DespesaUcOption) => void;
+}) {
+  const comboboxId = useId();
+  const listboxId = `${comboboxId}-listbox`;
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    setIsSearching(true);
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedQuery(query);
+      setIsSearching(false);
+    }, 220);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [query]);
+
+  useEffect(() => {
+    if (selectedUc && !isOpen) {
+      setQuery(selectedUc.identificador);
+      setDebouncedQuery(selectedUc.identificador);
+      setIsSearching(false);
+    }
+  }, [isOpen, selectedUc]);
+
+  const filteredUcs = useMemo(() => {
+    const normalizedQuery = debouncedQuery
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
+    if (!normalizedQuery) return ucs.slice(0, 20);
+
+    return ucs
+      .filter((uc) => {
+        const target = [
+          uc.id,
+          uc.identificador,
+          uc.instituicaoNome,
+          uc.secretariaNome,
+          uc.tipoDespesaNome,
+          uc.fornecedorNome,
+        ]
+          .join(" ")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
+
+        return target.includes(normalizedQuery);
+      })
+      .slice(0, 20);
+  }, [debouncedQuery, ucs]);
+
+  const handleSelect = (uc: DespesaUcOption) => {
+    onSelect(uc);
+    setQuery(uc.identificador);
+    setDebouncedQuery(uc.identificador);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="space-y-2">
+      <label
+        htmlFor={comboboxId}
+        className="block text-sm font-semibold tracking-[0.01em] text-[var(--foreground-muted)]"
+      >
+        Unidade consumidora
+        <span className="ml-1 text-red-500">*</span>
+      </label>
+      <div className="relative">
+        <div className="flex items-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 focus-within:border-[var(--primary-1)] focus-within:ring-4 focus-within:ring-[var(--focus-ring)]">
+          <span className="material-symbols-outlined !text-[18px] text-[var(--foreground-muted)]">
+            search
+          </span>
+          <input
+            id={comboboxId}
+            type="text"
+            role="combobox"
+            aria-controls={listboxId}
+            aria-expanded={isOpen}
+            aria-autocomplete="list"
+            aria-invalid={Boolean(error)}
+            disabled={disabled}
+            value={query}
+            placeholder="Digite ID, UC, instituicao, secretaria..."
+            onFocus={() => setIsOpen(true)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setIsOpen(true);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setIsOpen(false);
+              if (event.key === "Enter" && filteredUcs[0]) {
+                event.preventDefault();
+                handleSelect(filteredUcs[0]);
+              }
+            }}
+            className="min-h-11 w-full bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--foreground-muted)] disabled:cursor-not-allowed"
+          />
+          {isSearching ? (
+            <span className="material-symbols-outlined !text-[18px] animate-spin text-[var(--foreground-muted)]">
+              progress_activity
+            </span>
+          ) : (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => setIsOpen((current) => !current)}
+              className="flex h-8 w-8 items-center justify-center rounded-sm text-[var(--foreground-muted)] hover:bg-[var(--surface-subtle)] disabled:cursor-not-allowed"
+              aria-label="Alternar lista de unidades consumidoras"
+            >
+              <span className="material-symbols-outlined !text-[18px]">
+                {isOpen ? "expand_less" : "expand_more"}
+              </span>
+            </button>
+          )}
+        </div>
+
+        {isOpen ? (
+          <div
+            id={listboxId}
+            role="listbox"
+            className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] p-1 shadow-[var(--shadow-lg)]"
+          >
+            {isSearching ? (
+              <div className="px-3 py-4 text-sm text-[var(--foreground-muted)]">
+                Buscando UCs...
+              </div>
+            ) : filteredUcs.length === 0 ? (
+              <div className="px-3 py-4 text-sm text-[var(--foreground-muted)]">
+                Nenhuma UC encontrada.
+              </div>
+            ) : (
+              filteredUcs.map((uc) => {
+                const isSelected = selectedUc?.id === uc.id;
+                return (
+                  <button
+                    key={uc.id}
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    onClick={() => handleSelect(uc)}
+                    className={`flex w-full flex-col gap-1 rounded-sm px-3 py-2.5 text-left text-sm transition hover:bg-[var(--surface-subtle)] ${
+                      isSelected ? "bg-[var(--surface-subtle)] text-[var(--text-accent-teal)]" : ""
+                    }`}
+                  >
+                    <span className="font-semibold">
+                      {String(uc.id).padStart(3, "0")} - {uc.identificador}
+                    </span>
+                    <span className="text-xs text-[var(--foreground-muted)]">
+                      {uc.instituicaoNome} / {uc.tipoDespesaNome} / {uc.fornecedorNome}
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        ) : null}
+      </div>
+      {selectedUc ? (
+        <p className="text-xs font-semibold text-[var(--text-accent-teal)]">
+          UC selecionada: {String(selectedUc.id).padStart(3, "0")} - {selectedUc.identificador}
+        </p>
+      ) : null}
+      {error ? <p className="text-sm font-medium text-[#C23D3D]">{error}</p> : null}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Componente principal
 // ---------------------------------------------------------------------------
@@ -171,11 +356,13 @@ export default function DespesaForm({
   ucs,
   usuarios,
   initialValues,
+  ucSelectorVariant = "list",
   onCancel,
   onConfirm,
 }: DespesaFormProps) {
   const isViewMode = mode === "view";
   const isCreateMode = mode === "create";
+  const usesCombobox = ucSelectorVariant === "combobox";
 
   const [currentAuthUser, setCurrentAuthUser] = useState(() => authStorage.get());
   const currentUserId = currentAuthUser?.id ?? null;
@@ -305,7 +492,9 @@ export default function DespesaForm({
     const nextErrors: Record<string, string> = {};
 
     if (!selectedUc) {
-      nextErrors.idUnidadeConsumidora = "Selecione uma UC na tabela ao lado.";
+      nextErrors.idUnidadeConsumidora = usesCombobox
+        ? "Selecione uma UC na combobox."
+        : "Selecione uma UC na tabela ao lado.";
     }
 
     const numeroDocumento = digitsOnly(formValues.numeroDocumento);
@@ -401,9 +590,10 @@ export default function DespesaForm({
       </header>
 
       {/* Body: dois painéis lado a lado */}
-      <div className="grid min-h-0 flex-1 grid-cols-[300px_1fr] overflow-hidden">
+      <div className={`grid min-h-0 flex-1 overflow-hidden ${usesCombobox ? "grid-cols-1" : "grid-cols-[300px_1fr]"}`}>
 
         {/* ── Painel esquerdo: lista de UCs ── */}
+        {!usesCombobox ? (
         <div className="flex flex-col overflow-hidden border-r border-[var(--border-soft)]">
           {/* Busca */}
           <div className="flex-shrink-0 border-b border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
@@ -489,6 +679,7 @@ export default function DespesaForm({
             </p>
           )}
         </div>
+        ) : null}
 
         {/* ── Painel direito: UC selecionada + campos ── */}
         <div className="flex flex-col overflow-hidden">
@@ -515,6 +706,18 @@ export default function DespesaForm({
 
           {/* Scroll dos campos */}
           <div className="flex-1 overflow-y-auto px-5 py-4">
+            {usesCombobox ? (
+              <div className="mb-5 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
+                <UcCombobox
+                  ucs={ucs}
+                  selectedUc={selectedUc}
+                  disabled={isViewMode}
+                  error={errors.idUnidadeConsumidora}
+                  onSelect={handleSelectUc}
+                />
+              </div>
+            ) : null}
+
             {!selectedUc ? (
               <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
                 <span className="material-symbols-outlined !text-[36px] text-[var(--foreground-muted)] opacity-30">

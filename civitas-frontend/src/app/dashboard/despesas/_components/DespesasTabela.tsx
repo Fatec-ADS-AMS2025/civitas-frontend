@@ -105,6 +105,7 @@ export default function DespesasTabela({
               <th className="px-4 py-2">Valor</th>
               <th className="px-4 py-2">Data</th>
               <th className="px-4 py-2">Situacao</th>
+              <th className="px-4 py-2">Documento</th>
               <th className="px-4 py-2 text-center">Acao</th>
             </tr>
           </thead>

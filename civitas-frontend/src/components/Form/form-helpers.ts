@@ -31,6 +31,11 @@ const normalizeDocumentValue = (
     digitalizacao: typeof value.digitalizacao === 'string' ? value.digitalizacao : '',
     numeroDocumento: toPositiveNumberOrZero(value.numeroDocumento, source.numeroDocumento),
     idFornecedor: toPositiveNumberOrZero(value.idFornecedor, source.idFornecedor, source.fornecedorId),
+    fileName: typeof value.fileName === 'string' ? value.fileName : undefined,
+    fileType: typeof value.fileType === 'string' ? value.fileType : undefined,
+    fileSize: toOptionalNumber(value.fileSize) ?? undefined,
+    status: typeof value.status === 'string' ? value.status : undefined,
+    isPersisted: value.isPersisted === true,
 })
 
 const resolveDocumentFieldValue = (

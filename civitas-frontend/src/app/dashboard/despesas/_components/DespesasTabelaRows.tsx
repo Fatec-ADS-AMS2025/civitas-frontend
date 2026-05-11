@@ -34,7 +34,7 @@ export default function DespesasTabelaRows({
             key={`loading-row-${rowIndex}`}
             className="despesas-table-row despesas-table-row--loading rounded-sm bg-[var(--surface-subtle)]"
           >
-            {Array.from({ length: 9 }).map((__, cellIndex) => (
+            {Array.from({ length: 10 }).map((__, cellIndex) => (
               <td
                 key={`loading-cell-${rowIndex}-${cellIndex}`}
                 className="despesas-table-cell px-4 py-5"
@@ -52,7 +52,7 @@ export default function DespesasTabelaRows({
     return (
       <tr>
         <td
-          colSpan={9}
+          colSpan={10}
           className="despesas-table-empty rounded-sm border border-dashed border-[var(--border-default)] px-4 py-10 text-center text-[var(--foreground-soft)]"
         >
           {hasLocalListSearch
@@ -104,6 +104,9 @@ export default function DespesasTabelaRows({
               {despesa.situacaoLabel}
             </span>
           </td>
+          <td className="despesas-table-cell px-4 py-5">
+            <DocumentoAction despesa={despesa} />
+          </td>
           <td className="despesas-table-cell rounded-sm px-4 py-5">
             <RowActions
               despesa={despesa}
@@ -116,6 +119,38 @@ export default function DespesasTabelaRows({
         </tr>
       ))}
     </>
+  );
+}
+
+function DocumentoAction({ despesa }: { despesa: DespesaDashboardRow }) {
+  const documento = despesa.documento;
+
+  if (!documento?.digitalizacao) {
+    return (
+      <span className="inline-flex min-h-9 items-center rounded-sm border border-dashed border-[var(--border-soft)] px-3 text-xs font-semibold text-[var(--foreground-muted)]">
+        Sem anexo
+      </span>
+    );
+  }
+
+  const fileType = documento.fileType || "application/pdf";
+  const href = `data:${fileType};base64,${documento.digitalizacao}`;
+  const fileName = documento.fileName || `documento-${documento.numeroDocumento}.pdf`;
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      download={fileName}
+      className="inline-flex min-h-9 items-center gap-1.5 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)]"
+      aria-label={`Abrir documento da despesa ${despesa.registro}`}
+    >
+      <span className="material-symbols-outlined !text-[16px]" aria-hidden="true">
+        attach_file
+      </span>
+      Abrir
+    </a>
   );
 }
 

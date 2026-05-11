@@ -69,7 +69,7 @@ export default function Page() {
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
     resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
     isOptionsLoading: dashboard.loading,
-    hideDocumento: true,
+    hideDocumento: false,
   });
 
   const unidadeConsumidoraOptions = useMemo<DespesaUcOption[]>(() => {
