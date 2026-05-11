@@ -16,6 +16,7 @@ interface FormModalProps {
     name?: string
     isLoading: boolean
     isViewMode: boolean
+    extraContent?: React.ReactNode
     onCancel?: () => void
     onSubmit: (event: React.FormEvent) => void
 }
@@ -37,6 +38,7 @@ export default function FormModal({
     name,
     isLoading,
     isViewMode,
+    extraContent,
     onCancel,
     onSubmit,
 }: FormModalProps) {
@@ -87,6 +89,12 @@ export default function FormModal({
                                 isReadOnlyMode={mode === 'view' || mode === 'delete'}
                             />
                         ))}
+
+                        {extraContent ? (
+                            <div className='border-t border-[var(--divider)] pt-4'>
+                                {extraContent}
+                            </div>
+                        ) : null}
                     </div>
                 </div>
 

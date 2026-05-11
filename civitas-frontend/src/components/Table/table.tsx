@@ -35,6 +35,7 @@ type BaseTableProps<T extends TableRow> = {
   actions?: string[];
   onEdit?: (id: number, data: Partial<T> & Record<string, unknown>) => Promise<unknown>;
   onDelete?: (id: number) => Promise<void>;
+  renderModalExtra?: (row: T, mode: FormMode) => React.ReactNode;
   formFields?: ModalFieldConfig[];
   formValidationSchema?: Record<string, ValidationFn>;
   formHiddenFields?: string[];
@@ -64,6 +65,7 @@ const Table = <T extends TableRow,>({
   columns,
   onEdit,
   onDelete,
+  renderModalExtra,
   actions,
   formFields,
   formValidationSchema,
@@ -426,6 +428,9 @@ const Table = <T extends TableRow,>({
             fields={formFields}
             validationSchema={formValidationSchema}
             hiddenFields={formHiddenFields}
+            extraContent={
+              renderModalExtra ? renderModalExtra(selectedContent, modalAction) : undefined
+            }
             onCancel={closeModal}
             onConfirm={async (formData) => {
               try {

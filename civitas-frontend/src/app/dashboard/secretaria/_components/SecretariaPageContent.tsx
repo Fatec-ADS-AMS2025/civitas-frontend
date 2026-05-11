@@ -9,6 +9,8 @@ import {
   secretariaColumns,
   secretariaFormFields,
 } from "./secretariaConfig";
+import SecretariaInstituicoesView from "./SecretariaInstituicoesView";
+import SecretariaRelationshipCards from "./SecretariaRelationshipCards";
 
 type SecretariaPageContentProps = ReturnType<typeof useSecretariaPage>;
 
@@ -23,8 +25,12 @@ function SecretariaErrorAlert({ message }: { message: string }) {
 export default function SecretariaPageContent({
   secretarias,
   filteredData,
+  cardFilteredSecretarias,
+  secretariaMetrics,
+  cardFilter,
   campos,
   setFilteredData,
+  setCardFilter,
   setCampos,
   loading,
   error,
@@ -40,9 +46,16 @@ export default function SecretariaPageContent({
     <>
       {error ? <SecretariaErrorAlert message={error} /> : null}
 
+      <SecretariaRelationshipCards
+        secretarias={secretarias}
+        metrics={secretariaMetrics}
+        selectedFilter={cardFilter}
+        onFilterChange={setCardFilter}
+      />
+
       <SearchBar
         model={novaSecretaria}
-        dados={secretarias}
+        dados={cardFilteredSecretarias}
         setDados={setFilteredData}
         campos={campos}
         formFields={secretariaFormFields}
@@ -56,6 +69,9 @@ export default function SecretariaPageContent({
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={secretariaFormFields}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <SecretariaInstituicoesView secretaria={row} /> : null
+        }
       />
     </>
   );
