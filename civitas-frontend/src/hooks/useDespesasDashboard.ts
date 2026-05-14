@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { digitsOnly, normalizeDateInput, toTrimmedText } from "@/global/formPayload";
 import { SITUACAO_ATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
-import { documentoService } from "@/hooks/documento";
+import { documentoService, normalizeDocumentoForUi } from "@/hooks/documento";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
@@ -69,6 +69,8 @@ export type DespesaDashboardRow = {
   solicitaUcLabel: string;
   numeroDocumento: string;
   documento: DocumentoDTO | null;
+  documentoConfiavel: boolean;
+  idDocumento?: number;
   raw: DespesaDTO;
 };
 
@@ -83,7 +85,6 @@ type DashboardData = {
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   unidadesMedida: UnidadeMedidaDTO[];
   usuarios: UsuarioDTO[];
-  documentos: DocumentoDTO[];
 };
 
 const EMPTY_DASHBOARD_DATA: DashboardData = {
@@ -97,7 +98,6 @@ const EMPTY_DASHBOARD_DATA: DashboardData = {
   unidadesConsumidoras: [],
   unidadesMedida: [],
   usuarios: [],
-  documentos: [],
 };
 
 const DEFAULT_FILTERS: DespesasDashboardFilters = {
@@ -311,29 +311,10 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
 
-const toPositiveNumber = (value: unknown): number => {
-  const numericValue = Number(value);
-  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
+const resolveDocumentoId = (despesa: DespesaDTO): number | undefined => {
+  const idDocumento = Number(despesa.idDocumento ?? despesa.documento?.idDocumento);
+  return Number.isFinite(idDocumento) && idDocumento > 0 ? idDocumento : undefined;
 };
-
-const buildDocumentoKey = (numeroDocumento: unknown, idFornecedor: unknown): string => {
-  const numero = Number(digitsOnly(numeroDocumento ?? ""));
-  const fornecedor = Number(idFornecedor);
-  if (!Number.isFinite(numero) || numero <= 0 || !Number.isFinite(fornecedor) || fornecedor <= 0) {
-    return "";
-  }
-
-  return `${numero}:${fornecedor}`;
-};
-
-const normalizeDocumentoForUi = (documento: DocumentoDTO): DocumentoDTO => ({
-  ...documento,
-  digitalizacao: typeof documento.digitalizacao === "string" ? documento.digitalizacao : "",
-  fileName: documento.fileName ?? `documento-${documento.numeroDocumento || documento.idDocumento}.pdf`,
-  fileType: documento.fileType ?? "application/pdf",
-  status: "ready",
-  isPersisted: true,
-});
 
 const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
   try {
@@ -347,26 +328,13 @@ const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
   }
 };
 
-const safeLoadDocumentos = async (): Promise<DocumentoDTO[]> => {
-  try {
-    return (await documentoService.getAllDocumentsData()) ?? [];
-  } catch (error) {
-    if (!isHttpNotFoundError(error) && !isHttpBadRequestError(error)) {
-      logOptionalDashboardWarning("Erro ao carregar documentos de despesas:", error);
-    }
-
-    return [];
-  }
-};
-
 const buildDespesaRows = (
   despesas: DespesaDTO[],
   unidadesConsumidorasMap: Map<number, UnidadeConsumidoraDTO>,
   tiposDespesaMap: Map<number, TipoDespesaDTO>,
   tipoCodigosMap: Map<number, TipoCodigoDTO>,
   instituicoesMap: Map<number, InstituicaoDTO>,
-  secretariasMap: Map<number, SecretariaDTO>,
-  documentosMap: Map<string, DocumentoDTO>
+  secretariasMap: Map<number, SecretariaDTO>
 ): DespesaDashboardRow[] => {
   return despesas
     .map((despesa) => {
@@ -395,18 +363,18 @@ const buildDespesaRows = (
       const secretaria = secretariaId ? secretariasMap.get(secretariaId) : undefined;
       const resolvedFornecedorId =
         despesa.idFornecedor ?? unidadeConsumidora?.idFornecedor ?? 0;
-      const documento =
-        despesa.documento ??
-        documentosMap.get(
-          buildDocumentoKey(despesa.numeroDocumento, resolvedFornecedorId)
-        ) ??
-        null;
+      const documento = despesa.documento
+        ? normalizeDocumentoForUi(despesa.documento)
+        : null;
+      const idDocumento = resolveDocumentoId(despesa);
+      const documentoConfiavel = Boolean(documento?.digitalizacao || idDocumento);
       const normalizedRaw: DespesaDTO = {
         ...despesa,
         idTipoDespesa: resolvedTipoDespesaId,
         idInstituicao: instituicaoId ?? undefined,
         idOrcamento: despesa.idOrcamento ?? unidadeConsumidora?.idOrcamento,
         idFornecedor: resolvedFornecedorId,
+        idDocumento,
         idUnidadeConsumidora: despesa.idUnidadeConsumidora ?? unidadeConsumidora?.id,
         uc: resolvedUc,
         valor: despesa.valor ?? despesa.valorPrevisto,
@@ -444,6 +412,8 @@ const buildDespesaRows = (
         solicitaUcLabel: solicitaUc ? "Sim" : "Nao",
         numeroDocumento: despesa.numeroDocumento ?? "",
         documento,
+        documentoConfiavel,
+        idDocumento,
         raw: normalizedRaw,
       };
     })
@@ -673,6 +643,58 @@ const buildDespesaPayload = (
   };
 };
 
+const hasPersistedDocumentoReference = (despesa: DespesaDTO): boolean => {
+  return Boolean(
+    resolveDocumentoId(despesa) ||
+      (despesa.documento?.isPersisted === true && despesa.documento.digitalizacao)
+  );
+};
+
+const hasNewDocumentoPayload = (documento: unknown): boolean => {
+  if (!isRecord(documento) || documento.isPersisted === true) return false;
+  return typeof documento.digitalizacao === "string" && documento.digitalizacao.trim().length > 0;
+};
+
+const assertPersistedDocumentoLinkWasPreserved = (
+  formData: Record<string, unknown>,
+  payload: DespesaDTO,
+  currentDespesa: DespesaDTO
+) => {
+  if (!hasPersistedDocumentoReference(currentDespesa) || hasNewDocumentoPayload(formData.documento)) {
+    return;
+  }
+
+  if (!isRecord(formData.documento)) {
+    throw new Error(
+      "Esta despesa ja possui documento. Troque o arquivo para substituir ou mantenha o documento atual."
+    );
+  }
+
+  const originalNumeroDocumento = digitsOnly(
+    formData.documento.numeroDocumento ?? currentDespesa.numeroDocumento ?? ""
+  );
+  const nextNumeroDocumento = digitsOnly(payload.numeroDocumento ?? "");
+  const originalFornecedor = Number(
+    formData.documento.idFornecedor ?? currentDespesa.idFornecedor ?? 0
+  );
+  const nextFornecedor = Number(payload.idFornecedor ?? 0);
+  const originalUc = Number(currentDespesa.idUnidadeConsumidora ?? 0);
+  const nextUc = Number(payload.idUnidadeConsumidora ?? 0);
+
+  const changedDocumentoKey =
+    Boolean(originalNumeroDocumento) &&
+    Boolean(nextNumeroDocumento) &&
+    (originalNumeroDocumento !== nextNumeroDocumento ||
+      originalFornecedor !== nextFornecedor);
+  const changedUc = originalUc > 0 && nextUc > 0 && originalUc !== nextUc;
+
+  if (changedDocumentoKey || changedUc) {
+    throw new Error(
+      "Para alterar UC, fornecedor ou numero do documento de uma despesa com anexo, troque tambem o documento."
+    );
+  }
+};
+
 const buildDocumentoPayload = (
   formData: Record<string, unknown>,
   despesaPayload: DespesaDTO,
@@ -740,7 +762,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadesMedida,
     usuarios,
     unidadesConsumidorasAll,
-    documentos,
   ] = await Promise.all([
     despesaService.getAllStatusData(),
     tipoCodigoService.getAllOptional(),
@@ -753,7 +774,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadeMedidaService.getAllData(),
     usuarioService.getAllData(),
     unidadeConsumidoraService.getAllData(),
-    safeLoadDocumentos(),
   ]);
 
   return {
@@ -767,7 +787,6 @@ const loadDashboardData = async (): Promise<DashboardData> => {
     unidadesConsumidoras: unidadesConsumidorasAtivas ?? unidadesConsumidorasAll ?? [],
     unidadesMedida: unidadesMedida ?? [],
     usuarios: usuarios ?? [],
-    documentos: (documentos ?? []).map(normalizeDocumentoForUi),
   };
 };
 
@@ -848,19 +867,6 @@ export const useDespesasDashboard = () => {
     );
   }, [dashboardData.secretarias]);
 
-  const documentosMap = useMemo(() => {
-    const nextMap = new Map<string, DocumentoDTO>();
-
-    dashboardData.documentos.forEach((documento) => {
-      const key = buildDocumentoKey(documento.numeroDocumento, documento.idFornecedor);
-      if (key) {
-        nextMap.set(key, documento);
-      }
-    });
-
-    return nextMap;
-  }, [dashboardData.documentos]);
-
   const despesas = useMemo(() => {
     return buildDespesaRows(
       dashboardData.despesas,
@@ -868,12 +874,10 @@ export const useDespesasDashboard = () => {
       tiposDespesaMap,
       tipoCodigosMap,
       instituicoesMap,
-      secretariasMap,
-      documentosMap
+      secretariasMap
     );
   }, [
     dashboardData.despesas,
-    documentosMap,
     instituicoesMap,
     secretariasMap,
     tipoCodigosMap,
@@ -944,6 +948,7 @@ export const useDespesasDashboard = () => {
 
       const payload = buildDespesaPayload(formData, dashboardData, currentDespesa);
       const documentoPayload = buildDocumentoPayload(formData, payload, false);
+      assertPersistedDocumentoLinkWasPreserved(formData, payload, currentDespesa);
 
       if (documentoPayload) {
         await documentoService.createData(documentoPayload);
@@ -1045,6 +1050,31 @@ export const useDespesasDashboard = () => {
     [refetch]
   );
 
+  const resolveDespesaDocumento = useCallback(
+    async (despesa: DespesaDashboardRow): Promise<DespesaDashboardRow> => {
+      if (despesa.documento?.digitalizacao || !despesa.idDocumento) {
+        return despesa;
+      }
+
+      const documento = await documentoService.getDocumentoDataById(despesa.idDocumento);
+      if (!documento) {
+        return despesa;
+      }
+
+      return {
+        ...despesa,
+        documento,
+        documentoConfiavel: true,
+        raw: {
+          ...despesa.raw,
+          documento,
+          idDocumento: despesa.idDocumento,
+        },
+      };
+    },
+    []
+  );
+
   return useMemo(
     () => ({
       filters,
@@ -1071,6 +1101,7 @@ export const useDespesasDashboard = () => {
       updateDespesa,
       updateDespesaPagamento,
       removeDespesa,
+      resolveDespesaDocumento,
     }),
     [
       filters,
@@ -1096,6 +1127,7 @@ export const useDespesasDashboard = () => {
       updateDespesa,
       updateDespesaPagamento,
       removeDespesa,
+      resolveDespesaDocumento,
     ]
   );
 };

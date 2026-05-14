@@ -22,6 +22,7 @@ export default interface DespesaDTO {
   idInstituicao?: number;
   idFornecedor?: number;
   idUsuario?: number;
+  idDocumento?: number;
   documento?: DocumentoDTO | null;
 
   // Legacy fields still consumed by existing financial UI mapping.

@@ -4,6 +4,7 @@ export default interface DocumentoDTO {
   numeroDocumento: number;
   idFornecedor: number;
   idFluxo?: number;
+  idDespesa?: number;
   fileName?: string;
   fileType?: string;
   fileSize?: number;
