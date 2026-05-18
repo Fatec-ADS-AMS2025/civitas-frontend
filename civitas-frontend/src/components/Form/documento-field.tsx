@@ -14,6 +14,7 @@ export type DocumentoFieldValue = {
   fileName?: string;
   fileType?: string;
   fileSize?: number;
+  isPersisted?: boolean;
   status?: DocumentoUploadStatus;
   errorMessage?: string;
 };
@@ -48,6 +49,7 @@ const getDocumentoValue = (value: unknown): DocumentoFieldValue | null => {
     fileName: typeof value.fileName === "string" ? value.fileName : undefined,
     fileType: typeof value.fileType === "string" ? value.fileType : undefined,
     fileSize: toNumber(value.fileSize),
+    isPersisted: value.isPersisted === true,
     status: getUploadStatus(value.status),
     errorMessage: typeof value.errorMessage === "string" ? value.errorMessage : undefined,
   };
@@ -128,6 +130,7 @@ export default function DocumentoField({
 
   const statusMessage = useMemo(() => {
     if (status === "loading") return "Convertendo arquivo para Base64...";
+    if (documento?.isPersisted && hasFile) return "Documento anexado a esta despesa.";
     if (status === "ready" && hasFile) return "Arquivo pronto para envio.";
     if (status === "error") return documento?.errorMessage ?? "Erro ao converter arquivo.";
     return "Nenhum arquivo selecionado.";
@@ -237,7 +240,7 @@ export default function DocumentoField({
             {canPreview ? (
               <button
                 type="button"
-                disabled={isDisabled}
+                disabled={isConverting}
                 onClick={() => setIsPreviewOpen((current) => !current)}
                 className="civitas-action civitas-action--ghost min-h-10 rounded-sm px-3 text-xs font-semibold"
               >

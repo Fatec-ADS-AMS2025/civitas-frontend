@@ -1,4 +1,6 @@
-import type React from "react";
+import { useState, type CSSProperties } from "react";
+import { documentoService } from "@/hooks/documento";
+import { showToast } from "@/hooks/useToast";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { ICON_BUTTON_CLASS_NAME } from "../despesas.constants";
 import {
@@ -34,7 +36,7 @@ export default function DespesasTabelaRows({
             key={`loading-row-${rowIndex}`}
             className="despesas-table-row despesas-table-row--loading rounded-sm bg-[var(--surface-subtle)]"
           >
-            {Array.from({ length: 9 }).map((__, cellIndex) => (
+            {Array.from({ length: 10 }).map((__, cellIndex) => (
               <td
                 key={`loading-cell-${rowIndex}-${cellIndex}`}
                 className="despesas-table-cell px-4 py-5"
@@ -52,7 +54,7 @@ export default function DespesasTabelaRows({
     return (
       <tr>
         <td
-          colSpan={9}
+          colSpan={10}
           className="despesas-table-empty rounded-sm border border-dashed border-[var(--border-default)] px-4 py-10 text-center text-[var(--foreground-soft)]"
         >
           {hasLocalListSearch
@@ -104,6 +106,9 @@ export default function DespesasTabelaRows({
               {despesa.situacaoLabel}
             </span>
           </td>
+          <td className="despesas-table-cell px-4 py-5">
+            <DocumentoAction despesa={despesa} />
+          </td>
           <td className="despesas-table-cell rounded-sm px-4 py-5">
             <RowActions
               despesa={despesa}
@@ -116,6 +121,67 @@ export default function DespesasTabelaRows({
         </tr>
       ))}
     </>
+  );
+}
+
+function DocumentoAction({ despesa }: { despesa: DespesaDashboardRow }) {
+  const [isOpening, setIsOpening] = useState(false);
+  const documento = despesa.documento;
+
+  if (!despesa.documentoConfiavel) {
+    return (
+      <span className="inline-flex min-h-9 items-center rounded-sm border border-dashed border-[var(--border-soft)] px-3 text-xs font-semibold text-[var(--foreground-muted)]">
+        Sem anexo
+      </span>
+    );
+  }
+
+  const handleOpen = async () => {
+    try {
+      setIsOpening(true);
+      const resolvedDocumento =
+        documento?.digitalizacao
+          ? documento
+          : despesa.idDocumento
+            ? await documentoService.getDocumentoDataById(despesa.idDocumento)
+            : null;
+
+      if (!resolvedDocumento?.digitalizacao) {
+        showToast("Documento nao foi encontrado para abertura.", "error");
+        return;
+      }
+
+      const fileType = resolvedDocumento.fileType || "application/pdf";
+      const blob = base64ToBlob(resolvedDocumento.digitalizacao, fileType);
+      const url = window.URL.createObjectURL(blob);
+      const openedWindow = window.open(url, "_blank", "noopener,noreferrer");
+
+      if (!openedWindow) {
+        showToast("O navegador bloqueou a abertura do documento.", "error");
+      }
+
+      window.setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      console.error("Erro ao abrir documento da despesa.", error);
+      showToast("Nao foi possivel abrir o documento.", "error");
+    } finally {
+      setIsOpening(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={() => void handleOpen()}
+      disabled={isOpening}
+      className="inline-flex min-h-9 items-center gap-1.5 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)]"
+      aria-label={`Abrir documento da despesa ${despesa.registro}`}
+    >
+      <span className="material-symbols-outlined !text-[16px]" aria-hidden="true">
+        attach_file
+      </span>
+      {isOpening ? "Abrindo..." : "Abrir"}
+    </button>
   );
 }
 
@@ -167,7 +233,18 @@ function RowActions({
   );
 }
 
-const getEnterDelayStyle = (index: number): React.CSSProperties | undefined => {
+const base64ToBlob = (base64: string, fileType: string): Blob => {
+  const binary = window.atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new Blob([bytes], { type: fileType });
+};
+
+const getEnterDelayStyle = (index: number): CSSProperties | undefined => {
   if (index >= 6) return undefined;
-  return { ["--enter-delay" as string]: `${index * 45}ms` } as React.CSSProperties;
+  return { ["--enter-delay" as string]: `${index * 45}ms` } as CSSProperties;
 };

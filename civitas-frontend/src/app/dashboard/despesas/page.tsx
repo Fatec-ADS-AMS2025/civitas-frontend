@@ -70,7 +70,7 @@ export default function Page() {
     resolvedUsuarioOptions: viewModel.resolvedUsuarioOptions,
     resolvedUnidadeConsumidoraOptions: viewModel.resolvedUnidadeConsumidoraOptions,
     isOptionsLoading: dashboard.loading,
-    hideDocumento: true,
+    hideDocumento: false,
   });
 
   const unidadeConsumidoraOptions = useMemo<DespesaUcOption[]>(() => {
@@ -239,6 +239,24 @@ export default function Page() {
     }
   };
 
+  const handleOpenView = async (despesa: DespesaDashboardRow) => {
+    try {
+      setViewingDespesa(await dashboard.resolveDespesaDocumento(despesa));
+    } catch (error) {
+      showToast(getSubmitErrorMessage(error, "Nao foi possivel carregar o documento."), "error");
+      setViewingDespesa(despesa);
+    }
+  };
+
+  const handleOpenEdit = async (despesa: DespesaDashboardRow) => {
+    try {
+      setEditingDespesa(await dashboard.resolveDespesaDocumento(despesa));
+    } catch (error) {
+      showToast(getSubmitErrorMessage(error, "Nao foi possivel carregar o documento."), "error");
+      setEditingDespesa(despesa);
+    }
+  };
+
   const handleDelete = async (despesa: DespesaDashboardRow) => {
     const confirmed = window.confirm(
       `Deseja remover a despesa ${despesa.registro} - ${despesa.descricao}?`
@@ -376,8 +394,8 @@ export default function Page() {
         error={dashboard.error}
         canExport={viewModel.allExportRows.length > 0}
         onOpenExport={() => setIsExportModalOpen(true)}
-        onView={setViewingDespesa}
-        onEdit={setEditingDespesa}
+        onView={(despesa) => void handleOpenView(despesa)}
+        onEdit={(despesa) => void handleOpenEdit(despesa)}
         onDelete={(despesa) => void handleDelete(despesa)}
         onPayment={handleOpenPaymentModal}
       />

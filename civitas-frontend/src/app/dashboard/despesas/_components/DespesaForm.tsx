@@ -7,6 +7,7 @@ import type { FormFieldConfig } from "@/components/Form/form";
 import Input from "@/components/Input";
 import { digitsOnly, normalizeDateInput, validateDespesaDateRange } from "@/global/formPayload";
 import { authStorage } from "@/lib/auth-storage";
+import UcCombobox from "./UcCombobox";
 
 export type DespesaUcOption = {
   id: number;
@@ -33,6 +34,7 @@ export type DespesaResponsavelOption = {
 };
 
 export type DespesaFormMode = "create" | "edit" | "view";
+export type DespesaUcSelectorVariant = "list" | "combobox";
 
 export type DespesaFormValues = Record<string, unknown> & {
   idUnidadeConsumidora: number | "";
@@ -63,6 +65,7 @@ type DespesaFormProps = {
   ucs: DespesaUcOption[];
   usuarios: DespesaResponsavelOption[];
   initialValues?: DespesaFormInitialValues;
+  ucSelectorVariant?: DespesaUcSelectorVariant;
   onCancel: () => void;
   onConfirm?: (values: DespesaFormValues) => Promise<void> | void;
 };
@@ -171,11 +174,14 @@ export default function DespesaForm({
   ucs,
   usuarios,
   initialValues,
+  ucSelectorVariant = "list",
   onCancel,
   onConfirm,
 }: DespesaFormProps) {
   const isViewMode = mode === "view";
   const isCreateMode = mode === "create";
+  const isEditMode = mode === "edit";
+  const usesCombobox = ucSelectorVariant === "combobox";
 
   const [currentAuthUser, setCurrentAuthUser] = useState(() => authStorage.get());
   const currentUserId = currentAuthUser?.id ?? null;
@@ -186,6 +192,11 @@ export default function DespesaForm({
     buildInitialFormValues(initialValues, currentUserId, mode)
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const hasInitialPersistedDocumento =
+    isRecord(initialValues?.documento) && initialValues.documento.isPersisted === true;
+  const hasPersistedDocumento =
+    isRecord(formValues.documento) && formValues.documento.isPersisted === true;
+  const isDocumentoLinkLocked = isEditMode && hasPersistedDocumento;
   const documentoField: FormFieldConfig = useMemo(
     () => ({
       key: "documento",
@@ -245,6 +256,7 @@ export default function DespesaForm({
         idInstituicao: "",
         idOrcamento: "",
         idFornecedor: "",
+        codigo: v.codigo === v.uc ? "" : v.codigo,
       }));
       return;
     }
@@ -265,7 +277,7 @@ export default function DespesaForm({
   }, [selectedUc]);
 
   const handleSelectUc = (uc: DespesaUcOption) => {
-    if (isViewMode) return;
+    if (isViewMode || isDocumentoLinkLocked) return;
     setSelectedUc(uc);
     setErrors((e) => ({
       ...e,
@@ -277,11 +289,16 @@ export default function DespesaForm({
     }));
   };
 
+  const handleClearUcSelection = () => {
+    if (isViewMode || isDocumentoLinkLocked) return;
+    setSelectedUc(null);
+  };
+
   const handleRowKeyDown = (
     event: React.KeyboardEvent<HTMLTableRowElement>,
     uc: DespesaUcOption
   ) => {
-    if (isViewMode) return;
+    if (isViewMode || isDocumentoLinkLocked) return;
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       handleSelectUc(uc);
@@ -305,7 +322,9 @@ export default function DespesaForm({
     const nextErrors: Record<string, string> = {};
 
     if (!selectedUc) {
-      nextErrors.idUnidadeConsumidora = "Selecione uma UC na tabela ao lado.";
+      nextErrors.idUnidadeConsumidora = usesCombobox
+        ? "Selecione uma UC na combobox."
+        : "Selecione uma UC na tabela ao lado.";
     }
 
     const numeroDocumento = digitsOnly(formValues.numeroDocumento);
@@ -314,6 +333,10 @@ export default function DespesaForm({
 
     const hasDocumentoInput = formValues.documento !== "" && formValues.documento !== undefined && formValues.documento !== null;
     const documentoValue = resolveDocumentoValue(formValues.documento);
+    if (isEditMode && hasInitialPersistedDocumento && !hasDocumentoInput) {
+      nextErrors.documento =
+        "Esta despesa ja possui documento. Troque o arquivo para substituir ou mantenha o documento atual.";
+    }
     if (isCreateMode || hasDocumentoInput) {
       if (!documentoValue) {
         nextErrors.documento = "Selecione um arquivo e aguarde a conversao para Base64.";
@@ -358,8 +381,12 @@ export default function DespesaForm({
     const resolvedDocumento = documentoValue
       ? {
           ...documentoValue,
-          numeroDocumento: Number(numeroDocumento),
-          idFornecedor: Number(selectedUc?.idFornecedor ?? formValues.idFornecedor ?? 0),
+          ...(documentoValue.isPersisted
+            ? {}
+            : {
+                numeroDocumento: Number(numeroDocumento),
+                idFornecedor: Number(selectedUc?.idFornecedor ?? formValues.idFornecedor ?? 0),
+              }),
         }
       : formValues.documento;
 
@@ -401,9 +428,10 @@ export default function DespesaForm({
       </header>
 
       {/* Body: dois painéis lado a lado */}
-      <div className="grid min-h-0 flex-1 grid-cols-[300px_1fr] overflow-hidden">
+      <div className={`grid min-h-0 flex-1 overflow-hidden ${usesCombobox ? "grid-cols-1" : "grid-cols-[300px_1fr]"}`}>
 
         {/* ── Painel esquerdo: lista de UCs ── */}
+        {!usesCombobox ? (
         <div className="flex flex-col overflow-hidden border-r border-[var(--border-soft)]">
           {/* Busca */}
           <div className="flex-shrink-0 border-b border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
@@ -442,9 +470,9 @@ export default function DespesaForm({
                     <button
                       key={uc.id}
                       type="button"
-                      tabIndex={isViewMode ? -1 : 0}
+                      tabIndex={isViewMode || isDocumentoLinkLocked ? -1 : 0}
                       aria-selected={isSelected}
-                      disabled={isViewMode}
+                      disabled={isViewMode || isDocumentoLinkLocked}
                       onClick={() => handleSelectUc(uc)}
                       onKeyDown={(e) => handleRowKeyDown(e as any, uc)}
                       className={`flex w-full items-center gap-2.5 rounded-sm border px-3 py-2.5 text-left transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-default ${
@@ -489,6 +517,7 @@ export default function DespesaForm({
             </p>
           )}
         </div>
+        ) : null}
 
         {/* ── Painel direito: UC selecionada + campos ── */}
         <div className="flex flex-col overflow-hidden">
@@ -515,6 +544,19 @@ export default function DespesaForm({
 
           {/* Scroll dos campos */}
           <div className="flex-1 overflow-y-auto px-5 py-4">
+            {usesCombobox ? (
+              <div className="mb-5 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
+                <UcCombobox
+                  ucs={ucs}
+                  selectedUc={selectedUc}
+                  disabled={isViewMode || isDocumentoLinkLocked}
+                  error={errors.idUnidadeConsumidora}
+                  onSelect={handleSelectUc}
+                  onClearSelection={handleClearUcSelection}
+                />
+              </div>
+            ) : null}
+
             {!selectedUc ? (
               <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
                 <span className="material-symbols-outlined !text-[36px] text-[var(--foreground-muted)] opacity-30">
@@ -551,12 +593,17 @@ export default function DespesaForm({
                 {/* Dados da despesa */}
                 <div>
                   <SectionLabel>Dados da despesa</SectionLabel>
+                  {isDocumentoLinkLocked ? (
+                    <p className="mb-3 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-medium text-[var(--foreground-muted)]">
+                      Esta despesa ja possui documento. Para evitar vinculo inconsistente, a UC e o numero do documento ficam bloqueados enquanto o documento atual for mantido.
+                    </p>
+                  ) : null}
                   <div className="grid grid-cols-2 gap-3">
                     <Input
                       label="Numero do documento"
                       placeholder="Somente numeros"
                       required={!isViewMode}
-                      disabled={isViewMode}
+                      disabled={isViewMode || isDocumentoLinkLocked}
                       value={formValues.numeroDocumento}
                       error={errors.numeroDocumento}
                       onChange={(e) => handleValueChange("numeroDocumento", e.target.value)}
