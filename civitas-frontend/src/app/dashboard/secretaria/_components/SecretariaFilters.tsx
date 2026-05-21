@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import Form from "@/components/Form/form";
 import Input from "@/components/Input";
 import Modal from "@/components/modal";
-import { SITUACAO_OPTIONS } from "@/global/situacao";
 import { showToast } from "@/hooks/useToast";
 import type { Secretaria, SecretariaRow } from "@/hooks/useSecretariaPage";
 import { novaSecretaria, secretariaFormFields } from "./secretariaConfig";
@@ -17,14 +16,12 @@ type SecretariaFiltersProps = {
 
 type SecretariaFilterState = {
   search: string;
-  situacao: string;
   vinculo: string;
   cidade: string;
 };
 
 const INITIAL_FILTERS: SecretariaFilterState = {
   search: "",
-  situacao: "",
   vinculo: "",
   cidade: "",
 };
@@ -72,10 +69,6 @@ const matchesFilters = (
   if (query && !searchTarget.includes(query)) return false;
   if (cityQuery && !normalizeSearch(secretaria.cidade).includes(cityQuery)) return false;
 
-  if (filters.situacao && Number(secretaria.situacao) !== Number(filters.situacao)) {
-    return false;
-  }
-
   if (filters.vinculo === "comInstituicoes" && secretaria.totalInstituicoes <= 0) {
     return false;
   }
@@ -105,14 +98,6 @@ export default function SecretariaFilters({
 
     if (filters.search.trim()) {
       active.push({ key: "search", label: "Busca", value: filters.search.trim() });
-    }
-
-    if (filters.situacao) {
-      active.push({
-        key: "situacao",
-        label: "Situacao",
-        value: getOptionLabel(SITUACAO_OPTIONS, filters.situacao),
-      });
     }
 
     if (filters.vinculo) {
@@ -183,24 +168,6 @@ export default function SecretariaFilters({
           label="Busca geral"
           placeholder="Nome, CNPJ, telefone, descricao ou e-mail"
         />
-
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-[var(--foreground-muted)]">
-            Situacao
-          </label>
-          <select
-            value={filters.situacao}
-            onChange={(event) => updateFilter("situacao", event.target.value)}
-            className="civitas-control"
-          >
-            <option value="">Todas</option>
-            {SITUACAO_OPTIONS.map((option) => (
-              <option key={String(option.value)} value={String(option.value)}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-[var(--foreground-muted)]">

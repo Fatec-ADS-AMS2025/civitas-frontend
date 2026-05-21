@@ -29,13 +29,6 @@ export const buildInstituicaoCampos = (
       type: "select",
       options: secretariaOptions,
     },
-    {
-      key: "situacao",
-      placeholder: "Situacao",
-      local: "filtro",
-      type: "select",
-      options: SITUACAO_OPTIONS,
-    },
   ];
 };
 

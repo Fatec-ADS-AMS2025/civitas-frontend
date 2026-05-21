@@ -88,13 +88,6 @@ const camposConst: FieldConfig[] = [
     type: "select",
     options: TIPO_USUARIO_OPTIONS,
   },
-  {
-    key: "situacao",
-    placeholder: "Situacao",
-    local: "filtro",
-    type: "select",
-    options: SITUACAO_OPTIONS,
-  },
 ];
 
 const usuarioFormFields: ModalFieldConfig[] = [

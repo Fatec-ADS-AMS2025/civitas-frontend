@@ -1,6 +1,8 @@
 export type TableColumn = {
   id: string;
   label: string;
+  sortable?: boolean;
+  sortType?: "auto" | "string" | "number" | "date";
 };
 
 export type TableExportOutputType = "xlsx" | "pdf";
