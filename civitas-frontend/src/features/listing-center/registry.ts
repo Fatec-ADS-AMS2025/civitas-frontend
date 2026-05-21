@@ -1,0 +1,414 @@
+import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
+import { fornecedorService } from "@/hooks/fornecedor";
+import { instituicaoService } from "@/hooks/instituicao";
+import { orcamentoService } from "@/hooks/orcamento";
+import { secretariaService } from "@/hooks/secretaria";
+import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
+import { usuarioService } from "@/hooks/usuario";
+import type FornecedorDTO from "@/models/fornecedor";
+import type InstituicaoDTO from "@/models/instituicao";
+import type OrcamentoDTO from "@/models/orcamento";
+import type SecretariaDTO from "@/models/secretaria";
+import type TipoInstituicaoDTO from "@/models/tipoInstituicao";
+import type UsuarioDTO from "@/models/usuario";
+import type { ListingConfig, ListingPageResult, ListingRegistry } from "./types";
+
+type ListingRow = Record<string, unknown>;
+
+type UsuarioRow = ListingRow & {
+  id: number;
+  nome: string;
+  cpf: string;
+  matricula: string;
+  cidade: string;
+  estado: string;
+  email: string;
+  tipoUsuarioLabel: string;
+  situacaoLabel: string;
+};
+
+type FornecedorRow = ListingRow & {
+  idFornecedor: number;
+  nomeFantasia: string;
+  nome: string;
+  cnpj: string;
+  telefone: string;
+  cidade: string;
+  estado: string;
+  situacaoLabel: string;
+};
+
+type SecretariaRow = ListingRow & {
+  idSecretaria: number;
+  nome: string;
+  descricao: string;
+  cnpj: string;
+  cidade: string;
+  estado: string;
+  situacaoLabel: string;
+};
+
+type InstituicaoRow = ListingRow & {
+  id: number;
+  nome: string;
+  cnpj: string;
+  cidade: string;
+  estado: string;
+  secretariaLabel: string;
+  tipoInstituicaoLabel: string;
+  situacaoLabel: string;
+};
+
+type OrcamentoRow = ListingRow & {
+  idOrcamento: number;
+  ano: number;
+  valor: number;
+  instituicaoLabel: string;
+  tipoDespesaLabel: string;
+  situacaoLabel: string;
+};
+
+const DEFAULT_PAGE_SIZES = [10, 20, 50];
+
+const TIPO_USUARIO_OPTIONS = new Map<number, string>([
+  [1, "Visitante"],
+  [2, "Administrador"],
+  [3, "Funcionario"],
+]);
+
+const buildClientPageResult = <T extends ListingRow>(
+  rows: T[],
+  page: number,
+  pageSize: number,
+): ListingPageResult<T> => {
+  const totalRecords = rows.length;
+  const totalPages = totalRecords === 0 ? 0 : Math.ceil(totalRecords / pageSize);
+  const resolvedPage = totalPages === 0 ? 1 : Math.min(page, totalPages);
+  const start = (resolvedPage - 1) * pageSize;
+  const end = start + pageSize;
+
+  return {
+    rows: rows.slice(start, end),
+    allRows: rows,
+    totalRecords,
+    totalPages,
+    currentPage: resolvedPage,
+    pageSize,
+  };
+};
+
+const buildLookupLabel = (label: string, situacao?: number) =>
+  situacao === SITUACAO_INATIVO ? `${label} (${getSituacaoLabel(situacao)})` : label;
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+
+const mapUsuarioRow = (usuario: UsuarioDTO): UsuarioRow => ({
+  id: usuario.id,
+  nome: usuario.nome,
+  cpf: usuario.cpf,
+  matricula: usuario.matricula,
+  cidade: usuario.cidade,
+  estado: usuario.estado,
+  email: usuario.email,
+  tipoUsuarioLabel: TIPO_USUARIO_OPTIONS.get(usuario.tipoUsuario) ?? "Visitante",
+  situacaoLabel: getSituacaoLabel(usuario.situacao),
+});
+
+const mapFornecedorRow = (fornecedor: FornecedorDTO): FornecedorRow => ({
+  idFornecedor: fornecedor.idFornecedor,
+  nomeFantasia: fornecedor.nomeFantasia,
+  nome: fornecedor.nome,
+  cnpj: fornecedor.cnpj,
+  telefone: fornecedor.telefone,
+  cidade: fornecedor.cidade,
+  estado: fornecedor.estado,
+  situacaoLabel: getSituacaoLabel(fornecedor.situacao),
+});
+
+const loadUsuarioPage: ListingConfig<UsuarioRow>["loadPage"] = async ({
+  page,
+  pageSize,
+}) => {
+  const usuarios = await usuarioService.getAllData({ page: 1, size: 500 });
+  const rows = usuarios.map(mapUsuarioRow);
+  return buildClientPageResult(rows, page, pageSize);
+};
+
+const loadFornecedorPage: ListingConfig<FornecedorRow>["loadPage"] = async ({
+  page,
+  pageSize,
+}) => {
+  const fornecedores = await fornecedorService.getAllData({ page: 1, size: 500 });
+  const rows = fornecedores.map(mapFornecedorRow);
+  return buildClientPageResult(rows, page, pageSize);
+};
+
+const mapSecretariaRow = (secretaria: SecretariaDTO): SecretariaRow => ({
+  idSecretaria: secretaria.idSecretaria,
+  nome: secretaria.nome,
+  descricao: secretaria.descricao,
+  cnpj: secretaria.cnpj,
+  cidade: secretaria.cidade,
+  estado: secretaria.estado,
+  situacaoLabel: getSituacaoLabel(secretaria.situacao),
+});
+
+const loadSecretariaPage: ListingConfig<SecretariaRow>["loadPage"] = async ({
+  page,
+  pageSize,
+}) => {
+  const secretarias = await secretariaService.getAll();
+  const rows = secretarias.map(mapSecretariaRow);
+  return buildClientPageResult(rows, page, pageSize);
+};
+
+const loadInstituicaoPage: ListingConfig<InstituicaoRow>["loadPage"] = async ({
+  page,
+  pageSize,
+}) => {
+  const [instituicoes, secretarias, tiposInstituicao] = await Promise.all([
+    instituicaoService.getAll(),
+    secretariaService.getAll(),
+    tipoInstituicaoService.getAll(),
+  ]);
+
+  const secretariasMap = new Map(
+    secretarias.map((secretaria) => [secretaria.idSecretaria, buildLookupLabel(secretaria.nome, secretaria.situacao)] as const),
+  );
+  const tiposMap = new Map(
+    tiposInstituicao.map((tipo) => [tipo.id, buildLookupLabel(tipo.descricao, tipo.situacao)] as const),
+  );
+
+  const rows = instituicoes.map((instituicao) => ({
+    id: instituicao.id,
+    nome: instituicao.nome,
+    cnpj: instituicao.cnpj,
+    cidade: instituicao.cidade,
+    estado: instituicao.estado,
+    secretariaLabel:
+      secretariasMap.get(instituicao.idSecretaria ?? -1) ?? "Secretaria nao vinculada",
+    tipoInstituicaoLabel:
+      tiposMap.get(instituicao.idTipoInstituicao ?? -1) ?? "Tipo nao vinculado",
+    situacaoLabel: getSituacaoLabel(instituicao.situacao),
+  }));
+
+  return buildClientPageResult(rows, page, pageSize);
+};
+
+const loadOrcamentoPage: ListingConfig<OrcamentoRow>["loadPage"] = async ({
+  page,
+  pageSize,
+}) => {
+  const [orcamentos, instituicoes, tiposInstituicao] = await Promise.all([
+    orcamentoService.getAll(),
+    instituicaoService.getAll(),
+    tipoInstituicaoService.getAll(),
+  ]);
+
+  const instituicoesMap = new Map(
+    instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const),
+  );
+  const tiposMap = new Map(
+    tiposInstituicao.map((tipo) => [tipo.id, tipo.descricao] as const),
+  );
+
+  const rows = orcamentos.map((orcamento: OrcamentoDTO) => {
+    const ano = Number(orcamento.anoOrcamento ?? orcamento.ano ?? 0);
+    const valor = Number(orcamento.valorOrcamento ?? orcamento.valor ?? 0);
+
+    return {
+      idOrcamento: orcamento.idOrcamento,
+      ano,
+      valor,
+      valorFormatado: formatCurrency(valor),
+      instituicaoLabel:
+        instituicoesMap.get(orcamento.idInstituicao ?? -1) ?? "Instituicao nao vinculada",
+      tipoDespesaLabel:
+        tiposMap.get(orcamento.idTipoDespesa ?? -1) ?? "Tipo nao vinculado",
+      situacaoLabel: getSituacaoLabel(orcamento.situacao ?? 1),
+    };
+  });
+
+  return buildClientPageResult(rows, page, pageSize);
+};
+
+const listingRegistry: ListingRegistry = {
+  "central-usuarios": {
+    id: "central-usuarios",
+    label: "Usuarios",
+    description: "Acompanhe perfis, matriculas e status de acesso em uma unica visao.",
+    icon: "group",
+    category: "Acesso",
+    emptyTitle: "Nenhum usuario encontrado",
+    emptyDescription: "Ajuste os filtros ou cadastre novos usuarios no modulo de origem.",
+    defaultPageSize: 10,
+    pageSizeOptions: DEFAULT_PAGE_SIZES,
+    presets: [
+      { id: "todos", label: "Todos" },
+      { id: "ativos", label: "Ativos", filterValues: { situacaoLabel: "Ativo" } },
+      { id: "administradores", label: "Administradores", filterValues: { tipoUsuarioLabel: "Administrador" } },
+    ],
+    columns: [
+      { id: "nome", label: "Nome", accessor: (row) => row.nome, sortType: "text" },
+      { id: "cpf", label: "CPF", accessor: (row) => row.cpf, sortType: "text" },
+      { id: "matricula", label: "Matricula", accessor: (row) => row.matricula, sortType: "text" },
+      { id: "cidade", label: "Cidade", accessor: (row) => row.cidade, sortType: "text" },
+      { id: "estado", label: "Estado", accessor: (row) => row.estado, sortType: "text" },
+      { id: "email", label: "E-mail", accessor: (row) => row.email, sortType: "text" },
+      { id: "tipoUsuarioLabel", label: "Tipo", accessor: (row) => row.tipoUsuarioLabel, sortType: "text" },
+      { id: "situacaoLabel", label: "Situacao", accessor: (row) => row.situacaoLabel, sortType: "text" },
+    ],
+    filters: [
+      { id: "cidade", label: "Cidade", type: "text" },
+      { id: "estado", label: "Estado", type: "text" },
+      { id: "tipoUsuarioLabel", label: "Tipo", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select" },
+    ],
+    loadPage: loadUsuarioPage,
+    getRowId: (row) => String(row.id),
+  },
+  "central-fornecedores": {
+    id: "central-fornecedores",
+    label: "Fornecedores",
+    description: "Centralize a visualizacao de contato, localidade e situacao dos fornecedores.",
+    icon: "box",
+    category: "Cadastros",
+    emptyTitle: "Nenhum fornecedor encontrado",
+    emptyDescription: "Tente outro conjunto de filtros para localizar fornecedores.",
+    defaultPageSize: 10,
+    pageSizeOptions: DEFAULT_PAGE_SIZES,
+    presets: [
+      { id: "todos", label: "Todos" },
+      { id: "ativos", label: "Ativos", filterValues: { situacaoLabel: "Ativo" } },
+      { id: "interior", label: "Somente por cidade", description: "Filtre por cidade e telefone." },
+    ],
+    columns: [
+      { id: "nomeFantasia", label: "Nome Fantasia", accessor: (row) => row.nomeFantasia, sortType: "text" },
+      { id: "nome", label: "Razao Social", accessor: (row) => row.nome, sortType: "text" },
+      { id: "cnpj", label: "CNPJ", accessor: (row) => row.cnpj, sortType: "text" },
+      { id: "telefone", label: "Telefone", accessor: (row) => row.telefone, sortType: "text" },
+      { id: "cidade", label: "Cidade", accessor: (row) => row.cidade, sortType: "text" },
+      { id: "estado", label: "Estado", accessor: (row) => row.estado, sortType: "text" },
+      { id: "situacaoLabel", label: "Situacao", accessor: (row) => row.situacaoLabel, sortType: "text" },
+    ],
+    filters: [
+      { id: "cidade", label: "Cidade", type: "text" },
+      { id: "estado", label: "Estado", type: "text" },
+      { id: "situacaoLabel", label: "Situacao", type: "select" },
+    ],
+    loadPage: loadFornecedorPage,
+    getRowId: (row) => String(row.idFornecedor),
+  },
+  "central-secretarias": {
+    id: "central-secretarias",
+    label: "Secretarias",
+    description: "Consulte secretarias e seus dados institucionais em uma visao reutilizavel.",
+    icon: "account_balance",
+    category: "Cadastros",
+    emptyTitle: "Nenhuma secretaria encontrada",
+    emptyDescription: "Nao ha secretarias disponiveis para a selecao atual.",
+    defaultPageSize: 10,
+    pageSizeOptions: DEFAULT_PAGE_SIZES,
+    presets: [
+      { id: "todos", label: "Todos" },
+      { id: "ativos", label: "Ativos", filterValues: { situacaoLabel: "Ativo" } },
+      { id: "inativos", label: "Inativos", filterValues: { situacaoLabel: "Inativo" } },
+    ],
+    columns: [
+      { id: "nome", label: "Nome", accessor: (row) => row.nome, sortType: "text" },
+      { id: "descricao", label: "Descricao", accessor: (row) => row.descricao, sortType: "text" },
+      { id: "cnpj", label: "CNPJ", accessor: (row) => row.cnpj, sortType: "text" },
+      { id: "cidade", label: "Cidade", accessor: (row) => row.cidade, sortType: "text" },
+      { id: "estado", label: "Estado", accessor: (row) => row.estado, sortType: "text" },
+      { id: "situacaoLabel", label: "Situacao", accessor: (row) => row.situacaoLabel, sortType: "text" },
+    ],
+    filters: [
+      { id: "cidade", label: "Cidade", type: "text" },
+      { id: "estado", label: "Estado", type: "text" },
+      { id: "situacaoLabel", label: "Situacao", type: "select" },
+    ],
+    loadPage: loadSecretariaPage,
+    getRowId: (row) => String(row.idSecretaria),
+  },
+  "central-instituicoes": {
+    id: "central-instituicoes",
+    label: "Instituicoes",
+    description: "Reuna instituicoes, vinculos e situacoes sem depender da tela CRUD original.",
+    icon: "flowchart",
+    category: "Cadastros",
+    emptyTitle: "Nenhuma instituicao encontrada",
+    emptyDescription: "Revise os filtros ou aguarde o carregamento de dados vinculados.",
+    defaultPageSize: 10,
+    pageSizeOptions: DEFAULT_PAGE_SIZES,
+    presets: [
+      { id: "todos", label: "Todos" },
+      { id: "ativas", label: "Ativas", filterValues: { situacaoLabel: "Ativo" } },
+      { id: "sem-vinculo", label: "Sem vinculo", filterValues: { tipoInstituicaoLabel: "Tipo nao vinculado" } },
+    ],
+    columns: [
+      { id: "nome", label: "Nome", accessor: (row) => row.nome, sortType: "text" },
+      { id: "cnpj", label: "CNPJ", accessor: (row) => row.cnpj, sortType: "text" },
+      { id: "cidade", label: "Cidade", accessor: (row) => row.cidade, sortType: "text" },
+      { id: "estado", label: "Estado", accessor: (row) => row.estado, sortType: "text" },
+      { id: "secretariaLabel", label: "Secretaria", accessor: (row) => row.secretariaLabel, sortType: "text" },
+      { id: "tipoInstituicaoLabel", label: "Tipo", accessor: (row) => row.tipoInstituicaoLabel, sortType: "text" },
+      { id: "situacaoLabel", label: "Situacao", accessor: (row) => row.situacaoLabel, sortType: "text" },
+    ],
+    filters: [
+      { id: "cidade", label: "Cidade", type: "text" },
+      { id: "estado", label: "Estado", type: "text" },
+      { id: "secretariaLabel", label: "Secretaria", type: "select" },
+      { id: "tipoInstituicaoLabel", label: "Tipo", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select" },
+    ],
+    loadPage: loadInstituicaoPage,
+    getRowId: (row) => String(row.id),
+  },
+  "central-orcamentos": {
+    id: "central-orcamentos",
+    label: "Orcamentos",
+    description: "Visualize diferentes recortes de orcamentos com filtros, ordenacao e exportacao.",
+    icon: "request_quote",
+    category: "Planejamento",
+    emptyTitle: "Nenhum orcamento encontrado",
+    emptyDescription: "Aplique outro recorte para consultar os orcamentos disponiveis.",
+    defaultPageSize: 10,
+    pageSizeOptions: DEFAULT_PAGE_SIZES,
+    presets: [
+      { id: "todos", label: "Todos" },
+      { id: "ativos", label: "Ativos", filterValues: { situacaoLabel: "Ativo" } },
+      { id: "alto-valor", label: "Faixa alta", filterValues: { valor: "100000|" } },
+    ],
+    columns: [
+      { id: "idOrcamento", label: "ID", accessor: (row) => row.idOrcamento, sortType: "number" },
+      { id: "ano", label: "Ano", accessor: (row) => row.ano, sortType: "number" },
+      {
+        id: "valor",
+        label: "Valor",
+        accessor: (row) => row.valor,
+        sortType: "number",
+        align: "right",
+        render: (value) => formatCurrency(Number(value ?? 0)),
+      },
+      { id: "instituicaoLabel", label: "Instituicao", accessor: (row) => row.instituicaoLabel, sortType: "text" },
+      { id: "tipoDespesaLabel", label: "Tipo de Despesa", accessor: (row) => row.tipoDespesaLabel, sortType: "text" },
+      { id: "situacaoLabel", label: "Situacao", accessor: (row) => row.situacaoLabel, sortType: "text" },
+    ],
+    filters: [
+      { id: "ano", label: "Ano", type: "number-range" },
+      { id: "valor", label: "Valor", type: "number-range" },
+      { id: "instituicaoLabel", label: "Instituicao", type: "select" },
+      { id: "tipoDespesaLabel", label: "Tipo de Despesa", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select" },
+    ],
+    loadPage: loadOrcamentoPage,
+    getRowId: (row) => String(row.idOrcamento),
+  },
+};
+
+export const LISTING_CENTER_REGISTRY = listingRegistry;
+export const LISTING_CENTER_CONFIGS = Object.values(listingRegistry);

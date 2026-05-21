@@ -6,6 +6,22 @@ import {
 
 export const NAVIGATION_CATALOG: NavigationItem[] = [
   {
+    key: "central-listagens",
+    label: "Central de Listagens",
+    path: "/dashboard/central-listagens",
+    keywords: ["listagens", "tabelas", "central", "filtros", "exportacao"],
+    features: [
+      "alternar entre listagens",
+      "salvar filtros temporarios",
+      "controlar colunas visiveis",
+      "ordenar por diferentes tipos",
+      "exportar a visualizacao atual",
+    ],
+    category: "Principal",
+    icon: "table_chart",
+    priority: 98,
+  },
+  {
     key: "dashboard",
     label: "Dashboard",
     path: "/dashboard",
