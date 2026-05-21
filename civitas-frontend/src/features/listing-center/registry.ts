@@ -1,10 +1,13 @@
 import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
+import { despesaService } from "@/hooks/despesa";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
+import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
 import { usuarioService } from "@/hooks/usuario";
+import type DespesaDTO from "@/models/despesa";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -68,6 +71,17 @@ type OrcamentoRow = ListingRow & {
   situacaoLabel: string;
 };
 
+type DespesaRow = ListingRow & {
+  id: number;
+  numeroDocumento: string;
+  dataEmissao: string;
+  dataVencimento: string;
+  consumoPrevisto: number;
+  fornecedorLabel: string;
+  tipoDespesaLabel: string;
+  situacaoLabel: string;
+};
+
 const DEFAULT_PAGE_SIZES = [10, 20, 50];
 
 const TIPO_USUARIO_OPTIONS = new Map<number, string>([
@@ -105,6 +119,17 @@ const formatCurrency = (value: number) =>
     style: "currency",
     currency: "BRL",
   }).format(value);
+
+const formatDate = (value: unknown) => {
+  const text = String(value ?? "").trim();
+  if (!text) return "-";
+
+  const [datePart] = text.split("T");
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+  if (!match) return text;
+
+  return `${match[3]}/${match[2]}/${match[1]}`;
+};
 
 const mapUsuarioRow = (usuario: UsuarioDTO): UsuarioRow => ({
   id: usuario.id,
@@ -236,6 +261,75 @@ const loadOrcamentoPage: ListingConfig<OrcamentoRow>["loadPage"] = async ({
   return buildClientPageResult(rows, page, pageSize);
 };
 
+const DESPESA_SORT_BY: Record<string, string> = {
+  numeroDocumento: "numeroDocumento",
+  dataEmissao: "dataEmissao",
+  dataVencimento: "dataVencimento",
+  consumoPrevisto: "consumoPrevisto",
+  fornecedorLabel: "idFornecedor",
+  tipoDespesaLabel: "idTipoDespesa",
+  situacaoLabel: "situacao",
+};
+
+const mapDespesaRow = (
+  despesa: DespesaDTO,
+  fornecedoresMap: Map<number, string>,
+  tiposDespesaMap: Map<number, string>,
+): DespesaRow => {
+  const dataEmissao = despesa.dataEmissao ?? despesa.dataEmicao ?? despesa.data ?? "";
+  const dataVencimento = despesa.dataVencimento ?? despesa.data ?? "";
+  const consumoPrevisto = Number(
+    despesa.consumoPrevisto ?? despesa.valorPrevisto ?? despesa.valor ?? despesa.valorPago ?? 0,
+  );
+
+  return {
+    id: despesa.id,
+    numeroDocumento: String(despesa.numeroDocumento ?? despesa.codigo ?? despesa.id),
+    dataEmissao,
+    dataVencimento,
+    consumoPrevisto: Number.isFinite(consumoPrevisto) ? consumoPrevisto : 0,
+    fornecedorLabel:
+      fornecedoresMap.get(despesa.idFornecedor ?? despesa.fornecedorId ?? -1) ?? "Fornecedor nao vinculado",
+    tipoDespesaLabel:
+      tiposDespesaMap.get(despesa.idTipoDespesa ?? -1) ?? "Tipo nao vinculado",
+    situacaoLabel: getSituacaoLabel(despesa.status ?? despesa.situacao ?? 1),
+  };
+};
+
+const loadDespesaPage: ListingConfig<DespesaRow>["loadPage"] = async ({
+  page,
+  pageSize,
+  sortColumnId,
+  sortDirection,
+}) => {
+  const sortBy = sortColumnId ? DESPESA_SORT_BY[sortColumnId] : undefined;
+  const [despesasPage, fornecedores, tiposDespesa] = await Promise.all([
+    despesaService.getPage({
+      page,
+      size: pageSize,
+      sortBy,
+      sortDirection: sortBy ? sortDirection : undefined,
+    }),
+    fornecedorService.getAllData({ page: 1, size: 500 }),
+    tipoDespesaService.getAllData({ page: 1, size: 500 }),
+  ]);
+
+  const fornecedoresMap = new Map(
+    fornecedores.map((fornecedor) => [fornecedor.idFornecedor, fornecedor.nomeFantasia || fornecedor.nome] as const),
+  );
+  const tiposDespesaMap = new Map(
+    tiposDespesa.map((tipo) => [tipo.id, buildLookupLabel(tipo.descricao, tipo.situacao)] as const),
+  );
+
+  return {
+    rows: despesasPage.items.map((despesa) => mapDespesaRow(despesa, fornecedoresMap, tiposDespesaMap)),
+    totalRecords: despesasPage.totalRecords,
+    totalPages: despesasPage.totalPages,
+    currentPage: despesasPage.currentPage,
+    pageSize: despesasPage.pageSize,
+  };
+};
+
 const listingRegistry: ListingRegistry = {
   "central-usuarios": {
     id: "central-usuarios",
@@ -269,6 +363,60 @@ const listingRegistry: ListingRegistry = {
       { id: "situacaoLabel", label: "Situacao", type: "select" },
     ],
     loadPage: loadUsuarioPage,
+    getRowId: (row) => String(row.id),
+  },
+  "central-despesas": {
+    id: "central-despesas",
+    label: "Despesas",
+    description: "Consulte despesas paginadas pelo servidor com filtros, datas e exportacao da visao atual.",
+    icon: "sell",
+    category: "Financeiro",
+    emptyTitle: "Nenhuma despesa encontrada",
+    emptyDescription: "Ajuste os filtros ou confira se ha despesas disponiveis no backend.",
+    paginationMode: "server",
+    defaultPageSize: 10,
+    pageSizeOptions: DEFAULT_PAGE_SIZES,
+    presets: [
+      { id: "todos", label: "Todos" },
+      { id: "ativas", label: "Ativas", filterValues: { situacaoLabel: "Ativo" } },
+      { id: "alto-consumo", label: "Alto consumo", filterValues: { consumoPrevisto: "500|" } },
+    ],
+    columns: [
+      { id: "numeroDocumento", label: "Documento", accessor: (row) => row.numeroDocumento, sortType: "text" },
+      {
+        id: "dataEmissao",
+        label: "Emissao",
+        accessor: (row) => row.dataEmissao,
+        sortType: "date",
+        render: (value) => formatDate(value),
+      },
+      {
+        id: "dataVencimento",
+        label: "Vencimento",
+        accessor: (row) => row.dataVencimento,
+        sortType: "date",
+        render: (value) => formatDate(value),
+      },
+      {
+        id: "consumoPrevisto",
+        label: "Valor/Consumo",
+        accessor: (row) => row.consumoPrevisto,
+        sortType: "number",
+        align: "right",
+        render: (value) => formatCurrency(Number(value ?? 0)),
+      },
+      { id: "fornecedorLabel", label: "Fornecedor", accessor: (row) => row.fornecedorLabel, sortType: "text" },
+      { id: "tipoDespesaLabel", label: "Tipo", accessor: (row) => row.tipoDespesaLabel, sortType: "text" },
+      { id: "situacaoLabel", label: "Situacao", accessor: (row) => row.situacaoLabel, sortType: "text" },
+    ],
+    filters: [
+      { id: "dataVencimento", label: "Vencimento", type: "date-range" },
+      { id: "consumoPrevisto", label: "Valor/Consumo", type: "number-range" },
+      { id: "fornecedorLabel", label: "Fornecedor", type: "select" },
+      { id: "tipoDespesaLabel", label: "Tipo", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select" },
+    ],
+    loadPage: loadDespesaPage,
     getRowId: (row) => String(row.id),
   },
   "central-fornecedores": {

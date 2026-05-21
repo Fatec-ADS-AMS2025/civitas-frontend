@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 export type ListingSortType = "text" | "number" | "date";
 export type ListingFilterType = "text" | "select" | "number-range" | "date-range";
+export type ListingPaginationMode = "client" | "server";
 export type ListingRow = Record<string, unknown>;
 
 export type ListingOption = {
@@ -36,6 +37,10 @@ export type ListingColumn<T extends ListingRow> = {
 export type ListingLoadParams = {
   page: number;
   pageSize: number;
+  search?: string;
+  filterValues?: Record<string, string>;
+  sortColumnId?: string;
+  sortDirection?: "asc" | "desc";
 };
 
 export type ListingPageResult<T extends ListingRow> = {
@@ -55,6 +60,7 @@ export type ListingConfig<T extends ListingRow> = {
   category: string;
   emptyTitle: string;
   emptyDescription: string;
+  paginationMode?: ListingPaginationMode;
   defaultPageSize?: number;
   pageSizeOptions?: number[];
   presets: ListingPreset[];

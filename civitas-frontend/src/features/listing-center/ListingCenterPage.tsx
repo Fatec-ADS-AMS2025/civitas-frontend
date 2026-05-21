@@ -110,35 +110,49 @@ export default function ListingCenterPage() {
   const storedView = views[activeConfig.id];
   const fallbackView = useMemo(() => getInitialListingViewState(activeConfig), [activeConfig]);
   const viewState = storedView ?? fallbackView;
+  const isServerPaginated = activeConfig.paginationMode === "server";
+  const serverSearchSignature = isServerPaginated ? viewState.search : "";
+  const serverFilterSignature = useMemo(
+    () => (isServerPaginated ? JSON.stringify(viewState.filterValues) : ""),
+    [isServerPaginated, viewState.filterValues],
+  );
+  const serverSortSignature = isServerPaginated
+    ? `${viewState.sortColumnId ?? ""}:${viewState.sortDirection}`
+    : "";
 
   useEffect(() => {
     ensureView(activeConfig.id);
   }, [activeConfig.id, ensureView]);
 
-  useDashboardHeader({
-    title: "Central de Listagens",
-    eyebrow: "Operacao",
-    subtitle:
-      "Um fluxo unico para alternar tabelas, salvar filtros temporarios e exportar a visualizacao atual.",
-    breadcrumbs: [
-      { label: "Home", href: "/dashboard" },
-      { label: "Central de Listagens" },
-    ],
-    actions: [
-      {
-        label: "Atualizar",
-        icon: "refresh",
-        variant: "secondary",
-        onClick: () => setRefreshToken((currentValue) => currentValue + 1),
-      },
-      {
-        label: "Resetar vista",
-        icon: "restart_alt",
-        variant: "ghost",
-        onClick: () => resetView(activeConfig.id),
-      },
-    ],
-  });
+  const dashboardHeaderConfig = useMemo(
+    () => ({
+      title: "Central de Listagens",
+      eyebrow: "Operacao",
+      subtitle:
+        "Um fluxo unico para alternar tabelas, salvar filtros temporarios e exportar a visualizacao atual.",
+      breadcrumbs: [
+        { label: "Home", href: "/dashboard" },
+        { label: "Central de Listagens" },
+      ],
+      actions: [
+        {
+          label: "Atualizar",
+          icon: "refresh",
+          variant: "secondary" as const,
+          onClick: () => setRefreshToken((currentValue) => currentValue + 1),
+        },
+        {
+          label: "Resetar vista",
+          icon: "restart_alt",
+          variant: "ghost" as const,
+          onClick: () => resetView(activeConfig.id),
+        },
+      ],
+    }),
+    [activeConfig.id, resetView],
+  );
+
+  useDashboardHeader(dashboardHeaderConfig);
 
   useEffect(() => {
     let isMounted = true;
@@ -149,6 +163,10 @@ export default function ListingCenterPage() {
         const loadedResult = await activeConfig.loadPage({
           page: viewState.page,
           pageSize: viewState.pageSize,
+          search: viewState.search,
+          filterValues: viewState.filterValues,
+          sortColumnId: viewState.sortColumnId,
+          sortDirection: viewState.sortDirection,
         });
 
         if (!isMounted) {
@@ -192,6 +210,9 @@ export default function ListingCenterPage() {
   }, [
     activeConfig,
     refreshToken,
+    serverFilterSignature,
+    serverSearchSignature,
+    serverSortSignature,
     updateView,
     viewState.page,
     viewState.pageSize,
@@ -218,14 +239,27 @@ export default function ListingCenterPage() {
   );
   const effectiveVisibleColumns =
     visibleColumns.length > 0 ? visibleColumns : activeConfig.columns;
+  const usesServerRows = isServerPaginated && !result?.allRows;
   const totalFilteredPages =
-    sortedRows.length === 0 ? 0 : Math.ceil(sortedRows.length / viewState.pageSize);
+    usesServerRows
+      ? result?.totalPages ?? 0
+      : sortedRows.length === 0
+        ? 0
+        : Math.ceil(sortedRows.length / viewState.pageSize);
   const resolvedPage =
-    totalFilteredPages === 0 ? 1 : Math.min(viewState.page, totalFilteredPages);
+    usesServerRows
+      ? result?.currentPage ?? viewState.page
+      : totalFilteredPages === 0
+        ? 1
+        : Math.min(viewState.page, totalFilteredPages);
   const paginatedRows = useMemo(() => {
+    if (usesServerRows) {
+      return sortedRows;
+    }
+
     const start = (resolvedPage - 1) * viewState.pageSize;
     return sortedRows.slice(start, start + viewState.pageSize);
-  }, [resolvedPage, sortedRows, viewState.pageSize]);
+  }, [resolvedPage, sortedRows, usesServerRows, viewState.pageSize]);
 
   const selectOptionsByFilter = useMemo(() => {
     return activeConfig.filters.reduce<Record<string, { label: string; value: string }[]>>(
@@ -250,7 +284,9 @@ export default function ListingCenterPage() {
       });
   }, [activeConfig.filters, viewState.filterValues]);
 
-  const summaryText = `${sortedRows.length} registro(s) visiveis de ${result?.totalRecords ?? sourceRows.length}`;
+  const summaryText = usesServerRows
+    ? `${sortedRows.length} registro(s) nesta pagina de ${result?.totalRecords ?? sourceRows.length}`
+    : `${sortedRows.length} registro(s) visiveis de ${result?.totalRecords ?? sourceRows.length}`;
 
   useEffect(() => {
     if (resolvedPage === viewState.page) {
@@ -735,7 +771,7 @@ export default function ListingCenterPage() {
           <PaginationControls
             currentPage={resolvedPage}
             totalPages={totalFilteredPages}
-            totalRecords={sortedRows.length}
+            totalRecords={usesServerRows ? result?.totalRecords ?? sortedRows.length : sortedRows.length}
             pageSize={viewState.pageSize}
             pageSizeOptions={pageSizeOptions}
             disabled={isLoading}
