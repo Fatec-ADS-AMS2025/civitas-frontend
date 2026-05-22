@@ -620,9 +620,9 @@ const Table = <T extends TableRow,>({
                       const isSortable = isColumnSortable(column);
                       const sortIcon =
                         sortDirection === "asc"
-                          ? "arrow_upward"
+                          ? "arrow_downward"
                           : sortDirection === "desc"
-                            ? "arrow_downward"
+                            ? "arrow_upward"
                             : "unfold_more";
 
                       return (
