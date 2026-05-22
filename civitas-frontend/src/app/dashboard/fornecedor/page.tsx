@@ -56,7 +56,7 @@ const columns = [
   { id: "nomeFantasia", label: "Nome Fantasia" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 
 const camposConst: FieldConfig[] = [

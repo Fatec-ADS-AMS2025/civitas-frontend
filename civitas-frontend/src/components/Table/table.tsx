@@ -42,6 +42,7 @@ type BaseTableProps<T extends TableRow> = {
   actions?: string[];
   onEdit?: (id: number, data: Partial<T> & Record<string, unknown>) => Promise<unknown>;
   onDelete?: (id: number) => Promise<void>;
+  renderRowActions?: (row: T) => React.ReactNode;
   renderModalExtra?: (row: T, mode: FormMode) => React.ReactNode;
   formFields?: ModalFieldConfig[];
   formValidationSchema?: Record<string, ValidationFn>;
@@ -72,6 +73,7 @@ const Table = <T extends TableRow,>({
   columns,
   onEdit,
   onDelete,
+  renderRowActions,
   renderModalExtra,
   actions,
   formFields,
@@ -91,7 +93,7 @@ const Table = <T extends TableRow,>({
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
   const resolvedActions = actions ?? (onDelete ? ["edit", "view", "delete"] : ["edit", "view"]);
-  const hasActions = resolvedActions.length > 0;
+  const hasActions = Boolean(renderRowActions) || resolvedActions.length > 0;
 
   const [modalAction, setModalAction] = useState<FormMode | null>(null);
   const [selectedContent, setSelectedContent] = useState<T | null>(null);
@@ -209,6 +211,10 @@ const Table = <T extends TableRow,>({
   };
 
   const renderCellValue = (objeto: T, column: TableColumn) => {
+    if (column.render) {
+      return column.render(toRecord(objeto));
+    }
+
     const record = toRecord(objeto);
 
     if (isStatusColumn(column.id)) {
@@ -318,6 +324,10 @@ const Table = <T extends TableRow,>({
 
     const sampleValue = sample
       .map((row) => {
+        if (column.sortValue) {
+          return column.sortValue(toRecord(row));
+        }
+
         if (isStatusColumn(column.id)) {
           return getTableCellText(row, column);
         }
@@ -362,10 +372,12 @@ const Table = <T extends TableRow,>({
       const leftRecord = toRecord(left.row);
       const rightRecord = toRecord(right.row);
 
-      const leftValue =
-        leftRecord[activeColumn.id] ?? getTableCellText(left.row, activeColumn);
-      const rightValue =
-        rightRecord[activeColumn.id] ?? getTableCellText(right.row, activeColumn);
+      const leftValue = activeColumn.sortValue
+        ? activeColumn.sortValue(leftRecord)
+        : leftRecord[activeColumn.id] ?? getTableCellText(left.row, activeColumn);
+      const rightValue = activeColumn.sortValue
+        ? activeColumn.sortValue(rightRecord)
+        : rightRecord[activeColumn.id] ?? getTableCellText(right.row, activeColumn);
 
       const leftEmpty = leftValue === null || leftValue === undefined || leftValue === "";
       const rightEmpty = rightValue === null || rightValue === undefined || rightValue === "";
@@ -671,19 +683,23 @@ const Table = <T extends TableRow,>({
 
                       {hasActions ? (
                         <td className="rounded-sm px-5 py-[14px] align-middle">
-                          <div className="flex items-center justify-center gap-2">
-                            {resolvedActions.includes("view") ? (
-                              renderActionButton("visibility", "view", objeto)
-                            ) : null}
+                          {renderRowActions ? (
+                            renderRowActions(objeto)
+                          ) : (
+                            <div className="flex items-center justify-center gap-2">
+                              {resolvedActions.includes("view") ? (
+                                renderActionButton("visibility", "view", objeto)
+                              ) : null}
 
-                            {resolvedActions.includes("edit") ? (
-                              renderActionButton("edit", "edit", objeto)
-                            ) : null}
+                              {resolvedActions.includes("edit") ? (
+                                renderActionButton("edit", "edit", objeto)
+                              ) : null}
 
-                            {resolvedActions.includes("delete") ? (
-                              renderActionButton("delete", "delete", objeto, "danger")
-                            ) : null}
-                          </div>
+                              {resolvedActions.includes("delete") ? (
+                                renderActionButton("delete", "delete", objeto, "danger")
+                              ) : null}
+                            </div>
+                          )}
                         </td>
                       ) : null}
                     </tr>
@@ -734,17 +750,23 @@ const Table = <T extends TableRow,>({
 
                     {hasActions ? (
                       <div className="mt-4 flex items-center justify-end gap-2">
-                        {resolvedActions.includes("view") ? (
-                          renderActionButton("visibility", "view", objeto)
-                        ) : null}
+                        {renderRowActions ? (
+                          renderRowActions(objeto)
+                        ) : (
+                          <>
+                            {resolvedActions.includes("view") ? (
+                              renderActionButton("visibility", "view", objeto)
+                            ) : null}
 
-                        {resolvedActions.includes("edit") ? (
-                          renderActionButton("edit", "edit", objeto)
-                        ) : null}
+                            {resolvedActions.includes("edit") ? (
+                              renderActionButton("edit", "edit", objeto)
+                            ) : null}
 
-                        {resolvedActions.includes("delete") ? (
-                          renderActionButton("delete", "delete", objeto, "danger")
-                        ) : null}
+                            {resolvedActions.includes("delete") ? (
+                              renderActionButton("delete", "delete", objeto, "danger")
+                            ) : null}
+                          </>
+                        )}
                       </div>
                     ) : null}
                   </div>

@@ -1,8 +1,12 @@
+import type { ReactNode } from "react";
+
 export type TableColumn = {
   id: string;
   label: string;
   sortable?: boolean;
   sortType?: "auto" | "string" | "number" | "date";
+  render?: (row: Record<string, unknown>) => ReactNode;
+  sortValue?: (row: Record<string, unknown>) => unknown;
 };
 
 export type TableExportOutputType = "xlsx" | "pdf";

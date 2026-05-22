@@ -30,7 +30,7 @@ export const secretariaColumns = [
   { id: "descricao", label: "Descricao" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 
 export const secretariaSearchFields: FieldConfig[] = [

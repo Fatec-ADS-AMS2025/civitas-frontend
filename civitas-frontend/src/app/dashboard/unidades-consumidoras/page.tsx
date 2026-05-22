@@ -30,7 +30,7 @@ const columns = [
   { id: "secretariaLabel", label: "Secretaria" },
   { id: "orcamentoLabel", label: "Orcamento" },
   { id: "fornecedorLabel", label: "Fornecedor" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 const novaUnidadeConsumidora = { id: 0, identificador: "", idInstituicao: "", idTipoDespesa: "", idSecretaria: "", idOrcamento: "", idFornecedor: "", excluido: false, dataExclusao: "" };
 // Indica quando um registro relacionado está inativo.
