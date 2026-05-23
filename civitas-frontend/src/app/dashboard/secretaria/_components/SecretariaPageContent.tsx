@@ -62,6 +62,42 @@ export default function SecretariaPageContent({
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={secretariaFormFields}
+        displayMode="cards"
+        cardConfig={{
+          icon: "corporate_fare",
+          tone: "teal",
+          eyebrow: (row) => `Secretaria #${String(row.idSecretaria).padStart(3, "0")}`,
+          title: (row) => row.nome || row.descricao || "Secretaria sem nome",
+          subtitle: (row) => row.descricao,
+          badgeColumnId: "situacaoLabel",
+          primaryFields: [
+            { label: "CNPJ", columnId: "cnpj", icon: "badge" },
+            { label: "Telefone", columnId: "telefone", icon: "call" },
+            {
+              label: "Instituicoes",
+              value: (row) => row.totalInstituicoes,
+              icon: "account_balance",
+              tone: "success",
+            },
+          ],
+          relationshipFields: [
+            {
+              label: "Localidade",
+              value: (row) =>
+                [row.cidade, row.estado].filter(Boolean).join(" / ") ||
+                "Localidade nao informada",
+              icon: "location_city",
+            },
+            {
+              label: "Endereco",
+              value: (row) =>
+                [row.logradouro, row.numero, row.bairro].filter(Boolean).join(", ") ||
+                "Endereco nao informado",
+              icon: "home_work",
+            },
+            { label: "E-mail", value: (row) => row.email || "-", icon: "mail" },
+          ],
+        }}
         renderModalExtra={(row, mode) =>
           mode === "view" ? <SecretariaInstituicoesView secretaria={row} /> : null
         }
