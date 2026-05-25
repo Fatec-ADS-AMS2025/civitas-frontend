@@ -30,20 +30,13 @@ export const secretariaColumns = [
   { id: "descricao", label: "Descricao" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 
 export const secretariaSearchFields: FieldConfig[] = [
   { key: "descricao", placeholder: "Descricao", local: "principal" },
   { key: "cnpj", placeholder: "CNPJ", local: "principal" },
   { key: "telefone", placeholder: "Telefone", local: "filtro" },
-  {
-    key: "situacao",
-    placeholder: "Situacao",
-    local: "filtro",
-    type: "select",
-    options: SITUACAO_OPTIONS,
-  },
   { key: "cidade", placeholder: "Cidade", local: "filtro" },
 ];
 

@@ -43,7 +43,6 @@ export const INITIAL_FILTER_FORM: DespesasDashboardFilters = {
   idSecretaria: "",
   idTipoCodigo: "",
   idTipoDespesa: "",
-  situacao: "",
   vencimento: "",
   solicitaUc: "",
 };
