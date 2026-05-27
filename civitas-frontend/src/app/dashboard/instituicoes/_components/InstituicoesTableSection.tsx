@@ -10,6 +10,7 @@ import {
   NOVA_INSTITUICAO,
 } from "../_constants/instituicoes";
 import type { Instituicao, InstituicaoRow } from "../_types";
+import InstituicaoDetailsView from "./InstituicaoDetailsView";
 
 type InstituicoesTableSectionProps = {
   campos: FieldConfig[];
@@ -54,25 +55,9 @@ export default function InstituicoesTableSection({
         onDelete={onDelete}
         formFields={formFields}
         formHiddenFields={["id"]}
-        displayMode="cards"
-        cardConfig={{
-          icon: "account_balance",
-          tone: "teal",
-          eyebrow: (row) => `Instituicao #${String(row.id).padStart(3, "0")}`,
-          title: (row) => row.nome || "Instituicao sem nome",
-          subtitle: (row) => row.secretariaLabel,
-          badgeColumnId: "situacaoLabel",
-          primaryFields: [
-            { label: "Tipo", columnId: "tipoInstituicaoLabel", icon: "domain" },
-            { label: "Gastos", columnId: "totalGastosFormatado", icon: "payments", tone: "amber" },
-            { label: "Saldo", columnId: "saldoFormatado", icon: "savings", tone: "success" },
-          ],
-          relationshipFields: [
-            { label: "Secretaria", columnId: "secretariaLabel", icon: "corporate_fare" },
-            { label: "Despesas", columnId: "quantidadeDespesas", icon: "receipt_long" },
-            { label: "Codigos", columnId: "quantidadeCodigos", icon: "qr_code_2" },
-          ],
-        }}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <InstituicaoDetailsView instituicao={row} /> : null
+        }
         exportConfig={{
           enabled: true,
           title: "Instituicoes",

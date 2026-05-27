@@ -4,7 +4,6 @@ import type { DespesasDashboardFilters } from "@/hooks/useDespesasDashboard";
 import {
   FILTER_FIELD_CLASS_NAME,
   SOLICITA_UC_OPTIONS,
-  STATUS_OPTIONS,
   VENCIMENTO_OPTIONS,
 } from "../despesas.constants";
 import type { SelectOption } from "../despesas.types";
@@ -166,14 +165,6 @@ const buildActiveFilters = (
     });
   }
 
-  if (filterForm.situacao) {
-    activeFilters.push({
-      key: "situacao",
-      label: "Status",
-      value: getOptionLabel(STATUS_OPTIONS, filterForm.situacao),
-    });
-  }
-
   if (filterForm.vencimento) {
     activeFilters.push({
       key: "vencimento",
@@ -249,7 +240,7 @@ export default function DespesasFiltros({
           </h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
             Os filtros aplicam automaticamente e tambem podem ser confirmados no
-            botao Aplicar. Use os atalhos para status e vencimento ou refine por
+            botao Aplicar. Use os atalhos para vencimento ou refine por
             secretaria, instituicao, periodo e categoria.
           </p>
         </div>
@@ -270,18 +261,6 @@ export default function DespesasFiltros({
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2">
-        <QuickFilterButton
-          active={filterForm.situacao === "1"}
-          label="A pagar"
-          icon="pending_actions"
-          onClick={() => toggleFilter("situacao", "1")}
-        />
-        <QuickFilterButton
-          active={filterForm.situacao === "2"}
-          label="Pagas"
-          icon="task_alt"
-          onClick={() => toggleFilter("situacao", "2")}
-        />
         <QuickFilterButton
           active={filterForm.vencimento === "atrasadas"}
           label="Vencidas"
@@ -352,13 +331,6 @@ export default function DespesasFiltros({
           emptyLabel="Todas as categorias"
           options={tipoDespesaOptions}
           onChange={(value) => updateFilter("idTipoDespesa", value)}
-        />
-        <FilterSelect
-          label="Status"
-          value={filterForm.situacao}
-          emptyLabel="Todos os status"
-          options={STATUS_OPTIONS}
-          onChange={(value) => updateFilter("situacao", value)}
         />
         <FilterSelect
           label="Vencimento"

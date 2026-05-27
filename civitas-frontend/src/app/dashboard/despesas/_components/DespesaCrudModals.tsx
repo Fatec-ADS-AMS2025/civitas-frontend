@@ -4,6 +4,7 @@ import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import Modal from "@/components/modal";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { buildDespesaFormObject } from "../despesas.utils";
+import DespesaDetailsView from "./DespesaDetailsView";
 import DespesaForm, {
   type DespesaResponsavelOption,
   type DespesaUcOption,
@@ -107,6 +108,7 @@ export default function DespesaCrudModals({
             type="view"
             fields={viewFields}
             hiddenFields={[]}
+            extraContent={<DespesaDetailsView despesa={viewingDespesa} />}
             onCancel={() => setViewingDespesa(null)}
           />
         </Modal>

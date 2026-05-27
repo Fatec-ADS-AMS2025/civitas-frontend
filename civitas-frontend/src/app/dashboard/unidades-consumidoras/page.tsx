@@ -20,9 +20,8 @@ import OrcamentoDTO from "@/models/orcamento";
 import SecretariaDTO from "@/models/secretaria";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 import UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
+import UnidadeConsumidoraDetailsView from "./_components/UnidadeConsumidoraDetailsView";
 
-// Filtro local de status para busca avançada.
-const STATUS_OPTIONS = [{ value: "Ativo", label: "Ativo" }, { value: "Inativo", label: "Inativo" }];
 const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = { page: 1, size: 20 };
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 const columns = [
@@ -32,12 +31,12 @@ const columns = [
   { id: "secretariaLabel", label: "Secretaria" },
   { id: "orcamentoLabel", label: "Orcamento" },
   { id: "fornecedorLabel", label: "Fornecedor" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 const novaUnidadeConsumidora = { id: 0, identificador: "", idInstituicao: "", idTipoDespesa: "", idSecretaria: "", idOrcamento: "", idFornecedor: "", excluido: false, dataExclusao: "" };
 // Indica quando um registro relacionado está inativo.
 const toLabel = (label: string, situacao?: number) => situacao === SITUACAO_INATIVO ? `${label} (${getSituacaoLabel(situacao)})` : label;
-type UnidadeConsumidoraRow = UnidadeConsumidoraDTO & { instituicaoLabel: string; tipoDespesaLabel: string; secretariaLabel: string; orcamentoLabel: string; fornecedorLabel: string; situacaoLabel: string };
+export type UnidadeConsumidoraRow = UnidadeConsumidoraDTO & { instituicaoLabel: string; tipoDespesaLabel: string; secretariaLabel: string; orcamentoLabel: string; fornecedorLabel: string; situacaoLabel: string };
 type PaginationState = Pick<PaginatedResult<UnidadeConsumidoraRow>, "currentPage" | "pageSize" | "totalPages" | "totalRecords">;
 type UnidadeConsumidoraLookups = {
   instituicoes: InstituicaoDTO[];
@@ -215,7 +214,6 @@ export default function Page() {
       { key: "idSecretaria", placeholder: "Secretaria", local: "filtro", type: "select", options: secretariaOptions },
       { key: "idOrcamento", placeholder: "Orcamento", local: "filtro", type: "select", options: orcamentoOptions },
       { key: "idFornecedor", placeholder: "Fornecedor", local: "filtro", type: "select", options: fornecedorOptions },
-      { key: "situacaoLabel", placeholder: "Situacao", local: "filtro", type: "select", options: STATUS_OPTIONS },
     ]);
   }, [fornecedorOptions, instituicaoOptions, orcamentoOptions, secretariaOptions, tipoDespesaOptions]);
 
@@ -271,6 +269,9 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={formFields}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <UnidadeConsumidoraDetailsView unidade={row} /> : null
+        }
         emptyTitle="Nenhuma unidade consumidora cadastrada"
         emptyDescription="Cadastre uma nova unidade consumidora para iniciar o controle."
         exportConfig={{ enabled: true, title: "Unidades Consumidoras", fileName: "unidades-consumidoras", allData: data }}

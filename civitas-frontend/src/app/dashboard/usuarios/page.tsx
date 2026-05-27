@@ -15,10 +15,11 @@ import { usuarioService } from "@/hooks/usuario";
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import UsuarioDTO from "@/models/usuario";
 import type { ListQuery, PaginatedResult } from "@/hooks/generic";
+import UsuarioDetailsView from "./_components/UsuarioDetailsView";
 import UsuariosSkeleton from "./skeleton";
 
 type User = UsuarioDTO;
-type UserRow = User & {
+export type UserRow = User & {
   tipoUsuarioLabel: string;
   situacaoLabel: string;
 };
@@ -71,7 +72,7 @@ const columns = [
   { id: "estado", label: "Estado" },
   { id: "email", label: "E-mail" },
   { id: "tipoUsuarioLabel", label: "Tipo" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 
 const camposConst: FieldConfig[] = [
@@ -87,13 +88,6 @@ const camposConst: FieldConfig[] = [
     local: "filtro",
     type: "select",
     options: TIPO_USUARIO_OPTIONS,
-  },
-  {
-    key: "situacao",
-    placeholder: "Situacao",
-    local: "filtro",
-    type: "select",
-    options: SITUACAO_OPTIONS,
   },
 ];
 
@@ -350,6 +344,9 @@ const Page = () => {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={usuarioFormFields}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <UsuarioDetailsView usuario={row} /> : null
+        }
         exportConfig={{
           enabled: true,
           title: "Usuarios",

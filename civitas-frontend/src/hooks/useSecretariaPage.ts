@@ -4,9 +4,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FieldConfig } from "@/components/Table/searchbar";
 import { normalizeSecretariaPayload } from "@/global/formPayload";
 import { getSituacaoLabel } from "@/global/situacao";
+import { despesaService } from "@/hooks/despesa";
 import { instituicaoService } from "@/hooks/instituicao";
+import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
+import { buildFinanceRelations } from "@/lib/financeiro-relations";
+import type { FinanceSecretariaResumo } from "@/lib/financeiro-relations";
+import type DespesaDTO from "@/models/despesa";
 import type InstituicaoDTO from "@/models/instituicao";
+import type OrcamentoDTO from "@/models/orcamento";
 import type SecretariaDTO from "@/models/secretaria";
 
 export type Secretaria = SecretariaDTO;
@@ -14,6 +20,12 @@ export type SecretariaRow = Secretaria & {
   situacaoLabel: string;
   totalInstituicoes: number;
   instituicoesRelacionadas: InstituicaoDTO[];
+  quantidadeDespesas: number;
+  quantidadeCodigos: number;
+  totalOrcamentosFormatado: string;
+  totalGastosFormatado: string;
+  saldoFormatado: string;
+  financeiroResumo?: FinanceSecretariaResumo;
 };
 
 export type SecretariaCardFilter =
@@ -46,20 +58,57 @@ const loadInstituicoesSafely = async (): Promise<InstituicaoDTO[]> => {
   }
 };
 
+const loadDespesasSafely = async (): Promise<DespesaDTO[]> => {
+  try {
+    return await despesaService.getAllStatusData();
+  } catch (error) {
+    console.error("Erro ao carregar despesas vinculadas as secretarias:", error);
+    return [];
+  }
+};
+
+const loadOrcamentosSafely = async (): Promise<OrcamentoDTO[]> => {
+  try {
+    return await orcamentoService.getAllData();
+  } catch (error) {
+    console.error("Erro ao carregar orcamentos vinculados as secretarias:", error);
+    return [];
+  }
+};
+
 const mapSecretariaRows = (
   items: Secretaria[],
-  instituicoes: InstituicaoDTO[]
+  instituicoes: InstituicaoDTO[],
+  despesas: DespesaDTO[],
+  orcamentos: OrcamentoDTO[]
 ): SecretariaRow[] => {
+  const relations = buildFinanceRelations({
+    despesas,
+    instituicoes,
+    secretarias: items,
+    orcamentos,
+  });
+  const financeiroMap = new Map(
+    relations.secretarias.map((secretaria) => [secretaria.id, secretaria])
+  );
+
   return items.map((item) => {
     const instituicoesRelacionadas = instituicoes.filter(
       (instituicao) => instituicao.idSecretaria === item.idSecretaria
     );
+    const financeiroResumo = financeiroMap.get(item.idSecretaria);
 
     return {
       ...item,
       situacaoLabel: getSituacaoLabel(item.situacao),
       instituicoesRelacionadas,
       totalInstituicoes: instituicoesRelacionadas.length,
+      quantidadeDespesas: financeiroResumo?.quantidadeDespesas ?? 0,
+      quantidadeCodigos: financeiroResumo?.quantidadeCodigos ?? 0,
+      totalOrcamentosFormatado: financeiroResumo?.totalOrcamentosFormatado ?? "R$ 0,00",
+      totalGastosFormatado: financeiroResumo?.totalGastosFormatado ?? "R$ 0,00",
+      saldoFormatado: financeiroResumo?.saldoFormatado ?? "R$ 0,00",
+      financeiroResumo,
     };
   });
 };
@@ -74,11 +123,18 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
   const [error, setError] = useState<string | null>(null);
 
   const refreshSecretarias = useCallback(async () => {
-    const [items, instituicoesItems] = await Promise.all([
+    const [items, instituicoesItems, despesasItems, orcamentosItems] = await Promise.all([
       secretariaService.getAll(),
       loadInstituicoesSafely(),
+      loadDespesasSafely(),
+      loadOrcamentosSafely(),
     ]);
-    const rows = mapSecretariaRows(items, instituicoesItems);
+    const rows = mapSecretariaRows(
+      items,
+      instituicoesItems,
+      despesasItems,
+      orcamentosItems
+    );
 
     setInstituicoes(instituicoesItems);
     setSecretarias(rows);

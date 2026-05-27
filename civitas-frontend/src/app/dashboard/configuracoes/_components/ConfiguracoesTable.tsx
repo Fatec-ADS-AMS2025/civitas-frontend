@@ -22,12 +22,6 @@ export default function ConfiguracoesTable({
   onUpdate,
   onToggleSituacao,
 }: ConfiguracoesTableProps) {
-  const statusColumn = definition.columns.find((column) => column.id === "situacaoLabel");
-  const titleColumn =
-    definition.columns.find((column) => column.id === "descricao") ??
-    definition.columns.find((column) => column.id === "nome") ??
-    definition.columns[0];
-
   return (
     <Table
       data={dadosFiltrados}
@@ -36,25 +30,6 @@ export default function ConfiguracoesTable({
       onDelete={onToggleSituacao}
       formFields={formFields}
       formHiddenFields={CONFIG_FORM_HIDDEN_FIELDS}
-      displayMode="cards"
-      cardConfig={{
-        icon: "tune",
-        tone: "slate",
-        eyebrow: definition.label,
-        title: (row) => {
-          const record = row as unknown as Record<string, unknown>;
-          return titleColumn ? String(record[titleColumn.id] ?? "Registro") : "Registro";
-        },
-        badgeColumnId: statusColumn?.id,
-        primaryFields: definition.columns
-          .filter((column) => column.id !== statusColumn?.id && column.id !== titleColumn?.id)
-          .map((column) => ({
-            label: column.label,
-            columnId: column.id,
-            icon: column.id.toLowerCase().includes("unidade") ? "straighten" : "label",
-          })),
-        gridClassName: "grid-cols-1 md:grid-cols-2 xl:grid-cols-3",
-      }}
       exportConfig={{
         enabled: true,
         title: definition.label,

@@ -19,11 +19,12 @@ import {
 import { fornecedorService } from "@/hooks/fornecedor";
 import type { ListQuery, PaginatedResult } from "@/hooks/generic";
 import FornecedorDTO from "@/models/fornecedor";
+import FornecedorDetailsView from "./_components/FornecedorDetailsView";
 import FornecedorSkeleton from "./skeleton";
 // Usando o tipo do service
 
 type Fornecedor = FornecedorDTO;
-type FornecedorRow = Fornecedor & { situacaoLabel: string };
+export type FornecedorRow = Fornecedor & { situacaoLabel: string };
 type PaginationState = Pick<
   PaginatedResult<FornecedorRow>,
   "currentPage" | "pageSize" | "totalPages" | "totalRecords"
@@ -56,20 +57,13 @@ const columns = [
   { id: "nomeFantasia", label: "Nome Fantasia" },
   { id: "cnpj", label: "CNPJ" },
   { id: "telefone", label: "Telefone" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 
 const camposConst: FieldConfig[] = [
   { key: "nomeFantasia", placeholder: "Nome Fantasia", local: "principal" },
   { key: "cnpj", placeholder: "CNPJ", local: "principal" },
   { key: "telefone", placeholder: "Telefone", local: "filtro" },
-  {
-    key: "situacao",
-    placeholder: "Situacao",
-    local: "filtro",
-    type: "select",
-    options: SITUACAO_OPTIONS,
-  },
   { key: "cidade", placeholder: "Cidade", local: "filtro" },
 ];
 
@@ -325,6 +319,9 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={fornecedorFormFields}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <FornecedorDetailsView fornecedor={row} /> : null
+        }
         exportConfig={{
           enabled: true,
           title: "Fornecedores",

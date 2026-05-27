@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Form from "../Form/form";
 import type { FormMode, FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
 import Modal from "../modal";
@@ -14,6 +15,7 @@ type TableModalProps<T extends TableRow> = {
   formValidationSchema?: Record<string, ValidationFn>;
   formHiddenFields?: string[];
   renderModalExtra?: (row: T, mode: FormMode) => React.ReactNode;
+  detailsContent?: ReactNode;
   onClose: () => void;
   onEdit?: (id: number, data: Partial<T> & Record<string, unknown>) => Promise<unknown>;
   onDelete?: (id: number) => Promise<void>;
@@ -28,11 +30,25 @@ export function TableModal<T extends TableRow>({
   formValidationSchema,
   formHiddenFields,
   renderModalExtra,
+  detailsContent,
   onClose,
   onEdit,
   onDelete,
 }: TableModalProps<T>) {
   if (!action || !row) return null;
+
+  const extraContent = renderModalExtra ? renderModalExtra(row, action) : undefined;
+
+  if (action === "view" && detailsContent) {
+    return (
+      <Modal setValue={onClose} value={action != null}>
+        <div className="space-y-5">
+          {detailsContent}
+          {extraContent ? <div>{extraContent}</div> : null}
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal setValue={onClose} value={action != null}>
@@ -44,7 +60,7 @@ export function TableModal<T extends TableRow>({
         fields={formFields}
         validationSchema={formValidationSchema}
         hiddenFields={formHiddenFields}
-        extraContent={renderModalExtra ? renderModalExtra(row, action) : undefined}
+        extraContent={extraContent}
         onCancel={onClose}
         onConfirm={async (formData) => {
           try {
