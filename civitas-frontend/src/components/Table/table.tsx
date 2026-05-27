@@ -239,6 +239,11 @@ const Table = <T extends TableRow,>({
     return cellText;
   };
 
+  const getPrimaryColumn = (columnsToUse: TableColumn[]) => {
+    const nonStatus = columnsToUse.find((column) => !isStatusColumn(column.id));
+    return nonStatus ?? columnsToUse[0] ?? null;
+  };
+
   const isColumnSortable = (column: TableColumn) => column.sortable !== false;
 
   const parseNumberValue = (value: unknown): number | null => {
@@ -604,84 +609,151 @@ const Table = <T extends TableRow,>({
             </div>
           ) : null}
 
-          <div className="w-full overflow-x-auto px-4 py-4 sm:px-5 lg:px-6">
-            <table className="w-full min-w-[720px] border-separate border-spacing-y-[10px] text-left text-[var(--foreground)] lg:min-w-[860px]">
-              <thead>
-                <tr className="civitas-table__head text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                  {visibleColumns.map((column) => {
-                    const isActiveSort = sortState.columnId === column.id;
-                    const sortDirection = isActiveSort ? sortState.direction : null;
-                    const isSortable = isColumnSortable(column);
-                    const sortIcon =
-                      sortDirection === "asc"
-                        ? "arrow_downward"
-                        : sortDirection === "desc"
-                          ? "arrow_upward"
-                          : "unfold_more";
+          <div className="hidden md:block">
+            <div className="w-full overflow-x-auto px-4 py-4 sm:px-5 lg:px-6">
+              <table className="w-full min-w-[720px] border-separate border-spacing-y-[10px] text-left text-[var(--foreground)] lg:min-w-[860px]">
+                <thead>
+                  <tr className="civitas-table__head text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+                    {visibleColumns.map((column) => {
+                      const isActiveSort = sortState.columnId === column.id;
+                      const sortDirection = isActiveSort ? sortState.direction : null;
+                      const isSortable = isColumnSortable(column);
+                      const sortIcon =
+                        sortDirection === "asc"
+                          ? "arrow_downward"
+                          : sortDirection === "desc"
+                            ? "arrow_upward"
+                            : "unfold_more";
 
-                    return (
-                      <th
-                        key={column.id}
-                        className="px-5 py-2.5"
-                        aria-sort={
-                          isActiveSort
-                            ? sortDirection === "asc"
-                              ? "ascending"
-                              : "descending"
-                            : "none"
-                        }
-                      >
-                        {isSortable ? (
-                          <button
-                            type="button"
-                            onClick={() => toggleSort(column)}
-                            className="group inline-flex items-center gap-2 text-left text-[var(--foreground)] transition hover:text-[var(--secundary-1)]"
-                          >
-                            <span>{column.label}</span>
-                            <span
-                              className={`material-symbols-outlined text-base ${
-                                sortDirection
-                                  ? "text-[var(--primary-1)]"
-                                  : "text-[var(--foreground-soft)] group-hover:text-[var(--secundary-1)]"
-                              }`}
+                      return (
+                        <th
+                          key={column.id}
+                          className="px-5 py-2.5"
+                          aria-sort={
+                            isActiveSort
+                              ? sortDirection === "asc"
+                                ? "ascending"
+                                : "descending"
+                              : "none"
+                          }
+                        >
+                          {isSortable ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleSort(column)}
+                              className="group inline-flex items-center gap-2 text-left text-[var(--foreground)] transition hover:text-[var(--secundary-1)]"
                             >
-                              {sortIcon}
-                            </span>
-                          </button>
-                        ) : (
-                          <span>{column.label}</span>
-                        )}
-                      </th>
-                    );
-                  })}
-                  {hasActions ? <th className="px-5 py-2.5 text-center">Acoes</th> : null}
-                </tr>
-              </thead>
+                              <span>{column.label}</span>
+                              <span
+                                className={`material-symbols-outlined text-base ${
+                                  sortDirection
+                                    ? "text-[var(--primary-1)]"
+                                    : "text-[var(--foreground-soft)] group-hover:text-[var(--secundary-1)]"
+                                }`}
+                              >
+                                {sortIcon}
+                              </span>
+                            </button>
+                          ) : (
+                            <span>{column.label}</span>
+                          )}
+                        </th>
+                      );
+                    })}
+                    {hasActions ? <th className="px-5 py-2.5 text-center">Acoes</th> : null}
+                  </tr>
+                </thead>
 
-              <tbody>
-                {sortedData.map((objeto, index) => (
-                  <tr
+                <tbody>
+                  {sortedData.map((objeto, index) => (
+                    <tr
+                      key={index}
+                      style={getMotionStyle(index)}
+                      className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:bg-[var(--surface-subtle)] hover:ring-[var(--border-default)]"
+                    >
+                      {visibleColumns.map((column, columnIndex) => (
+                        <td
+                          key={column.id}
+                          className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${columnIndex === 0 ? "rounded-sm" : ""
+                            }`}
+                        >
+                          {renderCellValue(objeto, column)}
+                        </td>
+                      ))}
+
+                      {hasActions ? (
+                        <td className="rounded-sm px-5 py-[14px] align-middle">
+                          {renderRowActions ? (
+                            renderRowActions(objeto)
+                          ) : (
+                            <div className="flex items-center justify-center gap-2">
+                              {resolvedActions.includes("view") ? (
+                                renderActionButton("visibility", "view", objeto)
+                              ) : null}
+
+                              {resolvedActions.includes("edit") ? (
+                                renderActionButton("edit", "edit", objeto)
+                              ) : null}
+
+                              {resolvedActions.includes("delete") ? (
+                                renderActionButton("delete", "delete", objeto, "danger")
+                              ) : null}
+                            </div>
+                          )}
+                        </td>
+                      ) : null}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="block md:hidden">
+            <div className="space-y-4 p-4">
+              {sortedData.map((objeto, index) => {
+                const primaryColumn = getPrimaryColumn(visibleColumns);
+                const statusColumn = visibleColumns.find((column) => isStatusColumn(column.id));
+                const showStatus =
+                  statusColumn && primaryColumn && statusColumn.id !== primaryColumn.id;
+                const detailColumns = visibleColumns.filter(
+                  (column) =>
+                    column.id !== primaryColumn?.id &&
+                    (!statusColumn || column.id !== statusColumn.id)
+                );
+
+                return (
+                  <div
                     key={index}
                     style={getMotionStyle(index)}
-                    className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:bg-[var(--surface-subtle)] hover:ring-[var(--border-default)]"
+                    className="civitas-table__card civitas-enter rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4"
                   >
-                    {visibleColumns.map((column, columnIndex) => (
-                      <td
-                        key={column.id}
-                        className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${
-                          columnIndex === 0 ? "rounded-sm" : ""
-                        }`}
-                      >
-                        {renderCellValue(objeto, column)}
-                      </td>
-                    ))}
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1 break-words">
+                        {primaryColumn ? renderCellValue(objeto, primaryColumn) : null}
+                      </div>
+                      <div>{showStatus && statusColumn ? renderCellValue(objeto, statusColumn) : null}</div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {detailColumns.map((column) => (
+                        <div key={column.id} className="flex flex-col">
+                          <span className="civitas-table__meta text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+                            {column.label}
+                          </span>
+                          <span className="civitas-table__cell break-words text-[15px] font-medium text-[var(--foreground)]">
+                            {renderCellValue(objeto, column)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
 
                     {hasActions ? (
-                      <td className="rounded-sm px-5 py-[14px] align-middle">
+                      <div className="mt-4 flex items-center justify-end gap-2">
                         {renderRowActions ? (
                           renderRowActions(objeto)
                         ) : (
-                          <div className="flex items-center justify-center gap-2">
+                          <>
                             {resolvedActions.includes("view") ? (
                               renderActionButton("visibility", "view", objeto)
                             ) : null}
@@ -693,9 +765,9 @@ const Table = <T extends TableRow,>({
                             {resolvedActions.includes("delete") ? (
                               renderActionButton("delete", "delete", objeto, "danger")
                             ) : null}
-                          </div>
+                          </>
                         )}
-                      </td>
+                      </div>
                     ) : null}
                   </tr>
                 ))}

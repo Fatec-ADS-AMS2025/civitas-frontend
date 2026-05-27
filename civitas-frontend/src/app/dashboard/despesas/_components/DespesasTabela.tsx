@@ -182,47 +182,6 @@ export default function DespesasTabela({
     : "Nenhuma despesa encontrada com os filtros atuais.";
 
   const shouldPaginate = Boolean(paginationEnabled && pagination);
-  const tablePaginationProps =
-    shouldPaginate && pagination
-      ? { paginationEnabled: true as const, pagination }
-      : { paginationEnabled: false as const };
-
-  const renderDespesaActions = (despesa: DespesaDashboardRow) => (
-    <div className="flex items-center justify-center gap-2">
-      <button
-        type="button"
-        onClick={() => onView(despesa)}
-        className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
-        aria-label={`Visualizar ${despesa.registro}`}
-      >
-        <span className="material-symbols-outlined !text-[18px]">visibility</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => onEdit(despesa)}
-        className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
-        aria-label={`Editar ${despesa.registro}`}
-      >
-        <span className="material-symbols-outlined !text-[18px]">edit</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => onPayment(despesa)}
-        className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
-        aria-label={`Atualizar pagamento ${despesa.registro}`}
-      >
-        <span className="material-symbols-outlined !text-[18px]">payments</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => onDelete(despesa)}
-        className="despesas-table-action despesas-table-action--danger flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--status-inactive-text)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-danger-soft)] hover:shadow-[var(--shadow-sm)]"
-        aria-label={`Remover ${despesa.registro}`}
-      >
-        <span className="material-symbols-outlined !text-[18px]">delete</span>
-      </button>
-    </div>
-  );
 
   return (
     <section
@@ -281,17 +240,107 @@ export default function DespesasTabela({
       ) : null}
 
       <div className="px-4 py-5 sm:px-6">
-        <Table
-          data={tableData.visibleDespesas}
-          columns={columns}
-          renderRowActions={renderDespesaActions}
-          isLoading={loading}
-          errorMessage={error}
-          emptyTitle="Nenhuma despesa encontrada"
-          emptyDescription={emptyDescription}
-          exportConfig={{ enabled: false }}
-          {...tablePaginationProps}
-        />
+        {shouldPaginate ? (
+          <Table
+            data={tableData.visibleDespesas}
+            columns={columns}
+            renderRowActions={(row) => {
+              const despesa = row as DespesaDashboardRow;
+              return (
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onView(despesa)}
+                    className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
+                    aria-label={`Visualizar ${despesa.registro}`}
+                  >
+                    <span className="material-symbols-outlined !text-[18px]">visibility</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onEdit(despesa)}
+                    className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
+                    aria-label={`Editar ${despesa.registro}`}
+                  >
+                    <span className="material-symbols-outlined !text-[18px]">edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPayment(despesa)}
+                    className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
+                    aria-label={`Atualizar pagamento ${despesa.registro}`}
+                  >
+                    <span className="material-symbols-outlined !text-[18px]">payments</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(despesa)}
+                    className="despesas-table-action despesas-table-action--danger flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--status-inactive-text)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-danger-soft)] hover:shadow-[var(--shadow-sm)]"
+                    aria-label={`Remover ${despesa.registro}`}
+                  >
+                    <span className="material-symbols-outlined !text-[18px]">delete</span>
+                  </button>
+                </div>
+              );
+            }}
+            isLoading={loading}
+            errorMessage={error}
+            emptyTitle="Nenhuma despesa encontrada"
+            emptyDescription={emptyDescription}
+            exportConfig={{ enabled: false }}
+            paginationEnabled
+            pagination={pagination!}
+          />
+        ) : (
+          <Table
+            data={tableData.visibleDespesas}
+            columns={columns}
+            renderRowActions={(row) => {
+              const despesa = row as DespesaDashboardRow;
+              return (
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onView(despesa)}
+                    className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
+                    aria-label={`Visualizar ${despesa.registro}`}
+                  >
+                    <span className="material-symbols-outlined !text-[18px]">visibility</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onEdit(despesa)}
+                    className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
+                    aria-label={`Editar ${despesa.registro}`}
+                  >
+                    <span className="material-symbols-outlined !text-[18px]">edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPayment(despesa)}
+                    className={`${ICON_BUTTON_CLASS_NAME} despesas-table-action`}
+                    aria-label={`Atualizar pagamento ${despesa.registro}`}
+                  >
+                    <span className="material-symbols-outlined !text-[18px]">payments</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(despesa)}
+                    className="despesas-table-action despesas-table-action--danger flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] text-[var(--status-inactive-text)] shadow-[var(--shadow-xs)] transition-all duration-[var(--motion-duration-fast)] hover:-translate-y-[1px] hover:bg-[var(--surface-danger-soft)] hover:shadow-[var(--shadow-sm)]"
+                    aria-label={`Remover ${despesa.registro}`}
+                  >
+                    <span className="material-symbols-outlined !text-[18px]">delete</span>
+                  </button>
+                </div>
+              );
+            }}
+            isLoading={loading}
+            errorMessage={error}
+            emptyTitle="Nenhuma despesa encontrada"
+            emptyDescription={emptyDescription}
+            exportConfig={{ enabled: false }}
+          />
+        )}
       </div>
 
       <div className="despesas-table-footer flex flex-col gap-2 border-t border-[var(--divider)] bg-[var(--surface-subtle)] px-5 py-4 text-sm text-[var(--foreground-muted)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
