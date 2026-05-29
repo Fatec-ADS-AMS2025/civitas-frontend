@@ -21,8 +21,6 @@ import SecretariaDTO from "@/models/secretaria";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 import UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 
-// Filtro local de status para busca avançada.
-const STATUS_OPTIONS = [{ value: "Ativo", label: "Ativo" }, { value: "Inativo", label: "Inativo" }];
 const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = { page: 1, size: 20 };
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 const columns = [
@@ -32,7 +30,7 @@ const columns = [
   { id: "secretariaLabel", label: "Secretaria" },
   { id: "orcamentoLabel", label: "Orcamento" },
   { id: "fornecedorLabel", label: "Fornecedor" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 const novaUnidadeConsumidora = { id: 0, identificador: "", idInstituicao: "", idTipoDespesa: "", idSecretaria: "", idOrcamento: "", idFornecedor: "", excluido: false, dataExclusao: "" };
 // Indica quando um registro relacionado está inativo.
@@ -215,7 +213,6 @@ export default function Page() {
       { key: "idSecretaria", placeholder: "Secretaria", local: "filtro", type: "select", options: secretariaOptions },
       { key: "idOrcamento", placeholder: "Orcamento", local: "filtro", type: "select", options: orcamentoOptions },
       { key: "idFornecedor", placeholder: "Fornecedor", local: "filtro", type: "select", options: fornecedorOptions },
-      { key: "situacaoLabel", placeholder: "Situacao", local: "filtro", type: "select", options: STATUS_OPTIONS },
     ]);
   }, [fornecedorOptions, instituicaoOptions, orcamentoOptions, secretariaOptions, tipoDespesaOptions]);
 

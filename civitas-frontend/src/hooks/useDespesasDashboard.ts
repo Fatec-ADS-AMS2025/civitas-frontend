@@ -37,7 +37,6 @@ export type DespesasDashboardFilters = {
   idSecretaria: string;
   idTipoCodigo: string;
   idTipoDespesa: string;
-  situacao: string;
   vencimento: string;
   solicitaUc: string;
 };
@@ -108,7 +107,6 @@ const DEFAULT_FILTERS: DespesasDashboardFilters = {
   idSecretaria: "",
   idTipoCodigo: "",
   idTipoDespesa: "",
-  situacao: "",
   vencimento: "",
   solicitaUc: "",
 };
@@ -479,10 +477,6 @@ const matchesDespesaFilters = (
     }
   }
 
-  if (filters.situacao && row.situacao !== Number(filters.situacao)) {
-    return false;
-  }
-
   if (!matchesVencimentoFilter(row, filters.vencimento)) {
     return false;
   }
@@ -505,10 +499,6 @@ const matchesOrcamentoFilters = (
     if ((orcamento.idTipoDespesa ?? 0) !== Number(filters.idTipoDespesa)) {
       return false;
     }
-  }
-
-  if (filters.situacao && Number(orcamento.situacao ?? 0) !== Number(filters.situacao)) {
-    return false;
   }
 
   const hasDateFilter = Boolean(filters.dataInicio || filters.dataFim);

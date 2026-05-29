@@ -71,7 +71,7 @@ const columns = [
   { id: "estado", label: "Estado" },
   { id: "email", label: "E-mail" },
   { id: "tipoUsuarioLabel", label: "Tipo" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 
 const camposConst: FieldConfig[] = [
@@ -87,13 +87,6 @@ const camposConst: FieldConfig[] = [
     local: "filtro",
     type: "select",
     options: TIPO_USUARIO_OPTIONS,
-  },
-  {
-    key: "situacao",
-    placeholder: "Situacao",
-    local: "filtro",
-    type: "select",
-    options: SITUACAO_OPTIONS,
   },
 ];
 
