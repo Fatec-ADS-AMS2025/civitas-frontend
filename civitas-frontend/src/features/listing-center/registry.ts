@@ -85,6 +85,7 @@ type DespesaRow = ListingRow & {
 const DEFAULT_PAGE_SIZES = [10, 20, 50];
 const LISTING_FETCH_SIZE = 5000;
 const SERVER_EXPORT_PAGE_SIZE = 500;
+const SERVER_EXPORT_PAGE_BATCH_SIZE = 3;
 
 const TIPO_USUARIO_OPTIONS = new Map<number, string>([
   [1, "Visitante"],
@@ -326,10 +327,17 @@ const loadDespesaRows = async ({
   const despesas = [...firstPage.items];
   const totalPages = Math.max(firstPage.totalPages, 1);
 
-  if (totalPages > 1) {
-    const remainingPages = Array.from({ length: totalPages - 1 }, (_, index) => index + 2);
+  for (
+    let pageStart = 2;
+    pageStart <= totalPages;
+    pageStart += SERVER_EXPORT_PAGE_BATCH_SIZE
+  ) {
+    const batchPages = Array.from(
+      { length: Math.min(SERVER_EXPORT_PAGE_BATCH_SIZE, totalPages - pageStart + 1) },
+      (_, index) => pageStart + index,
+    );
     const pages = await Promise.all(
-      remainingPages.map((currentPage) =>
+      batchPages.map((currentPage) =>
         despesaService.getPage({
           page: currentPage,
           size: SERVER_EXPORT_PAGE_SIZE,

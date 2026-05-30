@@ -65,8 +65,12 @@ const matchesFilter = (
     return true;
   }
 
-  if (filterDefinition.type === "text" || filterDefinition.type === "select") {
+  if (filterDefinition.type === "text") {
     return normalizeText(rowValue).includes(normalizeText(filterValue));
+  }
+
+  if (filterDefinition.type === "select") {
+    return normalizeText(rowValue) === normalizeText(filterValue);
   }
 
   if (filterDefinition.type === "number-range") {
