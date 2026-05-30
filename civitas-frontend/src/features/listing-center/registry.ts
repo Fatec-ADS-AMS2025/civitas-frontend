@@ -83,6 +83,8 @@ type DespesaRow = ListingRow & {
 };
 
 const DEFAULT_PAGE_SIZES = [10, 20, 50];
+const LISTING_FETCH_SIZE = 5000;
+const SERVER_EXPORT_PAGE_SIZE = 500;
 
 const TIPO_USUARIO_OPTIONS = new Map<number, string>([
   [1, "Visitante"],
@@ -154,21 +156,23 @@ const mapFornecedorRow = (fornecedor: FornecedorDTO): FornecedorRow => ({
   situacaoLabel: getSituacaoLabel(fornecedor.situacao),
 });
 
-const loadUsuarioPage: ListingConfig<UsuarioRow>["loadPage"] = async ({
-  page,
-  pageSize,
-}) => {
-  const usuarios = await usuarioService.getAllData({ page: 1, size: 500 });
-  const rows = usuarios.map(mapUsuarioRow);
+const loadUsuarioRows = async () => {
+  const usuarios = await usuarioService.getAllData({ page: 1, size: LISTING_FETCH_SIZE });
+  return usuarios.map(mapUsuarioRow);
+};
+
+const loadUsuarioPage: ListingConfig<UsuarioRow>["loadPage"] = async ({ page, pageSize }) => {
+  const rows = await loadUsuarioRows();
   return buildClientPageResult(rows, page, pageSize);
 };
 
-const loadFornecedorPage: ListingConfig<FornecedorRow>["loadPage"] = async ({
-  page,
-  pageSize,
-}) => {
-  const fornecedores = await fornecedorService.getAllData({ page: 1, size: 500 });
-  const rows = fornecedores.map(mapFornecedorRow);
+const loadFornecedorRows = async () => {
+  const fornecedores = await fornecedorService.getAllData({ page: 1, size: LISTING_FETCH_SIZE });
+  return fornecedores.map(mapFornecedorRow);
+};
+
+const loadFornecedorPage: ListingConfig<FornecedorRow>["loadPage"] = async ({ page, pageSize }) => {
+  const rows = await loadFornecedorRows();
   return buildClientPageResult(rows, page, pageSize);
 };
 
@@ -182,23 +186,21 @@ const mapSecretariaRow = (secretaria: SecretariaDTO): SecretariaRow => ({
   situacaoLabel: getSituacaoLabel(secretaria.situacao),
 });
 
-const loadSecretariaPage: ListingConfig<SecretariaRow>["loadPage"] = async ({
-  page,
-  pageSize,
-}) => {
-  const secretarias = await secretariaService.getAll();
-  const rows = secretarias.map(mapSecretariaRow);
+const loadSecretariaRows = async () => {
+  const secretarias = await secretariaService.getAllData({ page: 1, size: LISTING_FETCH_SIZE });
+  return secretarias.map(mapSecretariaRow);
+};
+
+const loadSecretariaPage: ListingConfig<SecretariaRow>["loadPage"] = async ({ page, pageSize }) => {
+  const rows = await loadSecretariaRows();
   return buildClientPageResult(rows, page, pageSize);
 };
 
-const loadInstituicaoPage: ListingConfig<InstituicaoRow>["loadPage"] = async ({
-  page,
-  pageSize,
-}) => {
+const loadInstituicaoRows = async () => {
   const [instituicoes, secretarias, tiposInstituicao] = await Promise.all([
-    instituicaoService.getAll(),
-    secretariaService.getAll(),
-    tipoInstituicaoService.getAll(),
+    instituicaoService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
+    secretariaService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
+    tipoInstituicaoService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
   ]);
 
   const secretariasMap = new Map(
@@ -208,7 +210,7 @@ const loadInstituicaoPage: ListingConfig<InstituicaoRow>["loadPage"] = async ({
     tiposInstituicao.map((tipo) => [tipo.id, buildLookupLabel(tipo.descricao, tipo.situacao)] as const),
   );
 
-  const rows = instituicoes.map((instituicao) => ({
+  return instituicoes.map((instituicao) => ({
     id: instituicao.id,
     nome: instituicao.nome,
     cnpj: instituicao.cnpj,
@@ -220,18 +222,21 @@ const loadInstituicaoPage: ListingConfig<InstituicaoRow>["loadPage"] = async ({
       tiposMap.get(instituicao.idTipoInstituicao ?? -1) ?? "Tipo nao vinculado",
     situacaoLabel: getSituacaoLabel(instituicao.situacao),
   }));
-
-  return buildClientPageResult(rows, page, pageSize);
 };
 
-const loadOrcamentoPage: ListingConfig<OrcamentoRow>["loadPage"] = async ({
+const loadInstituicaoPage: ListingConfig<InstituicaoRow>["loadPage"] = async ({
   page,
   pageSize,
 }) => {
+  const rows = await loadInstituicaoRows();
+  return buildClientPageResult(rows, page, pageSize);
+};
+
+const loadOrcamentoRows = async () => {
   const [orcamentos, instituicoes, tiposInstituicao] = await Promise.all([
-    orcamentoService.getAll(),
-    instituicaoService.getAll(),
-    tipoInstituicaoService.getAll(),
+    orcamentoService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
+    instituicaoService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
+    tipoInstituicaoService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
   ]);
 
   const instituicoesMap = new Map(
@@ -241,7 +246,7 @@ const loadOrcamentoPage: ListingConfig<OrcamentoRow>["loadPage"] = async ({
     tiposInstituicao.map((tipo) => [tipo.id, tipo.descricao] as const),
   );
 
-  const rows = orcamentos.map((orcamento: OrcamentoDTO) => {
+  return orcamentos.map((orcamento: OrcamentoDTO) => {
     const ano = Number(orcamento.anoOrcamento ?? orcamento.ano ?? 0);
     const valor = Number(orcamento.valorOrcamento ?? orcamento.valor ?? 0);
 
@@ -257,7 +262,13 @@ const loadOrcamentoPage: ListingConfig<OrcamentoRow>["loadPage"] = async ({
       situacaoLabel: getSituacaoLabel(orcamento.situacao ?? 1),
     };
   });
+};
 
+const loadOrcamentoPage: ListingConfig<OrcamentoRow>["loadPage"] = async ({
+  page,
+  pageSize,
+}) => {
+  const rows = await loadOrcamentoRows();
   return buildClientPageResult(rows, page, pageSize);
 };
 
@@ -296,12 +307,78 @@ const mapDespesaRow = (
   };
 };
 
+const loadDespesaRows = async ({
+  sortColumnId,
+  sortDirection,
+}: Parameters<ListingConfig<DespesaRow>["loadPage"]>[0]) => {
+  const sortBy = sortColumnId ? DESPESA_SORT_BY[sortColumnId] : undefined;
+  const [firstPage, fornecedores, tiposDespesa] = await Promise.all([
+    despesaService.getPage({
+      page: 1,
+      size: SERVER_EXPORT_PAGE_SIZE,
+      sortBy,
+      sortDirection: sortBy ? sortDirection : undefined,
+    }),
+    fornecedorService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
+    tipoDespesaService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
+  ]);
+
+  const despesas = [...firstPage.items];
+  const totalPages = Math.max(firstPage.totalPages, 1);
+
+  if (totalPages > 1) {
+    const remainingPages = Array.from({ length: totalPages - 1 }, (_, index) => index + 2);
+    const pages = await Promise.all(
+      remainingPages.map((currentPage) =>
+        despesaService.getPage({
+          page: currentPage,
+          size: SERVER_EXPORT_PAGE_SIZE,
+          sortBy,
+          sortDirection: sortBy ? sortDirection : undefined,
+        }),
+      ),
+    );
+
+    pages.forEach((pageResult) => {
+      despesas.push(...pageResult.items);
+    });
+  }
+
+  const fornecedoresMap = new Map(
+    fornecedores.map((fornecedor) => [fornecedor.idFornecedor, fornecedor.nomeFantasia || fornecedor.nome] as const),
+  );
+  const tiposDespesaMap = new Map(
+    tiposDespesa.map((tipo) => [tipo.id, buildLookupLabel(tipo.descricao, tipo.situacao)] as const),
+  );
+
+  return despesas.map((despesa) => mapDespesaRow(despesa, fornecedoresMap, tiposDespesaMap));
+};
+
 const loadDespesaPage: ListingConfig<DespesaRow>["loadPage"] = async ({
   page,
   pageSize,
+  search,
+  filterValues,
   sortColumnId,
   sortDirection,
 }) => {
+  const hasLocalConstraints =
+    Boolean(search?.trim()) ||
+    Object.values(filterValues ?? {}).some((value) => Boolean(value));
+
+  if (hasLocalConstraints) {
+    const rows = await loadDespesaRows({
+      page: 1,
+      pageSize,
+      search,
+      filterValues,
+      sortColumnId,
+      sortDirection,
+    });
+
+    return buildClientPageResult(rows, page, pageSize);
+  }
+
   const sortBy = sortColumnId ? DESPESA_SORT_BY[sortColumnId] : undefined;
   const [despesasPage, fornecedores, tiposDespesa] = await Promise.all([
     despesaService.getPage({
@@ -310,10 +387,9 @@ const loadDespesaPage: ListingConfig<DespesaRow>["loadPage"] = async ({
       sortBy,
       sortDirection: sortBy ? sortDirection : undefined,
     }),
-    fornecedorService.getAllData({ page: 1, size: 500 }),
-    tipoDespesaService.getAllData({ page: 1, size: 500 }),
+    fornecedorService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
+    tipoDespesaService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
   ]);
-
   const fornecedoresMap = new Map(
     fornecedores.map((fornecedor) => [fornecedor.idFornecedor, fornecedor.nomeFantasia || fornecedor.nome] as const),
   );
@@ -363,6 +439,7 @@ const listingRegistry: ListingRegistry = {
       { id: "situacaoLabel", label: "Situacao", type: "select" },
     ],
     loadPage: loadUsuarioPage,
+    loadExportRows: loadUsuarioRows,
     getRowId: (row) => String(row.id),
   },
   "central-despesas": {
@@ -417,6 +494,7 @@ const listingRegistry: ListingRegistry = {
       { id: "situacaoLabel", label: "Situacao", type: "select" },
     ],
     loadPage: loadDespesaPage,
+    loadExportRows: loadDespesaRows,
     getRowId: (row) => String(row.id),
   },
   "central-fornecedores": {
@@ -449,6 +527,7 @@ const listingRegistry: ListingRegistry = {
       { id: "situacaoLabel", label: "Situacao", type: "select" },
     ],
     loadPage: loadFornecedorPage,
+    loadExportRows: loadFornecedorRows,
     getRowId: (row) => String(row.idFornecedor),
   },
   "central-secretarias": {
@@ -480,6 +559,7 @@ const listingRegistry: ListingRegistry = {
       { id: "situacaoLabel", label: "Situacao", type: "select" },
     ],
     loadPage: loadSecretariaPage,
+    loadExportRows: loadSecretariaRows,
     getRowId: (row) => String(row.idSecretaria),
   },
   "central-instituicoes": {
@@ -514,6 +594,7 @@ const listingRegistry: ListingRegistry = {
       { id: "situacaoLabel", label: "Situacao", type: "select" },
     ],
     loadPage: loadInstituicaoPage,
+    loadExportRows: loadInstituicaoRows,
     getRowId: (row) => String(row.id),
   },
   "central-orcamentos": {
@@ -554,6 +635,7 @@ const listingRegistry: ListingRegistry = {
       { id: "situacaoLabel", label: "Situacao", type: "select" },
     ],
     loadPage: loadOrcamentoPage,
+    loadExportRows: loadOrcamentoRows,
     getRowId: (row) => String(row.idOrcamento),
   },
 };

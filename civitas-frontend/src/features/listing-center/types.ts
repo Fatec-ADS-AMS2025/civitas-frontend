@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 export type ListingSortType = "text" | "number" | "date";
 export type ListingFilterType = "text" | "select" | "number-range" | "date-range";
 export type ListingPaginationMode = "client" | "server";
+export type ListingViewMode = "single" | "compare";
+export type ListingPanelId = "primary" | "secondary";
 export type ListingRow = Record<string, unknown>;
 
 export type ListingOption = {
@@ -67,6 +69,7 @@ export type ListingConfig<T extends ListingRow> = {
   columns: ListingColumn<T>[];
   filters: ListingFilterDefinition[];
   loadPage: (params: ListingLoadParams) => Promise<ListingPageResult<T>>;
+  loadExportRows?: (params: ListingLoadParams) => Promise<T[]>;
   getRowId: (row: T) => string;
 };
 
@@ -82,3 +85,5 @@ export type ListingViewState = {
   page: number;
   pageSize: number;
 };
+
+export type ListingPanelSelection = Record<ListingPanelId, string>;

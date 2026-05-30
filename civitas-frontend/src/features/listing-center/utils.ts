@@ -7,6 +7,13 @@ import type {
   ListingViewState,
 } from "./types";
 
+type ListingExportSection<T extends Record<string, unknown>> = {
+  title: string;
+  config: ListingConfig<T>;
+  columns: ListingColumn<T>[];
+  rows: T[];
+};
+
 const normalizeText = (value: unknown): string => {
   if (value === null || value === undefined) return "";
 
@@ -23,7 +30,10 @@ const parseNumber = (value: unknown): number | null => {
   }
 
   if (typeof value === "string") {
-    const normalized = value.replace(/[^\d,.-]/g, "").replace(/\.(?=.*\.)/g, "").replace(",", ".");
+    const cleaned = value.replace(/[^\d,.-]/g, "");
+    const normalized = cleaned.includes(",")
+      ? cleaned.replace(/\./g, "").replace(",", ".")
+      : cleaned.replace(/,/g, "");
     const parsed = Number(normalized);
     return Number.isFinite(parsed) ? parsed : null;
   }
@@ -215,19 +225,256 @@ export const exportListingRows = async <T extends Record<string, unknown>>({
   columns,
   rows,
   outputType,
+  title,
+  fileName,
 }: {
   config: ListingConfig<T>;
   columns: ListingColumn<T>[];
   rows: T[];
   outputType: "xlsx" | "pdf";
+  title?: string;
+  fileName?: string;
 }) => {
   await exportTableData({
     outputType,
-    title: config.label,
-    fileName: config.id,
+    title: title ?? config.label,
+    fileName: fileName ?? config.id,
     rows: buildExportRows(rows, columns),
     columns: buildExportColumns(columns),
   });
+};
+
+export const loadListingRowsForExport = async <T extends Record<string, unknown>>(
+  config: ListingConfig<T>,
+  viewState: ListingViewState,
+) => {
+  const loadParams = {
+    page: 1,
+    pageSize: Math.max(viewState.pageSize, 500),
+    search: viewState.search,
+    filterValues: viewState.filterValues,
+    sortColumnId: viewState.sortColumnId,
+    sortDirection: viewState.sortDirection,
+  };
+  const fallbackResult = config.loadExportRows ? null : await config.loadPage(loadParams);
+  const sourceRows = config.loadExportRows
+    ? await config.loadExportRows(loadParams)
+    : fallbackResult?.allRows ?? fallbackResult?.rows ?? [];
+
+  return applyListingSort(
+    applyListingFilters(sourceRows, config, viewState),
+    config.columns,
+    viewState.sortColumnId,
+    viewState.sortDirection,
+  );
+};
+
+const sanitizeFileName = (value: string) => {
+  const normalized = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9-_]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
+
+  return normalized || "exportacao";
+};
+
+const downloadBlob = (blob: Blob, fileName: string) => {
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = objectUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(() => {
+    URL.revokeObjectURL(objectUrl);
+  }, 0);
+};
+
+const getExportDateTime = () =>
+  new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date());
+
+const toSafeSheetName = (value: string, fallback: string) => {
+  const cleaned = value.replace(/[\\/*?:[\]]/g, " ").replace(/\s+/g, " ").trim();
+  return (cleaned || fallback).slice(0, 31);
+};
+
+const styleWorksheet = (worksheet: import("exceljs").Worksheet, columns: TableColumn[]) => {
+  const headerRow = worksheet.getRow(1);
+  headerRow.height = 22;
+  headerRow.eachCell((cell) => {
+    cell.font = {
+      bold: true,
+      color: { argb: "FFFFFFFF" },
+    };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF58AFAE" },
+    };
+    cell.alignment = { vertical: "middle", horizontal: "center" };
+    cell.border = {
+      top: { style: "thin", color: { argb: "FFD5E3E6" } },
+      left: { style: "thin", color: { argb: "FFD5E3E6" } },
+      bottom: { style: "thin", color: { argb: "FFD5E3E6" } },
+      right: { style: "thin", color: { argb: "FFD5E3E6" } },
+    };
+  });
+
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return;
+
+    row.eachCell((cell) => {
+      cell.alignment = {
+        vertical: "middle",
+        horizontal: "left",
+        wrapText: true,
+      };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFE4EEF0" } },
+        left: { style: "thin", color: { argb: "FFE4EEF0" } },
+        bottom: { style: "thin", color: { argb: "FFE4EEF0" } },
+        right: { style: "thin", color: { argb: "FFE4EEF0" } },
+      };
+    });
+  });
+
+  worksheet.columns = columns.map((column, index) => {
+    const columnValues = worksheet
+      .getColumn(index + 1)
+      .values.filter((value) => value !== undefined && value !== null);
+    const maxContentLength = Math.max(
+      column.label.length,
+      ...columnValues.map((value) => String(value).length),
+    );
+
+    return {
+      width: Math.min(Math.max(maxContentLength + 4, 14), 36),
+    };
+  });
+
+  if (columns.length > 0) {
+    worksheet.autoFilter = {
+      from: "A1",
+      to: `${worksheet.getRow(1).getCell(columns.length).address}`,
+    };
+  }
+  worksheet.views = [{ state: "frozen", ySplit: 1 }];
+};
+
+export const exportListingComparison = async <
+  T extends Record<string, unknown>,
+>({
+  outputType,
+  title,
+  fileName,
+  sections,
+}: {
+  outputType: "xlsx" | "pdf";
+  title: string;
+  fileName: string;
+  sections: ListingExportSection<T>[];
+}) => {
+  if (outputType === "xlsx") {
+    const ExcelJS = await import("exceljs");
+    const workbook = new ExcelJS.Workbook();
+
+    sections.forEach((section, index) => {
+      const columns = buildExportColumns(section.columns);
+      const rows = buildExportRows(section.rows, section.columns);
+      const worksheet = workbook.addWorksheet(toSafeSheetName(section.title, `Painel ${index + 1}`));
+
+      worksheet.addRow(columns.map((column) => column.label));
+      rows.forEach((row) => {
+        worksheet.addRow(columns.map((column) => String(row[column.id] ?? "-")));
+      });
+      styleWorksheet(worksheet, columns);
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    downloadBlob(
+      new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      `${sanitizeFileName(fileName)}.xlsx`,
+    );
+    return;
+  }
+
+  const [{ jsPDF }, autoTableModule] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+  ]);
+  const autoTable = autoTableModule.default;
+  const maxColumns = Math.max(...sections.map((section) => section.columns.length));
+  const doc = new jsPDF({
+    orientation: maxColumns > 5 ? "landscape" : "portrait",
+    unit: "pt",
+    format: "a4",
+  });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let currentY = 76;
+
+  doc.setFontSize(16);
+  doc.setTextColor(31, 42, 50);
+  doc.text(title, 40, 42);
+
+  doc.setFontSize(10);
+  doc.setTextColor(90, 107, 116);
+  doc.text(`Gerado em: ${getExportDateTime()}`, 40, 60);
+
+  sections.forEach((section, index) => {
+    if (index > 0) {
+      doc.addPage();
+      currentY = 52;
+    }
+
+    const columns = buildExportColumns(section.columns);
+    const rows = buildExportRows(section.rows, section.columns);
+
+    doc.setFontSize(12);
+    doc.setTextColor(31, 42, 50);
+    doc.text(section.title, 40, currentY);
+
+    autoTable(doc, {
+      startY: currentY + 14,
+      head: [columns.map((column) => column.label)],
+      body: rows.map((row) => columns.map((column) => String(row[column.id] ?? "-"))),
+      theme: "grid",
+      headStyles: {
+        fillColor: [88, 175, 174],
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [247, 250, 251],
+      },
+      styles: {
+        fontSize: 8,
+        cellPadding: 5,
+        lineColor: [228, 238, 240],
+        lineWidth: 0.5,
+        textColor: [51, 51, 51],
+        overflow: "linebreak",
+      },
+      margin: {
+        top: 52,
+        right: 40,
+        bottom: 40,
+        left: 40,
+      },
+      tableWidth: pageWidth - 80,
+    });
+  });
+
+  doc.save(`${sanitizeFileName(fileName)}.pdf`);
 };
 
 export const buildFilterOptionsFromRows = <T extends Record<string, unknown>>(
