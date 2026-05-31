@@ -6,24 +6,36 @@ import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { normalizeOrcamentoPayload } from "@/global/formPayload";
 import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
+import { despesaService } from "@/hooks/despesa";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
+import DespesaDTO from "@/models/despesa";
 import InstituicaoDTO from "@/models/instituicao";
 import OrcamentoDTO from "@/models/orcamento";
 import TipoDespesaDTO from "@/models/tipoDespesa";
+import OrcamentoDetailsView from "./_components/OrcamentoDetailsView";
 import OrcamentosSkeleton from "./skeleton";
 
 type Orcamento = OrcamentoDTO;
+type Despesa = DespesaDTO;
 type Instituicao = InstituicaoDTO;
 type TipoDespesa = TipoDespesaDTO;
-type OrcamentoRow = Orcamento & {
+export type OrcamentoRow = Orcamento & {
   instituicaoLabel: string;
   tipoDespesaLabel: string;
+  valorPrevisto: number;
+  valorRealizado: number;
+  saldo: number;
+  valorPrevistoFormatado: string;
+  valorRealizadoFormatado: string;
+  saldoFormatado: string;
+  quantidadeDespesasRelacionadas: number;
 };
 
 type OrcamentoPageData = {
   orcamentos: Orcamento[];
+  despesas: Despesa[];
   instituicoes: Instituicao[];
   tiposDespesa: TipoDespesa[];
 };
@@ -76,6 +88,38 @@ const buildLookupLabel = (label: string, situacao?: number): string => {
   return label;
 };
 
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+};
+
+const getOrcamentoId = (orcamento: Orcamento): number => {
+  return Number(orcamento.idOrcamento ?? orcamento.id ?? 0);
+};
+
+const getOrcamentoValorPrevisto = (orcamento: Orcamento): number => {
+  const value = Number(orcamento.valorOrcamento ?? orcamento.valor ?? 0);
+  return Number.isFinite(value) ? value : 0;
+};
+
+const getDespesaValorRealizado = (despesa: Despesa): number => {
+  const value = Number(
+    despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0
+  );
+  return Number.isFinite(value) ? value : 0;
+};
+
+const loadDespesasSafely = async (): Promise<Despesa[]> => {
+  try {
+    return await despesaService.getAllStatusData();
+  } catch (error) {
+    console.error("Erro ao carregar despesas vinculadas aos orcamentos:", error);
+    return [];
+  }
+};
+
 const validatePositiveNumber = (fieldLabel: string): ModalFieldConfig["validate"] => {
   return (value: unknown) => {
     if (value === undefined || value === null || value === "") {
@@ -93,6 +137,7 @@ const validatePositiveNumber = (fieldLabel: string): ModalFieldConfig["validate"
 
 const mapOrcamentoRows = (
   orcamentos: Orcamento[],
+  despesas: Despesa[],
   instituicoes: Instituicao[],
   tiposDespesa: TipoDespesa[]
 ): OrcamentoRow[] => {
@@ -104,11 +149,28 @@ const mapOrcamentoRows = (
   );
 
   return orcamentos.map((orcamento) => {
+    const orcamentoId = getOrcamentoId(orcamento);
     const instituicaoId = orcamento.idInstituicao;
     const tipoDespesaId = orcamento.idTipoDespesa;
+    const despesasRelacionadas = despesas.filter(
+      (despesa) => Number(despesa.idOrcamento ?? 0) === orcamentoId
+    );
+    const valorPrevisto = getOrcamentoValorPrevisto(orcamento);
+    const valorRealizado = despesasRelacionadas.reduce(
+      (total, despesa) => total + getDespesaValorRealizado(despesa),
+      0
+    );
+    const saldo = valorPrevisto - valorRealizado;
 
     return {
       ...orcamento,
+      valorPrevisto,
+      valorRealizado,
+      saldo,
+      valorPrevistoFormatado: formatCurrency(valorPrevisto),
+      valorRealizadoFormatado: formatCurrency(valorRealizado),
+      saldoFormatado: formatCurrency(saldo),
+      quantidadeDespesasRelacionadas: despesasRelacionadas.length,
       instituicaoLabel:
         instituicaoId !== undefined
           ? instituicaoMap.get(instituicaoId) ?? `Instituicao #${instituicaoId}`
@@ -122,14 +184,16 @@ const mapOrcamentoRows = (
 };
 
 const fetchOrcamentoPageData = async (): Promise<OrcamentoPageData> => {
-  const [orcamentos, instituicoes, tiposDespesa] = await Promise.all([
+  const [orcamentos, despesas, instituicoes, tiposDespesa] = await Promise.all([
     orcamentoService.getAll(),
+    loadDespesasSafely(),
     instituicaoService.getAll(),
     tipoDespesaService.getAll(),
   ]);
 
   return {
     orcamentos,
+    despesas,
     instituicoes,
     tiposDespesa,
   };
@@ -202,6 +266,7 @@ export default function Page() {
     const pageData = await fetchOrcamentoPageData();
     const rows = mapOrcamentoRows(
       pageData.orcamentos,
+      pageData.despesas,
       pageData.instituicoes,
       pageData.tiposDespesa
     );
@@ -223,6 +288,7 @@ export default function Page() {
         const pageData = await fetchOrcamentoPageData();
         const rows = mapOrcamentoRows(
           pageData.orcamentos,
+          pageData.despesas,
           pageData.instituicoes,
           pageData.tiposDespesa
         );
@@ -293,6 +359,9 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={orcamentoFormFields}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <OrcamentoDetailsView orcamento={row} /> : null
+        }
         exportConfig={{
           enabled: true,
           title: "Orcamentos",

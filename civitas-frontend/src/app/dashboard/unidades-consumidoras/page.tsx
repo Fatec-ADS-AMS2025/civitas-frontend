@@ -20,6 +20,7 @@ import OrcamentoDTO from "@/models/orcamento";
 import SecretariaDTO from "@/models/secretaria";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 import UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
+import UnidadeConsumidoraDetailsView from "./_components/UnidadeConsumidoraDetailsView";
 
 const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = { page: 1, size: 20 };
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
@@ -35,7 +36,7 @@ const columns = [
 const novaUnidadeConsumidora = { id: 0, identificador: "", idInstituicao: "", idTipoDespesa: "", idSecretaria: "", idOrcamento: "", idFornecedor: "", excluido: false, dataExclusao: "" };
 // Indica quando um registro relacionado está inativo.
 const toLabel = (label: string, situacao?: number) => situacao === SITUACAO_INATIVO ? `${label} (${getSituacaoLabel(situacao)})` : label;
-type UnidadeConsumidoraRow = UnidadeConsumidoraDTO & { instituicaoLabel: string; tipoDespesaLabel: string; secretariaLabel: string; orcamentoLabel: string; fornecedorLabel: string; situacaoLabel: string };
+export type UnidadeConsumidoraRow = UnidadeConsumidoraDTO & { instituicaoLabel: string; tipoDespesaLabel: string; secretariaLabel: string; orcamentoLabel: string; fornecedorLabel: string; situacaoLabel: string };
 type PaginationState = Pick<PaginatedResult<UnidadeConsumidoraRow>, "currentPage" | "pageSize" | "totalPages" | "totalRecords">;
 type UnidadeConsumidoraLookups = {
   instituicoes: InstituicaoDTO[];
@@ -268,6 +269,9 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={formFields}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <UnidadeConsumidoraDetailsView unidade={row} /> : null
+        }
         emptyTitle="Nenhuma unidade consumidora cadastrada"
         emptyDescription="Cadastre uma nova unidade consumidora para iniciar o controle."
         exportConfig={{ enabled: true, title: "Unidades Consumidoras", fileName: "unidades-consumidoras", allData: data }}

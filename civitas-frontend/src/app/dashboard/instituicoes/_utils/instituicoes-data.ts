@@ -61,6 +61,7 @@ export const mapInstituicaoRows = (
       quantidadeCodigos: resumoFinanceiro?.quantidadeCodigos ?? 0,
       totalGastosFormatado: resumoFinanceiro?.totalGastosFormatado ?? formatCurrency(0),
       saldoFormatado: resumoFinanceiro?.saldoFormatado ?? formatCurrency(0),
+      financeiroResumo: resumoFinanceiro,
     };
   });
 };

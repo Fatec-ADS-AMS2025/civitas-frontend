@@ -19,11 +19,12 @@ import {
 import { fornecedorService } from "@/hooks/fornecedor";
 import type { ListQuery, PaginatedResult } from "@/hooks/generic";
 import FornecedorDTO from "@/models/fornecedor";
+import FornecedorDetailsView from "./_components/FornecedorDetailsView";
 import FornecedorSkeleton from "./skeleton";
 // Usando o tipo do service
 
 type Fornecedor = FornecedorDTO;
-type FornecedorRow = Fornecedor & { situacaoLabel: string };
+export type FornecedorRow = Fornecedor & { situacaoLabel: string };
 type PaginationState = Pick<
   PaginatedResult<FornecedorRow>,
   "currentPage" | "pageSize" | "totalPages" | "totalRecords"
@@ -318,6 +319,9 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={fornecedorFormFields}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <FornecedorDetailsView fornecedor={row} /> : null
+        }
         exportConfig={{
           enabled: true,
           title: "Fornecedores",

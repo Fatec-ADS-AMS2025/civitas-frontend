@@ -22,6 +22,7 @@ export type InstituicaoRow = Instituicao & {
   quantidadeCodigos: number;
   totalGastosFormatado: string;
   saldoFormatado: string;
+  financeiroResumo?: FinanceInstituicaoResumo;
 };
 
 export type InstituicaoPageData = {

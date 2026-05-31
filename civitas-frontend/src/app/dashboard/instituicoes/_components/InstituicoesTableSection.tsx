@@ -10,6 +10,7 @@ import {
   NOVA_INSTITUICAO,
 } from "../_constants/instituicoes";
 import type { Instituicao, InstituicaoRow } from "../_types";
+import InstituicaoDetailsView from "./InstituicaoDetailsView";
 
 type InstituicoesTableSectionProps = {
   campos: FieldConfig[];
@@ -54,6 +55,9 @@ export default function InstituicoesTableSection({
         onDelete={onDelete}
         formFields={formFields}
         formHiddenFields={["id"]}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <InstituicaoDetailsView instituicao={row} /> : null
+        }
         exportConfig={{
           enabled: true,
           title: "Instituicoes",

@@ -68,7 +68,7 @@ export type TableProps<T extends TableRow> = BaseTableProps<T> &
     }
   );
 
-const Table = <T extends TableRow,>({
+function Table<T extends TableRow>({
   data,
   columns,
   onEdit,
@@ -88,7 +88,7 @@ const Table = <T extends TableRow,>({
   paginationEnabled,
   pagination,
   exportConfig,
-}: TableProps<T>) => {
+}: TableProps<T>) {
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
@@ -768,12 +768,13 @@ const Table = <T extends TableRow,>({
                           </>
                         )}
                       </div>
-                    ) : null}
+                                        ) : null}
                   </div>
                 );
               })}
             </div>
           </div>
+
           {shouldShowExportAction ? (
             <div className="flex flex-col gap-3 border-b border-[var(--divider)] px-4 py-4 sm:flex-row sm:items-center sm:justify-start sm:px-5 lg:px-6">
               <button
@@ -877,6 +878,6 @@ const Table = <T extends TableRow,>({
       ) : null}
     </div>
   );
-};
+}
 
 export default Table;
