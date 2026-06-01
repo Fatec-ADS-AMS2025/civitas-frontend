@@ -4,6 +4,7 @@ import type {
   ListingColumn,
   ListingConfig,
   ListingFilterDefinition,
+  ListingPanelId,
   ListingViewState,
 } from "./types";
 
@@ -22,6 +23,50 @@ const normalizeText = (value: unknown): string => {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
+};
+
+const normalizeKeyPart = (value: unknown): string | null => {
+  if (value === null || value === undefined) return null;
+
+  const text = String(value).trim();
+  if (!text || text === "undefined" || text === "null") return null;
+
+  return text;
+};
+
+export const buildListingScopedKey = (
+  fallback: string,
+  ...parts: unknown[]
+): string => {
+  const normalizedParts = parts.map(normalizeKeyPart);
+
+  if (normalizedParts.length === 0 || normalizedParts.some((part) => !part)) {
+    return fallback;
+  }
+
+  return normalizedParts.join(":");
+};
+
+export const buildListingRowKey = <T extends Record<string, unknown>>({
+  panelId,
+  listingId,
+  row,
+  index,
+  getRowId,
+}: {
+  panelId: ListingPanelId;
+  listingId: string;
+  row: T;
+  index: number;
+  getRowId: (row: T) => string;
+}) => {
+  const rowId = normalizeKeyPart(getRowId(row));
+  return buildListingScopedKey(
+    `${panelId}:${listingId}:row-${index}`,
+    panelId,
+    listingId,
+    rowId,
+  );
 };
 
 const parseNumber = (value: unknown): number | null => {

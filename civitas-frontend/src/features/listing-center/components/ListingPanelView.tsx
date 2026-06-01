@@ -1,15 +1,22 @@
+import { useState } from "react";
 import PaginationControls from "@/components/PaginationControls";
 import { EmptyState, ErrorState, LoadingState } from "@/components/feedback-states";
 import type {
   ListingColumn,
   ListingConfig,
   ListingFilterDefinition,
+  ListingPanelId,
   ListingRow,
   ListingViewState,
 } from "../types";
-import { buildFilterOptionsFromRows } from "../utils";
+import {
+  buildFilterOptionsFromRows,
+  buildListingRowKey,
+  buildListingScopedKey,
+} from "../utils";
 
 type ListingPanelViewProps = {
+  panelId: ListingPanelId;
   panelLabel: string;
   config: ListingConfig<ListingRow>;
   viewState: ListingViewState;
@@ -21,7 +28,6 @@ type ListingPanelViewProps = {
   isExporting: boolean;
   error: string | null;
   showFilters: boolean;
-  showColumns: boolean;
   summaryText: string;
   totalPages: number;
   totalRecords: number;
@@ -94,6 +100,7 @@ const buildSelectOptions = (
 };
 
 export function ListingPanelView({
+  panelId,
   panelLabel,
   config,
   viewState,
@@ -105,7 +112,6 @@ export function ListingPanelView({
   isExporting,
   error,
   showFilters,
-  showColumns,
   summaryText,
   totalPages,
   totalRecords,
@@ -122,6 +128,7 @@ export function ListingPanelView({
   onRetry,
   onExport,
 }: ListingPanelViewProps) {
+  const [showColumns, setShowColumns] = useState(false);
   const selectOptionsByFilter = config.filters.reduce<Record<string, { label: string; value: string }[]>>(
     (accumulator, filter) => {
       accumulator[filter.id] = buildSelectOptions(config, filter, sourceRows);
@@ -139,40 +146,49 @@ export function ListingPanelView({
         valueLabel: definition ? getValueLabel(definition, value) : value,
       };
     });
+  const columnSummary = `${visibleColumns.length} de ${config.columns.length} colunas visiveis`;
 
   return (
     <section className="civitas-surface civitas-enter min-w-0 overflow-hidden">
       <div className="border-b border-[var(--divider)] px-4 py-4 sm:px-5 lg:px-6">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="min-w-0">
+        <div className="flex flex-col gap-4">
+          <div className="min-w-0 max-w-4xl">
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
               {panelLabel} / {config.category}
             </p>
             <h3 className="mt-1 text-2xl font-semibold text-[var(--secundary-1)]">
               {config.label}
             </h3>
-            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
               {config.description}
             </p>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] xl:min-w-[520px]">
-            <label className="flex flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
+          <div className="grid gap-3 lg:grid-cols-[minmax(18rem,1fr)_auto]">
+            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium text-[var(--foreground)]">
               <span>Busca global</span>
               <input
                 value={viewState.search}
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder="Busque por qualquer coluna"
-                className="civitas-control min-h-[44px] rounded-sm px-4 py-2.5"
+                className="civitas-control min-h-[44px] w-full rounded-sm px-4 py-2.5"
               />
             </label>
 
-            <div className="flex flex-wrap items-end gap-2">
+            <div className="flex flex-wrap items-end gap-2 lg:justify-end">
+              <button
+                type="button"
+                onClick={() => setShowColumns((currentValue) => !currentValue)}
+                className="civitas-action civitas-action--ghost min-h-[44px] shrink-0 whitespace-nowrap rounded-sm"
+              >
+                <span className="material-symbols-outlined !text-[18px]">view_column</span>
+                {showColumns ? "Ocultar colunas" : "Colunas da tabela"}
+              </button>
               <button
                 type="button"
                 onClick={() => onExport("xlsx")}
                 disabled={isExporting || sortedRows.length === 0}
-                className="civitas-action civitas-action--secondary min-h-[44px] rounded-sm disabled:cursor-not-allowed disabled:opacity-60"
+                className="civitas-action civitas-action--secondary min-h-[44px] shrink-0 whitespace-nowrap rounded-sm disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="material-symbols-outlined !text-[18px]">table_view</span>
                 {isExporting ? "Gerando..." : "Excel"}
@@ -181,7 +197,7 @@ export function ListingPanelView({
                 type="button"
                 onClick={() => onExport("pdf")}
                 disabled={isExporting || sortedRows.length === 0}
-                className="civitas-action civitas-action--primary min-h-[44px] rounded-sm disabled:cursor-not-allowed disabled:opacity-60"
+                className="civitas-action civitas-action--primary min-h-[44px] shrink-0 whitespace-nowrap rounded-sm disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="material-symbols-outlined !text-[18px]">picture_as_pdf</span>
                 {isExporting ? "Gerando..." : "PDF"}
@@ -191,12 +207,18 @@ export function ListingPanelView({
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {config.presets.map((preset) => {
+          {config.presets.map((preset, presetIndex) => {
             const isSelected = viewState.selectedPresetId === preset.id;
 
             return (
               <button
-                key={preset.id}
+                key={buildListingScopedKey(
+                  `${panelId}:${config.id}:preset-${presetIndex}`,
+                  panelId,
+                  config.id,
+                  "preset",
+                  preset.id,
+                )}
                 type="button"
                 onClick={() => onPresetSelect(preset.id)}
                 className={`rounded-sm border px-3 py-2 text-sm font-medium transition-all duration-[var(--motion-duration-fast)] ${
@@ -214,14 +236,21 @@ export function ListingPanelView({
 
       {showFilters ? (
         <div className="border-b border-[var(--divider)] bg-[var(--surface-subtle)] px-4 py-4 sm:px-5 lg:px-6">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {config.filters.map((filter) => {
+          <div className="grid gap-4 md:grid-cols-2">
+            {config.filters.map((filter, filterIndex) => {
               const value = viewState.filterValues[filter.id] ?? "";
               const options = selectOptionsByFilter[filter.id] ?? [];
+              const filterKey = buildListingScopedKey(
+                `${panelId}:${config.id}:filter-${filterIndex}`,
+                panelId,
+                config.id,
+                "filter",
+                filter.id,
+              );
 
               if (filter.type === "select") {
                 return (
-                  <label key={filter.id} className="flex flex-col gap-2 text-sm font-medium">
+                  <label key={filterKey} className="flex flex-col gap-2 text-sm font-medium">
                     <span>{filter.label}</span>
                     <select
                       value={value}
@@ -229,8 +258,16 @@ export function ListingPanelView({
                       className="civitas-control min-h-[44px] rounded-sm px-4 py-2.5"
                     >
                       <option value="">Todos</option>
-                      {options.map((option) => (
-                        <option key={`${filter.id}-${option.value}`} value={option.value}>
+                      {options.map((option, optionIndex) => (
+                        <option
+                          key={buildListingScopedKey(
+                            `${filterKey}:option-${optionIndex}`,
+                            filterKey,
+                            "option",
+                            option.value,
+                          )}
+                          value={option.value}
+                        >
                           {option.label}
                         </option>
                       ))}
@@ -244,7 +281,7 @@ export function ListingPanelView({
                 const inputType = filter.type === "date-range" ? "date" : "number";
 
                 return (
-                  <div key={filter.id} className="flex flex-col gap-2 text-sm font-medium">
+                  <div key={filterKey} className="flex flex-col gap-2 text-sm font-medium">
                     <span>{filter.label}</span>
                     <div className="grid grid-cols-2 gap-2">
                       <input
@@ -271,7 +308,7 @@ export function ListingPanelView({
               }
 
               return (
-                <label key={filter.id} className="flex flex-col gap-2 text-sm font-medium">
+                <label key={filterKey} className="flex flex-col gap-2 text-sm font-medium">
                   <span>{filter.label}</span>
                   <input
                     value={value}
@@ -300,9 +337,16 @@ export function ListingPanelView({
 
           {activeFilterChips.length > 0 ? (
             <div className="mt-4 flex flex-wrap gap-2">
-              {activeFilterChips.map((chip) => (
+              {activeFilterChips.map((chip, chipIndex) => (
                 <button
-                  key={chip.id}
+                  key={buildListingScopedKey(
+                    `${panelId}:${config.id}:chip-${chipIndex}`,
+                    panelId,
+                    config.id,
+                    "chip",
+                    chip.id,
+                    chip.valueLabel,
+                  )}
                   type="button"
                   onClick={() => onFilterChange(chip.id, "")}
                   className="inline-flex items-center gap-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-3 py-2 text-sm text-[var(--foreground)]"
@@ -319,12 +363,22 @@ export function ListingPanelView({
 
       {showColumns ? (
         <div className="border-b border-[var(--divider)] px-4 py-4 sm:px-5 lg:px-6">
+          <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-semibold text-[var(--foreground)]">Colunas da tabela</p>
+            <p className="text-sm text-[var(--foreground-muted)]">{columnSummary}</p>
+          </div>
           <div className="flex flex-wrap gap-2">
-            {config.columns.map((column) => {
+            {config.columns.map((column, columnIndex) => {
               const checked = viewState.visibleColumnIds.includes(column.id);
               return (
                 <label
-                  key={column.id}
+                  key={buildListingScopedKey(
+                    `${panelId}:${config.id}:column-${columnIndex}`,
+                    panelId,
+                    config.id,
+                    "column",
+                    column.id,
+                  )}
                   className="inline-flex items-center gap-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-3 py-2 text-sm"
                 >
                   <input
@@ -367,17 +421,26 @@ export function ListingPanelView({
       ) : (
         <>
           <div className="hidden overflow-x-auto px-4 py-4 md:block sm:px-5 lg:px-6">
-            <table className="min-w-full border-separate border-spacing-y-[10px]">
+            <table className="min-w-[920px] border-separate border-spacing-y-[10px]">
               <thead>
                 <tr className="text-xs uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                  {visibleColumns.map((column) => {
+                  {visibleColumns.map((column, columnIndex) => {
                     const isActiveSort = viewState.sortColumnId === column.id;
                     return (
-                      <th key={column.id} className={`px-4 py-2 ${getCellAlignmentClassName(column.align)}`}>
+                      <th
+                        key={buildListingScopedKey(
+                          `${panelId}:${config.id}:header-${columnIndex}`,
+                          panelId,
+                          config.id,
+                          "header",
+                          column.id,
+                        )}
+                        className={`whitespace-nowrap px-4 py-2 ${getCellAlignmentClassName(column.align)}`}
+                      >
                         <button
                           type="button"
                           onClick={() => onSortChange(column.id)}
-                          className={`inline-flex items-center gap-2 font-semibold ${
+                          className={`inline-flex items-center gap-2 whitespace-nowrap font-semibold ${
                             column.align === "right" ? "ml-auto" : ""
                           }`}
                         >
@@ -392,45 +455,78 @@ export function ListingPanelView({
                 </tr>
               </thead>
               <tbody>
-                {paginatedRows.map((row) => (
-                  <tr
-                    key={config.getRowId(row)}
-                    className="rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[var(--border-soft)]"
-                  >
-                    {visibleColumns.map((column) => (
-                      <td
-                        key={`${config.getRowId(row)}-${column.id}`}
-                        className={`px-4 py-4 align-top text-sm text-[var(--foreground)] ${getCellAlignmentClassName(column.align)}`}
-                      >
-                        {renderColumnValue(column, row)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {paginatedRows.map((row, rowIndex) => {
+                  const rowKey = buildListingRowKey({
+                    panelId,
+                    listingId: config.id,
+                    row,
+                    index: rowIndex,
+                    getRowId: config.getRowId,
+                  });
+
+                  return (
+                    <tr
+                      key={rowKey}
+                      className="rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[var(--border-soft)]"
+                    >
+                      {visibleColumns.map((column, columnIndex) => (
+                        <td
+                          key={buildListingScopedKey(
+                            `${rowKey}:cell-${columnIndex}`,
+                            rowKey,
+                            "cell",
+                            column.id,
+                          )}
+                          className={`max-w-[22rem] break-words px-4 py-4 align-top text-sm text-[var(--foreground)] ${getCellAlignmentClassName(column.align)}`}
+                        >
+                          {renderColumnValue(column, row)}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
           <div className="space-y-4 p-4 md:hidden">
-            {paginatedRows.map((row) => (
-              <article
-                key={config.getRowId(row)}
-                className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4"
-              >
-                <div className="space-y-3">
-                  {visibleColumns.map((column) => (
-                    <div key={`${config.getRowId(row)}-${column.id}`} className="space-y-1">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                        {column.label}
-                      </p>
-                      <div className={`text-sm text-[var(--foreground)] ${getCellAlignmentClassName(column.align)}`}>
-                        {renderColumnValue(column, row)}
+            {paginatedRows.map((row, rowIndex) => {
+              const rowKey = buildListingRowKey({
+                panelId,
+                listingId: config.id,
+                row,
+                index: rowIndex,
+                getRowId: config.getRowId,
+              });
+
+              return (
+                <article
+                  key={rowKey}
+                  className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-4"
+                >
+                  <div className="space-y-3">
+                    {visibleColumns.map((column, columnIndex) => (
+                      <div
+                        key={buildListingScopedKey(
+                          `${rowKey}:card-field-${columnIndex}`,
+                          rowKey,
+                          "card-field",
+                          column.id,
+                        )}
+                        className="space-y-1"
+                      >
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+                          {column.label}
+                        </p>
+                        <div className={`break-words text-sm text-[var(--foreground)] ${getCellAlignmentClassName(column.align)}`}>
+                          {renderColumnValue(column, row)}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </article>
-            ))}
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </>
       )}

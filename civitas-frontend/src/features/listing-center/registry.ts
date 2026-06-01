@@ -1,4 +1,4 @@
-import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
+import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_INATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
@@ -93,6 +93,49 @@ const TIPO_USUARIO_OPTIONS = new Map<number, string>([
   [3, "Funcionario"],
 ]);
 
+const SITUACAO_FILTER_OPTIONS = [
+  { label: getSituacaoLabel(SITUACAO_ATIVO), value: getSituacaoLabel(SITUACAO_ATIVO) },
+  { label: getSituacaoLabel(SITUACAO_INATIVO), value: getSituacaoLabel(SITUACAO_INATIVO) },
+];
+
+const toOptionalNumber = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+};
+
+const getListingSituacaoLabel = (value: unknown) => getSituacaoLabel(toOptionalNumber(value));
+
+const normalizeIdentifierPart = (value: unknown) => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "number" && (!Number.isFinite(value) || value <= 0)) return "";
+
+  const text = String(value).trim();
+  if (!text || text === "undefined" || text === "null") return "";
+
+  return text;
+};
+
+const pickRowIdentifier = (...values: unknown[]) => {
+  for (const value of values) {
+    const text = normalizeIdentifierPart(value);
+    if (!text) continue;
+    return text;
+  }
+
+  return "";
+};
+
+const combineRowIdentifier = (...values: unknown[]) =>
+  values.map(normalizeIdentifierPart).filter(Boolean).join("-");
+
 const buildClientPageResult = <T extends ListingRow>(
   rows: T[],
   page: number,
@@ -115,7 +158,9 @@ const buildClientPageResult = <T extends ListingRow>(
 };
 
 const buildLookupLabel = (label: string, situacao?: number) =>
-  situacao === SITUACAO_INATIVO ? `${label} (${getSituacaoLabel(situacao)})` : label;
+  toOptionalNumber(situacao) === SITUACAO_INATIVO
+    ? `${label} (${getSituacaoLabel(SITUACAO_INATIVO)})`
+    : label;
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", {
@@ -143,7 +188,7 @@ const mapUsuarioRow = (usuario: UsuarioDTO): UsuarioRow => ({
   estado: usuario.estado,
   email: usuario.email,
   tipoUsuarioLabel: TIPO_USUARIO_OPTIONS.get(usuario.tipoUsuario) ?? "Visitante",
-  situacaoLabel: getSituacaoLabel(usuario.situacao),
+  situacaoLabel: getListingSituacaoLabel(usuario.situacao),
 });
 
 const mapFornecedorRow = (fornecedor: FornecedorDTO): FornecedorRow => ({
@@ -154,7 +199,7 @@ const mapFornecedorRow = (fornecedor: FornecedorDTO): FornecedorRow => ({
   telefone: fornecedor.telefone,
   cidade: fornecedor.cidade,
   estado: fornecedor.estado,
-  situacaoLabel: getSituacaoLabel(fornecedor.situacao),
+  situacaoLabel: getListingSituacaoLabel(fornecedor.situacao),
 });
 
 const loadUsuarioRows = async () => {
@@ -184,7 +229,7 @@ const mapSecretariaRow = (secretaria: SecretariaDTO): SecretariaRow => ({
   cnpj: secretaria.cnpj,
   cidade: secretaria.cidade,
   estado: secretaria.estado,
-  situacaoLabel: getSituacaoLabel(secretaria.situacao),
+  situacaoLabel: getListingSituacaoLabel(secretaria.situacao),
 });
 
 const loadSecretariaRows = async () => {
@@ -221,7 +266,7 @@ const loadInstituicaoRows = async () => {
       secretariasMap.get(instituicao.idSecretaria ?? -1) ?? "Secretaria nao vinculada",
     tipoInstituicaoLabel:
       tiposMap.get(instituicao.idTipoInstituicao ?? -1) ?? "Tipo nao vinculado",
-    situacaoLabel: getSituacaoLabel(instituicao.situacao),
+    situacaoLabel: getListingSituacaoLabel(instituicao.situacao),
   }));
 };
 
@@ -260,7 +305,7 @@ const loadOrcamentoRows = async () => {
         instituicoesMap.get(orcamento.idInstituicao ?? -1) ?? "Instituicao nao vinculada",
       tipoDespesaLabel:
         tiposMap.get(orcamento.idTipoDespesa ?? -1) ?? "Tipo nao vinculado",
-      situacaoLabel: getSituacaoLabel(orcamento.situacao ?? 1),
+      situacaoLabel: getListingSituacaoLabel(orcamento.situacao ?? SITUACAO_ATIVO),
     };
   });
 };
@@ -304,7 +349,7 @@ const mapDespesaRow = (
       fornecedoresMap.get(despesa.idFornecedor ?? despesa.fornecedorId ?? -1) ?? "Fornecedor nao vinculado",
     tipoDespesaLabel:
       tiposDespesaMap.get(despesa.idTipoDespesa ?? -1) ?? "Tipo nao vinculado",
-    situacaoLabel: getSituacaoLabel(despesa.status ?? despesa.situacao ?? 1),
+    situacaoLabel: getListingSituacaoLabel(despesa.status ?? despesa.situacao ?? SITUACAO_ATIVO),
   };
 };
 
@@ -436,7 +481,7 @@ const listingRegistry: ListingRegistry = {
       { id: "matricula", label: "Matricula", accessor: (row) => row.matricula, sortType: "text" },
       { id: "cidade", label: "Cidade", accessor: (row) => row.cidade, sortType: "text" },
       { id: "estado", label: "Estado", accessor: (row) => row.estado, sortType: "text" },
-      { id: "email", label: "E-mail", accessor: (row) => row.email, sortType: "text" },
+      { id: "email", label: "E-mail", accessor: (row) => row.email, sortType: "text", defaultVisible: false },
       { id: "tipoUsuarioLabel", label: "Tipo", accessor: (row) => row.tipoUsuarioLabel, sortType: "text" },
       { id: "situacaoLabel", label: "Situacao", accessor: (row) => row.situacaoLabel, sortType: "text" },
     ],
@@ -444,11 +489,11 @@ const listingRegistry: ListingRegistry = {
       { id: "cidade", label: "Cidade", type: "text" },
       { id: "estado", label: "Estado", type: "text" },
       { id: "tipoUsuarioLabel", label: "Tipo", type: "select" },
-      { id: "situacaoLabel", label: "Situacao", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select", options: SITUACAO_FILTER_OPTIONS },
     ],
     loadPage: loadUsuarioPage,
     loadExportRows: loadUsuarioRows,
-    getRowId: (row) => String(row.id),
+    getRowId: (row) => pickRowIdentifier(row.id, row.cpf, row.email, row.nome),
   },
   "central-despesas": {
     id: "central-despesas",
@@ -499,11 +544,11 @@ const listingRegistry: ListingRegistry = {
       { id: "consumoPrevisto", label: "Valor/Consumo", type: "number-range" },
       { id: "fornecedorLabel", label: "Fornecedor", type: "select" },
       { id: "tipoDespesaLabel", label: "Tipo", type: "select" },
-      { id: "situacaoLabel", label: "Situacao", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select", options: SITUACAO_FILTER_OPTIONS },
     ],
     loadPage: loadDespesaPage,
     loadExportRows: loadDespesaRows,
-    getRowId: (row) => String(row.id),
+    getRowId: (row) => pickRowIdentifier(row.id, row.numeroDocumento),
   },
   "central-fornecedores": {
     id: "central-fornecedores",
@@ -518,13 +563,14 @@ const listingRegistry: ListingRegistry = {
     presets: [
       { id: "todos", label: "Todos" },
       { id: "ativos", label: "Ativos", filterValues: { situacaoLabel: "Ativo" } },
+      { id: "inativos", label: "Inativos", filterValues: { situacaoLabel: "Inativo" } },
       { id: "interior", label: "Somente por cidade", description: "Filtre por cidade e telefone." },
     ],
     columns: [
       { id: "nomeFantasia", label: "Nome Fantasia", accessor: (row) => row.nomeFantasia, sortType: "text" },
       { id: "nome", label: "Razao Social", accessor: (row) => row.nome, sortType: "text" },
       { id: "cnpj", label: "CNPJ", accessor: (row) => row.cnpj, sortType: "text" },
-      { id: "telefone", label: "Telefone", accessor: (row) => row.telefone, sortType: "text" },
+      { id: "telefone", label: "Telefone", accessor: (row) => row.telefone, sortType: "text", defaultVisible: false },
       { id: "cidade", label: "Cidade", accessor: (row) => row.cidade, sortType: "text" },
       { id: "estado", label: "Estado", accessor: (row) => row.estado, sortType: "text" },
       { id: "situacaoLabel", label: "Situacao", accessor: (row) => row.situacaoLabel, sortType: "text" },
@@ -532,11 +578,11 @@ const listingRegistry: ListingRegistry = {
     filters: [
       { id: "cidade", label: "Cidade", type: "text" },
       { id: "estado", label: "Estado", type: "text" },
-      { id: "situacaoLabel", label: "Situacao", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select", options: SITUACAO_FILTER_OPTIONS },
     ],
     loadPage: loadFornecedorPage,
     loadExportRows: loadFornecedorRows,
-    getRowId: (row) => String(row.idFornecedor),
+    getRowId: (row) => pickRowIdentifier(row.idFornecedor, row.cnpj, row.nomeFantasia, row.nome),
   },
   "central-secretarias": {
     id: "central-secretarias",
@@ -555,7 +601,7 @@ const listingRegistry: ListingRegistry = {
     ],
     columns: [
       { id: "nome", label: "Nome", accessor: (row) => row.nome, sortType: "text" },
-      { id: "descricao", label: "Descricao", accessor: (row) => row.descricao, sortType: "text" },
+      { id: "descricao", label: "Descricao", accessor: (row) => row.descricao, sortType: "text", defaultVisible: false },
       { id: "cnpj", label: "CNPJ", accessor: (row) => row.cnpj, sortType: "text" },
       { id: "cidade", label: "Cidade", accessor: (row) => row.cidade, sortType: "text" },
       { id: "estado", label: "Estado", accessor: (row) => row.estado, sortType: "text" },
@@ -564,11 +610,11 @@ const listingRegistry: ListingRegistry = {
     filters: [
       { id: "cidade", label: "Cidade", type: "text" },
       { id: "estado", label: "Estado", type: "text" },
-      { id: "situacaoLabel", label: "Situacao", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select", options: SITUACAO_FILTER_OPTIONS },
     ],
     loadPage: loadSecretariaPage,
     loadExportRows: loadSecretariaRows,
-    getRowId: (row) => String(row.idSecretaria),
+    getRowId: (row) => pickRowIdentifier(row.idSecretaria, row.cnpj, row.nome),
   },
   "central-instituicoes": {
     id: "central-instituicoes",
@@ -583,6 +629,7 @@ const listingRegistry: ListingRegistry = {
     presets: [
       { id: "todos", label: "Todos" },
       { id: "ativas", label: "Ativas", filterValues: { situacaoLabel: "Ativo" } },
+      { id: "inativas", label: "Inativas", filterValues: { situacaoLabel: "Inativo" } },
       { id: "sem-vinculo", label: "Sem vinculo", filterValues: { tipoInstituicaoLabel: "Tipo nao vinculado" } },
     ],
     columns: [
@@ -599,11 +646,11 @@ const listingRegistry: ListingRegistry = {
       { id: "estado", label: "Estado", type: "text" },
       { id: "secretariaLabel", label: "Secretaria", type: "select" },
       { id: "tipoInstituicaoLabel", label: "Tipo", type: "select" },
-      { id: "situacaoLabel", label: "Situacao", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select", options: SITUACAO_FILTER_OPTIONS },
     ],
     loadPage: loadInstituicaoPage,
     loadExportRows: loadInstituicaoRows,
-    getRowId: (row) => String(row.id),
+    getRowId: (row) => pickRowIdentifier(row.id, row.cnpj, row.nome),
   },
   "central-orcamentos": {
     id: "central-orcamentos",
@@ -621,7 +668,7 @@ const listingRegistry: ListingRegistry = {
       { id: "alto-valor", label: "Faixa alta", filterValues: { valor: "100000|" } },
     ],
     columns: [
-      { id: "idOrcamento", label: "ID", accessor: (row) => row.idOrcamento, sortType: "number" },
+      { id: "idOrcamento", label: "ID", accessor: (row) => row.idOrcamento, sortType: "number", defaultVisible: false },
       { id: "ano", label: "Ano", accessor: (row) => row.ano, sortType: "number" },
       {
         id: "valor",
@@ -640,11 +687,15 @@ const listingRegistry: ListingRegistry = {
       { id: "valor", label: "Valor", type: "number-range" },
       { id: "instituicaoLabel", label: "Instituicao", type: "select" },
       { id: "tipoDespesaLabel", label: "Tipo de Despesa", type: "select" },
-      { id: "situacaoLabel", label: "Situacao", type: "select" },
+      { id: "situacaoLabel", label: "Situacao", type: "select", options: SITUACAO_FILTER_OPTIONS },
     ],
     loadPage: loadOrcamentoPage,
     loadExportRows: loadOrcamentoRows,
-    getRowId: (row) => String(row.idOrcamento),
+    getRowId: (row) =>
+      pickRowIdentifier(
+        row.idOrcamento,
+        combineRowIdentifier(row.ano, row.instituicaoLabel, row.tipoDespesaLabel),
+      ),
   },
 };
 

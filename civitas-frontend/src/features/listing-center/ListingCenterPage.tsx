@@ -349,7 +349,6 @@ export default function ListingCenterPage() {
   const { mode, setMode } = useListingCenterStore();
   const [refreshToken, setRefreshToken] = useState(0);
   const [showFilters, setShowFilters] = useState(true);
-  const [showColumns, setShowColumns] = useState(false);
   const [isComparisonExporting, setIsComparisonExporting] = useState(false);
   const primaryPanel = useListingPanelModel("primary", refreshToken);
   const secondaryPanel = useListingPanelModel("secondary", refreshToken);
@@ -393,8 +392,9 @@ export default function ListingCenterPage() {
   const exportComparison = async (outputType: "xlsx" | "pdf") => {
     try {
       setIsComparisonExporting(true);
+      const panelsToExport = mode === "compare" ? [primaryPanel, secondaryPanel] : [primaryPanel];
       const sections = await Promise.all(
-        visiblePanels.map(async (panel) => ({
+        panelsToExport.map(async (panel) => ({
           title: `${PANEL_LABEL[panel.panelId]} - ${panel.config.label}`,
           config: panel.config,
           columns: panel.visibleColumns,
@@ -457,24 +457,16 @@ export default function ListingCenterPage() {
             <button
               type="button"
               onClick={() => setShowFilters((currentValue) => !currentValue)}
-              className="civitas-action civitas-action--ghost rounded-sm"
+              className="civitas-action civitas-action--ghost shrink-0 whitespace-nowrap rounded-sm"
             >
               <span className="material-symbols-outlined !text-[18px]">filter_alt</span>
               {showFilters ? "Ocultar filtros" : "Mostrar filtros"}
             </button>
             <button
               type="button"
-              onClick={() => setShowColumns((currentValue) => !currentValue)}
-              className="civitas-action civitas-action--ghost rounded-sm"
-            >
-              <span className="material-symbols-outlined !text-[18px]">view_column</span>
-              Colunas
-            </button>
-            <button
-              type="button"
               onClick={() => void exportComparison("xlsx")}
               disabled={isComparisonExporting}
-              className="civitas-action civitas-action--secondary rounded-sm disabled:cursor-not-allowed disabled:opacity-60"
+              className="civitas-action civitas-action--secondary shrink-0 whitespace-nowrap rounded-sm disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="material-symbols-outlined !text-[18px]">table_view</span>
               {isComparisonExporting ? "Gerando..." : "Exportar visao Excel"}
@@ -483,7 +475,7 @@ export default function ListingCenterPage() {
               type="button"
               onClick={() => void exportComparison("pdf")}
               disabled={isComparisonExporting}
-              className="civitas-action civitas-action--primary rounded-sm disabled:cursor-not-allowed disabled:opacity-60"
+              className="civitas-action civitas-action--primary shrink-0 whitespace-nowrap rounded-sm disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="material-symbols-outlined !text-[18px]">picture_as_pdf</span>
               {isComparisonExporting ? "Gerando..." : "Exportar visao PDF"}
@@ -492,7 +484,7 @@ export default function ListingCenterPage() {
         </div>
 
         {mode === "compare" ? (
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid gap-4 2xl:grid-cols-2">
             {[primaryPanel, secondaryPanel].map((panel) => (
               <div key={panel.panelId} className="min-w-0">
                 <p className="mb-2 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
@@ -516,10 +508,11 @@ export default function ListingCenterPage() {
         )}
       </section>
 
-      <div className={mode === "compare" ? "grid min-w-0 gap-5 xl:grid-cols-2" : "flex min-w-0 flex-col gap-5"}>
+      <div className={mode === "compare" ? "grid min-w-0 gap-5 2xl:grid-cols-2" : "flex min-w-0 flex-col gap-5"}>
         {visiblePanels.map((panel) => (
           <ListingPanelView
             key={panel.panelId}
+            panelId={panel.panelId}
             panelLabel={PANEL_LABEL[panel.panelId]}
             config={panel.config}
             viewState={panel.viewState}
@@ -531,7 +524,6 @@ export default function ListingCenterPage() {
             isExporting={panel.isExporting}
             error={panel.error}
             showFilters={showFilters}
-            showColumns={showColumns}
             summaryText={panel.summaryText}
             totalPages={panel.totalPages}
             totalRecords={panel.totalRecords}
