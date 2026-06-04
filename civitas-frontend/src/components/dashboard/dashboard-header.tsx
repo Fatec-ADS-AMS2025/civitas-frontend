@@ -49,6 +49,15 @@ const DASHBOARD_HEADER_META: Record<string, DashboardHeaderConfig> = {
       { label: "Dashboard" },
     ],
   },
+  "/dashboard/central-listagens": {
+    title: "Central de Listagens",
+    eyebrow: "Operacao",
+    subtitle: "Fluxo unico para navegar entre tabelas dinamicas, filtros e exportacoes.",
+    breadcrumbs: [
+      { label: "Home", href: "/dashboard" },
+      { label: "Central de Listagens" },
+    ],
+  },
   "/dashboard/despesas": {
     title: "Despesas",
     eyebrow: "Operação",
