@@ -22,7 +22,14 @@ type Orcamento = OrcamentoDTO;
 type Despesa = DespesaDTO;
 type Instituicao = InstituicaoDTO;
 type TipoDespesa = TipoDespesaDTO;
+type TipoCadastroOrcamento = "anual" | "mensal";
+
+type OrcamentoFormData = Partial<Orcamento> & {
+  tipoCadastroOrcamento?: TipoCadastroOrcamento;
+} & Record<string, unknown>;
+
 export type OrcamentoRow = Orcamento & {
+  tipoCadastroOrcamento?: TipoCadastroOrcamento;
   instituicaoLabel: string;
   tipoDespesaLabel: string;
   valorPrevisto: number;
@@ -43,12 +50,35 @@ type OrcamentoPageData = {
 
 const novoOrcamento = {
   idOrcamento: 0,
+  tipoCadastroOrcamento: "anual",
   anoOrcamento: "",
   valorOrcamento: "",
   idInstituicao: "",
   idTipoDespesa: "",
   situacao: 1,
 };
+
+const ORCAMENTO_MONTHLY_FIELDS = [
+  { key: "valorJaneiro", label: "Janeiro" },
+  { key: "valorFevereiro", label: "Fevereiro" },
+  { key: "valorMarco", label: "Marco" },
+  { key: "valorAbril", label: "Abril" },
+  { key: "valorMaio", label: "Maio" },
+  { key: "valorJunho", label: "Junho" },
+  { key: "valorJulho", label: "Julho" },
+  { key: "valorAgosto", label: "Agosto" },
+  { key: "valorSetembro", label: "Setembro" },
+  { key: "valorOutubro", label: "Outubro" },
+  { key: "valorNovembro", label: "Novembro" },
+  { key: "valorDezembro", label: "Dezembro" },
+] as const;
+
+const ORCAMENTO_MONTHLY_KEYS = ORCAMENTO_MONTHLY_FIELDS.map((field) => field.key);
+
+const tipoCadastroOptions = [
+  { value: "anual", label: "Anual" },
+  { value: "mensal", label: "Mensal" },
+];
 
 const columns = [
   { id: "anoOrcamento", label: "Ano" },
@@ -136,6 +166,59 @@ const validatePositiveNumber = (fieldLabel: string): ModalFieldConfig["validate"
   };
 };
 
+const toPositiveNumber = (value: unknown): number | null => {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return null;
+  }
+
+  return numericValue;
+};
+
+const isMonthlyOrcamento = (formData: Record<string, unknown>): boolean => {
+  return formData.tipoCadastroOrcamento === "mensal";
+};
+
+const sumMonthlyValues = (formData: Record<string, unknown>): number => {
+  return ORCAMENTO_MONTHLY_KEYS.reduce((total, key) => {
+    const value = Number(formData[key] ?? 0);
+    return Number.isFinite(value) ? total + value : total;
+  }, 0);
+};
+
+const validateMonthlyValue = (fieldLabel: string): ModalFieldConfig["validate"] => {
+  return (value, formData) => {
+    if (!isMonthlyOrcamento(formData)) {
+      return undefined;
+    }
+
+    if (!toPositiveNumber(value)) {
+      return `${fieldLabel} deve ser maior que zero no cadastro mensal.`;
+    }
+
+    return undefined;
+  };
+};
+
+const buildOrcamentoPayload = <T extends OrcamentoFormData>(data: T): Partial<Orcamento> => {
+  const payloadSource = {
+    ...data,
+    valorOrcamento: isMonthlyOrcamento(data) ? sumMonthlyValues(data) : data.valorOrcamento,
+  };
+  const normalized = normalizeOrcamentoPayload(payloadSource) as Record<string, unknown>;
+
+  delete normalized.tipoCadastroOrcamento;
+  ORCAMENTO_MONTHLY_KEYS.forEach((key) => {
+    delete normalized[key];
+  });
+
+  return normalized as Partial<Orcamento>;
+};
+
 const mapOrcamentoRows = (
   orcamentos: Orcamento[],
   despesas: Despesa[],
@@ -165,6 +248,7 @@ const mapOrcamentoRows = (
 
     return {
       ...orcamento,
+      tipoCadastroOrcamento: "anual",
       valorPrevisto,
       valorRealizado,
       saldo,
@@ -227,6 +311,13 @@ export default function Page() {
     return [
       { key: "idOrcamento", hidden: true },
       {
+        key: "tipoCadastroOrcamento",
+        label: "Tipo de cadastro",
+        placeholder: "Selecione o tipo de cadastro",
+        type: "select",
+        options: tipoCadastroOptions,
+      },
+      {
         key: "anoOrcamento",
         label: "Ano",
         placeholder: "Digite o ano",
@@ -242,6 +333,7 @@ export default function Page() {
         required: true,
         type: "number",
         mask: "currency",
+        resolveDisabled: (formData) => isMonthlyOrcamento(formData),
         validate: validatePositiveNumber("Valor"),
       },
       {
@@ -260,6 +352,16 @@ export default function Page() {
         required: true,
         options: tipoDespesaOptions,
       },
+      ...ORCAMENTO_MONTHLY_FIELDS.map<ModalFieldConfig>((field) => ({
+        key: field.key,
+        label: field.label,
+        placeholder: `Valor de ${field.label.toLowerCase()}`,
+        type: "number",
+        mask: "currency",
+        section: "Valores mensais",
+        resolveHidden: (formData) => !isMonthlyOrcamento(formData),
+        validate: validateMonthlyValue(field.label),
+      })),
     ];
   }, [instituicaoOptions, tipoDespesaOptions]);
 
@@ -318,12 +420,12 @@ export default function Page() {
   }, []);
 
   const handleCreate = async (data: Omit<Orcamento, "idOrcamento">) => {
-    await orcamentoService.create(normalizeOrcamentoPayload(data));
+    await orcamentoService.create(buildOrcamentoPayload(data as OrcamentoFormData));
     await refreshOrcamentos();
   };
 
   const handleUpdate = async (id: number, data: Partial<Orcamento>) => {
-    await orcamentoService.update(id, normalizeOrcamentoPayload(data));
+    await orcamentoService.update(id, buildOrcamentoPayload(data as OrcamentoFormData));
     await refreshOrcamentos();
   };
 

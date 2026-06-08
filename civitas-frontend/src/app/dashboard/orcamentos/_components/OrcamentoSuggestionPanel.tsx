@@ -22,11 +22,50 @@ type OrcamentoSuggestionPanelProps = Pick<
   "formData" | "setFieldValue"
 >;
 
+const MONTHLY_FIELD_KEYS = [
+  "valorJaneiro",
+  "valorFevereiro",
+  "valorMarco",
+  "valorAbril",
+  "valorMaio",
+  "valorJunho",
+  "valorJulho",
+  "valorAgosto",
+  "valorSetembro",
+  "valorOutubro",
+  "valorNovembro",
+  "valorDezembro",
+] as const;
+
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(value);
+};
+
+const toNumber = (value: unknown): number => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  if (typeof value !== "string") {
+    return 0;
+  }
+
+  const numericValue = Number(
+    value
+      .replace(/\s/g, "")
+      .replace("R$", "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+  );
+
+  return Number.isFinite(numericValue) ? numericValue : 0;
+};
+
+const roundCurrency = (value: number): number => {
+  return Math.round(value * 100) / 100;
 };
 
 export default function OrcamentoSuggestionPanel({
@@ -35,6 +74,7 @@ export default function OrcamentoSuggestionPanel({
 }: OrcamentoSuggestionPanelProps) {
   const idInstituicao = formData.idInstituicao;
   const idTipoDespesa = formData.idTipoDespesa;
+  const isMonthly = formData.tipoCadastroOrcamento === "mensal";
   const [status, setStatus] = useState<SuggestionUiStatus>("idle");
   const [suggestion, setSuggestion] = useState<OrcamentoSuggestionResult>({
     status: "idle",
@@ -46,6 +86,19 @@ export default function OrcamentoSuggestionPanel({
     () => (suggestedValue !== undefined ? formatCurrency(suggestedValue) : ""),
     [suggestedValue]
   );
+
+  useEffect(() => {
+    if (!isMonthly) return;
+
+    const monthlyTotal = roundCurrency(
+      MONTHLY_FIELD_KEYS.reduce((total, key) => total + toNumber(formData[key]), 0)
+    );
+    const currentTotal = roundCurrency(toNumber(formData.valorOrcamento));
+
+    if (monthlyTotal !== currentTotal) {
+      setFieldValue("valorOrcamento", monthlyTotal > 0 ? monthlyTotal : "");
+    }
+  }, [formData, isMonthly, setFieldValue]);
 
   useEffect(() => {
     if (!idInstituicao || !idTipoDespesa) {
@@ -89,7 +142,21 @@ export default function OrcamentoSuggestionPanel({
   const applySuggestion = () => {
     if (suggestedValue === undefined) return;
 
-    setFieldValue("valorOrcamento", suggestedValue);
+    if (isMonthly) {
+      const baseMonthlyValue = Math.floor((suggestedValue / MONTHLY_FIELD_KEYS.length) * 100) / 100;
+      const distributedTotal = baseMonthlyValue * MONTHLY_FIELD_KEYS.length;
+      const remainder = roundCurrency(suggestedValue - distributedTotal);
+
+      MONTHLY_FIELD_KEYS.forEach((key, index) => {
+        setFieldValue(
+          key,
+          roundCurrency(baseMonthlyValue + (index === MONTHLY_FIELD_KEYS.length - 1 ? remainder : 0))
+        );
+      });
+    } else {
+      setFieldValue("valorOrcamento", suggestedValue);
+    }
+
     setStatus("accepted");
   };
 

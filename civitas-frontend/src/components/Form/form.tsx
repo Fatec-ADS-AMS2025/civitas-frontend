@@ -53,6 +53,7 @@ type FormFieldConfig = {
     options?: FormOption[];
     resolveOptions?: (formData: Record<string, unknown>, mode: FormMode) => FormOption[];
     readOnlyInModes?: FormMode[];
+    resolveHidden?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
     resolveDisabled?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
     clearOnDisable?: boolean;
     clearOnInvalidOption?: boolean;
@@ -144,6 +145,11 @@ export default function Form({
                 options: field.resolveOptions
                     ? field.resolveOptions(normalizedFormData, mode)
                     : field.options,
+                hidden:
+                    field.hidden ||
+                    (field.resolveHidden
+                        ? field.resolveHidden(normalizedFormData, mode)
+                        : false),
                 disabled:
                     field.disabled ||
                     (field.resolveDisabled
