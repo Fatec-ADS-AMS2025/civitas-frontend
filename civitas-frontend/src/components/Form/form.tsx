@@ -62,6 +62,12 @@ type FormFieldConfig = {
 
 type FieldConfig = FormFieldConfig
 
+type FormExtraContentRenderArgs = {
+    formData: Record<string, unknown>
+    mode: FormMode
+    setFieldValue: (key: string, value: unknown) => void
+}
+
 type FormProps = {
     camps?: string[];
     name?: string;
@@ -71,11 +77,20 @@ type FormProps = {
     validationSchema?: Record<string, ValidationFn>;
     hiddenFields?: string[];
     extraContent?: React.ReactNode;
+    renderExtraContent?: (args: FormExtraContentRenderArgs) => React.ReactNode;
     onCancel?: () => void;
     onConfirm?: (data: Record<string, unknown>) => Promise<unknown> | unknown;
 }
 
-export type { FieldConfig, FormFieldConfig, FormMode, FormOption, SectionDefinition, ValidationFn }
+export type {
+    FieldConfig,
+    FormExtraContentRenderArgs,
+    FormFieldConfig,
+    FormMode,
+    FormOption,
+    SectionDefinition,
+    ValidationFn,
+}
 
 export default function Form({
     camps,
@@ -86,6 +101,7 @@ export default function Form({
     validationSchema,
     hiddenFields,
     extraContent,
+    renderExtraContent,
     onCancel,
     onConfirm,
 }: FormProps) {
@@ -287,6 +303,20 @@ export default function Form({
         }
     }
 
+    const setFieldValue = (key: string, value: unknown) => {
+        const field = resolvedFieldMap.get(key) ?? fieldMap.get(key)
+        const normalizedValue = normalizeFieldValue(field, value, 'change', formData)
+
+        setFormData((prev) => ({
+            ...prev,
+            [key]: normalizedValue,
+        }))
+
+        if (errors[key]) {
+            setErrors((prev) => ({ ...prev, [key]: '' }))
+        }
+    }
+
     // Agrupa campos por seção para o modal renderizar na ordem correta.
     const groupedFields = useMemo(
         () => groupFieldsBySection(visibleFields),
@@ -296,6 +326,9 @@ export default function Form({
         () => getSectionOrder(visibleFields),
         [visibleFields]
     )
+    const resolvedExtraContent = renderExtraContent
+        ? renderExtraContent({ formData, mode, setFieldValue })
+        : extraContent
 
     return (
         <FormModal
@@ -308,7 +341,7 @@ export default function Form({
             name={name}
             isLoading={isLoading}
             isViewMode={isViewMode}
-            extraContent={extraContent}
+            extraContent={resolvedExtraContent}
             onCancel={onCancel}
             onSubmit={handleSubmit}
         />

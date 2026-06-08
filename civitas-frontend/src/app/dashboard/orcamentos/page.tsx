@@ -15,6 +15,7 @@ import InstituicaoDTO from "@/models/instituicao";
 import OrcamentoDTO from "@/models/orcamento";
 import TipoDespesaDTO from "@/models/tipoDespesa";
 import OrcamentoDetailsView from "./_components/OrcamentoDetailsView";
+import OrcamentoSuggestionPanel from "./_components/OrcamentoSuggestionPanel";
 import OrcamentosSkeleton from "./skeleton";
 
 type Orcamento = OrcamentoDTO;
@@ -351,6 +352,9 @@ export default function Page() {
         setCampos={setCampos}
         onCadastrar={handleCreate}
         formFields={orcamentoFormFields}
+        formRenderExtraContent={({ formData, setFieldValue }) => (
+          <OrcamentoSuggestionPanel formData={formData} setFieldValue={setFieldValue} />
+        )}
       />
 
       <Table
