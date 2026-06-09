@@ -6,7 +6,7 @@ import {
   DetailFieldGrid,
   DetailSection,
 } from "@/components/details/info-details";
-import type { OrcamentoRow } from "../page";
+import type { OrcamentoRow } from "./OrcamentosPageClient";
 
 type OrcamentoDetailsViewProps = {
   orcamento: OrcamentoRow;

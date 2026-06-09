@@ -6,7 +6,7 @@ import {
   DetailFieldGrid,
   DetailSection,
 } from "@/components/details/info-details";
-import type { FornecedorRow } from "../page";
+import type { FornecedorRow } from "./FornecedorPageClient";
 
 type FornecedorDetailsViewProps = {
   fornecedor: FornecedorRow;
