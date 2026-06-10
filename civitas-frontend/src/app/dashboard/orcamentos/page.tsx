@@ -357,6 +357,7 @@ export default function Page() {
         label: field.label,
         placeholder: `Valor de ${field.label.toLowerCase()}`,
         type: "number",
+        required: true,
         mask: "currency",
         section: "Valores mensais",
         resolveHidden: (formData) => !isMonthlyOrcamento(formData),

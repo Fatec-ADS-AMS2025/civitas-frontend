@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { FormExtraContentRenderArgs } from "@/components/Form/form";
 import { orcamentoService } from "@/hooks/orcamento";
+import type OrcamentoDTO from "@/models/orcamento";
 import {
   calculateOrcamentoSuggestion,
   type OrcamentoSuggestionResult,
@@ -80,6 +81,8 @@ export default function OrcamentoSuggestionPanel({
     status: "idle",
     count: 0,
   });
+  const orcamentosCacheRef = useRef<OrcamentoDTO[] | null>(null);
+  const orcamentosRequestRef = useRef<Promise<OrcamentoDTO[]> | null>(null);
 
   const suggestedValue = suggestion.averageValue;
   const suggestedValueLabel = useMemo(
@@ -113,7 +116,25 @@ export default function OrcamentoSuggestionPanel({
       setStatus("loading");
 
       try {
-        const orcamentos = await orcamentoService.getAll();
+        let orcamentos = orcamentosCacheRef.current;
+
+        if (!orcamentos) {
+          const request =
+            orcamentosRequestRef.current ??
+            orcamentoService
+              .getAll()
+              .then((orcamentos) => {
+                orcamentosCacheRef.current = orcamentos;
+                return orcamentos;
+              })
+              .finally(() => {
+                orcamentosRequestRef.current = null;
+              });
+
+          orcamentosRequestRef.current = request;
+          orcamentos = await request;
+        }
+
         if (!isActive) return;
 
         const nextSuggestion = calculateOrcamentoSuggestion(orcamentos, {
