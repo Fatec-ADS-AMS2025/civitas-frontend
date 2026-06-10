@@ -107,10 +107,6 @@ export default function Form({
     onConfirm,
 }: FormProps) {
     const initialData = useMemo(() => (isRecord(object) ? object : {}), [object])
-    const [formData, setFormData] = useState<Record<string, unknown>>(initialData)
-    const [isLoading, setIsLoading] = useState(false)
-    const [errors, setErrors] = useState<Record<string, string>>({})
-
     const mode: FormMode = type
     // Resolve a lista de campos via config, keys do objeto ou camps.
     const sourceFromCamps = useMemo(
@@ -132,6 +128,26 @@ export default function Form({
     const fieldMap = useMemo(() => {
         return new Map(mergedFields.map((field) => [field.key, field]))
     }, [mergedFields])
+
+    const initialFormData = useMemo(() => {
+        if (isRecord(object)) {
+            return buildDisplayFormData(object, mergedFields, fieldMap)
+        }
+
+        if (Array.isArray(object)) {
+            const emptyObject = object.reduce<Record<string, unknown>>((acc, key) => {
+                acc[key] = ''
+                return acc
+            }, {})
+            return buildDisplayFormData(emptyObject, mergedFields, fieldMap)
+        }
+
+        return {}
+    }, [fieldMap, mergedFields, object])
+
+    const [formData, setFormData] = useState<Record<string, unknown>>(() => initialFormData)
+    const [isLoading, setIsLoading] = useState(false)
+    const [errors, setErrors] = useState<Record<string, string>>({})
 
     const normalizedFormData = useMemo(
         () => buildNormalizedFormData(formData, mergedFields, fieldMap, 'change'),
@@ -162,25 +178,6 @@ export default function Form({
     const resolvedFieldMap = useMemo(() => {
         return new Map(resolvedFields.map((field) => [field.key, field]))
     }, [resolvedFields])
-
-    // Sincroniza estado inicial com objeto/camps fornecidos.
-    useEffect(() => {
-        if (isRecord(object)) {
-            setFormData(buildDisplayFormData(object, mergedFields, fieldMap))
-            return
-        }
-
-        if (Array.isArray(object)) {
-            const emptyObject = object.reduce<Record<string, unknown>>((acc, key) => {
-                acc[key] = ''
-                return acc
-            }, {})
-            setFormData(buildDisplayFormData(emptyObject, mergedFields, fieldMap))
-            return
-        }
-
-        setFormData({})
-    }, [fieldMap, mergedFields, object])
 
     useEffect(() => {
         if (mode === 'view' || mode === 'delete') return
@@ -230,10 +227,6 @@ export default function Form({
     const visibleFields = resolvedFields.filter((field) => !field.hidden && !fieldsToHide.includes(field.key))
 
     const isViewMode = mode === 'view'
-
-    useEffect(() => {
-        setErrors({})
-    }, [object, camps, fields, type])
 
     // Valida apenas o subconjunto informado para manter erros localizados.
     const validateFields = (fieldsForValidation: FormFieldConfig[]) => {

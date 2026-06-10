@@ -6,7 +6,7 @@ import {
   DetailFieldGrid,
   DetailSection,
 } from "@/components/details/info-details";
-import type { UserRow } from "../page";
+import type { UserRow } from "./UsuariosPageClient";
 
 type UsuarioDetailsViewProps = {
   usuario: UserRow;

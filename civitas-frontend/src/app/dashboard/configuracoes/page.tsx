@@ -14,7 +14,6 @@ export default function ConfiguracoesPage() {
     tipoSelecionado,
     setTipoSelecionado,
     campos,
-    setCampos,
     dadosOriginais,
     dadosFiltrados,
     setDadosFiltrados,
@@ -40,7 +39,6 @@ export default function ConfiguracoesPage() {
         dadosOriginais={dadosOriginais}
         setDadosFiltrados={setDadosFiltrados}
         campos={campos}
-        setCampos={setCampos}
         formFields={formFields}
         onCreate={handleCreate}
       />

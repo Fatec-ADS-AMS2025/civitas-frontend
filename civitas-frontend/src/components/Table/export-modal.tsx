@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Modal from "../modal";
 import type {
   TableColumn,
@@ -32,18 +32,12 @@ export default function ExportModal({
   onGenerate,
 }: ExportModalProps) {
   const [outputType, setOutputType] = useState<TableExportOutputType>(DEFAULT_OUTPUT_TYPE);
-  const [scope, setScope] = useState<TableExportScope>("filtered");
-  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    setOutputType(DEFAULT_OUTPUT_TYPE);
-    setScope(filteredCount > 0 ? "filtered" : "all");
-    setSelectedColumnIds(columns.map((column) => column.id));
-  }, [columns, filteredCount, open]);
+  const [scope, setScope] = useState<TableExportScope>(() =>
+    filteredCount > 0 ? "filtered" : "all"
+  );
+  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(() =>
+    columns.map((column) => column.id)
+  );
 
   const selectedCount = selectedColumnIds.length;
   const selectedScopeCount = scope === "filtered" ? filteredCount : allCount;

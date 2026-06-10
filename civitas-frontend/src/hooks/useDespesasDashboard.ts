@@ -73,7 +73,7 @@ export type DespesaDashboardRow = {
   raw: DespesaDTO;
 };
 
-type DashboardData = {
+export type DashboardData = {
   despesas: DespesaDTO[];
   tipoCodigos: TipoCodigoDTO[];
   tiposDespesa: TipoDespesaDTO[];
@@ -796,12 +796,19 @@ const buildDespesaApiPayload = (payload: DespesaDTO): DespesaDTO => ({
   idUnidadeConsumidora: Number(payload.idUnidadeConsumidora),
 });
 
-export const useDespesasDashboard = () => {
-  const [dashboardData, setDashboardData] = useState<DashboardData>(EMPTY_DASHBOARD_DATA);
+export const useDespesasDashboard = (
+  initialData?: DashboardData,
+  initialError: string | null = null
+) => {
+  const [dashboardData, setDashboardData] = useState<DashboardData>(
+    initialData ?? EMPTY_DASHBOARD_DATA
+  );
   const [filters, setFilters] = useState<DespesasDashboardFilters>(DEFAULT_FILTERS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(!initialData && !initialError);
+  const [error, setError] = useState<string | null>(initialError);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(
+    initialData ? new Date().toISOString() : null
+  );
 
   const refetch = useCallback(async () => {
     try {
@@ -820,8 +827,9 @@ export const useDespesasDashboard = () => {
   }, []);
 
   useEffect(() => {
+    if (initialData || initialError) return;
     void refetch();
-  }, [refetch]);
+  }, [initialData, initialError, refetch]);
 
   const tiposDespesaMap = useMemo(() => {
     return new Map(

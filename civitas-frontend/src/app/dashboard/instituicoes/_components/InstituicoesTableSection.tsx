@@ -17,7 +17,7 @@ type InstituicoesTableSectionProps = {
   filteredData: InstituicaoRow[];
   instituicaoRows: InstituicaoRow[];
   formFields: ModalFieldConfig[];
-  setCampos: Dispatch<SetStateAction<FieldConfig[]>>;
+  setCampos?: Dispatch<SetStateAction<FieldConfig[]>>;
   setFilteredData: Dispatch<SetStateAction<InstituicaoRow[]>>;
   onCreate: (data: Omit<Instituicao, "id">) => Promise<void>;
   onUpdate: (id: number, data: Partial<Instituicao>) => Promise<void>;

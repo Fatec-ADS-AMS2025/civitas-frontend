@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 export type ThemeMode = "system" | "light" | "dark";
 export type ResolvedTheme = Exclude<ThemeMode, "system">;
@@ -45,18 +45,19 @@ const readStoredTheme = (): ThemeMode => {
 export function ThemeProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
-
-  useEffect(() => {
-    const initialTheme = readStoredTheme();
-    setThemeModeState(initialTheme);
-    setResolvedTheme(applyTheme(initialTheme));
-  }, []);
+  const hasLoadedStoredTheme = useRef(false);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const effectiveThemeMode = hasLoadedStoredTheme.current ? themeMode : readStoredTheme();
+
+    if (!hasLoadedStoredTheme.current) {
+      hasLoadedStoredTheme.current = true;
+      setThemeModeState(effectiveThemeMode);
+    }
 
     const syncWithSystemTheme = () => {
-      setResolvedTheme(applyTheme(themeMode));
+      setResolvedTheme(applyTheme(effectiveThemeMode));
     };
 
     syncWithSystemTheme();

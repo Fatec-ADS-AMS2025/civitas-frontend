@@ -77,7 +77,6 @@ function useListingPanelModel(
   const {
     panelListingIds,
     views,
-    ensurePanelView,
     resetPanelView,
     setPanelListing,
     updatePanelView,
@@ -105,10 +104,6 @@ function useListingPanelModel(
       ? `${viewState.sortColumnId ?? ""}:${viewState.sortDirection}`
       : "";
   const serverPageSignature = config.paginationMode === "server" ? viewState.page : 1;
-
-  useEffect(() => {
-    ensurePanelView(panelId, config.id);
-  }, [config.id, ensurePanelView, panelId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -200,15 +195,6 @@ function useListingPanelModel(
   const summaryText = usesServerRows
     ? `${sortedRows.length} registro(s) nesta pagina de ${result?.totalRecords ?? sourceRows.length}`
     : `${sortedRows.length} registro(s) visiveis de ${sourceRows.length}`;
-
-  useEffect(() => {
-    if (resolvedPage === viewState.page) return;
-
-    updatePanelView(panelId, config.id, (currentView) => ({
-      ...currentView,
-      page: resolvedPage,
-    }));
-  }, [config.id, panelId, resolvedPage, updatePanelView, viewState.page]);
 
   const updateView = (updater: (currentView: ListingViewState) => ListingViewState) => {
     updatePanelView(panelId, config.id, updater);

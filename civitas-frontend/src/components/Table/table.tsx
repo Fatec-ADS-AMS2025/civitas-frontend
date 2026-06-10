@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import Form from "../Form/form";
 import Modal from "../modal";
@@ -100,9 +100,7 @@ function Table<T extends TableRow>({
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showColumnControls, setShowColumnControls] = useState(false);
-  const [visibleColumnIds, setVisibleColumnIds] = useState<string[]>(() =>
-    columns.map((column) => column.id)
-  );
+  const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
   const [sortState, setSortState] = useState<SortState>({
     columnId: null,
     direction: null,
@@ -118,31 +116,20 @@ function Table<T extends TableRow>({
   const exportColumns = useMemo(() => columns.filter((column) => column.id.trim() !== ""), [columns]);
 
   const columnIds = useMemo(() => columns.map((column) => column.id), [columns]);
+  const hiddenColumnSet = useMemo(() => new Set(hiddenColumnIds), [hiddenColumnIds]);
   const visibleColumns = useMemo(
-    () => columns.filter((column) => visibleColumnIds.includes(column.id)),
-    [columns, visibleColumnIds]
+    () => columns.filter((column) => !hiddenColumnSet.has(column.id)),
+    [columns, hiddenColumnSet]
   );
-
-  useEffect(() => {
-    setVisibleColumnIds((current) => {
-      if (columnIds.length === 0) return [];
-
-      const next = current.filter((id) => columnIds.includes(id));
-      const missing = columnIds.filter((id) => !next.includes(id));
-      const merged = [...next, ...missing];
-
-      return merged.length > 0 ? merged : columnIds;
-    });
-  }, [columnIds]);
-
-  useEffect(() => {
-    if (!sortState.columnId) return;
-
-    const isStillVisible = visibleColumnIds.includes(sortState.columnId);
-    if (!isStillVisible) {
-      setSortState({ columnId: null, direction: null });
+  const effectiveSortState = useMemo<SortState>(() => {
+    if (!sortState.columnId || !sortState.direction) {
+      return { columnId: null, direction: null };
     }
-  }, [sortState.columnId, visibleColumnIds]);
+
+    return hiddenColumnSet.has(sortState.columnId)
+      ? { columnId: null, direction: null }
+      : sortState;
+  }, [hiddenColumnSet, sortState]);
 
   const toRecord = (value: T): Record<string, unknown> => value as Record<string, unknown>;
 
@@ -354,17 +341,17 @@ function Table<T extends TableRow>({
   );
 
   const sortedData = useMemo(() => {
-    if (!sortState.columnId || !sortState.direction) {
+    if (!effectiveSortState.columnId || !effectiveSortState.direction) {
       return data;
     }
 
-    const activeColumn = columns.find((column) => column.id === sortState.columnId);
+    const activeColumn = columns.find((column) => column.id === effectiveSortState.columnId);
     if (!activeColumn || !isColumnSortable(activeColumn)) {
       return data;
     }
 
     const sortType = detectSortType(activeColumn, data);
-    const directionFactor = sortState.direction === "asc" ? 1 : -1;
+    const directionFactor = effectiveSortState.direction === "asc" ? 1 : -1;
 
     const rowsWithIndex = data.map((row, index) => ({ row, index }));
 
@@ -416,31 +403,33 @@ function Table<T extends TableRow>({
     });
 
     return rowsWithIndex.map((item) => item.row);
-  }, [collator, columns, data, sortState.columnId, sortState.direction]);
+  }, [collator, columns, data, effectiveSortState.columnId, effectiveSortState.direction]);
 
   const toggleColumnVisibility = (columnId: string) => {
-    setVisibleColumnIds((current) => {
-      const isSelected = current.includes(columnId);
-      if (isSelected && current.length === 1) {
+    setHiddenColumnIds((current) => {
+      const isHidden = current.includes(columnId);
+      const visibleCount = columns.filter((column) => !current.includes(column.id)).length;
+
+      if (!isHidden && visibleCount === 1) {
         showToast("Ao menos uma coluna deve ficar visivel.", "info");
         return current;
       }
 
-      if (isSelected) {
+      if (isHidden) {
         return current.filter((id) => id !== columnId);
       }
 
-      return [...current, columnId];
+      return [...current, columnId].filter((id) => columnIds.includes(id));
     });
   };
 
   const showAllColumns = () => {
-    setVisibleColumnIds(columnIds);
+    setHiddenColumnIds([]);
   };
 
   const reduceToSingleColumn = () => {
     if (columnIds.length === 0) return;
-    setVisibleColumnIds([columnIds[0]]);
+    setHiddenColumnIds(columnIds.slice(1));
   };
 
   const toggleSort = (column: TableColumn) => {
@@ -550,7 +539,7 @@ function Table<T extends TableRow>({
               <button
                 type="button"
                 onClick={clearSorting}
-                disabled={!sortState.columnId}
+                disabled={!effectiveSortState.columnId}
                 className="civitas-action civitas-action--ghost min-h-[40px] px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="material-symbols-outlined text-base">filter_list_off</span>
@@ -594,7 +583,7 @@ function Table<T extends TableRow>({
                   >
                     <input
                       type="checkbox"
-                      checked={visibleColumnIds.includes(column.id)}
+                      checked={!hiddenColumnSet.has(column.id)}
                       onChange={() => toggleColumnVisibility(column.id)}
                       className="h-4 w-4 accent-[var(--primary-1)]"
                     />
@@ -615,8 +604,8 @@ function Table<T extends TableRow>({
                 <thead>
                   <tr className="civitas-table__head text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                     {visibleColumns.map((column) => {
-                      const isActiveSort = sortState.columnId === column.id;
-                      const sortDirection = isActiveSort ? sortState.direction : null;
+                      const isActiveSort = effectiveSortState.columnId === column.id;
+                      const sortDirection = isActiveSort ? effectiveSortState.direction : null;
                       const isSortable = isColumnSortable(column);
                       const sortIcon =
                         sortDirection === "asc"
@@ -864,7 +853,7 @@ function Table<T extends TableRow>({
         </Modal>
       ) : null}
 
-      {exportEnabled ? (
+      {exportEnabled && isExportModalOpen ? (
         <ExportModal
           open={isExportModalOpen}
           title={exportTitle}

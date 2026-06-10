@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { TablePaginationConfig } from "@/components/Table/table";
 
 type UseClientPaginationOptions = {
@@ -25,17 +25,12 @@ export function useClientPagination<T>(
   const totalRecords = items.length;
   const totalPages = totalRecords === 0 ? 0 : Math.ceil(totalRecords / pageSize);
 
-  useEffect(() => {
-    setCurrentPage((previousPage) => {
-      const nextPage = clampPage(previousPage, totalPages);
-      return nextPage === previousPage ? previousPage : nextPage;
-    });
-  }, [totalPages]);
+  const resolvedCurrentPage = clampPage(currentPage, totalPages);
 
   const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
+    const startIndex = (resolvedCurrentPage - 1) * pageSize;
     return items.slice(startIndex, startIndex + pageSize);
-  }, [currentPage, items, pageSize]);
+  }, [items, pageSize, resolvedCurrentPage]);
 
   const goToPage = useCallback((nextPage: number) => {
     startTransition(() => {
@@ -61,7 +56,7 @@ export function useClientPagination<T>(
 
   const pagination = useMemo<TablePaginationConfig>(
     () => ({
-      currentPage,
+      currentPage: resolvedCurrentPage,
       totalPages,
       totalRecords,
       pageSize,
@@ -69,11 +64,11 @@ export function useClientPagination<T>(
       onPageChange: goToPage,
       onPageSizeChange: changePageSize,
     }),
-    [changePageSize, currentPage, goToPage, pageSize, pageSizeOptions, totalPages, totalRecords]
+    [changePageSize, goToPage, pageSize, pageSizeOptions, resolvedCurrentPage, totalPages, totalRecords]
   );
 
   return {
-    currentPage,
+    currentPage: resolvedCurrentPage,
     pageSize,
     totalPages,
     totalRecords,

@@ -6,7 +6,7 @@ import {
   DetailFieldGrid,
   DetailSection,
 } from "@/components/details/info-details";
-import type { UnidadeConsumidoraRow } from "../page";
+import type { UnidadeConsumidoraRow } from "./UnidadesConsumidorasPageClient";
 
 type UnidadeConsumidoraDetailsViewProps = {
   unidade: UnidadeConsumidoraRow;
