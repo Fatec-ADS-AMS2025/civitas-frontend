@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
@@ -213,22 +213,10 @@ export default function OrcamentosPageClient({
     initialData.instituicoes,
     initialData.tiposDespesa
   );
-  const initialInstituicaoOptions = initialData.instituicoes.map((instituicao) => ({
-    value: instituicao.id,
-    label: buildLookupLabel(instituicao.nome, instituicao.situacao),
-  }));
-  const initialTipoDespesaOptions = initialData.tiposDespesa.map((tipoDespesa) => ({
-    value: tipoDespesa.id,
-    label: buildLookupLabel(tipoDespesa.descricao, tipoDespesa.situacao),
-  }));
-
   const [orcamentos, setOrcamentos] = useState<OrcamentoRow[]>(initialRows);
   const [filteredData, setFilteredData] = useState<OrcamentoRow[]>(initialRows);
   const [instituicoes, setInstituicoes] = useState<Instituicao[]>(initialData.instituicoes);
   const [tiposDespesa, setTiposDespesa] = useState<TipoDespesa[]>(initialData.tiposDespesa);
-  const [campos, setCampos] = useState<FieldConfig[]>(
-    buildOrcamentoCampos(initialInstituicaoOptions, initialTipoDespesaOptions)
-  );
   const [error, setError] = useState<string | null>(initialError);
 
   const instituicaoOptions = useMemo(() => {
@@ -285,6 +273,10 @@ export default function OrcamentosPageClient({
     ];
   }, [instituicaoOptions, tipoDespesaOptions]);
 
+  const campos = useMemo<FieldConfig[]>(() => {
+    return buildOrcamentoCampos(instituicaoOptions, tipoDespesaOptions);
+  }, [instituicaoOptions, tipoDespesaOptions]);
+
   const refreshOrcamentos = async () => {
     const pageData = await fetchOrcamentoPageData();
     const rows = mapOrcamentoRows(
@@ -300,10 +292,6 @@ export default function OrcamentosPageClient({
     setFilteredData(rows);
     setError(null);
   };
-
-  useEffect(() => {
-    setCampos(buildOrcamentoCampos(instituicaoOptions, tipoDespesaOptions));
-  }, [instituicaoOptions, tipoDespesaOptions]);
 
   const handleCreate = async (data: Omit<Orcamento, "idOrcamento">) => {
     await orcamentoService.create(normalizeOrcamentoPayload(data));
@@ -333,7 +321,6 @@ export default function OrcamentosPageClient({
         dados={orcamentos}
         setDados={setFilteredData}
         campos={campos}
-        setCampos={setCampos}
         onCadastrar={handleCreate}
         formFields={orcamentoFormFields}
       />

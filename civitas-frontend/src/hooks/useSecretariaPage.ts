@@ -41,12 +41,66 @@ export type SecretariaMetrics = {
   secretariasSemInstituicoes: number;
 };
 
+export type SecretariaTextFilters = {
+  search: string;
+  vinculo: string;
+  cidade: string;
+};
+
+export const INITIAL_SECRETARIA_TEXT_FILTERS: SecretariaTextFilters = {
+  search: "",
+  vinculo: "",
+  cidade: "",
+};
+
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error && error.message) {
     return error.message;
   }
 
   return "Nao foi possivel carregar as secretarias. Verifique o backend e tente novamente.";
+};
+
+const normalizeSearch = (value: unknown): string => {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+};
+
+const matchesTextFilters = (
+  secretaria: SecretariaRow,
+  filters: SecretariaTextFilters
+): boolean => {
+  const query = normalizeSearch(filters.search);
+  const cityQuery = normalizeSearch(filters.cidade);
+  const searchTarget = normalizeSearch(
+    [
+      secretaria.nome,
+      secretaria.descricao,
+      secretaria.nomeRazaoSocial,
+      secretaria.cnpj,
+      secretaria.telefone,
+      secretaria.email,
+      secretaria.cidade,
+      secretaria.estado,
+      secretaria.situacaoLabel,
+    ].join(" ")
+  );
+
+  if (query && !searchTarget.includes(query)) return false;
+  if (cityQuery && !normalizeSearch(secretaria.cidade).includes(cityQuery)) return false;
+
+  if (filters.vinculo === "comInstituicoes" && secretaria.totalInstituicoes <= 0) {
+    return false;
+  }
+
+  if (filters.vinculo === "semInstituicoes" && secretaria.totalInstituicoes > 0) {
+    return false;
+  }
+
+  return true;
 };
 
 const loadInstituicoesSafely = async (): Promise<InstituicaoDTO[]> => {
@@ -115,9 +169,11 @@ const mapSecretariaRows = (
 
 export function useSecretariaPage(initialFields: FieldConfig[]) {
   const [secretarias, setSecretarias] = useState<SecretariaRow[]>([]);
-  const [filteredData, setFilteredData] = useState<SecretariaRow[]>([]);
   const [instituicoes, setInstituicoes] = useState<InstituicaoDTO[]>([]);
   const [cardFilter, setCardFilter] = useState<SecretariaCardFilter>({ type: "all" });
+  const [textFilters, setTextFilters] = useState<SecretariaTextFilters>(
+    INITIAL_SECRETARIA_TEXT_FILTERS
+  );
   const [campos, setCampos] = useState<FieldConfig[]>(initialFields);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -138,7 +194,6 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
 
     setInstituicoes(instituicoesItems);
     setSecretarias(rows);
-    setFilteredData(rows);
   }, []);
 
   const cardFilteredSecretarias = useMemo(() => {
@@ -175,6 +230,12 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
     };
   }, [instituicoes, secretarias]);
 
+  const filteredData = useMemo(() => {
+    return cardFilteredSecretarias.filter((secretaria) =>
+      matchesTextFilters(secretaria, textFilters)
+    );
+  }, [cardFilteredSecretarias, textFilters]);
+
   useEffect(() => {
     const loadSecretarias = async () => {
       try {
@@ -184,7 +245,6 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
       } catch (err) {
         console.error("Erro ao carregar secretarias:", err);
         setSecretarias([]);
-        setFilteredData([]);
         setInstituicoes([]);
         setError(getErrorMessage(err));
       } finally {
@@ -217,8 +277,9 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
     instituicoes,
     secretariaMetrics,
     cardFilter,
+    textFilters,
     campos,
-    setFilteredData,
+    setTextFilters,
     setCardFilter,
     setCampos,
     loading,

@@ -1,4 +1,11 @@
-import type { PaginatedResult } from "@/hooks/generic";
+"use client";
+
+import React, { useEffect, useMemo, useState } from "react";
+import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
+import Table from "@/components/Table/table";
+import { normalizeOrcamentoPayload } from "@/global/formPayload";
+import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
@@ -119,13 +126,6 @@ const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
-const emptyData: OrcamentoPageData = {
-  orcamentos: [],
-  despesas: [],
-  instituicoes: [],
-  tiposDespesa: [],
-};
-
 const loadDespesasSafely = async (): Promise<DespesaDTO[]> => {
   try {
     return await despesaService.getAllStatusData();
@@ -203,6 +203,22 @@ const buildOrcamentoPayload = <T extends OrcamentoFormData>(data: T): Partial<Or
   return normalized as Partial<Orcamento>;
 };
 
+const getOrcamentoId = (orcamento: Orcamento): number => {
+  return Number(orcamento.idOrcamento ?? orcamento.id ?? 0);
+};
+
+const getOrcamentoValorPrevisto = (orcamento: Orcamento): number => {
+  const value = Number(orcamento.valorOrcamento ?? orcamento.valor ?? 0);
+  return Number.isFinite(value) ? value : 0;
+};
+
+const getDespesaValorRealizado = (despesa: Despesa): number => {
+  const value = Number(
+    despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0
+  );
+  return Number.isFinite(value) ? value : 0;
+};
+
 const mapOrcamentoRows = (
   orcamentos: Orcamento[],
   despesas: Despesa[],
@@ -273,7 +289,6 @@ export default function Page() {
   const [filteredData, setFilteredData] = useState<OrcamentoRow[]>([]);
   const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
   const [tiposDespesa, setTiposDespesa] = useState<TipoDespesa[]>([]);
-  const [campos, setCampos] = useState<FieldConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -350,22 +365,24 @@ export default function Page() {
     ];
   }, [instituicaoOptions, tipoDespesaOptions]);
 
-    return (
-      <OrcamentosPageClient
-        initialData={emptyData}
-        initialError="Nao foi possivel carregar os orcamentos. Verifique o backend e tente novamente."
-      />
-    );
+  const campos = useMemo<FieldConfig[]>(() => {
+    return buildOrcamentoCampos(instituicaoOptions, tipoDespesaOptions);
+  }, [instituicaoOptions, tipoDespesaOptions]);
 
+  const refreshOrcamentos = async () => {
+    const pageData = await fetchOrcamentoPageData();
+    const rows = mapOrcamentoRows(
+      pageData.orcamentos,
+      pageData.despesas,
+      pageData.instituicoes,
+      pageData.tiposDespesa
+    );
     setInstituicoes(pageData.instituicoes);
     setTiposDespesa(pageData.tiposDespesa);
     setOrcamentos(rows);
     setFilteredData(rows);
+    setError(null);
   };
-
-  useEffect(() => {
-    setCampos(buildOrcamentoCampos(instituicaoOptions, tipoDespesaOptions));
-  }, [instituicaoOptions, tipoDespesaOptions]);
 
   useEffect(() => {
     const loadOrcamentos = async () => {
@@ -390,7 +407,6 @@ export default function Page() {
         setFilteredData([]);
         setInstituicoes([]);
         setTiposDespesa([]);
-        setCampos([]);
         setError(
           "Nao foi possivel carregar os orcamentos. Verifique o backend e tente novamente."
         );
@@ -434,7 +450,6 @@ export default function Page() {
         dados={orcamentos}
         setDados={setFilteredData}
         campos={campos}
-        setCampos={setCampos}
         onCadastrar={handleCreate}
         formFields={orcamentoFormFields}
         formRenderExtraContent={({ formData, setFieldValue }) => (

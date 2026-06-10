@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
@@ -98,7 +98,6 @@ export default function UnidadesConsumidorasPageClient({
 
   const [data, setData] = useState<UnidadeConsumidoraRow[]>(initialRows);
   const [filteredData, setFilteredData] = useState<UnidadeConsumidoraRow[]>(initialRows);
-  const [campos, setCampos] = useState<FieldConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [lookups, setLookups] = useState<UnidadeConsumidoraLookups>(initialLookups);
@@ -185,6 +184,15 @@ export default function UnidadesConsumidorasPageClient({
     },
   ], [fornecedorOptions, getFornecedorOptionsForSelection, getOrcamentoOptionsForSelection, getSecretariaOptionsForSelection, instituicaoOptions, tipoDespesaOptions]);
 
+  const campos = useMemo<FieldConfig[]>(() => [
+    { key: "identificador", placeholder: "Identificador", local: "principal" },
+    { key: "idInstituicao", placeholder: "Instituicao", local: "filtro", type: "select", options: instituicaoOptions },
+    { key: "idTipoDespesa", placeholder: "Tipo de Despesa", local: "filtro", type: "select", options: tipoDespesaOptions },
+    { key: "idSecretaria", placeholder: "Secretaria", local: "filtro", type: "select", options: secretariaOptions },
+    { key: "idOrcamento", placeholder: "Orcamento", local: "filtro", type: "select", options: orcamentoOptions },
+    { key: "idFornecedor", placeholder: "Fornecedor", local: "filtro", type: "select", options: fornecedorOptions },
+  ], [fornecedorOptions, instituicaoOptions, orcamentoOptions, secretariaOptions, tipoDespesaOptions]);
+
   // Carrega página + lookups em paralelo e mantém o estado consistente.
   const loadData = async (query: ListQuery = { page: pagination.currentPage, size: pagination.pageSize }) => {
     try {
@@ -228,17 +236,6 @@ export default function UnidadesConsumidorasPageClient({
     }
   };
 
-  useEffect(() => {
-    setCampos([
-      { key: "identificador", placeholder: "Identificador", local: "principal" },
-      { key: "idInstituicao", placeholder: "Instituicao", local: "filtro", type: "select", options: instituicaoOptions },
-      { key: "idTipoDespesa", placeholder: "Tipo de Despesa", local: "filtro", type: "select", options: tipoDespesaOptions },
-      { key: "idSecretaria", placeholder: "Secretaria", local: "filtro", type: "select", options: secretariaOptions },
-      { key: "idOrcamento", placeholder: "Orcamento", local: "filtro", type: "select", options: orcamentoOptions },
-      { key: "idFornecedor", placeholder: "Fornecedor", local: "filtro", type: "select", options: fornecedorOptions },
-    ]);
-  }, [fornecedorOptions, instituicaoOptions, orcamentoOptions, secretariaOptions, tipoDespesaOptions]);
-
   // Fluxo CRUD com recarga da página atual.
   const handleCreate = async (payload: Omit<UnidadeConsumidoraDTO, "id" | "excluido" | "dataExclusao">) => {
     await unidadeConsumidoraService.create(normalizeUnidadeConsumidoraPayload(payload));
@@ -276,7 +273,6 @@ export default function UnidadesConsumidorasPageClient({
         dados={data}
         setDados={setFilteredData}
         campos={campos}
-        setCampos={setCampos}
         onCadastrar={handleCreate}
         formFields={formFields}
       />

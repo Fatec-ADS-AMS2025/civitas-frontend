@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useDeferredValue, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useDebounce } from "@/hooks/useDebounce";
 import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import { NAVIGATION_CATALOG } from "@/navigation/navigation.data";
 import { searchNavigation } from "@/navigation/navigation.search";
@@ -17,7 +16,7 @@ export const useNavigationSearch = () => {
   const { push } = useAppNavigation();
   const pathname = usePathname() || "/dashboard";
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 220);
+  const debouncedQuery = useDeferredValue(query);
 
   const groups = useMemo(() => {
     return searchNavigation(NAVIGATION_CATALOG, debouncedQuery);
@@ -30,11 +29,9 @@ export const useNavigationSearch = () => {
 
   const normalizedPath = normalizePath(pathname);
   const [selectedKey, setSelectedKey] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
+  const effectiveSelectedKey = useMemo(() => {
     if (flattenedResults.length === 0) {
-      setSelectedKey(undefined);
-      return;
+      return undefined;
     }
 
     const activeItem = flattenedResults.find(
@@ -42,17 +39,14 @@ export const useNavigationSearch = () => {
     );
 
     if (activeItem) {
-      setSelectedKey(activeItem.item.key);
-      return;
+      return activeItem.item.key;
     }
 
     const hasSelectedItem = flattenedResults.some(
       (entry) => entry.item.key === selectedKey,
     );
 
-    if (!hasSelectedItem) {
-      setSelectedKey(flattenedResults[0].item.key);
-    }
+    return hasSelectedItem ? selectedKey : flattenedResults[0].item.key;
   }, [flattenedResults, normalizedPath, selectedKey]);
 
   const navigateToPath = (path: string) => {
@@ -66,7 +60,7 @@ export const useNavigationSearch = () => {
 
     const currentIndex = Math.max(
       0,
-      flattenedResults.findIndex((entry) => entry.item.key === selectedKey),
+      flattenedResults.findIndex((entry) => entry.item.key === effectiveSelectedKey),
     );
 
     if (event.key === "ArrowDown") {
@@ -87,7 +81,7 @@ export const useNavigationSearch = () => {
     if (event.key === "Enter") {
       event.preventDefault();
       const selectedItem = flattenedResults.find(
-        (entry) => entry.item.key === selectedKey,
+        (entry) => entry.item.key === effectiveSelectedKey,
       );
 
       if (selectedItem) {
@@ -105,7 +99,7 @@ export const useNavigationSearch = () => {
     query,
     setQuery,
     groups,
-    selectedKey,
+    selectedKey: effectiveSelectedKey,
     setSelectedKey,
     normalizedPath,
     debouncedQuery,

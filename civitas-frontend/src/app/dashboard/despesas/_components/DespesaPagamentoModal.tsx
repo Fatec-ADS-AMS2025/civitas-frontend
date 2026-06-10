@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Button from "@/components/button";
 import DocumentoField, { type DocumentoFieldValue } from "@/components/Form/documento-field";
 import type { FormFieldConfig } from "@/components/Form/form";
@@ -80,13 +80,6 @@ export default function DespesaPagamentoModal({
     }),
     []
   );
-
-  useEffect(() => {
-    if (!open) return;
-    setValues(buildInitialValues());
-    setErrors({});
-    setTouched({ valorPago: false, consumoReal: false });
-  }, [despesa, open]);
 
   if (!open || !despesa) return null;
 

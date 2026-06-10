@@ -426,6 +426,7 @@ export default function DespesasPageClient({
         onEditSubmit={handleEditSubmit}
       />
 
+      {isPaymentModalOpen ? (
         <DespesaPagamentoModal
           open={isPaymentModalOpen}
           despesa={paymentDespesa}
@@ -433,6 +434,7 @@ export default function DespesasPageClient({
           onClose={handleClosePaymentModal}
           onConfirm={handlePaymentSubmit}
         />
+      ) : null}
 
       {isOverdueWarningOpen ? (
         <Modal value={isOverdueWarningOpen} setValue={setIsOverdueWarningOpen}>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Button from "@/components/button";
 import DocumentoField, { type DocumentoFieldValue } from "@/components/Form/documento-field";
 import type { FormFieldConfig } from "@/components/Form/form";
@@ -110,6 +110,45 @@ const buildInitialFormValues = (
   };
 };
 
+const findInitialUc = (
+  values: DespesaFormValues,
+  ucs: DespesaUcOption[]
+): DespesaUcOption | null => {
+  const initialUcId = Number(values.idUnidadeConsumidora);
+  if (!Number.isFinite(initialUcId) || initialUcId <= 0) return null;
+  return ucs.find((uc) => uc.id === initialUcId) ?? null;
+};
+
+const applySelectedUcToValues = (
+  values: DespesaFormValues,
+  selectedUc: DespesaUcOption
+): DespesaFormValues => ({
+  ...values,
+  idUnidadeConsumidora: selectedUc.id,
+  uc: selectedUc.identificador,
+  idTipoCodigo: selectedUc.idTipoCodigo ?? "",
+  idTipoDespesa: selectedUc.idTipoDespesa,
+  idInstituicao: selectedUc.idInstituicao,
+  idOrcamento: selectedUc.idOrcamento,
+  idFornecedor: selectedUc.idFornecedor,
+  codigo:
+    values.codigo && String(values.codigo).trim().length > 0
+      ? values.codigo
+      : selectedUc.identificador,
+});
+
+const clearSelectedUcFromValues = (values: DespesaFormValues): DespesaFormValues => ({
+  ...values,
+  idUnidadeConsumidora: "",
+  uc: "",
+  idTipoCodigo: "",
+  idTipoDespesa: "",
+  idInstituicao: "",
+  idOrcamento: "",
+  idFornecedor: "",
+  codigo: values.codigo === values.uc ? "" : values.codigo,
+});
+
 const validatePositiveNumber = (value: unknown, label: string) => {
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue) || numericValue <= 0)
@@ -183,14 +222,18 @@ export default function DespesaForm({
   const isEditMode = mode === "edit";
   const usesCombobox = ucSelectorVariant === "combobox";
 
-  const [currentAuthUser, setCurrentAuthUser] = useState(() => authStorage.get());
+  const currentAuthUser = useMemo(() => authStorage.get(), []);
   const currentUserId = currentAuthUser?.id ?? null;
+  const initialFormValues = useMemo(
+    () => buildInitialFormValues(initialValues, currentUserId, mode),
+    [currentUserId, initialValues, mode]
+  );
 
   const [search, setSearch] = useState("");
-  const [selectedUc, setSelectedUc] = useState<DespesaUcOption | null>(null);
-  const [formValues, setFormValues] = useState<DespesaFormValues>(() =>
-    buildInitialFormValues(initialValues, currentUserId, mode)
+  const [selectedUc, setSelectedUc] = useState<DespesaUcOption | null>(() =>
+    findInitialUc(initialFormValues, ucs)
   );
+  const [formValues, setFormValues] = useState<DespesaFormValues>(() => initialFormValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const hasInitialPersistedDocumento =
     isRecord(initialValues?.documento) && initialValues.documento.isPersisted === true;
@@ -229,56 +272,10 @@ export default function DespesaForm({
     [selectedUc]
   );
 
-  useEffect(() => {
-    setCurrentAuthUser(authStorage.get());
-  }, []);
-
-  useEffect(() => {
-    const nextValues = buildInitialFormValues(initialValues, currentUserId, mode);
-    setFormValues(nextValues);
-    setErrors({});
-    const initialUcId = Number(nextValues.idUnidadeConsumidora);
-    if (!Number.isFinite(initialUcId) || initialUcId <= 0) {
-      setSelectedUc(null);
-      return;
-    }
-    setSelectedUc(ucs.find((uc) => uc.id === initialUcId) ?? null);
-  }, [currentUserId, initialValues, mode, ucs]);
-
-  useEffect(() => {
-    if (!selectedUc) {
-      setFormValues((v) => ({
-        ...v,
-        idUnidadeConsumidora: "",
-        uc: "",
-        idTipoCodigo: "",
-        idTipoDespesa: "",
-        idInstituicao: "",
-        idOrcamento: "",
-        idFornecedor: "",
-        codigo: v.codigo === v.uc ? "" : v.codigo,
-      }));
-      return;
-    }
-    setFormValues((v) => ({
-      ...v,
-      idUnidadeConsumidora: selectedUc.id,
-      uc: selectedUc.identificador,
-      idTipoCodigo: selectedUc.idTipoCodigo ?? "",
-      idTipoDespesa: selectedUc.idTipoDespesa,
-      idInstituicao: selectedUc.idInstituicao,
-      idOrcamento: selectedUc.idOrcamento,
-      idFornecedor: selectedUc.idFornecedor,
-      codigo:
-        v.codigo && String(v.codigo).trim().length > 0
-          ? v.codigo
-          : selectedUc.identificador,
-    }));
-  }, [selectedUc]);
-
   const handleSelectUc = (uc: DespesaUcOption) => {
     if (isViewMode || isDocumentoLinkLocked) return;
     setSelectedUc(uc);
+    setFormValues((values) => applySelectedUcToValues(values, uc));
     setErrors((e) => ({
       ...e,
       idUnidadeConsumidora: "",
@@ -292,6 +289,7 @@ export default function DespesaForm({
   const handleClearUcSelection = () => {
     if (isViewMode || isDocumentoLinkLocked) return;
     setSelectedUc(null);
+    setFormValues(clearSelectedUcFromValues);
   };
 
   const handleRowKeyDown = (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useDeferredValue, useId, useMemo, useState } from "react";
 import type { DespesaUcOption } from "./DespesaForm";
 
 type UcComboboxProps = {
@@ -29,31 +29,14 @@ export default function UcCombobox({
 }: UcComboboxProps) {
   const comboboxId = useId();
   const listboxId = `${comboboxId}-listbox`;
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [query, setQuery] = useState(() => selectedUc?.identificador ?? "");
   const [isOpen, setIsOpen] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-
-  useEffect(() => {
-    setIsSearching(true);
-    const timeoutId = window.setTimeout(() => {
-      setDebouncedQuery(query);
-      setIsSearching(false);
-    }, 220);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [query]);
-
-  useEffect(() => {
-    if (selectedUc && !isOpen) {
-      setQuery(selectedUc.identificador);
-      setDebouncedQuery(selectedUc.identificador);
-      setIsSearching(false);
-    }
-  }, [isOpen, selectedUc]);
+  const inputValue = !isOpen && selectedUc ? selectedUc.identificador : query;
+  const deferredQuery = useDeferredValue(inputValue);
+  const isSearching = inputValue !== deferredQuery;
 
   const filteredUcs = useMemo(() => {
-    const normalizedQuery = normalizeSearchText(debouncedQuery);
+    const normalizedQuery = normalizeSearchText(deferredQuery);
 
     if (!normalizedQuery) return ucs.slice(0, 20);
 
@@ -73,7 +56,7 @@ export default function UcCombobox({
         return target.includes(normalizedQuery);
       })
       .slice(0, 20);
-  }, [debouncedQuery, ucs]);
+  }, [deferredQuery, ucs]);
 
   const handleQueryChange = (nextQuery: string) => {
     setQuery(nextQuery);
@@ -90,7 +73,6 @@ export default function UcCombobox({
   const handleSelect = (uc: DespesaUcOption) => {
     onSelect(uc);
     setQuery(uc.identificador);
-    setDebouncedQuery(uc.identificador);
     setIsOpen(false);
   };
 
@@ -117,9 +99,12 @@ export default function UcCombobox({
             aria-autocomplete="list"
             aria-invalid={Boolean(error)}
             disabled={disabled}
-            value={query}
+            value={inputValue}
             placeholder="Digite ID, UC, instituicao, secretaria..."
-            onFocus={() => setIsOpen(true)}
+            onFocus={() => {
+              if (selectedUc) setQuery(selectedUc.identificador);
+              setIsOpen(true);
+            }}
             onChange={(event) => handleQueryChange(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Escape") setIsOpen(false);

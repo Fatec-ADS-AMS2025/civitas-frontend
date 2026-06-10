@@ -12,9 +12,6 @@ import { asErrorMessage } from "./configuracoes.utils";
 export const useConfiguracoes = () => {
   const [tipoSelecionado, setTipoSelecionado] =
     useState<ConfigKind>("tipoInstituicao");
-  const [campos, setCampos] = useState<FieldConfig[]>(
-    CONFIG_DEFINITIONS.tipoInstituicao.buildSearchFields()
-  );
   const [dadosOriginais, setDadosOriginais] = useState<ConfigRow[]>([]);
   const [dadosFiltrados, setDadosFiltrados] = useState<ConfigRow[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<UnidadeMedidaDTO[]>([]);
@@ -30,6 +27,11 @@ export const useConfiguracoes = () => {
   const formFields = useMemo(
     () => definition.buildFields(unidadesMedida, tipoCodigos),
     [definition, tipoCodigos, unidadesMedida]
+  );
+
+  const campos = useMemo<FieldConfig[]>(
+    () => definition.buildSearchFields(),
+    [definition]
   );
 
   const refreshData = useCallback(async (selectedKind: ConfigKind) => {
@@ -49,10 +51,6 @@ export const useConfiguracoes = () => {
       setLoading(false);
     }
   }, []);
-
-  useEffect(() => {
-    setCampos(definition.buildSearchFields());
-  }, [definition]);
 
   useEffect(() => {
     const load = async () => {
@@ -147,7 +145,6 @@ export const useConfiguracoes = () => {
     tipoSelecionado,
     setTipoSelecionado,
     campos,
-    setCampos,
     dadosOriginais,
     dadosFiltrados,
     setDadosFiltrados,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { normalizeInstituicaoPayload } from "@/global/formPayload";
 import { instituicaoService } from "@/hooks/instituicao";
 import { buildFinanceRelations } from "@/lib/financeiro-relations";
@@ -44,15 +44,6 @@ export default function InstituicoesPageClient({
     initialData.tiposInstituicao,
     initialRelations.instituicoes
   );
-  const initialSecretariaOptions = initialData.secretarias.map((secretaria) => ({
-    value: secretaria.idSecretaria,
-    label: buildLookupLabel(secretaria.nome, secretaria.situacao),
-  }));
-  const initialTipoInstituicaoOptions = initialData.tiposInstituicao.map((tipoInstituicao) => ({
-    value: tipoInstituicao.id,
-    label: buildLookupLabel(tipoInstituicao.descricao, tipoInstituicao.situacao),
-  }));
-
   const [instituicoes, setInstituicoes] = useState<Instituicao[]>(initialData.instituicoes);
   const [filteredData, setFilteredData] = useState<InstituicaoRow[]>(initialRows);
   const [secretarias, setSecretarias] = useState<Secretaria[]>(initialData.secretarias);
@@ -61,9 +52,6 @@ export default function InstituicoesPageClient({
   );
   const [despesas, setDespesas] = useState<Despesa[]>(initialData.despesas);
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>(initialData.orcamentos);
-  const [campos, setCampos] = useState<InstituicaoSearchField[]>(
-    buildInstituicaoCampos(initialSecretariaOptions, initialTipoInstituicaoOptions)
-  );
   const [error, setError] = useState<string | null>(initialError);
 
   const secretariaOptions = useMemo(() => {
@@ -82,6 +70,10 @@ export default function InstituicoesPageClient({
 
   const instituicaoFormFields = useMemo(() => {
     return buildInstituicaoFormFields(secretariaOptions, tipoInstituicaoOptions);
+  }, [secretariaOptions, tipoInstituicaoOptions]);
+
+  const campos = useMemo<InstituicaoSearchField[]>(() => {
+    return buildInstituicaoCampos(secretariaOptions, tipoInstituicaoOptions);
   }, [secretariaOptions, tipoInstituicaoOptions]);
 
   const relations = useMemo(() => {
@@ -104,22 +96,27 @@ export default function InstituicoesPageClient({
 
   const refreshInstituicoes = async () => {
     const pageData = await fetchInstituicaoPageData();
+    const nextRelations = buildFinanceRelations({
+      despesas: pageData.despesas,
+      instituicoes: pageData.instituicoes,
+      secretarias: pageData.secretarias,
+      orcamentos: pageData.orcamentos,
+    });
+    const nextRows = mapInstituicaoRows(
+      pageData.instituicoes,
+      pageData.secretarias,
+      pageData.tiposInstituicao,
+      nextRelations.instituicoes
+    );
 
     setInstituicoes(pageData.instituicoes);
     setSecretarias(pageData.secretarias);
     setTiposInstituicao(pageData.tiposInstituicao);
     setDespesas(pageData.despesas);
     setOrcamentos(pageData.orcamentos);
+    setFilteredData(nextRows);
     setError(null);
   };
-
-  useEffect(() => {
-    setCampos(buildInstituicaoCampos(secretariaOptions, tipoInstituicaoOptions));
-  }, [secretariaOptions, tipoInstituicaoOptions]);
-
-  useEffect(() => {
-    setFilteredData(instituicaoRows);
-  }, [instituicaoRows]);
 
   const handleCreate = async (data: Omit<Instituicao, "id">) => {
     await instituicaoService.create(normalizeInstituicaoPayload(data));
@@ -145,7 +142,6 @@ export default function InstituicoesPageClient({
         filteredData={filteredData}
         instituicaoRows={instituicaoRows}
         formFields={instituicaoFormFields}
-        setCampos={setCampos}
         setFilteredData={setFilteredData}
         onCreate={handleCreate}
         onUpdate={handleUpdate}

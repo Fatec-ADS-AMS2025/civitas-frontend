@@ -1,29 +1,23 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Form from "@/components/Form/form";
 import Input from "@/components/Input";
 import Modal from "@/components/modal";
 import { showToast } from "@/hooks/useToast";
-import type { Secretaria, SecretariaRow } from "@/hooks/useSecretariaPage";
+import {
+  INITIAL_SECRETARIA_TEXT_FILTERS,
+  type Secretaria,
+  type SecretariaRow,
+  type SecretariaTextFilters,
+} from "@/hooks/useSecretariaPage";
 import { novaSecretaria, secretariaFormFields } from "./secretariaConfig";
 
 type SecretariaFiltersProps = {
   data: SecretariaRow[];
-  setData: React.Dispatch<React.SetStateAction<SecretariaRow[]>>;
+  filters: SecretariaTextFilters;
+  setFilters: React.Dispatch<React.SetStateAction<SecretariaTextFilters>>;
   onCadastrar: (data: Omit<Secretaria, "idSecretaria">) => Promise<void>;
-};
-
-type SecretariaFilterState = {
-  search: string;
-  vinculo: string;
-  cidade: string;
-};
-
-const INITIAL_FILTERS: SecretariaFilterState = {
-  search: "",
-  vinculo: "",
-  cidade: "",
 };
 
 const VINCULO_OPTIONS = [
@@ -48,7 +42,7 @@ const getOptionLabel = (
 
 const matchesFilters = (
   secretaria: SecretariaRow,
-  filters: SecretariaFilterState
+  filters: SecretariaTextFilters
 ): boolean => {
   const query = normalizeSearch(filters.search);
   const cityQuery = normalizeSearch(filters.cidade);
@@ -82,10 +76,10 @@ const matchesFilters = (
 
 export default function SecretariaFilters({
   data,
-  setData,
+  filters,
+  setFilters,
   onCadastrar,
 }: SecretariaFiltersProps) {
-  const [filters, setFilters] = useState<SecretariaFilterState>(INITIAL_FILTERS);
   const [modalOpen, setModalOpen] = useState(false);
 
   const filteredRows = useMemo(
@@ -94,7 +88,7 @@ export default function SecretariaFilters({
   );
 
   const activeFilters = useMemo(() => {
-    const active: Array<{ key: keyof SecretariaFilterState; label: string; value: string }> = [];
+    const active: Array<{ key: keyof SecretariaTextFilters; label: string; value: string }> = [];
 
     if (filters.search.trim()) {
       active.push({ key: "search", label: "Busca", value: filters.search.trim() });
@@ -115,16 +109,12 @@ export default function SecretariaFilters({
     return active;
   }, [filters]);
 
-  useEffect(() => {
-    setData(filteredRows);
-  }, [filteredRows, setData]);
-
-  const updateFilter = (field: keyof SecretariaFilterState, value: string) => {
+  const updateFilter = (field: keyof SecretariaTextFilters, value: string) => {
     setFilters((current) => ({ ...current, [field]: value }));
   };
 
   const clearFilters = () => {
-    setFilters(INITIAL_FILTERS);
+    setFilters(INITIAL_SECRETARIA_TEXT_FILTERS);
   };
 
   return (

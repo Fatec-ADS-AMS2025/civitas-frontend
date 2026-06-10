@@ -26,11 +26,6 @@ export default function NavigationFeedback() {
       start();
     };
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [start]);
-
-  useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
       if (
         event.defaultPrevented ||
@@ -84,8 +79,12 @@ export default function NavigationFeedback() {
       }
     };
 
+    window.addEventListener("popstate", handlePopState);
     document.addEventListener("click", handleDocumentClick, true);
-    return () => document.removeEventListener("click", handleDocumentClick, true);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("click", handleDocumentClick, true);
+    };
   }, [start]);
 
   const isActive = status !== "idle";
