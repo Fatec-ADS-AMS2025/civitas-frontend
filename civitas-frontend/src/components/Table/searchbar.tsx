@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import Form, {
+  type FormExtraContentRenderArgs,
   type FormFieldConfig,
   type ValidationFn,
 } from "../Form/form";
@@ -28,6 +29,7 @@ type SearchBarProps = {
   formFields?: FormFieldConfig[];
   formValidationSchema?: Record<string, ValidationFn>;
   formHiddenFields?: string[];
+  formRenderExtraContent?: (args: FormExtraContentRenderArgs) => React.ReactNode;
 };
 
 const SearchBar = ({
@@ -41,6 +43,7 @@ const SearchBar = ({
   formFields,
   formValidationSchema,
   formHiddenFields,
+  formRenderExtraContent,
 }: SearchBarProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -225,6 +228,7 @@ const SearchBar = ({
             fields={formFields}
             validationSchema={formValidationSchema}
             hiddenFields={formHiddenFields}
+            renderExtraContent={formRenderExtraContent}
             onCancel={() => setModalOpen(false)}
             onConfirm={async (data) => {
               try {
