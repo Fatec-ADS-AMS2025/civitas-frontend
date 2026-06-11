@@ -16,7 +16,8 @@ type LoginResponse = {
   usuario: {
     id: number;
     nome: string;
-    tipoUsuario?: string;
+    email?: string;
+    tipoUsuario?: string | number;
   };
 };
 
@@ -79,6 +80,7 @@ export function useAuth() {
       const authUser: AuthStorageUser = {
         id: loginResponse.usuario.id,
         nome: loginResponse.usuario.nome,
+        email: loginResponse.usuario.email,
         token: loginResponse.token,
         expiresAtUtc: loginResponse.expiresAtUtc,
         tipoUsuario: loginResponse.usuario.tipoUsuario,

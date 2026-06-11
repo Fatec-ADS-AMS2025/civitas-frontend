@@ -183,8 +183,8 @@ export const NAVIGATION_CATALOG: NavigationItem[] = [
   },
   {
     key: "perfil",
-    label: "Perfil",
-    path: "/perfil",
+    label: "Meu Perfil",
+    path: "/dashboard/perfil",
     keywords: ["conta", "usuario", "meu perfil"],
     features: [
       "ver dados da conta",

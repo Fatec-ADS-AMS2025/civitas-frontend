@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import SearchDrawer from "@/components/SearchDrawer";
 import ThemeSwitcher from "@/components/theme/theme-switcher";
+import useAuth from "@/hooks/useAuth";
 import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import { NAVIGATION_CATALOG } from "@/navigation/navigation.data";
 
@@ -15,6 +16,7 @@ const normalizePath = (path: string): string => {
 
 export default function Sidebar() {
   const { push } = useAppNavigation();
+  const { user } = useAuth();
   const pathname = usePathname() || "/dashboard";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -112,8 +114,11 @@ export default function Sidebar() {
               <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-[var(--sidebar-profile-icon-bg)] text-[var(--sidebar-profile-text)]">
                 <span className="material-symbols-outlined">{profileItem.icon ?? "person"}</span>
               </div>
-              <div className="font-detail w-0 overflow-hidden whitespace-nowrap text-sm font-medium opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:opacity-100">
-                {profileItem.label}
+              <div className="font-detail w-0 min-w-0 overflow-hidden whitespace-nowrap text-sm font-medium opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:min-w-0 sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:min-w-0 sm:group-focus-within:opacity-100">
+                <span className="block max-w-[172px] truncate">{user?.nome || profileItem.label}</span>
+                <span className="block max-w-[172px] truncate text-xs font-normal opacity-80">
+                  {profileItem.label}
+                </span>
               </div>
             </button>
           </div>
