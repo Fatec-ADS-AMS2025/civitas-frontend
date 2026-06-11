@@ -4,9 +4,10 @@ export const AUTH_CREDENTIALS_STORAGE_KEY = 'civitas.auth.credentials';
 export type AuthStorageUser = {
   id: number;
   nome: string;
+  email?: string;
   token: string;
   expiresAtUtc: string;
-  tipoUsuario?: string;
+  tipoUsuario?: string | number;
 };
 
 export type AuthStoredCredentials = {
@@ -52,9 +53,13 @@ export const authStorage = {
       return {
         id: parsed.id,
         nome: parsed.nome,
+        email: typeof parsed.email === 'string' ? parsed.email : undefined,
         token: parsed.token,
         expiresAtUtc: parsed.expiresAtUtc,
-        tipoUsuario: typeof parsed.tipoUsuario === 'string' ? parsed.tipoUsuario : undefined,
+        tipoUsuario:
+          typeof parsed.tipoUsuario === 'string' || typeof parsed.tipoUsuario === 'number'
+            ? parsed.tipoUsuario
+            : undefined,
       };
     } catch (error) {
       console.error('[authStorage] Falha ao ler usuario salvo no localStorage.', error);

@@ -126,6 +126,15 @@ const DASHBOARD_HEADER_META: Record<string, DashboardHeaderConfig> = {
       { label: "Usuários" },
     ],
   },
+  "/dashboard/perfil": {
+    title: "Meu Perfil",
+    eyebrow: "Conta",
+    subtitle: "Consulte os dados do usuario autenticado.",
+    breadcrumbs: [
+      { label: "Home", href: "/dashboard" },
+      { label: "Meu Perfil" },
+    ],
+  },
 };
 
 const DashboardHeaderContext = createContext<DashboardHeaderContextValue | null>(null);
