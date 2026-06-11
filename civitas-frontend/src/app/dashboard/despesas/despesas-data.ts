@@ -9,37 +9,6 @@ import { unidadeConsumidoraService } from "@/hooks/unidadeConsumidora";
 import { unidadeMedidaService } from "@/hooks/unidadeMedida";
 import { usuarioService } from "@/hooks/usuario";
 import type { DashboardData } from "@/hooks/useDespesasDashboard";
-import type DespesaDTO from "@/models/despesa";
-
-const isHttpNotFoundError = (error: unknown): boolean => {
-  return error instanceof Error && error.message.includes("HTTP 404");
-};
-
-const isHttpBadRequestError = (error: unknown): boolean => {
-  return error instanceof Error && error.message.includes("HTTP 400");
-};
-
-const logOptionalDashboardWarning = (message: string, error: unknown): void => {
-  if (process.env.NODE_ENV === "development") {
-    console.warn(message, error);
-  }
-};
-
-const mergeUniqueById = (despesas: DespesaDTO[]): DespesaDTO[] => {
-  return Array.from(new Map(despesas.map((despesa) => [despesa.id, despesa])).values());
-};
-
-const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
-  try {
-    return (await despesaService.getInactiveOptional()) ?? [];
-  } catch (error) {
-    if (!isHttpNotFoundError(error) && !isHttpBadRequestError(error)) {
-      logOptionalDashboardWarning("Erro ao carregar despesas inativas:", error);
-    }
-
-    return [];
-  }
-};
 
 export const loadDespesasPageData = async (): Promise<DashboardData> => {
   const [
@@ -69,7 +38,7 @@ export const loadDespesasPageData = async (): Promise<DashboardData> => {
   ]);
 
   return {
-    despesas: mergeUniqueById([...(despesasTodas ?? []), ...(await safeLoadInactiveDespesas())]),
+    despesas: despesasTodas ?? [],
     tipoCodigos: tipoCodigos ?? [],
     tiposDespesa: tiposDespesa ?? [],
     orcamentos: orcamentos ?? [],

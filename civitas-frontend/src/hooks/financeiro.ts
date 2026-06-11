@@ -41,7 +41,7 @@ const normalizeOrcamentoDate = (orcamento: OrcamentoDTO): string => {
     return `${orcamento.ano}-01-01`;
   }
 
-  return new Date().toISOString();
+  return '';
 };
 
 const mapDespesaToTransacao = (despesa: DespesaDTO): FinanceiroTransacaoDTO => ({
@@ -49,7 +49,7 @@ const mapDespesaToTransacao = (despesa: DespesaDTO): FinanceiroTransacaoDTO => (
   tipo: 'despesa',
   descricao: despesa.descricao ?? despesa.numeroDocumento ?? `Despesa ${despesa.id}`,
   valor: Number(despesa.valor ?? despesa.consumoPrevisto ?? 0),
-  data: despesa.data ?? despesa.dataVencimento ?? despesa.dataEmicao ?? new Date().toISOString(),
+  data: despesa.data ?? despesa.dataVencimento ?? despesa.dataEmicao ?? despesa.dataEmissao ?? '',
   situacao: despesa.situacao,
   instituicaoId: despesa.idInstituicao,
   referenciaId: despesa.id,
@@ -167,7 +167,7 @@ const buildNumeroDocumento = (payload: FinanceiroPayloadDTO): string => {
     return descriptionDigits;
   }
 
-  return String(Date.now());
+  return '';
 };
 
 const compareByTotalGastosDesc = <T extends { totalGastos: number }>(a: T, b: T): number => {
@@ -382,12 +382,11 @@ export class FinanceiroService {
       throw new Error(`Despesa ${id} nao encontrada.`);
     }
 
-    const numeroDocumento =
-      buildNumeroDocumento({
-        ...payload,
-        numeroDocumento: payload.numeroDocumento ?? current.numeroDocumento,
-        descricao: payload.descricao ?? current.descricao,
-      }) || String(Date.now());
+    const numeroDocumento = buildNumeroDocumento({
+      ...payload,
+      numeroDocumento: payload.numeroDocumento ?? current.numeroDocumento,
+      descricao: payload.descricao ?? current.descricao,
+    });
     const uc = payload.uc?.trim() || current.uc || '';
     const dataVencimento = payload.dataVencimento ?? payload.data ?? current.dataVencimento ?? current.data;
     const dataEmicao = payload.dataEmicao ?? payload.data ?? current.dataEmicao ?? current.data ?? dataVencimento;
@@ -443,7 +442,7 @@ export class FinanceiroService {
       return;
     }
 
-    await despesaService.alterarSituacao(id);
+    await despesaService.delete(id);
   }
 }
 

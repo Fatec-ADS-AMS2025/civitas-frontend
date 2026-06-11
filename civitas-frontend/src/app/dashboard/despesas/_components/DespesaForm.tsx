@@ -70,8 +70,6 @@ type DespesaFormProps = {
   onConfirm?: (values: DespesaFormValues) => Promise<void> | void;
 };
 
-const getTodayDate = () => new Date().toISOString().slice(0, 10);
-
 const toNumberOrEmpty = (value: unknown): number | "" => {
   if (value === "" || value === undefined || value === null) return "";
   const parsedValue = Number(value);
@@ -103,8 +101,8 @@ const buildInitialFormValues = (
     valorPago: toNumberOrEmpty(initialValues?.valorPago ?? (isCreateMode ? 0 : "")),
     consumoPrevisto: toNumberOrEmpty(initialValues?.consumoPrevisto),
     consumoReal: toNumberOrEmpty(initialValues?.consumoReal ?? (isCreateMode ? 0 : "")),
-    dataEmicao: normalizeDateInput(initialValues?.dataEmicao) ?? getTodayDate(),
-    dataVencimento: normalizeDateInput(initialValues?.dataVencimento) ?? getTodayDate(),
+    dataEmicao: normalizeDateInput(initialValues?.dataEmicao) ?? "",
+    dataVencimento: normalizeDateInput(initialValues?.dataVencimento) ?? "",
     situacao: defaultStatus,
     status: defaultStatus,
   };
@@ -170,6 +168,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 
 const resolveDocumentoValue = (value: unknown): DocumentoFieldValue | null => {
   if (!isRecord(value)) return null;
+  if (value.isPersisted === true) {
+    return value as DocumentoFieldValue;
+  }
   if (typeof value.digitalizacao !== "string" || value.digitalizacao.trim().length === 0) {
     return null;
   }

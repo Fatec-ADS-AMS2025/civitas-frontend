@@ -9,4 +9,7 @@ export default interface OrcamentoDTO {
   idTipoDespesa?: number;
   descricao?: string;
   situacao?: number;
+  excluido?: boolean;
+  dataExclusao?: string | null;
+  statusExclusao?: boolean | string | null;
 }

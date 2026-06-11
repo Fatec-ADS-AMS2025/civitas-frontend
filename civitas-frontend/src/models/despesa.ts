@@ -17,6 +17,12 @@ export default interface DespesaDTO {
   dataPagamento?: string;
   status?: number;
   situacao?: number;
+  nomeDocumento?: string;
+  hashDocumento?: string;
+  confirmarDocumentoDuplicado?: boolean;
+  valoresOpcionais?: string;
+  excluido?: boolean;
+  dataExclusao?: string | null;
   idTipoDespesa?: number;
   idOrcamento?: number;
   idInstituicao?: number;
