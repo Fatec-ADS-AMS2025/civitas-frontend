@@ -15,7 +15,7 @@ export default function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { isAuthenticated, isHydrated, logout } = useAuth();
+  const { isAuthenticated, isHydrated, logout, user } = useAuth();
   const { push, replace } = useAppNavigation();
 
   useEffect(() => {
@@ -57,6 +57,30 @@ export default function Layout({
           className="dashboard-content-region"
         >
           <div className="dashboard-content-shell">
+            <div className="mb-4 flex items-center justify-between gap-3 sm:hidden">
+              <button
+                type="button"
+                onClick={() => push("/dashboard/perfil")}
+                className="min-w-0 flex-1 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-3 py-2 text-left shadow-[var(--shadow-sm)]"
+              >
+                <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-[var(--secundary-1)]">
+                  <span className="material-symbols-outlined text-[20px]">person</span>
+                  <span className="truncate">{user?.nome || "Meu Perfil"}</span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className="civitas-action civitas-action--primary shrink-0 gap-2 px-3 py-2"
+                onClick={() => {
+                  logout();
+                  push("/login");
+                }}
+                aria-label="Sair"
+              >
+                <span className="material-symbols-outlined text-[20px]">logout</span>
+              </button>
+            </div>
             <DashboardPageHeader />
 
             <div className="w-full">
