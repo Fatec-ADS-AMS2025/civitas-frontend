@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { digitsOnly, normalizeDateInput, toTrimmedText } from "@/global/formPayload";
+import { filterActiveRecords } from "@/global/softDelete";
 import { SITUACAO_ATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
 import { documentoService, normalizeDocumentoForUi } from "@/hooks/documento";
@@ -145,7 +146,7 @@ const parseDateTimestamp = (value?: string): number => {
 };
 
 const ensureValidDate = (value?: string): string => {
-  return normalizeDateInput(value) ?? normalizeDateInput(new Date().toISOString()) ?? "2026-01-01";
+  return normalizeDateInput(value) ?? "";
 };
 
 const resolveDespesaDate = (despesa: DespesaDTO): string => {
@@ -275,10 +276,6 @@ const matchesVencimentoFilter = (
   return true;
 };
 
-const mergeUniqueById = (despesas: DespesaDTO[]): DespesaDTO[] => {
-  return Array.from(new Map(despesas.map((despesa) => [despesa.id, despesa])).values());
-};
-
 const toErrorMessage = (error: unknown): string => {
   if (error instanceof Error && error.message) {
     return error.message;
@@ -291,20 +288,6 @@ const isHttpNotFoundError = (error: unknown): boolean => {
   return error instanceof Error && error.message.includes("HTTP 404");
 };
 
-const isHttpBadRequestError = (error: unknown): boolean => {
-  return error instanceof Error && error.message.includes("HTTP 400");
-};
-
-const isHttpMethodNotAllowedError = (error: unknown): boolean => {
-  return error instanceof Error && error.message.includes("HTTP 405");
-};
-
-const logOptionalDashboardWarning = (message: string, error: unknown): void => {
-  if (process.env.NODE_ENV === "development") {
-    console.warn(message, error);
-  }
-};
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -312,18 +295,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 const resolveDocumentoId = (despesa: DespesaDTO): number | undefined => {
   const idDocumento = Number(despesa.idDocumento ?? despesa.documento?.idDocumento);
   return Number.isFinite(idDocumento) && idDocumento > 0 ? idDocumento : undefined;
-};
-
-const safeLoadInactiveDespesas = async (): Promise<DespesaDTO[]> => {
-  try {
-    return (await despesaService.getInactiveOptional()) ?? [];
-  } catch (error) {
-    if (!isHttpNotFoundError(error) && !isHttpBadRequestError(error)) {
-      logOptionalDashboardWarning("Erro ao carregar despesas inativas:", error);
-    }
-
-    return [];
-  }
 };
 
 const buildDespesaRows = (
@@ -365,7 +336,9 @@ const buildDespesaRows = (
         ? normalizeDocumentoForUi(despesa.documento)
         : null;
       const idDocumento = resolveDocumentoId(despesa);
-      const documentoConfiavel = Boolean(documento?.digitalizacao || idDocumento);
+      const documentoConfiavel = Boolean(
+        documento?.digitalizacao || idDocumento || despesa.hashDocumento
+      );
       const normalizedRaw: DespesaDTO = {
         ...despesa,
         idTipoDespesa: resolvedTipoDespesaId,
@@ -577,7 +550,6 @@ const buildDespesaPayload = (
     throw new Error("Nao foi possivel identificar o usuario responsavel pela despesa.");
   }
 
-  const today = ensureValidDate();
   const formDataDataEmissao =
     typeof formData.dataEmissao === "string" ? formData.dataEmissao : undefined;
   const formDataDataEmicao =
@@ -590,12 +562,19 @@ const buildDespesaPayload = (
     formDataDataEmissao ??
       formDataDataEmicao ??
       currentDespesa?.dataEmissao ??
-      currentDespesa?.dataEmicao ??
-      today
+      currentDespesa?.dataEmicao
   );
   const dataVencimento = ensureValidDate(
-    formDataDataVencimento ?? currentDespesa?.dataVencimento ?? today
+    formDataDataVencimento ?? currentDespesa?.dataVencimento
   );
+
+  if (!dataEmissao) {
+    throw new Error("Informe uma data de emissao valida.");
+  }
+
+  if (!dataVencimento) {
+    throw new Error("Informe uma data de vencimento valida.");
+  }
   const situacao = Number(
     formData.status ??
       formData.situacao ??
@@ -635,7 +614,9 @@ const buildDespesaPayload = (
 
 const hasPersistedDocumentoReference = (despesa: DespesaDTO): boolean => {
   return Boolean(
-    resolveDocumentoId(despesa) ||
+    despesa.hashDocumento ||
+      despesa.nomeDocumento ||
+      resolveDocumentoId(despesa) ||
       (despesa.documento?.isPersisted === true && despesa.documento.digitalizacao)
   );
 };
@@ -767,10 +748,10 @@ const loadDashboardData = async (): Promise<DashboardData> => {
   ]);
 
   return {
-    despesas: mergeUniqueById([...(despesasTodas ?? []), ...(await safeLoadInactiveDespesas())]),
+    despesas: filterActiveRecords(despesasTodas ?? []),
     tipoCodigos: tipoCodigos ?? [],
     tiposDespesa: tiposDespesa ?? [],
-    orcamentos: orcamentos ?? [],
+    orcamentos: filterActiveRecords(orcamentos ?? []),
     instituicoes: instituicoes ?? [],
     secretarias: secretarias ?? [],
     fornecedores: fornecedores ?? [],
@@ -794,6 +775,10 @@ const buildDespesaApiPayload = (payload: DespesaDTO): DespesaDTO => ({
   status: Number(payload.status ?? payload.situacao ?? SITUACAO_ATIVO),
   idUsuario: Number(payload.idUsuario),
   idUnidadeConsumidora: Number(payload.idUnidadeConsumidora),
+  nomeDocumento: payload.nomeDocumento,
+  hashDocumento: payload.hashDocumento,
+  documento: payload.documento,
+  confirmarDocumentoDuplicado: payload.confirmarDocumentoDuplicado,
 });
 
 export const useDespesasDashboard = (
@@ -867,7 +852,7 @@ export const useDespesasDashboard = (
 
   const despesas = useMemo(() => {
     return buildDespesaRows(
-      dashboardData.despesas,
+      filterActiveRecords(dashboardData.despesas),
       unidadesConsumidorasMap,
       tiposDespesaMap,
       tipoCodigosMap,
@@ -888,7 +873,7 @@ export const useDespesasDashboard = (
   }, [despesas, filters]);
 
   const filteredOrcamentos = useMemo(() => {
-    return dashboardData.orcamentos.filter((orcamento) =>
+    return filterActiveRecords(dashboardData.orcamentos).filter((orcamento) =>
       matchesOrcamentoFilters(orcamento, filters)
     );
   }, [dashboardData.orcamentos, filters]);
@@ -927,10 +912,10 @@ export const useDespesasDashboard = (
         throw new Error("Selecione um documento para anexar a despesa.");
       }
 
-      await documentoService.createData(documentoPayload);
       await despesaService.createData(buildDespesaApiPayload({
         ...payload,
         id: 0,
+        documento: documentoPayload,
       }));
       await refetch();
     },
@@ -948,13 +933,10 @@ export const useDespesasDashboard = (
       const documentoPayload = buildDocumentoPayload(formData, payload, false);
       assertPersistedDocumentoLinkWasPreserved(formData, payload, currentDespesa);
 
-      if (documentoPayload) {
-        await documentoService.createData(documentoPayload);
-      }
-
       await despesaService.updateData(id, buildDespesaApiPayload({
         ...payload,
         id,
+        documento: documentoPayload ?? payload.documento,
       }));
       await refetch();
     },
@@ -999,12 +981,15 @@ export const useDespesasDashboard = (
         throw new Error("Fornecedor da despesa nao foi identificado.");
       }
 
-      await documentoService.createData({
+      const documentoPayload: DocumentoDTO = {
         idDocumento: 0,
         digitalizacao,
         numeroDocumento: Number(numeroDocumento),
         idFornecedor,
-      });
+        fileName: documentoValue?.fileName,
+        fileType: documentoValue?.fileType,
+        fileSize: documentoValue?.fileSize,
+      };
 
       const today = new Date().toISOString().slice(0, 10);
       const payload = buildDespesaPayload(
@@ -1024,6 +1009,7 @@ export const useDespesasDashboard = (
         buildDespesaApiPayload({
           ...payload,
           id,
+          documento: documentoPayload,
         })
       );
       await refetch();
@@ -1031,14 +1017,13 @@ export const useDespesasDashboard = (
     [dashboardData, refetch]
   );
 
-  // A API nao expõe DELETE para despesas; exibe mensagem clara.
   const removeDespesa = useCallback(
     async (id: number) => {
       try {
         await despesaService.delete(id);
       } catch (error) {
-        if (isHttpNotFoundError(error) || isHttpMethodNotAllowedError(error)) {
-          throw new Error("Exclusao de despesa nao esta disponivel na API.");
+        if (isHttpNotFoundError(error)) {
+          throw new Error("Despesa nao encontrada para exclusao.");
         }
         throw error;
       }

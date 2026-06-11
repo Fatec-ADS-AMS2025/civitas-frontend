@@ -1,4 +1,5 @@
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_INATIVO } from "@/global/situacao";
+import { filterActiveRecords } from "@/global/softDelete";
 import { despesaService } from "@/hooks/despesa";
 import { fornecedorService } from "@/hooks/fornecedor";
 import { instituicaoService } from "@/hooks/instituicao";
@@ -292,7 +293,7 @@ const loadOrcamentoRows = async () => {
     tiposInstituicao.map((tipo) => [tipo.id, tipo.descricao] as const),
   );
 
-  return orcamentos.map((orcamento: OrcamentoDTO) => {
+  return filterActiveRecords(orcamentos).map((orcamento: OrcamentoDTO) => {
     const ano = Number(orcamento.anoOrcamento ?? orcamento.ano ?? 0);
     const valor = Number(orcamento.valorOrcamento ?? orcamento.valor ?? 0);
 
@@ -404,7 +405,9 @@ const loadDespesaRows = async ({
     tiposDespesa.map((tipo) => [tipo.id, buildLookupLabel(tipo.descricao, tipo.situacao)] as const),
   );
 
-  return despesas.map((despesa) => mapDespesaRow(despesa, fornecedoresMap, tiposDespesaMap));
+  return filterActiveRecords(despesas).map((despesa) =>
+    mapDespesaRow(despesa, fornecedoresMap, tiposDespesaMap)
+  );
 };
 
 const loadDespesaPage: ListingConfig<DespesaRow>["loadPage"] = async ({
@@ -415,48 +418,16 @@ const loadDespesaPage: ListingConfig<DespesaRow>["loadPage"] = async ({
   sortColumnId,
   sortDirection,
 }) => {
-  const hasLocalConstraints =
-    Boolean(search?.trim()) ||
-    Object.values(filterValues ?? {}).some((value) => Boolean(value));
+  const rows = await loadDespesaRows({
+    page: 1,
+    pageSize,
+    search,
+    filterValues,
+    sortColumnId,
+    sortDirection,
+  });
 
-  if (hasLocalConstraints) {
-    const rows = await loadDespesaRows({
-      page: 1,
-      pageSize,
-      search,
-      filterValues,
-      sortColumnId,
-      sortDirection,
-    });
-
-    return buildClientPageResult(rows, page, pageSize);
-  }
-
-  const sortBy = sortColumnId ? DESPESA_SORT_BY[sortColumnId] : undefined;
-  const [despesasPage, fornecedores, tiposDespesa] = await Promise.all([
-    despesaService.getPage({
-      page,
-      size: pageSize,
-      sortBy,
-      sortDirection: sortBy ? sortDirection : undefined,
-    }),
-    fornecedorService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
-    tipoDespesaService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
-  ]);
-  const fornecedoresMap = new Map(
-    fornecedores.map((fornecedor) => [fornecedor.idFornecedor, fornecedor.nomeFantasia || fornecedor.nome] as const),
-  );
-  const tiposDespesaMap = new Map(
-    tiposDespesa.map((tipo) => [tipo.id, buildLookupLabel(tipo.descricao, tipo.situacao)] as const),
-  );
-
-  return {
-    rows: despesasPage.items.map((despesa) => mapDespesaRow(despesa, fornecedoresMap, tiposDespesaMap)),
-    totalRecords: despesasPage.totalRecords,
-    totalPages: despesasPage.totalPages,
-    currentPage: despesasPage.currentPage,
-    pageSize: despesasPage.pageSize,
-  };
+  return buildClientPageResult(rows, page, pageSize);
 };
 
 const listingRegistry: ListingRegistry = {

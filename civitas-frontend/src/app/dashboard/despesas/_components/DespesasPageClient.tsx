@@ -52,6 +52,7 @@ export default function DespesasPageClient({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingDespesa, setEditingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [viewingDespesa, setViewingDespesa] = useState<DespesaDashboardRow | null>(null);
+  const [deletingDespesa, setDeletingDespesa] = useState<DespesaDashboardRow | null>(null);
   const [paymentDespesa, setPaymentDespesa] = useState<DespesaDashboardRow | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isOverdueWarningOpen, setIsOverdueWarningOpen] = useState(false);
@@ -270,13 +271,18 @@ export default function DespesasPageClient({
   };
 
   const handleDelete = async (despesa: DespesaDashboardRow) => {
-    const confirmed = window.confirm(
-      `Deseja remover a despesa ${despesa.registro} - ${despesa.descricao}?`
-    );
-    if (!confirmed) return;
+    setDeletingDespesa(despesa);
+  };
 
+  const handleCloseDeleteModal = () => {
+    setDeletingDespesa(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingDespesa) return;
     try {
-      await dashboard.removeDespesa(despesa.id);
+      await dashboard.removeDespesa(deletingDespesa.id);
+      setDeletingDespesa(null);
     } catch (submitError) {
       showToast(getSubmitErrorMessage(submitError, "Erro ao remover despesa."), "error");
     }
@@ -434,6 +440,51 @@ export default function DespesasPageClient({
           onClose={handleClosePaymentModal}
           onConfirm={handlePaymentSubmit}
         />
+      ) : null}
+
+      {deletingDespesa ? (
+        <Modal value={Boolean(deletingDespesa)} setValue={handleCloseDeleteModal}>
+          <div className="flex h-full flex-col gap-6">
+            <div className="rounded-sm border border-[var(--tone-danger-border)] bg-[var(--tone-danger-bg)] p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--surface-elevated)] text-[var(--tone-danger-text)]">
+                  <span className="material-symbols-outlined !text-[28px]">
+                    delete
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--tone-danger-text)]">
+                    Confirmar exclusao
+                  </p>
+                  <h3 className="mt-1.5 text-2xl font-semibold text-[var(--foreground)]">
+                    Remover despesa {deletingDespesa.registro}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
+                    Esta acao remove a despesa da listagem ativa. Confirme apenas se deseja remover{" "}
+                    <strong className="font-semibold text-[var(--foreground)]">
+                      {deletingDespesa.descricao}
+                    </strong>
+                    .
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <Button type="button" variant="secondary" onClick={handleCloseDeleteModal}>
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="tertiary"
+                className="border-[var(--tone-danger-border)] bg-[var(--tone-danger-bg)] text-[var(--tone-danger-text)] hover:bg-[color-mix(in_srgb,var(--tone-danger-bg)_84%,var(--surface-elevated)_16%)]"
+                onClick={handleConfirmDelete}
+              >
+                Remover
+              </Button>
+            </div>
+          </div>
+        </Modal>
       ) : null}
 
       {isOverdueWarningOpen ? (

@@ -4,6 +4,7 @@ import Table from "@/components/Table/table";
 import type { TableColumn } from "@/components/Table/export-types";
 import type { TablePaginationConfig } from "@/components/Table/table";
 import { normalizeDateInput } from "@/global/formPayload";
+import { despesaService } from "@/hooks/despesa";
 import { documentoService } from "@/hooks/documento";
 import { showToast } from "@/hooks/useToast";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
@@ -373,21 +374,23 @@ function DocumentoAction({ despesa }: { despesa: DespesaDashboardRow }) {
             ? await documentoService.getDocumentoDataById(despesa.idDocumento)
             : null;
 
+      if (resolvedDocumento?.digitalizacao) {
+        const fileType = resolvedDocumento.fileType || "application/pdf";
+        const blob = base64ToBlob(resolvedDocumento.digitalizacao, fileType);
+        openBlob(blob);
+        return;
+      }
+
+      if (despesa.raw.hashDocumento) {
+        const blob = await despesaService.getDocumentoBlobByHash(despesa.raw.hashDocumento);
+        openBlob(blob);
+        return;
+      }
+
       if (!resolvedDocumento?.digitalizacao) {
         showToast("Documento nao foi encontrado para abertura.", "error");
         return;
       }
-
-      const fileType = resolvedDocumento.fileType || "application/pdf";
-      const blob = base64ToBlob(resolvedDocumento.digitalizacao, fileType);
-      const url = window.URL.createObjectURL(blob);
-      const openedWindow = window.open(url, "_blank", "noopener,noreferrer");
-
-      if (!openedWindow) {
-        showToast("O navegador bloqueou a abertura do documento.", "error");
-      }
-
-      window.setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
     } catch (error) {
       console.error("Erro ao abrir documento da despesa.", error);
       showToast("Nao foi possivel abrir o documento.", "error");
@@ -411,6 +414,17 @@ function DocumentoAction({ despesa }: { despesa: DespesaDashboardRow }) {
     </button>
   );
 }
+
+const openBlob = (blob: Blob): void => {
+  const url = window.URL.createObjectURL(blob);
+  const openedWindow = window.open(url, "_blank", "noopener,noreferrer");
+
+  if (!openedWindow) {
+    showToast("O navegador bloqueou a abertura do documento.", "error");
+  }
+
+  window.setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+};
 
 const base64ToBlob = (base64: string, fileType: string): Blob => {
   const binary = window.atob(base64);

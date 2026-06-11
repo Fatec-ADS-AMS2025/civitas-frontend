@@ -829,9 +829,6 @@ function Table<T extends TableRow>({
             onConfirm={async (formData) => {
               try {
                 if (modalAction === "delete") {
-                  const confirmDelete = window.confirm(`Tem certeza que deseja excluir este ${nomePagina}?`);
-                  if (!confirmDelete) return;
-
                   if (onDelete) {
                     await onDelete(getResolvedId(selectedContent));
                   }

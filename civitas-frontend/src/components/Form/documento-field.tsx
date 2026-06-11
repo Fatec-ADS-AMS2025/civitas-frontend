@@ -114,7 +114,7 @@ export default function DocumentoField({
   const errorId = getFieldErrorId(field.key);
   const documento = getDocumentoValue(value);
   const status = documento?.status ?? "idle";
-  const hasFile = Boolean(documento?.digitalizacao);
+  const hasFile = Boolean(documento?.digitalizacao || documento?.isPersisted);
   const isConverting = status === "loading";
   const isDisabled = disabled || isConverting;
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -126,11 +126,11 @@ export default function DocumentoField({
 
   const isImagePreview = Boolean(documento?.fileType?.startsWith("image/"));
   const isPdfPreview = Boolean(documento?.fileType?.includes("pdf"));
-  const canPreview = hasFile && (isImagePreview || isPdfPreview);
+  const canPreview = Boolean(documento?.digitalizacao) && (isImagePreview || isPdfPreview);
 
   const statusMessage = useMemo(() => {
     if (status === "loading") return "Convertendo arquivo para Base64...";
-    if (documento?.isPersisted && hasFile) return "Documento anexado a esta despesa.";
+    if (documento?.isPersisted) return "Documento anexado a esta despesa.";
     if (status === "ready" && hasFile) return "Arquivo pronto para envio.";
     if (status === "error") return documento?.errorMessage ?? "Erro ao converter arquivo.";
     return "Nenhum arquivo selecionado.";

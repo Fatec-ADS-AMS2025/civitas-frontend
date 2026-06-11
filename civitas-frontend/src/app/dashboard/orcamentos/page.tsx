@@ -5,6 +5,7 @@ import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { normalizeOrcamentoPayload } from "@/global/formPayload";
+import { filterActiveRecords } from "@/global/softDelete";
 import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
 import { despesaService } from "@/hooks/despesa";
 import { instituicaoService } from "@/hooks/instituicao";
@@ -225,6 +226,8 @@ const mapOrcamentoRows = (
   instituicoes: Instituicao[],
   tiposDespesa: TipoDespesa[]
 ): OrcamentoRow[] => {
+  const activeOrcamentos = filterActiveRecords(orcamentos);
+  const activeDespesas = filterActiveRecords(despesas);
   const instituicaoMap = new Map(
     instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const)
   );
@@ -232,11 +235,11 @@ const mapOrcamentoRows = (
     tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa.descricao] as const)
   );
 
-  return orcamentos.map((orcamento) => {
+  return activeOrcamentos.map((orcamento) => {
     const orcamentoId = getOrcamentoId(orcamento);
     const instituicaoId = orcamento.idInstituicao;
     const tipoDespesaId = orcamento.idTipoDespesa;
-    const despesasRelacionadas = despesas.filter(
+    const despesasRelacionadas = activeDespesas.filter(
       (despesa) => Number(despesa.idOrcamento ?? 0) === orcamentoId
     );
     const valorPrevisto = getOrcamentoValorPrevisto(orcamento);

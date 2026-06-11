@@ -65,7 +65,6 @@ export function TableModal<T extends TableRow>({
         onConfirm={async (formData) => {
           try {
             if (action === "delete") {
-              if (!window.confirm(`Tem certeza que deseja excluir este ${pageName}?`)) return;
               if (onDelete) await onDelete(getResolvedId(row));
             } else if (action === "edit" && onEdit) {
               await onEdit(getResolvedId(row), formData as Partial<T> & Record<string, unknown>);

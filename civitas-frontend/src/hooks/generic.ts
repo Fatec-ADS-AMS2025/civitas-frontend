@@ -1,4 +1,5 @@
 import { showToast } from "@/hooks/useToast";
+import { filterActiveRecords } from "@/global/softDelete";
 import { authStorage } from "@/lib/auth-storage";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
@@ -64,6 +65,45 @@ const parseApiMessageFromErrorText = (errorText: string): string => {
   return errorText;
 };
 
+const TECHNICAL_ERROR_KEYS = new Set([
+  "stacktrace",
+  "trace",
+  "traceid",
+  "exception",
+  "innerexception",
+  "source",
+  "targetsite",
+]);
+
+const translateApiErrorMessage = (message: string, status: number): string => {
+  const normalized = message
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  if (
+    normalized.includes("nao e possivel excluir um orcamento que possui despesas vinculadas")
+  ) {
+    return "Nao e possivel excluir este orcamento porque existem despesas vinculadas.";
+  }
+
+  if (
+    normalized.includes("orcamento") &&
+    (normalized.includes("foreign key") ||
+      normalized.includes("reference constraint") ||
+      normalized.includes("violates foreign key constraint") ||
+      normalized.includes("delete statement conflicted"))
+  ) {
+    return "Nao foi possivel excluir este orcamento porque ele possui registros vinculados.";
+  }
+
+  if (status === 404 && normalized.includes("orcamento")) {
+    return "O orcamento informado nao foi encontrado.";
+  }
+
+  return message;
+};
+
 const extractValidationMessages = (payload: unknown): string[] => {
   if (Array.isArray(payload)) {
     return payload
@@ -72,14 +112,20 @@ const extractValidationMessages = (payload: unknown): string[] => {
   }
 
   if (isRecord(payload)) {
-    return Object.values(payload)
+    return Object.entries(payload)
       .flatMap((value) => {
-        if (typeof value === "string") {
-          return [value.trim()];
+        const [key, fieldValue] = value;
+
+        if (TECHNICAL_ERROR_KEYS.has(key.toLowerCase())) {
+          return [];
         }
 
-        if (Array.isArray(value)) {
-          return value
+        if (typeof fieldValue === "string") {
+          return [fieldValue.trim()];
+        }
+
+        if (Array.isArray(fieldValue)) {
+          return fieldValue
             .map((item) => (typeof item === "string" ? item.trim() : ""))
             .filter((item) => item.length > 0);
         }
@@ -97,17 +143,20 @@ const buildDetailedApiErrorMessage = (
   errorText: string,
   status: number
 ): string => {
-  const validationMessages = extractValidationMessages(errorJson?.data);
+  const validationMessages = extractValidationMessages(errorJson?.data).map((message) =>
+    translateApiErrorMessage(message, status)
+  );
   const primaryMessage =
     errorJson?.message?.trim() ||
     parseApiMessageFromErrorText(errorText).trim() ||
     `Erro na requisicao (${status})`;
+  const translatedPrimaryMessage = translateApiErrorMessage(primaryMessage, status);
 
   if (validationMessages.length === 0) {
-    return primaryMessage;
+    return translatedPrimaryMessage;
   }
 
-  return `${primaryMessage}: ${Array.from(new Set(validationMessages)).join(" | ")}`;
+  return `${translatedPrimaryMessage}: ${Array.from(new Set(validationMessages)).join(" | ")}`;
 };
 
 const isPaginatedResult = <T>(value: unknown): value is PaginatedResult<T> => {
@@ -250,10 +299,13 @@ export class GenericService<T> {
     const size = query?.size ?? DEFAULT_LIST_QUERY.size;
 
     if (isPaginatedResult<R>(data)) {
-      return data;
+      return {
+        ...data,
+        items: filterActiveRecords(data.items),
+      };
     }
 
-    const items = Array.isArray(data) ? (data as R[]) : [];
+    const items = filterActiveRecords(Array.isArray(data) ? (data as R[]) : []);
     const totalRecords = items.length;
     const totalPages = totalRecords === 0 ? 0 : Math.ceil(totalRecords / size);
 
@@ -283,7 +335,7 @@ export class GenericService<T> {
     });
 
     const payload = await this.handleResponse(response, options);
-    return this.unwrapCollection<T>(payload);
+    return filterActiveRecords(this.unwrapCollection<T>(payload));
   }
 
   protected async requestItem(
@@ -319,7 +371,7 @@ export class GenericService<T> {
 
     return {
       ...envelope,
-      data: this.unwrapCollection<T>(payload),
+      data: filterActiveRecords(this.unwrapCollection<T>(payload)),
     };
   }
 
