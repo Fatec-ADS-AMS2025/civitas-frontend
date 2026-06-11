@@ -53,6 +53,7 @@ type FormFieldConfig = {
     options?: FormOption[];
     resolveOptions?: (formData: Record<string, unknown>, mode: FormMode) => FormOption[];
     readOnlyInModes?: FormMode[];
+    resolveHidden?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
     resolveDisabled?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
     clearOnDisable?: boolean;
     clearOnInvalidOption?: boolean;
@@ -61,6 +62,12 @@ type FormFieldConfig = {
 }
 
 type FieldConfig = FormFieldConfig
+
+type FormExtraContentRenderArgs = {
+    formData: Record<string, unknown>
+    mode: FormMode
+    setFieldValue: (key: string, value: unknown) => void
+}
 
 type FormProps = {
     camps?: string[];
@@ -71,11 +78,20 @@ type FormProps = {
     validationSchema?: Record<string, ValidationFn>;
     hiddenFields?: string[];
     extraContent?: React.ReactNode;
+    renderExtraContent?: (args: FormExtraContentRenderArgs) => React.ReactNode;
     onCancel?: () => void;
     onConfirm?: (data: Record<string, unknown>) => Promise<unknown> | unknown;
 }
 
-export type { FieldConfig, FormFieldConfig, FormMode, FormOption, SectionDefinition, ValidationFn }
+export type {
+    FieldConfig,
+    FormExtraContentRenderArgs,
+    FormFieldConfig,
+    FormMode,
+    FormOption,
+    SectionDefinition,
+    ValidationFn,
+}
 
 export default function Form({
     camps,
@@ -86,14 +102,11 @@ export default function Form({
     validationSchema,
     hiddenFields,
     extraContent,
+    renderExtraContent,
     onCancel,
     onConfirm,
 }: FormProps) {
     const initialData = useMemo(() => (isRecord(object) ? object : {}), [object])
-    const [formData, setFormData] = useState<Record<string, unknown>>(initialData)
-    const [isLoading, setIsLoading] = useState(false)
-    const [errors, setErrors] = useState<Record<string, string>>({})
-
     const mode: FormMode = type
     // Resolve a lista de campos via config, keys do objeto ou camps.
     const sourceFromCamps = useMemo(
@@ -116,6 +129,26 @@ export default function Form({
         return new Map(mergedFields.map((field) => [field.key, field]))
     }, [mergedFields])
 
+    const initialFormData = useMemo(() => {
+        if (isRecord(object)) {
+            return buildDisplayFormData(object, mergedFields, fieldMap)
+        }
+
+        if (Array.isArray(object)) {
+            const emptyObject = object.reduce<Record<string, unknown>>((acc, key) => {
+                acc[key] = ''
+                return acc
+            }, {})
+            return buildDisplayFormData(emptyObject, mergedFields, fieldMap)
+        }
+
+        return {}
+    }, [fieldMap, mergedFields, object])
+
+    const [formData, setFormData] = useState<Record<string, unknown>>(() => initialFormData)
+    const [isLoading, setIsLoading] = useState(false)
+    const [errors, setErrors] = useState<Record<string, string>>({})
+
     const normalizedFormData = useMemo(
         () => buildNormalizedFormData(formData, mergedFields, fieldMap, 'change'),
         [fieldMap, formData, mergedFields]
@@ -128,6 +161,11 @@ export default function Form({
                 options: field.resolveOptions
                     ? field.resolveOptions(normalizedFormData, mode)
                     : field.options,
+                hidden:
+                    field.hidden ||
+                    (field.resolveHidden
+                        ? field.resolveHidden(normalizedFormData, mode)
+                        : false),
                 disabled:
                     field.disabled ||
                     (field.resolveDisabled
@@ -140,25 +178,6 @@ export default function Form({
     const resolvedFieldMap = useMemo(() => {
         return new Map(resolvedFields.map((field) => [field.key, field]))
     }, [resolvedFields])
-
-    // Sincroniza estado inicial com objeto/camps fornecidos.
-    useEffect(() => {
-        if (isRecord(object)) {
-            setFormData(buildDisplayFormData(object, mergedFields, fieldMap))
-            return
-        }
-
-        if (Array.isArray(object)) {
-            const emptyObject = object.reduce<Record<string, unknown>>((acc, key) => {
-                acc[key] = ''
-                return acc
-            }, {})
-            setFormData(buildDisplayFormData(emptyObject, mergedFields, fieldMap))
-            return
-        }
-
-        setFormData({})
-    }, [fieldMap, mergedFields, object])
 
     useEffect(() => {
         if (mode === 'view' || mode === 'delete') return
@@ -208,10 +227,6 @@ export default function Form({
     const visibleFields = resolvedFields.filter((field) => !field.hidden && !fieldsToHide.includes(field.key))
 
     const isViewMode = mode === 'view'
-
-    useEffect(() => {
-        setErrors({})
-    }, [object, camps, fields, type])
 
     // Valida apenas o subconjunto informado para manter erros localizados.
     const validateFields = (fieldsForValidation: FormFieldConfig[]) => {
@@ -287,6 +302,20 @@ export default function Form({
         }
     }
 
+    const setFieldValue = (key: string, value: unknown) => {
+        const field = resolvedFieldMap.get(key) ?? fieldMap.get(key)
+        const normalizedValue = normalizeFieldValue(field, value, 'change', formData)
+
+        setFormData((prev) => ({
+            ...prev,
+            [key]: normalizedValue,
+        }))
+
+        if (errors[key]) {
+            setErrors((prev) => ({ ...prev, [key]: '' }))
+        }
+    }
+
     // Agrupa campos por seção para o modal renderizar na ordem correta.
     const groupedFields = useMemo(
         () => groupFieldsBySection(visibleFields),
@@ -296,6 +325,9 @@ export default function Form({
         () => getSectionOrder(visibleFields),
         [visibleFields]
     )
+    const resolvedExtraContent = renderExtraContent
+        ? renderExtraContent({ formData, mode, setFieldValue })
+        : extraContent
 
     return (
         <FormModal
@@ -308,7 +340,7 @@ export default function Form({
             name={name}
             isLoading={isLoading}
             isViewMode={isViewMode}
-            extraContent={extraContent}
+            extraContent={resolvedExtraContent}
             onCancel={onCancel}
             onSubmit={handleSubmit}
         />

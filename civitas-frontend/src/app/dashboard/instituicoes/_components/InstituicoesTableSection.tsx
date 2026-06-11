@@ -10,13 +10,14 @@ import {
   NOVA_INSTITUICAO,
 } from "../_constants/instituicoes";
 import type { Instituicao, InstituicaoRow } from "../_types";
+import InstituicaoDetailsView from "./InstituicaoDetailsView";
 
 type InstituicoesTableSectionProps = {
   campos: FieldConfig[];
   filteredData: InstituicaoRow[];
   instituicaoRows: InstituicaoRow[];
   formFields: ModalFieldConfig[];
-  setCampos: Dispatch<SetStateAction<FieldConfig[]>>;
+  setCampos?: Dispatch<SetStateAction<FieldConfig[]>>;
   setFilteredData: Dispatch<SetStateAction<InstituicaoRow[]>>;
   onCreate: (data: Omit<Instituicao, "id">) => Promise<void>;
   onUpdate: (id: number, data: Partial<Instituicao>) => Promise<void>;
@@ -54,6 +55,9 @@ export default function InstituicoesTableSection({
         onDelete={onDelete}
         formFields={formFields}
         formHiddenFields={["id"]}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <InstituicaoDetailsView instituicao={row} /> : null
+        }
         exportConfig={{
           enabled: true,
           title: "Instituicoes",

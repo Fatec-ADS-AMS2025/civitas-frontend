@@ -58,9 +58,24 @@ export const buildDespesaFormObject = (
     return EMPTY_DESPESA_FORM;
   }
 
+  const persistedDocumento =
+    despesa.documento ??
+    (despesa.raw.hashDocumento || despesa.raw.nomeDocumento
+      ? {
+          idDocumento: despesa.raw.idDocumento ?? 0,
+          digitalizacao: "",
+          numeroDocumento: Number(despesa.raw.numeroDocumento ?? 0),
+          idFornecedor: Number(despesa.raw.idFornecedor ?? despesa.raw.fornecedorId ?? 0),
+          fileName: despesa.raw.nomeDocumento ?? "Documento anexado",
+          fileType: "application/pdf",
+          isPersisted: true,
+          status: "ready",
+        }
+      : "");
+
   return {
     id: despesa.id,
-    documento: "",
+    documento: despesa.documentoConfiavel ? persistedDocumento : "",
     numeroDocumento: despesa.raw.numeroDocumento ?? "",
     codigo: despesa.raw.codigo === "0" ? "" : despesa.raw.codigo ?? "",
     idTipoCodigo: despesa.tipoCodigoId ?? "",

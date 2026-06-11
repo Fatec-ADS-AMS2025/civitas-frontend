@@ -11,7 +11,6 @@ type ConfiguracoesSearchProps = {
   dadosOriginais: ConfigRow[];
   setDadosFiltrados: Dispatch<SetStateAction<ConfigRow[]>>;
   campos: FieldConfig[];
-  setCampos: Dispatch<SetStateAction<FieldConfig[]>>;
   formFields: ModalFieldConfig[];
   onCreate: (formData: Record<string, unknown>) => Promise<void>;
 };
@@ -21,7 +20,6 @@ export default function ConfiguracoesSearch({
   dadosOriginais,
   setDadosFiltrados,
   campos,
-  setCampos,
   formFields,
   onCreate,
 }: ConfiguracoesSearchProps) {
@@ -31,7 +29,6 @@ export default function ConfiguracoesSearch({
       dados={dadosOriginais}
       setDados={setDadosFiltrados}
       campos={campos}
-      setCampos={setCampos}
       onCadastrar={onCreate}
       formFields={formFields}
       formHiddenFields={CONFIG_FORM_HIDDEN_FIELDS}

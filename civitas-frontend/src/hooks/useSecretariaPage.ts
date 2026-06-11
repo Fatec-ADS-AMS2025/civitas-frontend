@@ -4,9 +4,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FieldConfig } from "@/components/Table/searchbar";
 import { normalizeSecretariaPayload } from "@/global/formPayload";
 import { getSituacaoLabel } from "@/global/situacao";
+import { despesaService } from "@/hooks/despesa";
 import { instituicaoService } from "@/hooks/instituicao";
+import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
+import { buildFinanceRelations } from "@/lib/financeiro-relations";
+import type { FinanceSecretariaResumo } from "@/lib/financeiro-relations";
+import type DespesaDTO from "@/models/despesa";
 import type InstituicaoDTO from "@/models/instituicao";
+import type OrcamentoDTO from "@/models/orcamento";
 import type SecretariaDTO from "@/models/secretaria";
 
 export type Secretaria = SecretariaDTO;
@@ -14,6 +20,12 @@ export type SecretariaRow = Secretaria & {
   situacaoLabel: string;
   totalInstituicoes: number;
   instituicoesRelacionadas: InstituicaoDTO[];
+  quantidadeDespesas: number;
+  quantidadeCodigos: number;
+  totalOrcamentosFormatado: string;
+  totalGastosFormatado: string;
+  saldoFormatado: string;
+  financeiroResumo?: FinanceSecretariaResumo;
 };
 
 export type SecretariaCardFilter =
@@ -29,12 +41,66 @@ export type SecretariaMetrics = {
   secretariasSemInstituicoes: number;
 };
 
+export type SecretariaTextFilters = {
+  search: string;
+  vinculo: string;
+  cidade: string;
+};
+
+export const INITIAL_SECRETARIA_TEXT_FILTERS: SecretariaTextFilters = {
+  search: "",
+  vinculo: "",
+  cidade: "",
+};
+
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error && error.message) {
     return error.message;
   }
 
   return "Nao foi possivel carregar as secretarias. Verifique o backend e tente novamente.";
+};
+
+const normalizeSearch = (value: unknown): string => {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+};
+
+const matchesTextFilters = (
+  secretaria: SecretariaRow,
+  filters: SecretariaTextFilters
+): boolean => {
+  const query = normalizeSearch(filters.search);
+  const cityQuery = normalizeSearch(filters.cidade);
+  const searchTarget = normalizeSearch(
+    [
+      secretaria.nome,
+      secretaria.descricao,
+      secretaria.nomeRazaoSocial,
+      secretaria.cnpj,
+      secretaria.telefone,
+      secretaria.email,
+      secretaria.cidade,
+      secretaria.estado,
+      secretaria.situacaoLabel,
+    ].join(" ")
+  );
+
+  if (query && !searchTarget.includes(query)) return false;
+  if (cityQuery && !normalizeSearch(secretaria.cidade).includes(cityQuery)) return false;
+
+  if (filters.vinculo === "comInstituicoes" && secretaria.totalInstituicoes <= 0) {
+    return false;
+  }
+
+  if (filters.vinculo === "semInstituicoes" && secretaria.totalInstituicoes > 0) {
+    return false;
+  }
+
+  return true;
 };
 
 const loadInstituicoesSafely = async (): Promise<InstituicaoDTO[]> => {
@@ -46,43 +112,88 @@ const loadInstituicoesSafely = async (): Promise<InstituicaoDTO[]> => {
   }
 };
 
+const loadDespesasSafely = async (): Promise<DespesaDTO[]> => {
+  try {
+    return await despesaService.getAllStatusData();
+  } catch (error) {
+    console.error("Erro ao carregar despesas vinculadas as secretarias:", error);
+    return [];
+  }
+};
+
+const loadOrcamentosSafely = async (): Promise<OrcamentoDTO[]> => {
+  try {
+    return await orcamentoService.getAllData();
+  } catch (error) {
+    console.error("Erro ao carregar orcamentos vinculados as secretarias:", error);
+    return [];
+  }
+};
+
 const mapSecretariaRows = (
   items: Secretaria[],
-  instituicoes: InstituicaoDTO[]
+  instituicoes: InstituicaoDTO[],
+  despesas: DespesaDTO[],
+  orcamentos: OrcamentoDTO[]
 ): SecretariaRow[] => {
+  const relations = buildFinanceRelations({
+    despesas,
+    instituicoes,
+    secretarias: items,
+    orcamentos,
+  });
+  const financeiroMap = new Map(
+    relations.secretarias.map((secretaria) => [secretaria.id, secretaria])
+  );
+
   return items.map((item) => {
     const instituicoesRelacionadas = instituicoes.filter(
       (instituicao) => instituicao.idSecretaria === item.idSecretaria
     );
+    const financeiroResumo = financeiroMap.get(item.idSecretaria);
 
     return {
       ...item,
       situacaoLabel: getSituacaoLabel(item.situacao),
       instituicoesRelacionadas,
       totalInstituicoes: instituicoesRelacionadas.length,
+      quantidadeDespesas: financeiroResumo?.quantidadeDespesas ?? 0,
+      quantidadeCodigos: financeiroResumo?.quantidadeCodigos ?? 0,
+      totalOrcamentosFormatado: financeiroResumo?.totalOrcamentosFormatado ?? "R$ 0,00",
+      totalGastosFormatado: financeiroResumo?.totalGastosFormatado ?? "R$ 0,00",
+      saldoFormatado: financeiroResumo?.saldoFormatado ?? "R$ 0,00",
+      financeiroResumo,
     };
   });
 };
 
 export function useSecretariaPage(initialFields: FieldConfig[]) {
   const [secretarias, setSecretarias] = useState<SecretariaRow[]>([]);
-  const [filteredData, setFilteredData] = useState<SecretariaRow[]>([]);
   const [instituicoes, setInstituicoes] = useState<InstituicaoDTO[]>([]);
   const [cardFilter, setCardFilter] = useState<SecretariaCardFilter>({ type: "all" });
+  const [textFilters, setTextFilters] = useState<SecretariaTextFilters>(
+    INITIAL_SECRETARIA_TEXT_FILTERS
+  );
   const [campos, setCampos] = useState<FieldConfig[]>(initialFields);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refreshSecretarias = useCallback(async () => {
-    const [items, instituicoesItems] = await Promise.all([
+    const [items, instituicoesItems, despesasItems, orcamentosItems] = await Promise.all([
       secretariaService.getAll(),
       loadInstituicoesSafely(),
+      loadDespesasSafely(),
+      loadOrcamentosSafely(),
     ]);
-    const rows = mapSecretariaRows(items, instituicoesItems);
+    const rows = mapSecretariaRows(
+      items,
+      instituicoesItems,
+      despesasItems,
+      orcamentosItems
+    );
 
     setInstituicoes(instituicoesItems);
     setSecretarias(rows);
-    setFilteredData(rows);
   }, []);
 
   const cardFilteredSecretarias = useMemo(() => {
@@ -119,6 +230,12 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
     };
   }, [instituicoes, secretarias]);
 
+  const filteredData = useMemo(() => {
+    return cardFilteredSecretarias.filter((secretaria) =>
+      matchesTextFilters(secretaria, textFilters)
+    );
+  }, [cardFilteredSecretarias, textFilters]);
+
   useEffect(() => {
     const loadSecretarias = async () => {
       try {
@@ -128,7 +245,6 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
       } catch (err) {
         console.error("Erro ao carregar secretarias:", err);
         setSecretarias([]);
-        setFilteredData([]);
         setInstituicoes([]);
         setError(getErrorMessage(err));
       } finally {
@@ -161,8 +277,9 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
     instituicoes,
     secretariaMetrics,
     cardFilter,
+    textFilters,
     campos,
-    setFilteredData,
+    setTextFilters,
     setCardFilter,
     setCampos,
     loading,

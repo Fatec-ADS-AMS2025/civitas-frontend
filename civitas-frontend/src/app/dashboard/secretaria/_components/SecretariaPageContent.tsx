@@ -27,7 +27,8 @@ export default function SecretariaPageContent({
   cardFilteredSecretarias,
   secretariaMetrics,
   cardFilter,
-  setFilteredData,
+  textFilters,
+  setTextFilters,
   setCardFilter,
   loading,
   error,
@@ -52,7 +53,8 @@ export default function SecretariaPageContent({
 
       <SecretariaFilters
         data={cardFilteredSecretarias}
-        setData={setFilteredData}
+        filters={textFilters}
+        setFilters={setTextFilters}
         onCadastrar={handleCreate}
       />
 

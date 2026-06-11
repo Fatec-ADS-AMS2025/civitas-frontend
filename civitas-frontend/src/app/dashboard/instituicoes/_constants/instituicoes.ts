@@ -27,5 +27,5 @@ export const INSTITUICOES_COLUMNS: TableColumn[] = [
   { id: "quantidadeCodigos", label: "Codigos" },
   { id: "totalGastosFormatado", label: "Gastos" },
   { id: "saldoFormatado", label: "Saldo" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];

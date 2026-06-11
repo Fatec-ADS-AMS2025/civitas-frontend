@@ -23,13 +23,6 @@ export default function Modal({ value, setValue, children }: ModalProps) {
     }
   }, []);
 
-  // useEffect(() => {
-  //   const pai = document.querySelector('#pai');
-  //   if (pai) {
-  //     pai.style.overflow = value ? 'hidden' : 'auto';
-  //   }
-  // }, [value]);
-
   if (!value || !mounted) return null;
 
   const handleClose = () => {

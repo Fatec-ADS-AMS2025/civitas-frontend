@@ -1,9 +1,10 @@
-import type { Dispatch, SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import Form from "@/components/Form/form";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import Modal from "@/components/modal";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { buildDespesaFormObject } from "../despesas.utils";
+import DespesaDetailsView from "./DespesaDetailsView";
 import DespesaForm, {
   type DespesaResponsavelOption,
   type DespesaUcOption,
@@ -36,17 +37,53 @@ export default function DespesaCrudModals({
   onCreateSubmit,
   onEditSubmit,
 }: DespesaCrudModalsProps) {
+  const [createFormVariant, setCreateFormVariant] = useState<"list" | "combobox">("list");
+
   return (
     <>
       {isCreateModalOpen ? (
         <Modal value={isCreateModalOpen} setValue={setIsCreateModalOpen}>
-          <DespesaForm
-            mode="create"
-            ucs={unidadesConsumidoras}
-            usuarios={usuarios}
-            onCancel={() => setIsCreateModalOpen(false)}
-            onConfirm={onCreateSubmit}
-          />
+          <div className="flex h-full min-h-0 flex-col">
+            <div className="flex flex-shrink-0 items-center justify-end gap-2 border-b border-[var(--border-soft)] bg-[var(--surface-elevated)] px-6 py-3">
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
+                Versao do formulario
+              </span>
+              <div className="inline-flex rounded-sm border border-[var(--border-default)] bg-[var(--surface-subtle)] p-1">
+                <button
+                  type="button"
+                  onClick={() => setCreateFormVariant("list")}
+                  className={`rounded-sm px-3 py-1.5 text-xs font-semibold transition ${
+                    createFormVariant === "list"
+                      ? "bg-[var(--surface-elevated)] text-[var(--secundary-1)] shadow-[var(--shadow-xs)]"
+                      : "text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  Padrao
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCreateFormVariant("combobox")}
+                  className={`rounded-sm px-3 py-1.5 text-xs font-semibold transition ${
+                    createFormVariant === "combobox"
+                      ? "bg-[var(--surface-elevated)] text-[var(--secundary-1)] shadow-[var(--shadow-xs)]"
+                      : "text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  Combobox UC
+                </button>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1">
+              <DespesaForm
+                mode="create"
+                ucs={unidadesConsumidoras}
+                usuarios={usuarios}
+                ucSelectorVariant={createFormVariant}
+                onCancel={() => setIsCreateModalOpen(false)}
+                onConfirm={onCreateSubmit}
+              />
+            </div>
+          </div>
         </Modal>
       ) : null}
 
@@ -71,6 +108,7 @@ export default function DespesaCrudModals({
             type="view"
             fields={viewFields}
             hiddenFields={[]}
+            extraContent={<DespesaDetailsView despesa={viewingDespesa} />}
             onCancel={() => setViewingDespesa(null)}
           />
         </Modal>

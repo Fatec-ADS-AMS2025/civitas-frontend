@@ -19,6 +19,13 @@ import type { TableColumn, TableExportConfig } from "./export-types";
 
 type TableRow = object;
 
+type SortDirection = "asc" | "desc" | null;
+
+type SortState = {
+  columnId: string | null;
+  direction: SortDirection;
+};
+
 export type TablePaginationConfig = {
   currentPage: number;
   totalPages: number;
@@ -35,6 +42,7 @@ type BaseTableProps<T extends TableRow> = {
   actions?: string[];
   onEdit?: (id: number, data: Partial<T> & Record<string, unknown>) => Promise<unknown>;
   onDelete?: (id: number) => Promise<void>;
+  renderRowActions?: (row: T) => React.ReactNode;
   renderModalExtra?: (row: T, mode: FormMode) => React.ReactNode;
   formFields?: ModalFieldConfig[];
   formValidationSchema?: Record<string, ValidationFn>;
@@ -60,11 +68,12 @@ export type TableProps<T extends TableRow> = BaseTableProps<T> &
     }
   );
 
-const Table = <T extends TableRow,>({
+function Table<T extends TableRow>({
   data,
   columns,
   onEdit,
   onDelete,
+  renderRowActions,
   renderModalExtra,
   actions,
   formFields,
@@ -79,17 +88,23 @@ const Table = <T extends TableRow,>({
   paginationEnabled,
   pagination,
   exportConfig,
-}: TableProps<T>) => {
+}: TableProps<T>) {
   const pathname = usePathname() || "";
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
   const resolvedActions = actions ?? (onDelete ? ["edit", "view", "delete"] : ["edit", "view"]);
-  const hasActions = resolvedActions.length > 0;
+  const hasActions = Boolean(renderRowActions) || resolvedActions.length > 0;
 
   const [modalAction, setModalAction] = useState<FormMode | null>(null);
   const [selectedContent, setSelectedContent] = useState<T | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [showColumnControls, setShowColumnControls] = useState(false);
+  const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
+  const [sortState, setSortState] = useState<SortState>({
+    columnId: null,
+    direction: null,
+  });
 
   const exportEnabled = exportConfig?.enabled ?? true;
   const exportAllData = exportConfig?.allData ?? data;
@@ -99,6 +114,22 @@ const Table = <T extends TableRow,>({
   const shouldShowExportAction =
     exportEnabled && !isLoading && !errorMessage && hasExportData;
   const exportColumns = useMemo(() => columns.filter((column) => column.id.trim() !== ""), [columns]);
+
+  const columnIds = useMemo(() => columns.map((column) => column.id), [columns]);
+  const hiddenColumnSet = useMemo(() => new Set(hiddenColumnIds), [hiddenColumnIds]);
+  const visibleColumns = useMemo(
+    () => columns.filter((column) => !hiddenColumnSet.has(column.id)),
+    [columns, hiddenColumnSet]
+  );
+  const effectiveSortState = useMemo<SortState>(() => {
+    if (!sortState.columnId || !sortState.direction) {
+      return { columnId: null, direction: null };
+    }
+
+    return hiddenColumnSet.has(sortState.columnId)
+      ? { columnId: null, direction: null }
+      : sortState;
+  }, [hiddenColumnSet, sortState]);
 
   const toRecord = (value: T): Record<string, unknown> => value as Record<string, unknown>;
 
@@ -167,6 +198,10 @@ const Table = <T extends TableRow,>({
   };
 
   const renderCellValue = (objeto: T, column: TableColumn) => {
+    if (column.render) {
+      return column.render(toRecord(objeto));
+    }
+
     const record = toRecord(objeto);
 
     if (isStatusColumn(column.id)) {
@@ -190,6 +225,230 @@ const Table = <T extends TableRow,>({
 
     return cellText;
   };
+
+  const getPrimaryColumn = (columnsToUse: TableColumn[]) => {
+    const nonStatus = columnsToUse.find((column) => !isStatusColumn(column.id));
+    return nonStatus ?? columnsToUse[0] ?? null;
+  };
+
+  const isColumnSortable = (column: TableColumn) => column.sortable !== false;
+
+  const parseNumberValue = (value: unknown): number | null => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value !== "string") {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const digitCount = (trimmed.match(/\d/g) ?? []).length;
+    if (digitCount === 0) return null;
+
+    const letterCount = (trimmed.match(/[A-Za-z]/g) ?? []).length;
+    if (letterCount >= 3 && letterCount >= digitCount) return null;
+
+    let sanitized = trimmed.replace(/[^0-9,.-]/g, "");
+    const hasComma = sanitized.includes(",");
+    const hasDot = sanitized.includes(".");
+
+    if (hasComma && hasDot) {
+      if (sanitized.lastIndexOf(",") > sanitized.lastIndexOf(".")) {
+        sanitized = sanitized.replace(/\./g, "").replace(",", ".");
+      } else {
+        sanitized = sanitized.replace(/,/g, "");
+      }
+    } else if (hasComma) {
+      sanitized = sanitized.replace(/\./g, "").replace(",", ".");
+    }
+
+    const numeric = Number(sanitized);
+    return Number.isFinite(numeric) ? numeric : null;
+  };
+
+  const parseDateValue = (value: unknown): number | null => {
+    if (value instanceof Date) {
+      const timestamp = value.getTime();
+      return Number.isFinite(timestamp) ? timestamp : null;
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      const timestamp = new Date(value).getTime();
+      return Number.isFinite(timestamp) ? timestamp : null;
+    }
+
+    if (typeof value !== "string") {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const isoMatch = /^\d{4}-\d{2}-\d{2}/.test(trimmed);
+    if (isoMatch) {
+      const parsed = Date.parse(trimmed);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    const ptMatch = /^(\d{2})[/-](\d{2})[/-](\d{4})$/.exec(trimmed);
+    if (ptMatch) {
+      const day = Number(ptMatch[1]);
+      const month = Number(ptMatch[2]);
+      const year = Number(ptMatch[3]);
+      const parsed = new Date(year, month - 1, day).getTime();
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    return null;
+  };
+
+  const detectSortType = (column: TableColumn, sample: T[]) => {
+    if (column.sortType && column.sortType !== "auto") {
+      return column.sortType;
+    }
+
+    const sampleValue = sample
+      .map((row) => {
+        if (column.sortValue) {
+          return column.sortValue(toRecord(row));
+        }
+
+        if (isStatusColumn(column.id)) {
+          return getTableCellText(row, column);
+        }
+
+        const record = toRecord(row);
+        return record[column.id];
+      })
+      .find((value) => value !== null && value !== undefined && value !== "");
+
+    if (sampleValue instanceof Date) return "date";
+    if (typeof sampleValue === "number") return "number";
+
+    if (typeof sampleValue === "string") {
+      if (parseDateValue(sampleValue) !== null) return "date";
+      if (parseNumberValue(sampleValue) !== null) return "number";
+    }
+
+    return "string";
+  };
+
+  const collator = useMemo(
+    () => new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true }),
+    []
+  );
+
+  const sortedData = useMemo(() => {
+    if (!effectiveSortState.columnId || !effectiveSortState.direction) {
+      return data;
+    }
+
+    const activeColumn = columns.find((column) => column.id === effectiveSortState.columnId);
+    if (!activeColumn || !isColumnSortable(activeColumn)) {
+      return data;
+    }
+
+    const sortType = detectSortType(activeColumn, data);
+    const directionFactor = effectiveSortState.direction === "asc" ? 1 : -1;
+
+    const rowsWithIndex = data.map((row, index) => ({ row, index }));
+
+    rowsWithIndex.sort((left, right) => {
+      const leftRecord = toRecord(left.row);
+      const rightRecord = toRecord(right.row);
+
+      const leftValue = activeColumn.sortValue
+        ? activeColumn.sortValue(leftRecord)
+        : leftRecord[activeColumn.id] ?? getTableCellText(left.row, activeColumn);
+      const rightValue = activeColumn.sortValue
+        ? activeColumn.sortValue(rightRecord)
+        : rightRecord[activeColumn.id] ?? getTableCellText(right.row, activeColumn);
+
+      const leftEmpty = leftValue === null || leftValue === undefined || leftValue === "";
+      const rightEmpty = rightValue === null || rightValue === undefined || rightValue === "";
+
+      if (leftEmpty && rightEmpty) return left.index - right.index;
+      if (leftEmpty) return 1;
+      if (rightEmpty) return -1;
+
+      let comparison = 0;
+
+      if (sortType === "number") {
+        const leftNumber = parseNumberValue(leftValue);
+        const rightNumber = parseNumberValue(rightValue);
+
+        if (leftNumber !== null && rightNumber !== null) {
+          comparison = leftNumber - rightNumber;
+        } else {
+          comparison = collator.compare(String(leftValue), String(rightValue));
+        }
+      } else if (sortType === "date") {
+        const leftDate = parseDateValue(leftValue);
+        const rightDate = parseDateValue(rightValue);
+
+        if (leftDate !== null && rightDate !== null) {
+          comparison = leftDate - rightDate;
+        } else {
+          comparison = collator.compare(String(leftValue), String(rightValue));
+        }
+      } else {
+        comparison = collator.compare(String(leftValue), String(rightValue));
+      }
+
+      if (comparison === 0) return left.index - right.index;
+
+      return comparison * directionFactor;
+    });
+
+    return rowsWithIndex.map((item) => item.row);
+  }, [collator, columns, data, effectiveSortState.columnId, effectiveSortState.direction]);
+
+  const toggleColumnVisibility = (columnId: string) => {
+    setHiddenColumnIds((current) => {
+      const isHidden = current.includes(columnId);
+      const visibleCount = columns.filter((column) => !current.includes(column.id)).length;
+
+      if (!isHidden && visibleCount === 1) {
+        showToast("Ao menos uma coluna deve ficar visivel.", "info");
+        return current;
+      }
+
+      if (isHidden) {
+        return current.filter((id) => id !== columnId);
+      }
+
+      return [...current, columnId].filter((id) => columnIds.includes(id));
+    });
+  };
+
+  const showAllColumns = () => {
+    setHiddenColumnIds([]);
+  };
+
+  const reduceToSingleColumn = () => {
+    if (columnIds.length === 0) return;
+    setHiddenColumnIds(columnIds.slice(1));
+  };
+
+  const toggleSort = (column: TableColumn) => {
+    if (!isColumnSortable(column)) return;
+
+    setSortState((current) => {
+      if (current.columnId !== column.id) {
+        return { columnId: column.id, direction: "asc" };
+      }
+
+      if (current.direction === "asc") {
+        return { columnId: column.id, direction: "desc" };
+      }
+
+      return { columnId: null, direction: null };
+    });
+  };
+
+  const clearSorting = () => setSortState({ columnId: null, direction: null });
 
   const handleExport = async ({
     outputType,
@@ -261,28 +520,147 @@ const Table = <T extends TableRow,>({
     <div className="civitas-table civitas-table-shell civitas-enter mt-4 w-full">
       {!isLoading && !errorMessage && data.length > 0 ? (
         <>
+          <div className="flex flex-col gap-3 border-b border-[var(--divider)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-6">
+            <div>
+              <p className="text-sm font-semibold text-[var(--foreground)]">Tabela</p>
+              <p className="text-xs text-[var(--foreground-soft)]">
+                {visibleColumns.length} de {columns.length} colunas visiveis
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowColumnControls((prev) => !prev)}
+                className="civitas-action civitas-action--ghost min-h-[40px] px-4 py-2 text-sm"
+              >
+                <span className="material-symbols-outlined text-base">view_column</span>
+                Ocultar Colunas
+              </button>
+              <button
+                type="button"
+                onClick={clearSorting}
+                disabled={!effectiveSortState.columnId}
+                className="civitas-action civitas-action--ghost min-h-[40px] px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-base">filter_list_off</span>
+                Limpar ordenacao
+              </button>
+            </div>
+          </div>
+
+          {showColumnControls ? (
+            <div className="civitas-surface-subtle civitas-enter border-b border-[var(--divider)] px-4 py-4 sm:px-5 lg:px-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-[var(--foreground)]">Colunas visiveis</p>
+                  <p className="text-xs text-[var(--foreground-soft)]">
+                    {visibleColumns.length} de {columns.length} colunas selecionadas
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={showAllColumns}
+                    className="civitas-action civitas-action--ghost min-h-[40px] px-4 py-2 text-sm"
+                  >
+                    Marcar todas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={reduceToSingleColumn}
+                    className="civitas-action civitas-action--ghost min-h-[40px] px-4 py-2 text-sm"
+                  >
+                    Somente 1
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {columns.map((column) => (
+                  <label
+                    key={column.id}
+                    className="flex cursor-pointer items-center gap-3 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-4 py-3 text-sm font-medium text-[var(--foreground)]"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!hiddenColumnSet.has(column.id)}
+                      onChange={() => toggleColumnVisibility(column.id)}
+                      className="h-4 w-4 accent-[var(--primary-1)]"
+                    />
+                    <span>{column.label}</span>
+                  </label>
+                ))}
+              </div>
+
+              <p className="mt-3 text-xs text-[var(--foreground-soft)]">
+                Ao menos uma coluna deve ficar visivel.
+              </p>
+            </div>
+          ) : null}
+
           <div className="hidden md:block">
             <div className="w-full overflow-x-auto px-4 py-4 sm:px-5 lg:px-6">
               <table className="w-full min-w-[720px] border-separate border-spacing-y-[10px] text-left text-[var(--foreground)] lg:min-w-[860px]">
                 <thead>
                   <tr className="civitas-table__head text-[12px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                    {columns.map((column) => (
-                      <th key={column.id} className="px-5 py-2.5">
-                        {column.label}
-                      </th>
-                    ))}
+                    {visibleColumns.map((column) => {
+                      const isActiveSort = effectiveSortState.columnId === column.id;
+                      const sortDirection = isActiveSort ? effectiveSortState.direction : null;
+                      const isSortable = isColumnSortable(column);
+                      const sortIcon =
+                        sortDirection === "asc"
+                          ? "arrow_downward"
+                          : sortDirection === "desc"
+                            ? "arrow_upward"
+                            : "unfold_more";
+
+                      return (
+                        <th
+                          key={column.id}
+                          className="px-5 py-2.5"
+                          aria-sort={
+                            isActiveSort
+                              ? sortDirection === "asc"
+                                ? "ascending"
+                                : "descending"
+                              : "none"
+                          }
+                        >
+                          {isSortable ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleSort(column)}
+                              className="group inline-flex items-center gap-2 text-left text-[var(--foreground)] transition hover:text-[var(--secundary-1)]"
+                            >
+                              <span>{column.label}</span>
+                              <span
+                                className={`material-symbols-outlined text-base ${
+                                  sortDirection
+                                    ? "text-[var(--primary-1)]"
+                                    : "text-[var(--foreground-soft)] group-hover:text-[var(--secundary-1)]"
+                                }`}
+                              >
+                                {sortIcon}
+                              </span>
+                            </button>
+                          ) : (
+                            <span>{column.label}</span>
+                          )}
+                        </th>
+                      );
+                    })}
                     {hasActions ? <th className="px-5 py-2.5 text-center">Acoes</th> : null}
                   </tr>
                 </thead>
 
                 <tbody>
-                  {data.map((objeto, index) => (
+                  {sortedData.map((objeto, index) => (
                     <tr
                       key={index}
                       style={getMotionStyle(index)}
                       className="civitas-table__row civitas-enter overflow-hidden rounded-sm bg-[var(--surface-elevated)] ring-1 ring-[var(--border-soft)] transition-all duration-[var(--motion-duration-fast)] hover:bg-[var(--surface-subtle)] hover:ring-[var(--border-default)]"
                     >
-                      {columns.map((column, columnIndex) => (
+                      {visibleColumns.map((column, columnIndex) => (
                         <td
                           key={column.id}
                           className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${columnIndex === 0 ? "rounded-sm" : ""
@@ -294,19 +672,23 @@ const Table = <T extends TableRow,>({
 
                       {hasActions ? (
                         <td className="rounded-sm px-5 py-[14px] align-middle">
-                          <div className="flex items-center justify-center gap-2">
-                            {resolvedActions.includes("view") ? (
-                              renderActionButton("visibility", "view", objeto)
-                            ) : null}
+                          {renderRowActions ? (
+                            renderRowActions(objeto)
+                          ) : (
+                            <div className="flex items-center justify-center gap-2">
+                              {resolvedActions.includes("view") ? (
+                                renderActionButton("visibility", "view", objeto)
+                              ) : null}
 
-                            {resolvedActions.includes("edit") ? (
-                              renderActionButton("edit", "edit", objeto)
-                            ) : null}
+                              {resolvedActions.includes("edit") ? (
+                                renderActionButton("edit", "edit", objeto)
+                              ) : null}
 
-                            {resolvedActions.includes("delete") ? (
-                              renderActionButton("delete", "delete", objeto, "danger")
-                            ) : null}
-                          </div>
+                              {resolvedActions.includes("delete") ? (
+                                renderActionButton("delete", "delete", objeto, "danger")
+                              ) : null}
+                            </div>
+                          )}
                         </td>
                       ) : null}
                     </tr>
@@ -318,8 +700,16 @@ const Table = <T extends TableRow,>({
 
           <div className="block md:hidden">
             <div className="space-y-4 p-4">
-              {data.map((objeto, index) => {
-                const statusColumn = columns.find((column) => isStatusColumn(column.id));
+              {sortedData.map((objeto, index) => {
+                const primaryColumn = getPrimaryColumn(visibleColumns);
+                const statusColumn = visibleColumns.find((column) => isStatusColumn(column.id));
+                const showStatus =
+                  statusColumn && primaryColumn && statusColumn.id !== primaryColumn.id;
+                const detailColumns = visibleColumns.filter(
+                  (column) =>
+                    column.id !== primaryColumn?.id &&
+                    (!statusColumn || column.id !== statusColumn.id)
+                );
 
                 return (
                   <div
@@ -329,47 +719,51 @@ const Table = <T extends TableRow,>({
                   >
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 break-words">
-                        {columns[0] ? renderCellValue(objeto, columns[0]) : null}
+                        {primaryColumn ? renderCellValue(objeto, primaryColumn) : null}
                       </div>
-                      <div>{statusColumn ? renderCellValue(objeto, statusColumn) : null}</div>
+                      <div>{showStatus && statusColumn ? renderCellValue(objeto, statusColumn) : null}</div>
                     </div>
 
                     <div className="space-y-2">
-                      {columns
-                        .slice(1)
-                        .filter((column) => !isStatusColumn(column.id))
-                        .map((column) => (
-                          <div key={column.id} className="flex flex-col">
-                            <span className="civitas-table__meta text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                              {column.label}
-                            </span>
-                            <span className="civitas-table__cell break-words text-[15px] font-medium text-[var(--foreground)]">
-                              {renderCellValue(objeto, column)}
-                            </span>
-                          </div>
-                        ))}
+                      {detailColumns.map((column) => (
+                        <div key={column.id} className="flex flex-col">
+                          <span className="civitas-table__meta text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
+                            {column.label}
+                          </span>
+                          <span className="civitas-table__cell break-words text-[15px] font-medium text-[var(--foreground)]">
+                            {renderCellValue(objeto, column)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
 
                     {hasActions ? (
                       <div className="mt-4 flex items-center justify-end gap-2">
-                        {resolvedActions.includes("view") ? (
-                          renderActionButton("visibility", "view", objeto)
-                        ) : null}
+                        {renderRowActions ? (
+                          renderRowActions(objeto)
+                        ) : (
+                          <>
+                            {resolvedActions.includes("view") ? (
+                              renderActionButton("visibility", "view", objeto)
+                            ) : null}
 
-                        {resolvedActions.includes("edit") ? (
-                          renderActionButton("edit", "edit", objeto)
-                        ) : null}
+                            {resolvedActions.includes("edit") ? (
+                              renderActionButton("edit", "edit", objeto)
+                            ) : null}
 
-                        {resolvedActions.includes("delete") ? (
-                          renderActionButton("delete", "delete", objeto, "danger")
-                        ) : null}
+                            {resolvedActions.includes("delete") ? (
+                              renderActionButton("delete", "delete", objeto, "danger")
+                            ) : null}
+                          </>
+                        )}
                       </div>
-                    ) : null}
+                                        ) : null}
                   </div>
                 );
               })}
             </div>
           </div>
+
           {shouldShowExportAction ? (
             <div className="flex flex-col gap-3 border-b border-[var(--divider)] px-4 py-4 sm:flex-row sm:items-center sm:justify-start sm:px-5 lg:px-6">
               <button
@@ -435,9 +829,6 @@ const Table = <T extends TableRow,>({
             onConfirm={async (formData) => {
               try {
                 if (modalAction === "delete") {
-                  const confirmDelete = window.confirm(`Tem certeza que deseja excluir este ${nomePagina}?`);
-                  if (!confirmDelete) return;
-
                   if (onDelete) {
                     await onDelete(getResolvedId(selectedContent));
                   }
@@ -459,7 +850,7 @@ const Table = <T extends TableRow,>({
         </Modal>
       ) : null}
 
-      {exportEnabled ? (
+      {exportEnabled && isExportModalOpen ? (
         <ExportModal
           open={isExportModalOpen}
           title={exportTitle}
@@ -473,6 +864,6 @@ const Table = <T extends TableRow,>({
       ) : null}
     </div>
   );
-};
+}
 
 export default Table;

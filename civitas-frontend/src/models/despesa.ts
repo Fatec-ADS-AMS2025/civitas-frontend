@@ -1,3 +1,5 @@
+import type DocumentoDTO from "./documento";
+
 export default interface DespesaDTO {
   id: number;
   numeroDocumento?: string;
@@ -15,11 +17,19 @@ export default interface DespesaDTO {
   dataPagamento?: string;
   status?: number;
   situacao?: number;
+  nomeDocumento?: string;
+  hashDocumento?: string;
+  confirmarDocumentoDuplicado?: boolean;
+  valoresOpcionais?: string;
+  excluido?: boolean;
+  dataExclusao?: string | null;
   idTipoDespesa?: number;
   idOrcamento?: number;
   idInstituicao?: number;
   idFornecedor?: number;
   idUsuario?: number;
+  idDocumento?: number;
+  documento?: DocumentoDTO | null;
 
   // Legacy fields still consumed by existing financial UI mapping.
   descricao?: string;

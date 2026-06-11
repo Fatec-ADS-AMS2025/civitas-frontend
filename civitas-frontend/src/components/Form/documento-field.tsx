@@ -14,6 +14,7 @@ export type DocumentoFieldValue = {
   fileName?: string;
   fileType?: string;
   fileSize?: number;
+  isPersisted?: boolean;
   status?: DocumentoUploadStatus;
   errorMessage?: string;
 };
@@ -48,6 +49,7 @@ const getDocumentoValue = (value: unknown): DocumentoFieldValue | null => {
     fileName: typeof value.fileName === "string" ? value.fileName : undefined,
     fileType: typeof value.fileType === "string" ? value.fileType : undefined,
     fileSize: toNumber(value.fileSize),
+    isPersisted: value.isPersisted === true,
     status: getUploadStatus(value.status),
     errorMessage: typeof value.errorMessage === "string" ? value.errorMessage : undefined,
   };
@@ -112,7 +114,7 @@ export default function DocumentoField({
   const errorId = getFieldErrorId(field.key);
   const documento = getDocumentoValue(value);
   const status = documento?.status ?? "idle";
-  const hasFile = Boolean(documento?.digitalizacao);
+  const hasFile = Boolean(documento?.digitalizacao || documento?.isPersisted);
   const isConverting = status === "loading";
   const isDisabled = disabled || isConverting;
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -124,10 +126,11 @@ export default function DocumentoField({
 
   const isImagePreview = Boolean(documento?.fileType?.startsWith("image/"));
   const isPdfPreview = Boolean(documento?.fileType?.includes("pdf"));
-  const canPreview = hasFile && (isImagePreview || isPdfPreview);
+  const canPreview = Boolean(documento?.digitalizacao) && (isImagePreview || isPdfPreview);
 
   const statusMessage = useMemo(() => {
     if (status === "loading") return "Convertendo arquivo para Base64...";
+    if (documento?.isPersisted) return "Documento anexado a esta despesa.";
     if (status === "ready" && hasFile) return "Arquivo pronto para envio.";
     if (status === "error") return documento?.errorMessage ?? "Erro ao converter arquivo.";
     return "Nenhum arquivo selecionado.";
@@ -237,7 +240,7 @@ export default function DocumentoField({
             {canPreview ? (
               <button
                 type="button"
-                disabled={isDisabled}
+                disabled={isConverting}
                 onClick={() => setIsPreviewOpen((current) => !current)}
                 className="civitas-action civitas-action--ghost min-h-10 rounded-sm px-3 text-xs font-semibold"
               >

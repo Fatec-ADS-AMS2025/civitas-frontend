@@ -39,6 +39,11 @@ type DashboardHeaderContextValue = {
   clearHeaderConfig: () => void;
 };
 
+type DashboardHeaderOverride = {
+  pathname: string;
+  config: DashboardHeaderConfig;
+};
+
 const DASHBOARD_HEADER_META: Record<string, DashboardHeaderConfig> = {
   "/dashboard": {
     title: "Dashboard",
@@ -47,6 +52,15 @@ const DASHBOARD_HEADER_META: Record<string, DashboardHeaderConfig> = {
     breadcrumbs: [
       { label: "Home", href: "/dashboard" },
       { label: "Dashboard" },
+    ],
+  },
+  "/dashboard/central-listagens": {
+    title: "Central de Listagens",
+    eyebrow: "Operacao",
+    subtitle: "Fluxo unico para navegar entre tabelas dinamicas, filtros e exportacoes.",
+    breadcrumbs: [
+      { label: "Home", href: "/dashboard" },
+      { label: "Central de Listagens" },
     ],
   },
   "/dashboard/despesas": {
@@ -126,6 +140,15 @@ const DASHBOARD_HEADER_META: Record<string, DashboardHeaderConfig> = {
       { label: "Usuários" },
     ],
   },
+  "/dashboard/perfil": {
+    title: "Meu Perfil",
+    eyebrow: "Conta",
+    subtitle: "Consulte os dados do usuario autenticado.",
+    breadcrumbs: [
+      { label: "Home", href: "/dashboard" },
+      { label: "Meu Perfil" },
+    ],
+  },
 };
 
 const DashboardHeaderContext = createContext<DashboardHeaderContextValue | null>(null);
@@ -154,38 +177,89 @@ const buildFallbackConfig = (pathname: string): DashboardHeaderConfig => {
   };
 };
 
+const areBreadcrumbsEqual = (
+  left: DashboardHeaderBreadcrumb[] = [],
+  right: DashboardHeaderBreadcrumb[] = []
+) => {
+  if (left.length !== right.length) return false;
+
+  return left.every(
+    (item, index) =>
+      item.label === right[index]?.label && item.href === right[index]?.href
+  );
+};
+
+const areActionsEqual = (
+  left: DashboardHeaderAction[] = [],
+  right: DashboardHeaderAction[] = []
+) => {
+  if (left.length !== right.length) return false;
+
+  return left.every((item, index) => {
+    const other = right[index];
+    return (
+      item.label === other?.label &&
+      item.icon === other?.icon &&
+      item.href === other?.href &&
+      item.variant === other?.variant &&
+      item.ariaLabel === other?.ariaLabel
+    );
+  });
+};
+
+const areHeaderConfigsEqual = (
+  left: DashboardHeaderConfig,
+  right: DashboardHeaderConfig
+) => {
+  return (
+    left.title === right.title &&
+    left.subtitle === right.subtitle &&
+    left.eyebrow === right.eyebrow &&
+    areBreadcrumbsEqual(left.breadcrumbs, right.breadcrumbs) &&
+    areActionsEqual(left.actions, right.actions)
+  );
+};
+
 export function DashboardHeaderProvider({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname() || "/dashboard";
-  const [overrideConfig, setOverrideConfig] = useState<DashboardHeaderConfig | null>(null);
+  const [overrideConfig, setOverrideConfig] = useState<DashboardHeaderOverride | null>(null);
 
   const baseConfig = useMemo(() => {
     return DASHBOARD_HEADER_META[pathname] ?? buildFallbackConfig(pathname);
   }, [pathname]);
 
-  useEffect(() => {
-    setOverrideConfig(null);
-  }, [pathname]);
-
   const setHeaderConfig = useCallback((config: DashboardHeaderConfig) => {
-    setOverrideConfig(config);
-  }, []);
+    setOverrideConfig((current) => {
+      if (
+        current?.pathname === pathname &&
+        areHeaderConfigsEqual(current.config, config)
+      ) {
+        return current;
+      }
+
+      return { pathname, config };
+    });
+  }, [pathname]);
 
   const clearHeaderConfig = useCallback(() => {
     setOverrideConfig(null);
   }, []);
 
   const headerConfig = useMemo<DashboardHeaderConfig>(() => {
-    if (!overrideConfig) return baseConfig;
+    const currentOverride =
+      overrideConfig?.pathname === pathname ? overrideConfig.config : null;
+
+    if (!currentOverride) return baseConfig;
 
     return {
       ...baseConfig,
-      ...overrideConfig,
-      breadcrumbs: overrideConfig.breadcrumbs ?? baseConfig.breadcrumbs,
-      actions: overrideConfig.actions ?? baseConfig.actions,
+      ...currentOverride,
+      breadcrumbs: currentOverride.breadcrumbs ?? baseConfig.breadcrumbs,
+      actions: currentOverride.actions ?? baseConfig.actions,
     };
-  }, [baseConfig, overrideConfig]);
+  }, [baseConfig, overrideConfig, pathname]);
 
   const value = useMemo<DashboardHeaderContextValue>(
     () => ({
@@ -205,16 +279,20 @@ export function DashboardHeaderProvider({
 
 export function useDashboardHeader(config: DashboardHeaderConfig) {
   const context = useContext(DashboardHeaderContext);
+  const setHeaderConfig = context?.setHeaderConfig;
+  const clearHeaderConfig = context?.clearHeaderConfig;
 
   useEffect(() => {
-    if (!context) return undefined;
+    if (!setHeaderConfig) return;
 
-    context.setHeaderConfig(config);
+    setHeaderConfig(config);
+  }, [config, setHeaderConfig]);
 
+  useEffect(() => {
     return () => {
-      context.clearHeaderConfig();
+      clearHeaderConfig?.();
     };
-  }, [config, context]);
+  }, [clearHeaderConfig]);
 }
 
 export function useResolvedDashboardHeader() {
