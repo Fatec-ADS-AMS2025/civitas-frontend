@@ -58,11 +58,25 @@ export const buildDespesaFormObject = (
     return EMPTY_DESPESA_FORM;
   }
 
+  const persistedDocumento =
+    despesa.documento ??
+    (despesa.raw.hashDocumento || despesa.raw.nomeDocumento
+      ? {
+          idDocumento: despesa.raw.idDocumento ?? 0,
+          digitalizacao: "",
+          numeroDocumento: Number(despesa.raw.numeroDocumento ?? 0),
+          idFornecedor: Number(despesa.raw.idFornecedor ?? despesa.raw.fornecedorId ?? 0),
+          fileName: despesa.raw.nomeDocumento ?? "Documento anexado",
+          fileType: "application/pdf",
+          isPersisted: true,
+          status: "ready",
+        }
+      : "");
+
   return {
     id: despesa.id,
-    documento: "",
+    documento: despesa.documentoConfiavel ? persistedDocumento : "",
     numeroDocumento: despesa.raw.numeroDocumento ?? "",
-    idFluxo: "",
     codigo: despesa.raw.codigo === "0" ? "" : despesa.raw.codigo ?? "",
     idTipoCodigo: despesa.tipoCodigoId ?? "",
     idTipoDespesa: despesa.raw.idTipoDespesa ?? "",
@@ -94,6 +108,11 @@ export const getStatusBadgeClassName = (status: number): string => {
   if (status === 2) return "civitas-badge--status-active";
   if (status === 3) return "civitas-badge--status-inactive";
   return "civitas-badge--status-neutral";
+};
+
+// Pendente = A pagar (1) ou Atrasada (3).
+export const isPendingDespesa = (status: number): boolean => {
+  return status === 1 || status === 3;
 };
 
 export const mapDespesaToExportRow = (

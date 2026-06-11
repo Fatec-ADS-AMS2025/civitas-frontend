@@ -1,4 +1,5 @@
 import { normalizeDateInput, toTrimmedText } from "@/global/formPayload";
+import { filterActiveRecords } from "@/global/softDelete";
 import type DespesaDTO from "@/models/despesa";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -151,7 +152,9 @@ const getDespesaStatusLabel = (status: number): string => {
 };
 
 const getDespesaValor = (despesa: DespesaDTO): number => {
-  const resolvedValue = Number(despesa.valor ?? despesa.consumoPrevisto ?? 0);
+  const resolvedValue = Number(
+    despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0
+  );
   return Number.isFinite(resolvedValue) ? resolvedValue : 0;
 };
 
@@ -249,6 +252,8 @@ export const buildFinanceRelations = ({
   orcamentos = [],
   tiposDespesa = [],
 }: BuildFinanceRelationsInput): FinanceRelations => {
+  const activeDespesas = filterActiveRecords(despesas);
+  const activeOrcamentos = filterActiveRecords(orcamentos);
   const secretariaMap = new Map(
     secretarias.map((secretaria) => [secretaria.idSecretaria, secretaria])
   );
@@ -259,7 +264,7 @@ export const buildFinanceRelations = ({
     tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa])
   );
 
-  const despesasRelacionadas = despesas
+  const despesasRelacionadas = activeDespesas
     .map<FinanceDespesaRelacionada>((despesa) => {
       const instituicaoId = despesa.idInstituicao ?? null;
       const instituicao = instituicaoId ? instituicaoMap.get(instituicaoId) : undefined;
@@ -333,7 +338,7 @@ export const buildFinanceRelations = ({
         (accumulator, item) => accumulator + item.valor,
         0
       );
-      const totalOrcamentos = orcamentos
+      const totalOrcamentos = activeOrcamentos
         .filter((orcamento) => orcamento.idInstituicao === instituicao.id)
         .reduce(
           (accumulator, item) =>

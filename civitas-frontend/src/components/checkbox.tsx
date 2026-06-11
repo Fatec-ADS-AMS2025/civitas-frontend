@@ -1,4 +1,4 @@
-import React, { InputHTMLAttributes, useId, useEffect, useRef, useState } from 'react';
+import React, { InputHTMLAttributes, useCallback, useId, useState } from 'react';
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
@@ -19,12 +19,13 @@ function Checkbox({
   ...props
 }: CheckboxProps) {
   const checkboxId = id || useId();
-  const inputRef = useRef<HTMLInputElement>(null);
   const [internalChecked, setInternalChecked] = useState(defaultChecked || false);
-
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.indeterminate = indeterminate;
-  }, [indeterminate]);
+  const inputRef = useCallback(
+    (element: HTMLInputElement | null) => {
+      if (element) element.indeterminate = indeterminate;
+    },
+    [indeterminate]
+  );
 
   const isControlled = checked !== undefined;
   const currentChecked = isControlled ? checked : internalChecked;

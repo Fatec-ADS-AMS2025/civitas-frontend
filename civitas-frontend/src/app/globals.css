@@ -636,6 +636,24 @@ html[data-theme="dark"] {
   color: var(--status-neutral-text);
 }
 
+/* Destaque visual para despesas pendentes (A pagar/Atrasada). */
+.despesas-table-row--pending {
+  background: var(--surface-warning-soft);
+  border-left: 3px solid var(--border-accent-amber);
+}
+
+.despesas-table-row--pending .civitas-badge--status-neutral {
+  background: var(--tone-amber-bg);
+  color: var(--tone-amber-text);
+  border: 1px solid var(--tone-amber-border);
+}
+
+.despesas-table-row--pending .civitas-badge--status-inactive {
+  background: color-mix(in srgb, var(--tone-danger-bg) 72%, var(--surface-elevated) 28%);
+  color: var(--tone-danger-text);
+  border: 1px solid var(--tone-danger-border);
+}
+
 .civitas-divider {
   border-color: var(--divider);
 }

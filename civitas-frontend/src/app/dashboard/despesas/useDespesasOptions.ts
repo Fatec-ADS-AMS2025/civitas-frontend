@@ -2,25 +2,25 @@
 
 import { useMemo } from "react";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
-import type FluxoDTO from "@/models/fluxo";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
+import type SecretariaDTO from "@/models/secretaria";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
-import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 import type UsuarioDTO from "@/models/usuario";
 import type { SelectOption } from "./despesas.types";
 import { ensureOption, formatCurrency } from "./despesas.utils";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 
 type UseDespesasOptionsInput = {
   tipoCodigos: TipoCodigoDTO[];
   tiposDespesa: TipoDespesaDTO[];
   orcamentos: OrcamentoDTO[];
   instituicoes: InstituicaoDTO[];
+  secretarias: SecretariaDTO[];
   fornecedores: FornecedorDTO[];
   usuarios: UsuarioDTO[];
-  fluxos: FluxoDTO[];
   unidadesConsumidoras: UnidadeConsumidoraDTO[];
   activeModalDespesa: DespesaDashboardRow | null;
 };
@@ -30,9 +30,9 @@ export function useDespesasOptions({
   tiposDespesa,
   orcamentos,
   instituicoes,
+  secretarias,
   fornecedores,
   usuarios,
-  fluxos,
   unidadesConsumidoras,
   activeModalDespesa,
 }: UseDespesasOptionsInput) {
@@ -60,6 +60,15 @@ export function useDespesasOptions({
     [instituicoes]
   );
 
+  const secretariaOptions = useMemo<SelectOption[]>(
+    () =>
+      secretarias.map((item) => ({
+        value: item.idSecretaria,
+        label: item.nome || item.descricao || `Secretaria #${item.idSecretaria}`,
+      })),
+    [secretarias]
+  );
+
   const fornecedorOptions = useMemo<SelectOption[]>(
     () =>
       fornecedores.map((item) => ({
@@ -72,15 +81,6 @@ export function useDespesasOptions({
   const usuarioOptions = useMemo<SelectOption[]>(
     () => usuarios.map((item) => ({ value: item.id, label: item.nome })),
     [usuarios]
-  );
-
-  const fluxoOptions = useMemo<SelectOption[]>(
-    () =>
-      fluxos.map((fluxo) => ({
-        value: fluxo.idFluxo,
-        label: `#${String(fluxo.idFluxo).padStart(3, "0")} - Status ${fluxo.status} - Consumo ${fluxo.consumo}`,
-      })),
-    [fluxos]
   );
 
   const unidadeConsumidoraOptions = useMemo<SelectOption[]>(
@@ -178,8 +178,8 @@ export function useDespesasOptions({
       ensureOption(
         unidadeConsumidoraOptions,
         activeModalDespesa?.raw.idUnidadeConsumidora,
-        activeModalDespesa?.raw.uc
-          ? `Unidade ${activeModalDespesa.raw.uc}`
+        activeModalDespesa?.raw.idUnidadeConsumidora
+          ? `Unidade consumidora #${activeModalDespesa.raw.idUnidadeConsumidora}`
           : "Unidade consumidora atual"
       ),
     [activeModalDespesa, unidadeConsumidoraOptions]
@@ -188,13 +188,14 @@ export function useDespesasOptions({
   return {
     tipoDespesaOptions,
     tipoCodigoOptions,
+    instituicaoOptions,
+    secretariaOptions,
     resolvedTipoDespesaOptions,
     resolvedTipoCodigoOptions,
     resolvedInstituicaoOptions,
     resolvedOrcamentoOptions,
     resolvedFornecedorOptions,
     resolvedUsuarioOptions,
-    resolvedFluxoOptions: fluxoOptions,
     resolvedUnidadeConsumidoraOptions,
   };
 }

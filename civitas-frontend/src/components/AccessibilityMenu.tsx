@@ -96,10 +96,6 @@ export default function AccessibilityMenu() {
     }
   }, [])
 
-  useEffect(() => {
-    applyContrast(highContrast)
-  }, [highContrast])
-
   const updateFontSize = (size: number) => {
     const next = Math.max(MIN_FONT, Math.min(MAX_FONT, size))
     setFontSize(next)
@@ -114,6 +110,7 @@ export default function AccessibilityMenu() {
   const toggleContrast = () => {
     const next = !highContrast
     setHighContrast(next)
+    applyContrast(next)
     localStorage.setItem('app-high-contrast', String(next))
   }
 

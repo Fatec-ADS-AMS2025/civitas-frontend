@@ -151,7 +151,7 @@ export default function FormularioCompleto() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados do formulário:', dados);
+    // Envie os dados para o fluxo da tela aqui.
   };
 
   return (

@@ -1,14 +1,15 @@
 "use client";
 
-import { SearchBar } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { SkeletonTable } from "@/components/skeleton";
 import type { useSecretariaPage } from "@/hooks/useSecretariaPage";
 import {
-  novaSecretaria,
   secretariaColumns,
   secretariaFormFields,
 } from "./secretariaConfig";
+import SecretariaFilters from "./SecretariaFilters";
+import SecretariaInstituicoesView from "./SecretariaInstituicoesView";
+import SecretariaRelationshipCards from "./SecretariaRelationshipCards";
 
 type SecretariaPageContentProps = ReturnType<typeof useSecretariaPage>;
 
@@ -23,9 +24,12 @@ function SecretariaErrorAlert({ message }: { message: string }) {
 export default function SecretariaPageContent({
   secretarias,
   filteredData,
-  campos,
-  setFilteredData,
-  setCampos,
+  cardFilteredSecretarias,
+  secretariaMetrics,
+  cardFilter,
+  textFilters,
+  setTextFilters,
+  setCardFilter,
   loading,
   error,
   handleCreate,
@@ -40,13 +44,17 @@ export default function SecretariaPageContent({
     <>
       {error ? <SecretariaErrorAlert message={error} /> : null}
 
-      <SearchBar
-        model={novaSecretaria}
-        dados={secretarias}
-        setDados={setFilteredData}
-        campos={campos}
-        formFields={secretariaFormFields}
-        setCampos={setCampos}
+      <SecretariaRelationshipCards
+        secretarias={secretarias}
+        metrics={secretariaMetrics}
+        selectedFilter={cardFilter}
+        onFilterChange={setCardFilter}
+      />
+
+      <SecretariaFilters
+        data={cardFilteredSecretarias}
+        filters={textFilters}
+        setFilters={setTextFilters}
         onCadastrar={handleCreate}
       />
 
@@ -56,6 +64,9 @@ export default function SecretariaPageContent({
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={secretariaFormFields}
+        renderModalExtra={(row, mode) =>
+          mode === "view" ? <SecretariaInstituicoesView secretaria={row} /> : null
+        }
       />
     </>
   );

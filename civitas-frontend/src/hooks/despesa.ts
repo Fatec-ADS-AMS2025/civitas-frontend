@@ -1,6 +1,8 @@
 import { GenericService } from './generic';
 import DespesaDTO from '@/models/despesa';
+import type DocumentoDTO from '@/models/documento';
 import type { ListQuery } from './generic';
+import { filterActiveRecords } from '@/global/softDelete';
 
 const mergeUniqueById = (despesas: DespesaDTO[]): DespesaDTO[] => {
   return Array.from(new Map(despesas.map((despesa) => [despesa.id, despesa])).values());
@@ -26,6 +28,71 @@ const toQueryString = (query?: ListQuery): string => {
   return queryString ? `?${queryString}` : '';
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+const appendIfPresent = (formData: FormData, key: string, value: unknown): void => {
+  if (value === undefined || value === null || value === '') return;
+  formData.append(key, String(value));
+};
+
+const base64ToBlob = (base64: string, fileType?: string): Blob => {
+  const binary = window.atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new Blob([bytes], { type: fileType || 'application/pdf' });
+};
+
+const appendDocumentoIfPresent = (formData: FormData, documento: unknown): void => {
+  if (!isRecord(documento) || documento.isPersisted === true) return;
+
+  const digitalizacao =
+    typeof documento.digitalizacao === 'string' ? documento.digitalizacao.trim() : '';
+  if (!digitalizacao) return;
+
+  const fileName =
+    typeof documento.fileName === 'string' && documento.fileName.trim()
+      ? documento.fileName.trim()
+      : 'documento.pdf';
+  const fileType =
+    typeof documento.fileType === 'string' && documento.fileType.trim()
+      ? documento.fileType.trim()
+      : 'application/pdf';
+
+  formData.append('Documento', base64ToBlob(digitalizacao, fileType), fileName);
+};
+
+const buildDespesaFormData = (data: Partial<DespesaDTO>): FormData => {
+  const formData = new FormData();
+
+  appendIfPresent(formData, 'Id', data.id);
+  appendIfPresent(formData, 'NumeroDocumento', data.numeroDocumento);
+  appendIfPresent(formData, 'Codigo', data.codigo);
+  appendIfPresent(formData, 'DataEmissao', data.dataEmissao ?? data.dataEmicao);
+  appendIfPresent(formData, 'ValorPrevisto', data.valorPrevisto ?? data.valor);
+  appendIfPresent(formData, 'ValorPago', data.valorPago);
+  appendIfPresent(formData, 'Juros', 0);
+  appendIfPresent(formData, 'Multa', 0);
+  appendIfPresent(formData, 'Desconto', 0);
+  appendIfPresent(formData, 'ConsumoPrevisto', data.consumoPrevisto);
+  appendIfPresent(formData, 'ConsumoReal', data.consumoReal);
+  appendIfPresent(formData, 'DataVencimento', data.dataVencimento);
+  appendIfPresent(formData, 'DataPagamento', data.dataPagamento);
+  appendIfPresent(formData, 'Status', data.status ?? data.situacao);
+  appendIfPresent(formData, 'IdUsuario', data.idUsuario);
+  appendIfPresent(formData, 'IdUnidadeConsumidora', data.idUnidadeConsumidora);
+  appendIfPresent(formData, 'ValoresOpcionais', data.valoresOpcionais);
+  appendIfPresent(formData, 'ConfirmarDocumentoDuplicado', data.confirmarDocumentoDuplicado ?? false);
+  appendDocumentoIfPresent(formData, data.documento as DocumentoDTO | undefined);
+
+  return formData;
+};
+
 export class DespesaService extends GenericService<DespesaDTO> {
   constructor() {
     super('despesas');
@@ -43,7 +110,7 @@ export class DespesaService extends GenericService<DespesaDTO> {
       headers: this.createHeaders(),
     });
     const payload = await this.handleResponse(response, { showErrorToast: false });
-    return this.unwrapCollection<DespesaDTO>(payload);
+    return filterActiveRecords(this.unwrapCollection<DespesaDTO>(payload));
   }
 
   async getAtrasadas(query?: ListQuery): Promise<DespesaDTO[]> {
@@ -51,7 +118,7 @@ export class DespesaService extends GenericService<DespesaDTO> {
       headers: this.createHeaders(),
     });
     const payload = await this.handleResponse(response, { showErrorToast: false });
-    return this.unwrapCollection<DespesaDTO>(payload);
+    return filterActiveRecords(this.unwrapCollection<DespesaDTO>(payload));
   }
 
   async getPagasData(query?: ListQuery): Promise<DespesaDTO[]> {
@@ -79,7 +146,9 @@ export class DespesaService extends GenericService<DespesaDTO> {
       this.getAtrasadasData(query),
     ]);
 
-    return mergeUniqueById([...(aPagar ?? []), ...(pagas ?? []), ...(atrasadas ?? [])]);
+    return filterActiveRecords(
+      mergeUniqueById([...(aPagar ?? []), ...(pagas ?? []), ...(atrasadas ?? [])])
+    );
   }
 
   async getInactiveOptional(query?: ListQuery): Promise<DespesaDTO[]> {
@@ -90,7 +159,9 @@ export class DespesaService extends GenericService<DespesaDTO> {
     params.set('page', String(page));
     params.set('size', String(size));
 
-    const response = await fetch(`${this.getUrlEndpoint()}/inativos?${params.toString()}`);
+    const response = await fetch(`${this.getUrlEndpoint()}/excluidos?${params.toString()}`, {
+      headers: this.createHeaders(),
+    });
     if (!response.ok) {
       return [];
     }
@@ -102,10 +173,8 @@ export class DespesaService extends GenericService<DespesaDTO> {
   async createFromDashboard(data: DespesaDTO): Promise<DespesaDTO> {
     const response = await fetch(this.getUrlEndpoint(), {
       method: 'POST',
-      headers: this.createHeaders({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(data),
+      headers: this.createHeaders(),
+      body: buildDespesaFormData(data),
     });
 
     const payload = await this.handleResponse(response, {
@@ -118,10 +187,8 @@ export class DespesaService extends GenericService<DespesaDTO> {
   async updateFromDashboard(id: number, data: Partial<DespesaDTO>): Promise<DespesaDTO> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       method: 'PUT',
-      headers: this.createHeaders({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(data),
+      headers: this.createHeaders(),
+      body: buildDespesaFormData({ ...data, id }),
     });
 
     const payload = await this.handleResponse(response, {
@@ -129,6 +196,35 @@ export class DespesaService extends GenericService<DespesaDTO> {
       showSuccessToast: false,
     });
     return this.unwrapItem<DespesaDTO>(payload);
+  }
+
+  override async createData(data: DespesaDTO): Promise<DespesaDTO> {
+    return this.createFromDashboard(data);
+  }
+
+  override async updateData(id: number, data: Partial<DespesaDTO>): Promise<DespesaDTO> {
+    return this.updateFromDashboard(id, data);
+  }
+
+  override async delete(id: number): Promise<void> {
+    const response = await fetch(`${this.getUrlEndpoint()}/${id}/status-exclusao`, {
+      method: 'PATCH',
+      headers: this.createHeaders(),
+    });
+
+    await this.handleResponse(response, { showSuccessToast: true });
+  }
+
+  async getDocumentoBlobByHash(hashDocumento: string): Promise<Blob> {
+    const response = await fetch(`${this.getUrlEndpoint()}/documento/${hashDocumento}`, {
+      headers: this.createHeaders(),
+    });
+
+    if (!response.ok) {
+      await this.handleResponse(response, { showErrorToast: false });
+    }
+
+    return response.blob();
   }
 
   async alterarStatusFromDashboard(id: number, status: number): Promise<void> {

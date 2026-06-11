@@ -24,7 +24,6 @@ type UseDespesaFormFieldsInput = {
   resolvedOrcamentoOptions: SelectOption[];
   resolvedFornecedorOptions: SelectOption[];
   resolvedUsuarioOptions: SelectOption[];
-  resolvedFluxoOptions: SelectOption[];
   resolvedUnidadeConsumidoraOptions: SelectOption[];
   isOptionsLoading?: boolean;
   hideDocumento?: boolean;
@@ -39,7 +38,6 @@ export function useDespesaFormFields({
   resolvedOrcamentoOptions,
   resolvedFornecedorOptions,
   resolvedUsuarioOptions,
-  resolvedFluxoOptions,
   resolvedUnidadeConsumidoraOptions,
   isOptionsLoading = false,
   hideDocumento = false,
@@ -114,10 +112,6 @@ export function useDespesaFormFields({
             return "Selecione um fornecedor valido para vincular o documento.";
           }
 
-          if (toPositiveNumber(formData.idFluxo) <= 0) {
-            return "Selecione um fluxo valido para vincular o documento.";
-          }
-
           return undefined;
         },
       },
@@ -134,27 +128,6 @@ export function useDespesaFormFields({
           if (normalizedValue.length > 100) {
             return "Numero do documento deve ter no maximo 100 caracteres.";
           }
-          return undefined;
-        },
-      },
-      {
-        key: "idFluxo",
-        label: "Fluxo",
-        placeholder: "Selecione o fluxo",
-        type: "select",
-        requiredInModes: ["create"],
-        disabled: isOptionsLoading,
-        options: resolvedFluxoOptions,
-        validate: (value, formData, mode) => {
-          const hasDocumentInput =
-            formData.documento !== "" &&
-            formData.documento !== undefined &&
-            formData.documento !== null;
-
-          if ((mode === "create" || hasDocumentInput) && toPositiveNumber(value) <= 0) {
-            return "Selecione um fluxo valido.";
-          }
-
           return undefined;
         },
       },
@@ -379,12 +352,10 @@ export function useDespesaFormFields({
     [
       resolvedFornecedorOptions,
       resolvedInstituicaoOptions,
-      resolvedFluxoOptions,
       resolvedOrcamentoOptions,
       resolvedTipoCodigoOptions,
       resolvedTipoDespesaOptions,
       resolvedUsuarioOptions,
-      resolvedUnidadeConsumidoraOptions,
       isOptionsLoading,
       resolveDocumento,
       resolveTipoCodigo,

@@ -28,13 +28,22 @@ export const STATUS_OPTIONS: SelectOption[] = [
   { value: "3", label: "Atrasada" },
 ];
 
+export const VENCIMENTO_OPTIONS: SelectOption[] = [
+  { value: "atrasadas", label: "Vencidas" },
+  { value: "hoje", label: "Vencem hoje" },
+  { value: "proximos7", label: "Proximos 7 dias" },
+  { value: "semData", label: "Sem vencimento" },
+];
+
 export const INITIAL_FILTER_FORM: DespesasDashboardFilters = {
   search: "",
   dataInicio: "",
   dataFim: "",
+  idInstituicao: "",
+  idSecretaria: "",
   idTipoCodigo: "",
   idTipoDespesa: "",
-  situacao: "",
+  vencimento: "",
   solicitaUc: "",
 };
 
@@ -42,7 +51,6 @@ export const EMPTY_DESPESA_FORM: Record<string, unknown> = {
   id: 0,
   documento: "",
   numeroDocumento: "",
-  idFluxo: "",
   codigo: "",
   idTipoCodigo: "",
   idTipoDespesa: "",

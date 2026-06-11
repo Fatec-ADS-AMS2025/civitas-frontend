@@ -1,4 +1,6 @@
 export { default as DespesaCrudModals } from "./DespesaCrudModals";
+export { default as DespesaDetailsView } from "./DespesaDetailsView";
+export { default as DespesaPagamentoModal } from "./DespesaPagamentoModal";
 export { default as DespesasExplorer } from "./DespesasExplorer";
 export { default as DespesasExportModal } from "./DespesasExportModal";
 export { default as DespesasFiltros } from "./DespesasFiltros";

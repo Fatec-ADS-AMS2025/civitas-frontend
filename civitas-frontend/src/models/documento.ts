@@ -3,5 +3,11 @@ export default interface DocumentoDTO {
   digitalizacao: string;
   numeroDocumento: number;
   idFornecedor: number;
-  idFluxo: number;
+  idFluxo?: number;
+  idDespesa?: number;
+  fileName?: string;
+  fileType?: string;
+  fileSize?: number;
+  isPersisted?: boolean;
+  status?: "idle" | "loading" | "ready" | "error";
 }

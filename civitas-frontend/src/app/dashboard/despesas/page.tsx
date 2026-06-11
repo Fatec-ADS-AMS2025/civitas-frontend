@@ -1,26 +1,17 @@
-"use client";
+import DespesasPageClient from "./_components/DespesasPageClient";
+import { loadDespesasPageData } from "./despesas-data";
 
-import { DespesaContent } from "./_components/DespesaContent";
-import { useDespesaPage } from "./_components/useDespesaPage";
+export const dynamic = "force-dynamic";
 
-export default function Page() {
-  const {
-    filteredDespesas,
-    loading,
-    handleDelete,
-    setEditing,
-    setViewing,
-  } = useDespesaPage();
+export default async function Page() {
+  try {
+    const initialData = await loadDespesasPageData();
+    return <DespesasPageClient initialData={initialData} />;
+  } catch (error) {
+    console.error("Erro ao carregar despesas no servidor:", error);
 
-  return (
-    <div className="space-y-6">
-      <DespesaContent
-        data={filteredDespesas}
-        loading={loading}
-        onEdit={setEditing}
-        onView={setViewing}
-        onDelete={handleDelete}
-      />
-    </div>
-  );
+    return (
+      <DespesasPageClient initialError="Nao foi possivel carregar os dados de despesas." />
+    );
+  }
 }

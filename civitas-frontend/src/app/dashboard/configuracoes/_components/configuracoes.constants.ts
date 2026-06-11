@@ -1,5 +1,4 @@
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import type { FieldConfig } from "@/components/Table/searchbar";
 import { SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import type { ConfigDefinition, ConfigKind } from "./configuracoes.types";
 
@@ -22,14 +21,10 @@ export const SOLICITA_UC_OPTIONS = [
   { value: 2, label: "Nao" },
 ];
 
-const statusSearchOptions: FieldConfig["options"] = [
-  { value: "Ativo", label: "Ativo" },
-  { value: "Inativo", label: "Inativo" },
-];
 
 const tipoInstituicaoColumns = [
   { id: "descricao", label: "Descricao" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 
 const tipoCodigoColumns = [
@@ -41,22 +36,14 @@ const tipoDespesaColumns = [
   { id: "descricao", label: "Descricao" },
   { id: "solicitaUcLabel", label: "Solicita UC" },
   { id: "unidadeMedidaLabel", label: "Unidade de Medida" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
 
 const unidadeMedidaColumns = [
   { id: "descricao", label: "Descricao" },
   { id: "abreviatura", label: "Abreviatura" },
-  { id: "situacaoLabel", label: "Situacao" },
+  { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
-
-const buildStatusSearchField = (): FieldConfig => ({
-  key: "situacaoLabel",
-  placeholder: "Situacao",
-  local: "filtro",
-  type: "select",
-  options: statusSearchOptions,
-});
 
 const buildSituacaoField = (): ModalFieldConfig => ({
   key: "situacao",
@@ -113,7 +100,6 @@ export const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
     ],
     buildSearchFields: () => [
       { key: "descricao", placeholder: "Descricao", local: "principal" },
-      buildStatusSearchField(),
     ],
     emptyModel: {
       id: 0,
@@ -174,7 +160,6 @@ export const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
     },
     buildSearchFields: () => [
       { key: "descricao", placeholder: "Descricao", local: "principal" },
-      buildStatusSearchField(),
     ],
     emptyModel: {
       id: 0,
@@ -207,7 +192,6 @@ export const CONFIG_DEFINITIONS: Record<ConfigKind, ConfigDefinition> = {
     ],
     buildSearchFields: () => [
       { key: "descricao", placeholder: "Descricao", local: "principal" },
-      buildStatusSearchField(),
     ],
     emptyModel: {
       id: 0,
