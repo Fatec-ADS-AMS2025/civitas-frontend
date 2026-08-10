@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import { InfoCard, type InfoListItem } from "@/components/DataDisplay";
 import type { TableColumn } from "./export-types";
 import { getTableCellText, isStatusColumn } from "./export-utils";
@@ -17,8 +17,8 @@ type TableCardViewProps<T extends TableRow> = {
 const resolveCardValue = <T extends TableRow>(
   value: TableCardValue<T> | undefined,
   row: T,
-  fallback?: React.ReactNode
-): React.ReactNode => (typeof value === "function" ? value(row) : value ?? fallback);
+  fallback?: React.ReactNode,
+): React.ReactNode => (typeof value === "function" ? value(row) : (value ?? fallback));
 
 const buildDefaultFields = <T extends TableRow>(columns: TableColumn[]) => {
   const statusColumn = columns.find((column) => isStatusColumn(column.id));
@@ -45,12 +45,9 @@ export function TableCardView<T extends TableRow>({
     columns.find((column) => column.id === resolvedConfig?.badgeColumnId) ??
     columns.find((column) => isStatusColumn(column.id));
   const titleColumn = columns[0];
-  const subtitleColumn = columns.find(
-    (column, index) => index > 0 && !isStatusColumn(column.id)
-  );
+  const subtitleColumn = columns.find((column, index) => index > 0 && !isStatusColumn(column.id));
   const primaryFields = resolvedConfig?.primaryFields ?? buildDefaultFields<T>(columns);
-  const gridClassName =
-    resolvedConfig?.gridClassName ?? "grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3";
+  const gridClassName = resolvedConfig?.gridClassName ?? "grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3";
 
   const resolveField = (row: T, field: TableCardField<T>): InfoListItem => {
     const column = columns.find((item) => item.id === field.columnId);
@@ -73,30 +70,24 @@ export function TableCardView<T extends TableRow>({
           title={resolveCardValue(
             resolvedConfig?.title,
             row,
-            titleColumn ? renderCellValue(row, titleColumn) : "Registro"
+            titleColumn ? renderCellValue(row, titleColumn) : "Registro",
           )}
           subtitle={resolveCardValue(
             resolvedConfig?.subtitle,
             row,
-            subtitleColumn ? getTableCellText(row, subtitleColumn) : undefined
+            subtitleColumn ? getTableCellText(row, subtitleColumn) : undefined,
           )}
           badge={resolveCardValue(
             resolvedConfig?.badge,
             row,
-            statusColumn ? renderCellValue(row, statusColumn) : undefined
+            statusColumn ? renderCellValue(row, statusColumn) : undefined,
           )}
           icon={resolvedConfig?.icon}
           tone={resolvedConfig?.tone}
           primaryItems={primaryFields.map((field) => resolveField(row, field))}
-          secondaryItems={(resolvedConfig?.secondaryFields ?? []).map((field) =>
-            resolveField(row, field)
-          )}
-          relationshipItems={(resolvedConfig?.relationshipFields ?? []).map((field) =>
-            resolveField(row, field)
-          )}
-          footerItems={(resolvedConfig?.footerFields ?? []).map((field) =>
-            resolveField(row, field)
-          )}
+          secondaryItems={(resolvedConfig?.secondaryFields ?? []).map((field) => resolveField(row, field))}
+          relationshipItems={(resolvedConfig?.relationshipFields ?? []).map((field) => resolveField(row, field))}
+          footerItems={(resolvedConfig?.footerFields ?? []).map((field) => resolveField(row, field))}
           actions={renderActions(row)}
         />
       ))}

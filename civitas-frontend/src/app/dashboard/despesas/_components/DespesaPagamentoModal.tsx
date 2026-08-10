@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import type React from "react";
+import { useMemo, useState } from "react";
 import Button from "@/components/button";
 import DocumentoField, { type DocumentoFieldValue } from "@/components/Form/documento-field";
 import type { FormFieldConfig } from "@/components/Form/form";
@@ -78,7 +79,7 @@ export default function DespesaPagamentoModal({
       type: "documento",
       accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
     }),
-    []
+    [],
   );
 
   if (!open || !despesa) return null;
@@ -88,10 +89,14 @@ export default function DespesaPagamentoModal({
 
     const nextErrors: PaymentErrors = {};
     const resolvedValorPago = touched.valorPago
-      ? values.valorPago === "" ? "" : Number(values.valorPago)
+      ? values.valorPago === ""
+        ? ""
+        : Number(values.valorPago)
       : Number(despesa.raw.valorPago);
     const resolvedConsumoReal = touched.consumoReal
-      ? values.consumoReal === "" ? "" : Number(values.consumoReal)
+      ? values.consumoReal === ""
+        ? ""
+        : Number(values.consumoReal)
       : Number(despesa.raw.consumoReal);
     const documentoValue = resolveDocumentoValue(values.documento);
 
@@ -128,12 +133,10 @@ export default function DespesaPagamentoModal({
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--tone-success-text)]">
                   Pagamento de despesa
                 </p>
-                <h3 className="mt-1.5 text-2xl font-semibold text-[var(--foreground)]">
-                  Esta despesa ja esta paga
-                </h3>
+                <h3 className="mt-1.5 text-2xl font-semibold text-[var(--foreground)]">Esta despesa ja esta paga</h3>
                 <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                  O registro {despesa.registro} ja possui baixa de pagamento. Para
-                  alterar dados financeiros, use a edicao da despesa.
+                  O registro {despesa.registro} ja possui baixa de pagamento. Para alterar dados financeiros, use a
+                  edicao da despesa.
                 </p>
               </div>
             </div>
@@ -141,14 +144,8 @@ export default function DespesaPagamentoModal({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <PaymentInfoCard label="Registro" value={despesa.registro} />
-            <PaymentInfoCard
-              label="Data do pagamento"
-              value={formatPaymentDate(despesa.raw.dataPagamento)}
-            />
-            <PaymentInfoCard
-              label="Valor pago"
-              value={formatPaymentCurrency(despesa.raw.valorPago)}
-            />
+            <PaymentInfoCard label="Data do pagamento" value={formatPaymentDate(despesa.raw.dataPagamento)} />
+            <PaymentInfoCard label="Valor pago" value={formatPaymentCurrency(despesa.raw.valorPago)} />
             <PaymentInfoCard
               label={`Consumo real em ${unidadeMedidaNome || "unidade"}`}
               value={formatPaymentNumber(despesa.raw.consumoReal)}
@@ -156,9 +153,7 @@ export default function DespesaPagamentoModal({
           </div>
 
           <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
-            <p className="text-sm font-semibold text-[var(--foreground)]">
-              {despesa.descricao}
-            </p>
+            <p className="text-sm font-semibold text-[var(--foreground)]">{despesa.descricao}</p>
             <p className="mt-1 text-xs text-[var(--foreground-soft)]">
               Documento: {despesa.numeroDocumento || "Nao informado"}
             </p>
@@ -181,9 +176,7 @@ export default function DespesaPagamentoModal({
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
             Pagamento de despesa
           </p>
-          <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">
-            Pagar despesa {despesa.registro}
-          </h3>
+          <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">Pagar despesa {despesa.registro}</h3>
           <p className="mt-1 text-sm text-[var(--foreground-muted)]">
             Informe valor pago, consumo real e anexe o comprovante.
           </p>
@@ -264,9 +257,7 @@ export default function DespesaPagamentoModal({
 function PaymentInfoCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
-      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
-        {label}
-      </span>
+      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">{label}</span>
       <strong className="mt-2 block text-lg text-[var(--foreground)]">{value}</strong>
     </div>
   );

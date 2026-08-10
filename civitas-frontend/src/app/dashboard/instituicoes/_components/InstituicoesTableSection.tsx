@@ -2,13 +2,10 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import { SearchBar } from "@/components/Table/searchbar";
 import type { FieldConfig } from "@/components/Table/searchbar";
+import { SearchBar } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-import {
-  INSTITUICOES_COLUMNS,
-  NOVA_INSTITUICAO,
-} from "../_constants/instituicoes";
+import { INSTITUICOES_COLUMNS, NOVA_INSTITUICAO } from "../_constants/instituicoes";
 import type { Instituicao, InstituicaoRow } from "../_types";
 import InstituicaoDetailsView from "./InstituicaoDetailsView";
 
@@ -55,9 +52,7 @@ export default function InstituicoesTableSection({
         onDelete={onDelete}
         formFields={formFields}
         formHiddenFields={["id"]}
-        renderModalExtra={(row, mode) =>
-          mode === "view" ? <InstituicaoDetailsView instituicao={row} /> : null
-        }
+        renderModalExtra={(row, mode) => (mode === "view" ? <InstituicaoDetailsView instituicao={row} /> : null)}
         exportConfig={{
           enabled: true,
           title: "Instituicoes",

@@ -1,5 +1,5 @@
-import { showToast } from "@/hooks/useToast";
 import { filterActiveRecords } from "@/global/softDelete";
+import { showToast } from "@/hooks/useToast";
 import { authStorage } from "@/lib/auth-storage";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
@@ -81,9 +81,7 @@ const translateApiErrorMessage = (message: string, status: number): string => {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 
-  if (
-    normalized.includes("nao e possivel excluir um orcamento que possui despesas vinculadas")
-  ) {
+  if (normalized.includes("nao e possivel excluir um orcamento que possui despesas vinculadas")) {
     return "Nao e possivel excluir este orcamento porque existem despesas vinculadas.";
   }
 
@@ -106,9 +104,7 @@ const translateApiErrorMessage = (message: string, status: number): string => {
 
 const extractValidationMessages = (payload: unknown): string[] => {
   if (Array.isArray(payload)) {
-    return payload
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter((item) => item.length > 0);
+    return payload.map((item) => (typeof item === "string" ? item.trim() : "")).filter((item) => item.length > 0);
   }
 
   if (isRecord(payload)) {
@@ -141,15 +137,13 @@ const extractValidationMessages = (payload: unknown): string[] => {
 const buildDetailedApiErrorMessage = (
   errorJson: ResponseEnvelope<unknown> | null,
   errorText: string,
-  status: number
+  status: number,
 ): string => {
   const validationMessages = extractValidationMessages(errorJson?.data).map((message) =>
-    translateApiErrorMessage(message, status)
+    translateApiErrorMessage(message, status),
   );
   const primaryMessage =
-    errorJson?.message?.trim() ||
-    parseApiMessageFromErrorText(errorText).trim() ||
-    `Erro na requisicao (${status})`;
+    errorJson?.message?.trim() || parseApiMessageFromErrorText(errorText).trim() || `Erro na requisicao (${status})`;
   const translatedPrimaryMessage = translateApiErrorMessage(primaryMessage, status);
 
   if (validationMessages.length === 0) {
@@ -169,7 +163,7 @@ const isHttpNotFoundError = (error: unknown): boolean => {
 
 const toQueryString = (
   query: ListQuery | undefined,
-  defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY
+  defaults: Required<Pick<ListQuery, "page" | "size">> = DEFAULT_LIST_QUERY,
 ): string => {
   const params = new URLSearchParams();
   const mergedQuery = { ...defaults, ...query };
@@ -205,10 +199,7 @@ export class GenericService<T> {
     return headers;
   }
 
-  protected async handleResponse<R = unknown>(
-    response: Response,
-    options: HandleResponseOptions = {}
-  ): Promise<R> {
+  protected async handleResponse<R = unknown>(response: Response, options: HandleResponseOptions = {}): Promise<R> {
     if (response.status === 204) return undefined as R;
 
     const contentType = response.headers.get("content-type");
@@ -218,7 +209,7 @@ export class GenericService<T> {
       let errorJson: any = null;
 
       try {
-        if (contentType && contentType.includes("application/json")) {
+        if (contentType?.includes("application/json")) {
           errorJson = await response.json();
         } else {
           errorText = await response.text();
@@ -227,11 +218,7 @@ export class GenericService<T> {
         errorText = "Erro ao processar resposta do servidor.";
       }
 
-      const message = buildDetailedApiErrorMessage(
-        errorJson,
-        errorText,
-        response.status
-      );
+      const message = buildDetailedApiErrorMessage(errorJson, errorText, response.status);
 
       if (options.showErrorToast !== false) {
         showToast(message, "error");
@@ -240,7 +227,7 @@ export class GenericService<T> {
       throw new Error(`HTTP ${response.status}: ${message}`);
     }
 
-    if (contentType && contentType.includes("application/json")) {
+    if (contentType?.includes("application/json")) {
       const json = (await response.json()) as R;
 
       if (
@@ -290,10 +277,7 @@ export class GenericService<T> {
     return [];
   }
 
-  protected normalizePaginatedResult<R>(
-    payload: unknown,
-    query?: ListQuery
-  ): PaginatedResult<R> {
+  protected normalizePaginatedResult<R>(payload: unknown, query?: ListQuery): PaginatedResult<R> {
     const data = isResponseEnvelope<unknown>(payload) ? payload.data : payload;
     const page = query?.page ?? DEFAULT_LIST_QUERY.page;
     const size = query?.size ?? DEFAULT_LIST_QUERY.size;
@@ -326,10 +310,7 @@ export class GenericService<T> {
     return payload as R;
   }
 
-  protected async requestCollection(
-    query?: ListQuery,
-    options: HandleResponseOptions = {}
-  ): Promise<T[]> {
+  protected async requestCollection(query?: ListQuery, options: HandleResponseOptions = {}): Promise<T[]> {
     const response = await fetch(`${this.getUrlEndpoint()}${toQueryString(query)}`, {
       headers: this.createHeaders(),
     });
@@ -338,10 +319,7 @@ export class GenericService<T> {
     return filterActiveRecords(this.unwrapCollection<T>(payload));
   }
 
-  protected async requestItem(
-    id: number,
-    options: HandleResponseOptions = {}
-  ): Promise<T> {
+  protected async requestItem(id: number, options: HandleResponseOptions = {}): Promise<T> {
     const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
       headers: this.createHeaders(),
     });

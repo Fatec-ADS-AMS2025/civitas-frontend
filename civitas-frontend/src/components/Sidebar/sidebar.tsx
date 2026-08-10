@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import SearchDrawer from "@/components/SearchDrawer";
 import ThemeSwitcher from "@/components/theme/theme-switcher";
 import useAuth from "@/hooks/useAuth";
@@ -30,10 +30,7 @@ export default function Sidebar() {
   const normalizedPath = normalizePath(pathname);
 
   const navigationItems = useMemo(
-    () =>
-      NAVIGATION_CATALOG.filter(
-        (item) => item.path.startsWith("/dashboard") && item.key !== "perfil",
-      ),
+    () => NAVIGATION_CATALOG.filter((item) => item.path.startsWith("/dashboard") && item.key !== "perfil"),
     [],
   );
   const navigationGroups = useMemo(() => {
@@ -52,10 +49,7 @@ export default function Sidebar() {
     return navigationItems.find((item) => normalizePath(item.path) === normalizedPath)?.category;
   }, [navigationItems, normalizedPath]);
 
-  const profileItem = useMemo(
-    () => NAVIGATION_CATALOG.find((item) => item.key === "perfil"),
-    [],
-  );
+  const profileItem = useMemo(() => NAVIGATION_CATALOG.find((item) => item.key === "perfil"), []);
 
   useEffect(() => {
     if (!activeCategory) return;
@@ -72,8 +66,7 @@ export default function Sidebar() {
 
   const toggleGroup = (category: string) => {
     setExpandedGroups((current) => {
-      const currentValue =
-        current[category] ?? (category === activeCategory || category === "Principal");
+      const currentValue = current[category] ?? (category === activeCategory || category === "Principal");
 
       return {
         ...current,
@@ -182,6 +175,7 @@ export default function Sidebar() {
         {profileItem ? (
           <div className="border-t border-[var(--sidebar-divider)] px-3 py-4">
             <button
+              type="button"
               className="flex w-full items-center justify-center gap-0 rounded-sm bg-[var(--sidebar-profile-bg)] px-3 py-2.5 text-[var(--sidebar-profile-text)] transition-all duration-150 hover:bg-[var(--sidebar-profile-hover-bg)] sm:group-hover:justify-start sm:group-hover:gap-3 sm:group-focus-within:justify-start sm:group-focus-within:gap-3"
               onClick={() => push(profileItem.path)}
               onKeyDown={(event) => {
@@ -196,9 +190,7 @@ export default function Sidebar() {
               </div>
               <div className="font-detail w-0 min-w-0 overflow-hidden whitespace-nowrap text-sm font-medium opacity-0 transition-all duration-200 sm:group-hover:w-auto sm:group-hover:min-w-0 sm:group-hover:opacity-100 sm:group-focus-within:w-auto sm:group-focus-within:min-w-0 sm:group-focus-within:opacity-100">
                 <span className="block max-w-[172px] truncate">{user?.nome || profileItem.label}</span>
-                <span className="block max-w-[172px] truncate text-xs font-normal opacity-80">
-                  {profileItem.label}
-                </span>
+                <span className="block max-w-[172px] truncate text-xs font-normal opacity-80">{profileItem.label}</span>
               </div>
             </button>
           </div>

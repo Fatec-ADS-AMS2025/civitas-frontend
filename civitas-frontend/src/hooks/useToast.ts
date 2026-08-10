@@ -8,7 +8,9 @@ type Toast = {
 let listeners: ((toast: Toast) => void)[] = [];
 
 export function showToast(message: string, type: ToastType = "info") {
-  listeners.forEach((l) => l({ message, type }));
+  listeners.forEach((listener) => {
+    listener({ message, type });
+  });
 }
 
 export function subscribeToast(listener: (toast: Toast) => void) {

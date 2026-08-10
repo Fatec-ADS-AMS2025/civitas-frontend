@@ -1,11 +1,7 @@
 "use client";
 
-import {
-  startTransition,
-  useCallback,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { type MouseEvent as ReactMouseEvent, startTransition, useCallback } from "react";
 import { create } from "zustand";
 
 type ProgressStatus = "idle" | "pending" | "visible" | "finishing";
@@ -82,8 +78,7 @@ const normalizeHref = (href: string) => {
   }
 
   try {
-    const base =
-      typeof window !== "undefined" ? window.location.origin : "http://localhost";
+    const base = typeof window !== "undefined" ? window.location.origin : "http://localhost";
     const url = new URL(href, base);
     return `${url.pathname}${url.search}${url.hash}`;
   } catch {
@@ -91,10 +86,7 @@ const normalizeHref = (href: string) => {
   }
 };
 
-const startTrickle = (
-  set: (partial: Partial<NavigationProgressState>) => void,
-  get: () => NavigationProgressState
-) => {
+const startTrickle = (set: (partial: Partial<NavigationProgressState>) => void, get: () => NavigationProgressState) => {
   clearTrickleTimer();
 
   trickleTimer = setInterval(() => {
@@ -205,7 +197,7 @@ export function useAppNavigation() {
       const normalizedTarget = stripHash(normalizeHref(href));
       return normalizedTarget !== stripHash(pathname);
     },
-    [pathname]
+    [pathname],
   );
 
   const startNavigation = useCallback(
@@ -217,7 +209,7 @@ export function useAppNavigation() {
       start();
       return true;
     },
-    [shouldAnimate, start]
+    [shouldAnimate, start],
   );
 
   const push = useCallback(
@@ -228,7 +220,7 @@ export function useAppNavigation() {
         router.push(href, options);
       });
     },
-    [router, startNavigation]
+    [router, startNavigation],
   );
 
   const replace = useCallback(
@@ -239,7 +231,7 @@ export function useAppNavigation() {
         router.replace(href, options);
       });
     },
-    [router, startNavigation]
+    [router, startNavigation],
   );
 
   const back = useCallback(() => {
@@ -273,7 +265,7 @@ export function useAppNavigation() {
 
       startNavigation(href);
     },
-    [startNavigation]
+    [startNavigation],
   );
 
   return {

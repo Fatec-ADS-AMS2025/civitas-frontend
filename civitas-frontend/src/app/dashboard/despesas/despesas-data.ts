@@ -7,8 +7,8 @@ import { tipoCodigoService } from "@/hooks/tipoCodigo";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import { unidadeConsumidoraService } from "@/hooks/unidadeConsumidora";
 import { unidadeMedidaService } from "@/hooks/unidadeMedida";
-import { usuarioService } from "@/hooks/usuario";
 import type { DashboardData } from "@/hooks/useDespesasDashboard";
+import { usuarioService } from "@/hooks/usuario";
 
 export const loadDespesasPageData = async (): Promise<DashboardData> => {
   const [

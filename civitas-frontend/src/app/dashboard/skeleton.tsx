@@ -63,10 +63,7 @@ export default function DashboardSkeleton() {
           <SkeletonBlock className="mt-3 h-4 w-80 max-w-full" />
           <div className="mt-5 space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={`action-card-${index}`}
-                className="civitas-card-soft px-4 py-4"
-              >
+              <div key={`action-card-${index}`} className="civitas-card-soft px-4 py-4">
                 <div className="flex items-center gap-4">
                   <SkeletonBlock className="h-11 w-11 rounded-sm" />
                   <div className="min-w-0 flex-1 space-y-2">
@@ -85,10 +82,7 @@ export default function DashboardSkeleton() {
           <SkeletonBlock className="mt-4 h-8 w-64" />
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={`overview-card-${index}`}
-                className="civitas-card-soft px-4 py-4"
-              >
+              <div key={`overview-card-${index}`} className="civitas-card-soft px-4 py-4">
                 <div className="flex items-center justify-between gap-3">
                   <SkeletonBlock className="h-4 w-28" />
                   <SkeletonBlock className="h-5 w-5 rounded-sm" />
@@ -136,10 +130,7 @@ export default function DashboardSkeleton() {
 
           <div className="mt-6 grid gap-3">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div
-                key={`recent-expense-${index}`}
-                className="civitas-card-soft px-4 py-4"
-              >
+              <div key={`recent-expense-${index}`} className="civitas-card-soft px-4 py-4">
                 <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
                   <div className="space-y-2">
                     <SkeletonBlock className="h-6 w-28" />
@@ -166,10 +157,7 @@ export default function DashboardSkeleton() {
 
           <div className="mt-6 space-y-3">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div
-                key={`priority-card-${index}`}
-                className="civitas-card-soft px-4 py-4"
-              >
+              <div key={`priority-card-${index}`} className="civitas-card-soft px-4 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-2">
                     <SkeletonBlock className="h-5 w-40" />

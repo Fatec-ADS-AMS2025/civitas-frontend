@@ -1,16 +1,11 @@
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import type { FieldConfig } from "@/components/Table/searchbar";
-import {
-  composeValidators,
-  validateDigitsLength,
-  validateMaxLength,
-  validateUfCode,
-} from "@/global/formPayload";
+import { composeValidators, validateDigitsLength, validateMaxLength, validateUfCode } from "@/global/formPayload";
 import { SITUACAO_OPTIONS } from "@/global/situacao";
 
 export const buildInstituicaoCampos = (
   secretariaOptions: FieldConfig["options"],
-  tipoInstituicaoOptions: FieldConfig["options"]
+  tipoInstituicaoOptions: FieldConfig["options"],
 ): FieldConfig[] => {
   return [
     { key: "nome", placeholder: "Nome", local: "principal" },
@@ -34,7 +29,7 @@ export const buildInstituicaoCampos = (
 
 export const buildInstituicaoFormFields = (
   secretariaOptions: FieldConfig["options"],
-  tipoInstituicaoOptions: FieldConfig["options"]
+  tipoInstituicaoOptions: FieldConfig["options"],
 ): ModalFieldConfig[] => {
   return [
     { key: "id", hidden: true },
@@ -96,10 +91,7 @@ export const buildInstituicaoFormFields = (
       label: "Estado",
       placeholder: "UF",
       required: true,
-      validate: composeValidators(
-        validateUfCode(),
-        validateMaxLength("Estado", 2)
-      ),
+      validate: composeValidators(validateUfCode(), validateMaxLength("Estado", 2)),
     },
     {
       key: "telefone",

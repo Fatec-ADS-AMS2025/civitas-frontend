@@ -1,40 +1,30 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 
-const MIN_FONT = 14
-const DEFAULT_FONT = 16
-const MAX_FONT = 22
+const MIN_FONT = 14;
+const DEFAULT_FONT = 16;
+const MAX_FONT = 22;
 
 const updateAccessibilityScale = (size: number) => {
-  const scale = Number((size / DEFAULT_FONT).toFixed(3))
-  document.documentElement.style.setProperty('--accessibility-font-size', `${size}px`)
-  document.documentElement.style.setProperty('--accessibility-ui-scale', String(scale))
-}
+  const scale = Number((size / DEFAULT_FONT).toFixed(3));
+  document.documentElement.style.setProperty("--accessibility-font-size", `${size}px`);
+  document.documentElement.style.setProperty("--accessibility-ui-scale", String(scale));
+};
 
 const syncRootColorScheme = (root: HTMLElement, forceHighContrast: boolean) => {
-  root.style.colorScheme = forceHighContrast
-    ? 'dark'
-    : root.dataset.theme === 'dark'
-      ? 'dark'
-      : 'light'
-}
+  root.style.colorScheme = forceHighContrast ? "dark" : root.dataset.theme === "dark" ? "dark" : "light";
+};
 
 type AccessibilityActionProps = {
-  label: string
-  ariaLabel: string
-  onClick: () => void
-  children: React.ReactNode
-  isActive?: boolean
-}
+  label: string;
+  ariaLabel: string;
+  onClick: () => void;
+  children: React.ReactNode;
+  isActive?: boolean;
+};
 
-function AccessibilityAction({
-  label,
-  ariaLabel,
-  onClick,
-  children,
-  isActive = false,
-}: AccessibilityActionProps) {
+function AccessibilityAction({ label, ariaLabel, onClick, children, isActive = false }: AccessibilityActionProps) {
   return (
     <div className="group relative flex items-center">
       <button
@@ -63,56 +53,56 @@ function AccessibilityAction({
         {label}
       </span>
     </div>
-  )
+  );
 }
 
 export default function AccessibilityMenu() {
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT)
-  const [highContrast, setHighContrast] = useState(false)
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT);
+  const [highContrast, setHighContrast] = useState(false);
 
   const applyContrast = (enabled: boolean) => {
-    const root = document.documentElement
-    root.dataset.contrast = enabled ? 'high' : 'normal'
-    syncRootColorScheme(root, enabled)
-  }
+    const root = document.documentElement;
+    root.dataset.contrast = enabled ? "high" : "normal";
+    syncRootColorScheme(root, enabled);
+  };
 
   useEffect(() => {
-    const savedFont = localStorage.getItem('app-font-size')
-    const savedContrast = localStorage.getItem('app-high-contrast')
+    const savedFont = localStorage.getItem("app-font-size");
+    const savedContrast = localStorage.getItem("app-high-contrast");
 
     if (savedFont) {
-      const parsed = Number(savedFont)
-      setFontSize(parsed)
-      updateAccessibilityScale(parsed)
+      const parsed = Number(savedFont);
+      setFontSize(parsed);
+      updateAccessibilityScale(parsed);
     } else {
-      updateAccessibilityScale(DEFAULT_FONT)
+      updateAccessibilityScale(DEFAULT_FONT);
     }
 
-    if (savedContrast === 'true') {
-      setHighContrast(true)
-      applyContrast(true)
+    if (savedContrast === "true") {
+      setHighContrast(true);
+      applyContrast(true);
     } else {
-      applyContrast(false)
+      applyContrast(false);
     }
-  }, [])
+  }, []);
 
   const updateFontSize = (size: number) => {
-    const next = Math.max(MIN_FONT, Math.min(MAX_FONT, size))
-    setFontSize(next)
-    updateAccessibilityScale(next)
-    localStorage.setItem('app-font-size', String(next))
-  }
+    const next = Math.max(MIN_FONT, Math.min(MAX_FONT, size));
+    setFontSize(next);
+    updateAccessibilityScale(next);
+    localStorage.setItem("app-font-size", String(next));
+  };
 
-  const increaseFont = () => updateFontSize(fontSize + 1)
-  const decreaseFont = () => updateFontSize(fontSize - 1)
-  const resetFont = () => updateFontSize(DEFAULT_FONT)
+  const increaseFont = () => updateFontSize(fontSize + 1);
+  const decreaseFont = () => updateFontSize(fontSize - 1);
+  const resetFont = () => updateFontSize(DEFAULT_FONT);
 
   const toggleContrast = () => {
-    const next = !highContrast
-    setHighContrast(next)
-    applyContrast(next)
-    localStorage.setItem('app-high-contrast', String(next))
-  }
+    const next = !highContrast;
+    setHighContrast(next);
+    applyContrast(next);
+    localStorage.setItem("app-high-contrast", String(next));
+  };
 
   return (
     <aside
@@ -126,33 +116,20 @@ export default function AccessibilityMenu() {
         sm:bottom-5 sm:right-5
       "
     >
-
-      <AccessibilityAction
-        label="Aumentar fonte"
-        ariaLabel="Aumentar fonte"
-        onClick={increaseFont}
-      >
+      <AccessibilityAction label="Aumentar fonte" ariaLabel="Aumentar fonte" onClick={increaseFont}>
         A+
       </AccessibilityAction>
 
-      <AccessibilityAction
-        label="Restaurar fonte"
-        ariaLabel="Restaurar fonte"
-        onClick={resetFont}
-      >
+      <AccessibilityAction label="Restaurar fonte" ariaLabel="Restaurar fonte" onClick={resetFont}>
         Aa
       </AccessibilityAction>
 
-      <AccessibilityAction
-        label="Diminuir fonte"
-        ariaLabel="Diminuir fonte"
-        onClick={decreaseFont}
-      >
+      <AccessibilityAction label="Diminuir fonte" ariaLabel="Diminuir fonte" onClick={decreaseFont}>
         A-
       </AccessibilityAction>
 
       <AccessibilityAction
-        label={highContrast ? 'Desativar contraste' : 'Ativar contraste'}
+        label={highContrast ? "Desativar contraste" : "Ativar contraste"}
         ariaLabel="Alternar contraste"
         onClick={toggleContrast}
         isActive={highContrast}
@@ -168,5 +145,5 @@ export default function AccessibilityMenu() {
         </span>
       </AccessibilityAction>
     </aside>
-  )
+  );
 }

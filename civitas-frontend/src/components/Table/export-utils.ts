@@ -86,10 +86,7 @@ export const getTableCellText = <T extends object>(row: T, column: TableColumn):
   return String(value);
 };
 
-export const getSelectedColumns = (
-  columns: TableColumn[],
-  selectedColumnIds: string[]
-): TableColumn[] => {
+export const getSelectedColumns = (columns: TableColumn[], selectedColumnIds: string[]): TableColumn[] => {
   const selected = new Set(selectedColumnIds);
   return columns.filter((column) => selected.has(column.id));
 };
@@ -131,12 +128,7 @@ const buildSheetRows = <T extends object>(rows: T[], columns: TableColumn[]) => 
   return rows.map((row) => columns.map((column) => getTableCellText(row, column)));
 };
 
-const exportToExcel = async <T extends object>({
-  title,
-  fileName,
-  rows,
-  columns,
-}: ExportTableDataParams<T>) => {
+const exportToExcel = async <T extends object>({ title, fileName, rows, columns }: ExportTableDataParams<T>) => {
   const ExcelJS = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(title.slice(0, 31) || "Exportacao");
@@ -144,7 +136,9 @@ const exportToExcel = async <T extends object>({
   const tableRows = buildSheetRows(rows, columns);
 
   worksheet.addRow(headerLabels);
-  tableRows.forEach((row) => worksheet.addRow(row));
+  tableRows.forEach((row) => {
+    worksheet.addRow(row);
+  });
 
   const headerRow = worksheet.getRow(1);
   headerRow.height = 22;
@@ -189,10 +183,7 @@ const exportToExcel = async <T extends object>({
   });
 
   worksheet.columns = columns.map((column, index) => {
-    const maxContentLength = Math.max(
-      column.label.length,
-      ...tableRows.map((row) => String(row[index] ?? "").length)
-    );
+    const maxContentLength = Math.max(column.label.length, ...tableRows.map((row) => String(row[index] ?? "").length));
 
     return {
       width: Math.min(Math.max(maxContentLength + 4, 14), 36),
@@ -210,20 +201,12 @@ const exportToExcel = async <T extends object>({
     new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     }),
-    `${sanitizeFileName(fileName)}.xlsx`
+    `${sanitizeFileName(fileName)}.xlsx`,
   );
 };
 
-const exportToPdf = async <T extends object>({
-  title,
-  fileName,
-  rows,
-  columns,
-}: ExportTableDataParams<T>) => {
-  const [{ jsPDF }, autoTableModule] = await Promise.all([
-    import("jspdf"),
-    import("jspdf-autotable"),
-  ]);
+const exportToPdf = async <T extends object>({ title, fileName, rows, columns }: ExportTableDataParams<T>) => {
+  const [{ jsPDF }, autoTableModule] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
   const autoTable = autoTableModule.default;
   const doc = new jsPDF({
     orientation: columns.length > 5 ? "landscape" : "portrait",

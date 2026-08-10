@@ -1,5 +1,5 @@
+import type FluxoDTO from "@/models/fluxo";
 import { GenericService } from "./generic";
-import FluxoDTO from "@/models/fluxo";
 
 export class FluxoService extends GenericService<FluxoDTO> {
   constructor() {

@@ -79,12 +79,8 @@ function SummaryCard({ title, subtitle, value, visible, tone, icon }: SummaryCar
     >
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
-            Conta digital
-          </p>
-          <h2 className="mt-4 text-[30px] font-semibold leading-none text-[var(--foreground)]">
-            {title}
-          </h2>
+          <p className="text-[11px] uppercase tracking-[0.08em] text-[var(--foreground-soft)]">Conta digital</p>
+          <h2 className="mt-4 text-[30px] font-semibold leading-none text-[var(--foreground)]">{title}</h2>
           <p className="mt-2 text-sm text-[var(--foreground-muted)]">{subtitle}</p>
         </div>
 
@@ -100,12 +96,8 @@ function SummaryCard({ title, subtitle, value, visible, tone, icon }: SummaryCar
         className="despesas-summary-card__value relative z-10 mt-5 rounded-sm border px-4 py-3"
         style={toneStyle.value}
       >
-        <p className="text-xs uppercase tracking-[0.18em] text-[var(--foreground-soft)]">
-          Valor atual
-        </p>
-        <p className="mt-2 text-[28px] font-semibold leading-none">
-          {visible ? formatCurrency(value) : "* * * * * *"}
-        </p>
+        <p className="text-xs uppercase tracking-[0.18em] text-[var(--foreground-soft)]">Valor atual</p>
+        <p className="mt-2 text-[28px] font-semibold leading-none">{visible ? formatCurrency(value) : "* * * * * *"}</p>
       </div>
     </article>
   );

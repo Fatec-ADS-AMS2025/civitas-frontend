@@ -27,11 +27,7 @@ export function RelationshipCard({
               <h4 className="break-words text-sm font-semibold text-[var(--foreground)]">
                 <InfoValue value={title} />
               </h4>
-              {subtitle ? (
-                <p className="mt-1 break-words text-xs text-[var(--foreground-soft)]">
-                  {subtitle}
-                </p>
-              ) : null}
+              {subtitle ? <p className="mt-1 break-words text-xs text-[var(--foreground-soft)]">{subtitle}</p> : null}
             </div>
             {badge ? <div className="shrink-0">{badge}</div> : null}
           </div>

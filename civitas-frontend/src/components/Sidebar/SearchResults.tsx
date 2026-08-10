@@ -1,4 +1,3 @@
-import React from "react";
 import { normalizeSearchText } from "@/navigation/navigation.search";
 import type { NavigationSearchGroup } from "@/navigation/navigation.types";
 
@@ -71,7 +70,7 @@ const HighlightedLabel = ({ label, query }: { label: string; query: string }) =>
   return (
     <>
       {label.slice(0, range.start)}
-                    <mark className="rounded-sm bg-[var(--search-highlight-bg)] px-1 text-[var(--search-highlight-text)]">
+      <mark className="rounded-sm bg-[var(--search-highlight-bg)] px-1 text-[var(--search-highlight-text)]">
         {label.slice(range.start, range.end)}
       </mark>
       {label.slice(range.end)}
@@ -86,11 +85,7 @@ const getFeatureMatch = (features: string[], query: string) => {
     return features[0] ?? "";
   }
 
-  return (
-    features.find((feature) =>
-      normalizeSearchText(feature).includes(normalizedQuery)
-    ) ?? features[0] ?? ""
-  );
+  return features.find((feature) => normalizeSearchText(feature).includes(normalizedQuery)) ?? features[0] ?? "";
 };
 
 export default function SearchResults({
@@ -139,9 +134,7 @@ export default function SearchResults({
                         : "text-[var(--search-result-text)] hover:bg-[var(--search-result-hover-bg)]"
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[20px]">
-                    {entry.item.icon ?? "apps"}
-                  </span>
+                  <span className="material-symbols-outlined text-[20px]">{entry.item.icon ?? "apps"}</span>
 
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-semibold">

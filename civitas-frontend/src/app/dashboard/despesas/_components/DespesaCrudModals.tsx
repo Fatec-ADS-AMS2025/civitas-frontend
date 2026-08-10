@@ -1,14 +1,11 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
-import Form from "@/components/Form/form";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import Form from "@/components/Form/form";
 import Modal from "@/components/modal";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { buildDespesaFormObject } from "../despesas.utils";
 import DespesaDetailsView from "./DespesaDetailsView";
-import DespesaForm, {
-  type DespesaResponsavelOption,
-  type DespesaUcOption,
-} from "./DespesaForm";
+import DespesaForm, { type DespesaResponsavelOption, type DespesaUcOption } from "./DespesaForm";
 
 type DespesaCrudModalsProps = {
   isCreateModalOpen: boolean;

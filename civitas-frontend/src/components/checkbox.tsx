@@ -1,6 +1,7 @@
-import React, { InputHTMLAttributes, useCallback, useId, useState } from 'react';
+import type React from "react";
+import { type InputHTMLAttributes, useCallback, useId, useState } from "react";
 
-interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   label?: string;
   value?: string;
   indeterminate?: boolean;
@@ -15,16 +16,17 @@ function Checkbox({
   defaultChecked,
   indeterminate = false,
   onChange,
-  className = '',
+  className = "",
   ...props
 }: CheckboxProps) {
-  const checkboxId = id || useId();
+  const generatedId = useId();
+  const checkboxId = id || generatedId;
   const [internalChecked, setInternalChecked] = useState(defaultChecked || false);
   const inputRef = useCallback(
     (element: HTMLInputElement | null) => {
       if (element) element.indeterminate = indeterminate;
     },
-    [indeterminate]
+    [indeterminate],
   );
 
   const isControlled = checked !== undefined;
@@ -48,14 +50,14 @@ function Checkbox({
         checked={currentChecked}
         onChange={handleChange}
         className="h-5 w-5 cursor-pointer rounded-sm border-2 border-[var(--primary-1)] accent-[var(--primary-1)] focus:ring-2 focus:ring-[var(--focus-ring)] focus:ring-offset-2 focus:ring-offset-[var(--surface-elevated)] disabled:cursor-not-allowed disabled:opacity-50"
-        aria-checked={indeterminate ? 'mixed' : currentChecked}
+        aria-checked={indeterminate ? "mixed" : currentChecked}
         {...props}
       />
       {label && (
         <label
           htmlFor={checkboxId}
           className={`cursor-pointer select-none text-base font-medium text-[var(--foreground)] ${
-            disabled ? 'opacity-50 cursor-not-allowed' : ''
+            disabled ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
           {label}

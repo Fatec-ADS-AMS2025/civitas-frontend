@@ -1,9 +1,9 @@
-import { GenericService } from './generic';
-import UnidadeMedidaDTO from '@/models/unidadeMedida';
+import type UnidadeMedidaDTO from "@/models/unidadeMedida";
+import { GenericService } from "./generic";
 
 export class UnidadeMedidaService extends GenericService<UnidadeMedidaDTO> {
   constructor() {
-    super('unidade-medida');
+    super("unidade-medida");
   }
 }
 

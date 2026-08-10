@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  DespesasRelacionadasTable,
-  InsightsModal,
-} from "@/components/financeiro-insights";
 import type { InsightMetric } from "@/components/financeiro-insights";
+import { DespesasRelacionadasTable, InsightsModal } from "@/components/financeiro-insights";
 import type { InstituicaoFinanceResumo } from "../_types";
 import InstituicaoCodigoResumoCard from "./InstituicaoCodigoResumoCard";
 
@@ -13,9 +10,7 @@ type InstituicaoInsightsModalProps = {
   onClose: () => void;
 };
 
-const buildInstituicaoMetrics = (
-  instituicao: InstituicaoFinanceResumo | null
-): InsightMetric[] => {
+const buildInstituicaoMetrics = (instituicao: InstituicaoFinanceResumo | null): InsightMetric[] => {
   if (!instituicao) {
     return [];
   }
@@ -48,10 +43,7 @@ const buildInstituicaoMetrics = (
   ];
 };
 
-export default function InstituicaoInsightsModal({
-  instituicao,
-  onClose,
-}: InstituicaoInsightsModalProps) {
+export default function InstituicaoInsightsModal({ instituicao, onClose }: InstituicaoInsightsModalProps) {
   return (
     <InsightsModal
       open={instituicao !== null}
@@ -73,10 +65,7 @@ export default function InstituicaoInsightsModal({
         {instituicao && instituicao.codigos.length > 0 ? (
           <div className="grid gap-3 lg:grid-cols-2">
             {instituicao.codigos.map((codigo) => (
-              <InstituicaoCodigoResumoCard
-                key={`${instituicao.id}-${codigo.codigoNormalizado}`}
-                codigo={codigo}
-              />
+              <InstituicaoCodigoResumoCard key={`${instituicao.id}-${codigo.codigoNormalizado}`} codigo={codigo} />
             ))}
           </div>
         ) : (

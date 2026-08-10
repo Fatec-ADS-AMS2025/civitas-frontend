@@ -1,5 +1,5 @@
+import type UsuarioDTO from "@/models/usuario";
 import { GenericService } from "./generic";
-import UsuarioDTO from "@/models/usuario";
 
 export class UsuarioService extends GenericService<UsuarioDTO> {
   constructor() {
@@ -13,10 +13,10 @@ export class UsuarioService extends GenericService<UsuarioDTO> {
 
       if (payload && typeof payload === "object" && "data" in payload) {
         const users = payload.data;
-        return Array.isArray(users) ? users[0] ?? null : null;
+        return Array.isArray(users) ? (users[0] ?? null) : null;
       }
 
-      return Array.isArray(payload) ? payload[0] ?? null : null;
+      return Array.isArray(payload) ? (payload[0] ?? null) : null;
     } catch (error) {
       console.error("Erro ao buscar usuario por CPF:", error);
       return null;
@@ -30,7 +30,9 @@ export class UsuarioService extends GenericService<UsuarioDTO> {
     try {
       const users = await this.getAllData({ page: 1, size: 500 });
       const matchedUser = users.find((user) => {
-        const userEmail = String(user.email ?? "").trim().toLowerCase();
+        const userEmail = String(user.email ?? "")
+          .trim()
+          .toLowerCase();
         const userPassword = String(user.senha ?? "");
         return userEmail === normalizedEmail && userPassword === normalizedPassword;
       });

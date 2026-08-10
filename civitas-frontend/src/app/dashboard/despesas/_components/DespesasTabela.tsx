@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 import Input from "@/components/Input";
-import Table from "@/components/Table/table";
 import type { TableColumn } from "@/components/Table/export-types";
 import type { TablePaginationConfig } from "@/components/Table/table";
+import Table from "@/components/Table/table";
 import { normalizeDateInput } from "@/global/formPayload";
 import { despesaService } from "@/hooks/despesa";
 import { documentoService } from "@/hooks/documento";
-import { showToast } from "@/hooks/useToast";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
+import { showToast } from "@/hooks/useToast";
 import { ICON_BUTTON_CLASS_NAME } from "../despesas.constants";
 import type { DespesasListSearchState, DespesasTableData } from "../despesas.types";
 import { getDespesaCodigo, getStatusBadgeClassName } from "../despesas.utils";
@@ -60,11 +60,7 @@ export default function DespesasTabela({
         label: "Codigo",
         render: (row) => {
           const despesa = row as DespesaDashboardRow;
-          return (
-            <span className="text-sm font-semibold text-[var(--secundary-1)]">
-              {getDespesaCodigo(despesa)}
-            </span>
-          );
+          return <span className="text-sm font-semibold text-[var(--secundary-1)]">{getDespesaCodigo(despesa)}</span>;
         },
         sortValue: (row) => getDespesaCodigo(row as DespesaDashboardRow),
       },
@@ -73,11 +69,7 @@ export default function DespesasTabela({
         label: "Tipo codigo",
         render: (row) => {
           const despesa = row as DespesaDashboardRow;
-          return (
-            <span className="text-sm font-semibold text-[var(--foreground)]">
-              {despesa.tipoCodigoNome}
-            </span>
-          );
+          return <span className="text-sm font-semibold text-[var(--foreground)]">{despesa.tipoCodigoNome}</span>;
         },
         sortValue: (row) => (row as DespesaDashboardRow).tipoCodigoNome,
       },
@@ -100,11 +92,7 @@ export default function DespesasTabela({
         label: "Categoria",
         render: (row) => {
           const despesa = row as DespesaDashboardRow;
-          return (
-            <span className="text-sm font-semibold text-[var(--foreground)]">
-              {despesa.categoria}
-            </span>
-          );
+          return <span className="text-sm font-semibold text-[var(--foreground)]">{despesa.categoria}</span>;
         },
         sortValue: (row) => (row as DespesaDashboardRow).categoria,
       },
@@ -113,11 +101,7 @@ export default function DespesasTabela({
         label: "Descricao",
         render: (row) => {
           const despesa = row as DespesaDashboardRow;
-          return (
-            <span className="text-sm text-[var(--foreground-muted)]">
-              {despesa.descricao}
-            </span>
-          );
+          return <span className="text-sm text-[var(--foreground-muted)]">{despesa.descricao}</span>;
         },
         sortValue: (row) => (row as DespesaDashboardRow).descricao,
       },
@@ -127,11 +111,7 @@ export default function DespesasTabela({
         sortType: "number",
         render: (row) => {
           const despesa = row as DespesaDashboardRow;
-          return (
-            <span className="text-sm font-semibold text-[var(--secundary-1)]">
-              {despesa.valorFormatado}
-            </span>
-          );
+          return <span className="text-sm font-semibold text-[var(--secundary-1)]">{despesa.valorFormatado}</span>;
         },
         sortValue: (row) => (row as DespesaDashboardRow).valor,
       },
@@ -141,11 +121,7 @@ export default function DespesasTabela({
         sortType: "date",
         render: (row) => {
           const despesa = row as DespesaDashboardRow;
-          return (
-            <span className="text-sm text-[var(--foreground-muted)]">
-              {despesa.dataFormatada}
-            </span>
-          );
+          return <span className="text-sm text-[var(--foreground-muted)]">{despesa.dataFormatada}</span>;
         },
         sortValue: (row) => resolveSortDate(row as DespesaDashboardRow),
       },
@@ -158,7 +134,7 @@ export default function DespesasTabela({
           return (
             <span
               className={`despesas-table-status-badge civitas-badge min-w-[84px] ${getStatusBadgeClassName(
-                despesa.situacao
+                despesa.situacao,
               )}`}
             >
               {despesa.situacaoLabel}
@@ -175,7 +151,7 @@ export default function DespesasTabela({
         render: (row) => <DocumentoAction despesa={row as DespesaDashboardRow} />,
       },
     ],
-    []
+    [],
   );
 
   const emptyDescription = tableData.hasLocalListSearch
@@ -190,13 +166,10 @@ export default function DespesasTabela({
       className="despesas-table-section civitas-table-shell civitas-enter overflow-hidden rounded-sm"
     >
       <div className="despesas-table-header border-b border-[var(--divider)] px-5 py-5 sm:px-6">
-        <h3 className="text-[36px] font-bold leading-none text-[var(--secundary-1)]">
-          Listagem de despesas
-        </h3>
+        <h3 className="text-[36px] font-bold leading-none text-[var(--secundary-1)]">Listagem de despesas</h3>
         <p className="mt-2 text-sm text-[var(--foreground-muted)]">
-          Painel com leitura rapida de categoria, valor, data, situacao e acoes
-          de manutencao. Use os filtros abaixo para isolar um unico codigo ou
-          uma instituicao especifica.
+          Painel com leitura rapida de categoria, valor, data, situacao e acoes de manutencao. Use os filtros abaixo
+          para isolar um unico codigo ou uma instituicao especifica.
         </p>
       </div>
 
@@ -232,9 +205,7 @@ export default function DespesasTabela({
             onClick={onOpenExport}
             className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-5 py-2.5 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] sm:w-auto"
           >
-            <span className="material-symbols-outlined text-base text-[var(--foreground)]">
-              print
-            </span>
+            <span className="material-symbols-outlined text-base text-[var(--foreground)]">print</span>
             Exportar / Imprimir
           </button>
         </div>
@@ -367,12 +338,11 @@ function DocumentoAction({ despesa }: { despesa: DespesaDashboardRow }) {
   const handleOpen = async () => {
     try {
       setIsOpening(true);
-      const resolvedDocumento =
-        documento?.digitalizacao
-          ? documento
-          : despesa.idDocumento
-            ? await documentoService.getDocumentoDataById(despesa.idDocumento)
-            : null;
+      const resolvedDocumento = documento?.digitalizacao
+        ? documento
+        : despesa.idDocumento
+          ? await documentoService.getDocumentoDataById(despesa.idDocumento)
+          : null;
 
       if (resolvedDocumento?.digitalizacao) {
         const fileType = resolvedDocumento.fileType || "application/pdf";

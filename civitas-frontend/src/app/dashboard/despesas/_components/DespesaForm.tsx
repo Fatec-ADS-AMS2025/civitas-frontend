@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import type React from "react";
+import { useMemo, useState } from "react";
 import Button from "@/components/button";
 import DocumentoField, { type DocumentoFieldValue } from "@/components/Form/documento-field";
 import type { FormFieldConfig } from "@/components/Form/form";
@@ -79,12 +80,10 @@ const toNumberOrEmpty = (value: unknown): number | "" => {
 const buildInitialFormValues = (
   initialValues: DespesaFormInitialValues | undefined,
   currentUserId: number | null,
-  mode: DespesaFormMode
+  mode: DespesaFormMode,
 ): DespesaFormValues => {
   const isCreateMode = mode === "create";
-  const defaultStatus = toNumberOrEmpty(
-    initialValues?.situacao ?? initialValues?.status ?? 1
-  );
+  const defaultStatus = toNumberOrEmpty(initialValues?.situacao ?? initialValues?.status ?? 1);
   return {
     idUnidadeConsumidora: toNumberOrEmpty(initialValues?.idUnidadeConsumidora),
     uc: String(initialValues?.uc ?? ""),
@@ -108,19 +107,13 @@ const buildInitialFormValues = (
   };
 };
 
-const findInitialUc = (
-  values: DespesaFormValues,
-  ucs: DespesaUcOption[]
-): DespesaUcOption | null => {
+const findInitialUc = (values: DespesaFormValues, ucs: DespesaUcOption[]): DespesaUcOption | null => {
   const initialUcId = Number(values.idUnidadeConsumidora);
   if (!Number.isFinite(initialUcId) || initialUcId <= 0) return null;
   return ucs.find((uc) => uc.id === initialUcId) ?? null;
 };
 
-const applySelectedUcToValues = (
-  values: DespesaFormValues,
-  selectedUc: DespesaUcOption
-): DespesaFormValues => ({
+const applySelectedUcToValues = (values: DespesaFormValues, selectedUc: DespesaUcOption): DespesaFormValues => ({
   ...values,
   idUnidadeConsumidora: selectedUc.id,
   uc: selectedUc.identificador,
@@ -129,10 +122,7 @@ const applySelectedUcToValues = (
   idInstituicao: selectedUc.idInstituicao,
   idOrcamento: selectedUc.idOrcamento,
   idFornecedor: selectedUc.idFornecedor,
-  codigo:
-    values.codigo && String(values.codigo).trim().length > 0
-      ? values.codigo
-      : selectedUc.identificador,
+  codigo: values.codigo && String(values.codigo).trim().length > 0 ? values.codigo : selectedUc.identificador,
 });
 
 const clearSelectedUcFromValues = (values: DespesaFormValues): DespesaFormValues => ({
@@ -149,16 +139,14 @@ const clearSelectedUcFromValues = (values: DespesaFormValues): DespesaFormValues
 
 const validatePositiveNumber = (value: unknown, label: string) => {
   const numericValue = Number(value);
-  if (!Number.isFinite(numericValue) || numericValue <= 0)
-    return `${label} deve ser maior que zero.`;
+  if (!Number.isFinite(numericValue) || numericValue <= 0) return `${label} deve ser maior que zero.`;
   return undefined;
 };
 
 const validateOptionalNonNegativeNumber = (value: unknown, label: string) => {
   if (value === "" || value === undefined || value === null) return undefined;
   const numericValue = Number(value);
-  if (!Number.isFinite(numericValue) || numericValue < 0)
-    return `${label} nao pode ser negativo.`;
+  if (!Number.isFinite(numericValue) || numericValue < 0) return `${label} nao pode ser negativo.`;
   return undefined;
 };
 
@@ -212,7 +200,6 @@ function ReadonlyField({ label, value }: { label: string; value: string }) {
 export default function DespesaForm({
   mode,
   ucs,
-  usuarios,
   initialValues,
   ucSelectorVariant = "list",
   onCancel,
@@ -227,19 +214,16 @@ export default function DespesaForm({
   const currentUserId = currentAuthUser?.id ?? null;
   const initialFormValues = useMemo(
     () => buildInitialFormValues(initialValues, currentUserId, mode),
-    [currentUserId, initialValues, mode]
+    [currentUserId, initialValues, mode],
   );
 
   const [search, setSearch] = useState("");
-  const [selectedUc, setSelectedUc] = useState<DespesaUcOption | null>(() =>
-    findInitialUc(initialFormValues, ucs)
-  );
+  const [selectedUc, setSelectedUc] = useState<DespesaUcOption | null>(() => findInitialUc(initialFormValues, ucs));
   const [formValues, setFormValues] = useState<DespesaFormValues>(() => initialFormValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const hasInitialPersistedDocumento =
     isRecord(initialValues?.documento) && initialValues.documento.isPersisted === true;
-  const hasPersistedDocumento =
-    isRecord(formValues.documento) && formValues.documento.isPersisted === true;
+  const hasPersistedDocumento = isRecord(formValues.documento) && formValues.documento.isPersisted === true;
   const isDocumentoLinkLocked = isEditMode && hasPersistedDocumento;
   const documentoField: FormFieldConfig = useMemo(
     () => ({
@@ -248,16 +232,12 @@ export default function DespesaForm({
       type: "documento",
       accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
     }),
-    []
+    [],
   );
 
   const filteredUcs = useMemo(() => {
     const q = search.toLowerCase();
-    return ucs.filter(
-      (uc) =>
-        String(uc.id).includes(q) ||
-        uc.identificador.toLowerCase().includes(q)
-    );
+    return ucs.filter((uc) => String(uc.id).includes(q) || uc.identificador.toLowerCase().includes(q));
   }, [ucs, search]);
 
   const selectedUcSummary = useMemo(
@@ -270,7 +250,7 @@ export default function DespesaForm({
       fornecedor: selectedUc?.fornecedorNome ?? "",
       orcamento: selectedUc?.orcamentoLabel ?? "",
     }),
-    [selectedUc]
+    [selectedUc],
   );
 
   const handleSelectUc = (uc: DespesaUcOption) => {
@@ -293,10 +273,7 @@ export default function DespesaForm({
     setFormValues(clearSelectedUcFromValues);
   };
 
-  const handleRowKeyDown = (
-    event: React.KeyboardEvent<HTMLTableRowElement>,
-    uc: DespesaUcOption
-  ) => {
+  const handleRowKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, uc: DespesaUcOption) => {
     if (isViewMode || isDocumentoLinkLocked) return;
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -304,10 +281,7 @@ export default function DespesaForm({
     }
   };
 
-  const handleValueChange = <K extends keyof DespesaFormValues>(
-    key: K,
-    value: DespesaFormValues[K]
-  ) => {
+  const handleValueChange = <K extends keyof DespesaFormValues>(key: K, value: DespesaFormValues[K]) => {
     setFormValues((v) => ({ ...v, [key]: value }));
     if (errors[key as string]) {
       setErrors((e) => ({ ...e, [key]: "" }));
@@ -327,10 +301,10 @@ export default function DespesaForm({
     }
 
     const numeroDocumento = digitsOnly(formValues.numeroDocumento);
-    if (!numeroDocumento)
-      nextErrors.numeroDocumento = "Numero do documento deve conter apenas numeros.";
+    if (!numeroDocumento) nextErrors.numeroDocumento = "Numero do documento deve conter apenas numeros.";
 
-    const hasDocumentoInput = formValues.documento !== "" && formValues.documento !== undefined && formValues.documento !== null;
+    const hasDocumentoInput =
+      formValues.documento !== "" && formValues.documento !== undefined && formValues.documento !== null;
     const documentoValue = resolveDocumentoValue(formValues.documento);
     if (isEditMode && hasInitialPersistedDocumento && !hasDocumentoInput) {
       nextErrors.documento =
@@ -366,10 +340,8 @@ export default function DespesaForm({
     const dateRangeError = validateDespesaDateRange(normalizedDataEmicao, normalizedDataVencimento);
     if (dateRangeError) nextErrors.dataVencimento = dateRangeError;
 
-    const resolvedResponsibleUserId =
-      Number(formValues.idUsuario) || currentUserId || authStorage.get()?.id || null;
-    if (!resolvedResponsibleUserId)
-      nextErrors.idUsuario = "Selecione um usuario responsavel.";
+    const resolvedResponsibleUserId = Number(formValues.idUsuario) || currentUserId || authStorage.get()?.id || null;
+    if (!resolvedResponsibleUserId) nextErrors.idUsuario = "Selecione um usuario responsavel.";
 
     const resolvedStatus = isCreateMode ? 1 : Number(formValues.situacao);
     if (!resolvedStatus) nextErrors.situacao = "Selecione um status financeiro.";
@@ -417,105 +389,94 @@ export default function DespesaForm({
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
           Formulario de despesa
         </p>
-        <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">
-          Selecione uma UC e registre o gasto
-        </h3>
+        <h3 className="mt-1.5 text-2xl font-semibold text-[var(--secundary-1)]">Selecione uma UC e registre o gasto</h3>
         <p className="mt-1 text-sm leading-6 text-[var(--foreground-muted)]">
-          Escolha a unidade consumidora ao lado. Os vinculos da despesa serao
-          preenchidos automaticamente sempre que a UC for selecionada.
+          Escolha a unidade consumidora ao lado. Os vinculos da despesa serao preenchidos automaticamente sempre que a
+          UC for selecionada.
         </p>
       </header>
 
       {/* Body: dois painéis lado a lado */}
       <div className={`grid min-h-0 flex-1 overflow-hidden ${usesCombobox ? "grid-cols-1" : "grid-cols-[300px_1fr]"}`}>
-
         {/* ── Painel esquerdo: lista de UCs ── */}
         {!usesCombobox ? (
-        <div className="flex flex-col overflow-hidden border-r border-[var(--border-soft)]">
-          {/* Busca */}
-          <div className="flex-shrink-0 border-b border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
-              Unidades consumidoras
-            </p>
-            <div className="flex items-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-2.5 focus-within:border-[var(--primary-1)] focus-within:ring-4 focus-within:ring-[var(--focus-ring)] transition-all">
-              <span className="material-symbols-outlined !text-[16px] text-[var(--foreground-muted)]">
-                search
-              </span>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar por ID ou identificador..."
-                className="w-full bg-transparent py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Lista */}
-          <div className="flex-1 overflow-y-auto">
-            {ucs.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-[var(--foreground-muted)]">
-                Nenhuma UC disponivel no momento.
+          <div className="flex flex-col overflow-hidden border-r border-[var(--border-soft)]">
+            {/* Busca */}
+            <div className="flex-shrink-0 border-b border-[var(--border-soft)] bg-[var(--surface-subtle)] px-4 py-3">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
+                Unidades consumidoras
               </p>
-            ) : filteredUcs.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-[var(--foreground-muted)]">
-                Nenhuma UC encontrada.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-1 p-2">
-                {filteredUcs.map((uc) => {
-                  const isSelected = selectedUc?.id === uc.id;
-                  return (
-                    <button
-                      key={uc.id}
-                      type="button"
-                      tabIndex={isViewMode || isDocumentoLinkLocked ? -1 : 0}
-                      aria-selected={isSelected}
-                      disabled={isViewMode || isDocumentoLinkLocked}
-                      onClick={() => handleSelectUc(uc)}
-                      onKeyDown={(e) => handleRowKeyDown(e as any, uc)}
-                      className={`flex w-full items-center gap-2.5 rounded-sm border px-3 py-2.5 text-left transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-default ${
-                        isSelected
-                          ? "border-[var(--border-accent-teal)] bg-[var(--surface-subtle)] ring-1 ring-[var(--border-accent-teal)]"
-                          : "border-transparent bg-transparent hover:border-[var(--border-soft)] hover:bg-[var(--surface-subtle)]"
-                      }`}
-                    >
-                      <span
-                        className={`min-w-[32px] text-[11px] font-semibold ${
-                          isSelected
-                            ? "text-[var(--text-accent-teal)]"
-                            : "text-[var(--foreground-muted)]"
-                        }`}
-                      >
-                        {String(uc.id).padStart(3, "0")}
-                      </span>
-                      <span
-                        className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm ${
-                          isSelected
-                            ? "font-semibold text-[var(--text-accent-teal)]"
-                            : "text-[var(--foreground)]"
-                        }`}
-                      >
-                        {uc.identificador}
-                      </span>
-                      {isSelected && (
-                        <span className="material-symbols-outlined !text-[14px] text-[var(--text-accent-teal)]">
-                          check
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+              <div className="flex items-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-2.5 focus-within:border-[var(--primary-1)] focus-within:ring-4 focus-within:ring-[var(--focus-ring)] transition-all">
+                <span className="material-symbols-outlined !text-[16px] text-[var(--foreground-muted)]">search</span>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar por ID ou identificador..."
+                  className="w-full bg-transparent py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none"
+                />
               </div>
+            </div>
+
+            {/* Lista */}
+            <div className="flex-1 overflow-y-auto">
+              {ucs.length === 0 ? (
+                <p className="px-4 py-6 text-center text-sm text-[var(--foreground-muted)]">
+                  Nenhuma UC disponivel no momento.
+                </p>
+              ) : filteredUcs.length === 0 ? (
+                <p className="px-4 py-6 text-center text-sm text-[var(--foreground-muted)]">Nenhuma UC encontrada.</p>
+              ) : (
+                <div className="flex flex-col gap-1 p-2">
+                  {filteredUcs.map((uc) => {
+                    const isSelected = selectedUc?.id === uc.id;
+                    return (
+                      <button
+                        key={uc.id}
+                        type="button"
+                        tabIndex={isViewMode || isDocumentoLinkLocked ? -1 : 0}
+                        aria-pressed={isSelected}
+                        disabled={isViewMode || isDocumentoLinkLocked}
+                        onClick={() => handleSelectUc(uc)}
+                        onKeyDown={(event) => handleRowKeyDown(event, uc)}
+                        className={`flex w-full items-center gap-2.5 rounded-sm border px-3 py-2.5 text-left transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-default ${
+                          isSelected
+                            ? "border-[var(--border-accent-teal)] bg-[var(--surface-subtle)] ring-1 ring-[var(--border-accent-teal)]"
+                            : "border-transparent bg-transparent hover:border-[var(--border-soft)] hover:bg-[var(--surface-subtle)]"
+                        }`}
+                      >
+                        <span
+                          className={`min-w-[32px] text-[11px] font-semibold ${
+                            isSelected ? "text-[var(--text-accent-teal)]" : "text-[var(--foreground-muted)]"
+                          }`}
+                        >
+                          {String(uc.id).padStart(3, "0")}
+                        </span>
+                        <span
+                          className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm ${
+                            isSelected ? "font-semibold text-[var(--text-accent-teal)]" : "text-[var(--foreground)]"
+                          }`}
+                        >
+                          {uc.identificador}
+                        </span>
+                        {isSelected && (
+                          <span className="material-symbols-outlined !text-[14px] text-[var(--text-accent-teal)]">
+                            check
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {errors.idUnidadeConsumidora && (
+              <p className="flex-shrink-0 border-t border-[var(--border-soft)] px-4 py-2.5 text-sm font-medium text-[#C23D3D]">
+                {errors.idUnidadeConsumidora}
+              </p>
             )}
           </div>
-
-          {errors.idUnidadeConsumidora && (
-            <p className="flex-shrink-0 border-t border-[var(--border-soft)] px-4 py-2.5 text-sm font-medium text-[#C23D3D]">
-              {errors.idUnidadeConsumidora}
-            </p>
-          )}
-        </div>
         ) : null}
 
         {/* ── Painel direito: UC selecionada + campos ── */}
@@ -574,9 +535,7 @@ export default function DespesaForm({
                     <ReadonlyField
                       label="UC (ID)"
                       value={
-                        formValues.idUnidadeConsumidora
-                          ? String(formValues.idUnidadeConsumidora).padStart(3, "0")
-                          : ""
+                        formValues.idUnidadeConsumidora ? String(formValues.idUnidadeConsumidora).padStart(3, "0") : ""
                       }
                     />
                     <ReadonlyField label="Identificador UC" value={formValues.uc} />
@@ -594,7 +553,8 @@ export default function DespesaForm({
                   <SectionLabel>Dados da despesa</SectionLabel>
                   {isDocumentoLinkLocked ? (
                     <p className="mb-3 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-2 text-xs font-medium text-[var(--foreground-muted)]">
-                      Esta despesa ja possui documento. Para evitar vinculo inconsistente, a UC e o numero do documento ficam bloqueados enquanto o documento atual for mantido.
+                      Esta despesa ja possui documento. Para evitar vinculo inconsistente, a UC e o numero do documento
+                      ficam bloqueados enquanto o documento atual for mantido.
                     </p>
                   ) : null}
                   <div className="grid grid-cols-2 gap-3">
@@ -663,10 +623,7 @@ export default function DespesaForm({
                           value={formValues.documento}
                           error={errors.documento}
                           onChange={(field, value) =>
-                            handleValueChange(
-                              field.key as "documento",
-                              value as DocumentoFieldValue | ""
-                            )
+                            handleValueChange(field.key as "documento", value as DocumentoFieldValue | "")
                           }
                           disabled={isViewMode}
                           required={isCreateMode}
@@ -682,18 +639,10 @@ export default function DespesaForm({
 
           {/* Footer com ações */}
           <div className="flex flex-shrink-0 items-center justify-end gap-2 border-t border-[var(--divider)] bg-[var(--surface-subtle)] px-5 py-3">
-            <Button
-              variant="secondary"
-              onClick={onCancel}
-              type="button"
-            >
+            <Button variant="secondary" onClick={onCancel} type="button">
               {isViewMode ? "Fechar" : "Cancelar"}
             </Button>
-            {!isViewMode && (
-              <Button type="submit">
-                Confirmar
-              </Button>
-            )}
+            {!isViewMode && <Button type="submit">Confirmar</Button>}
           </div>
         </div>
       </div>

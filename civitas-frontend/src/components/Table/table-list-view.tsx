@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import type { TableColumn } from "./export-types";
 import { getMotionStyle } from "./table-record";
 import type { TableRow } from "./table-types";
@@ -42,9 +42,7 @@ export function TableListView<T extends TableRow>({
                   aria-label={`Ordenar por ${column.label}`}
                 >
                   <span>{column.label}</span>
-                  <span className="material-symbols-outlined !text-[18px]">
-                    {getSortIcon(column.id)}
-                  </span>
+                  <span className="material-symbols-outlined !text-[18px]">{getSortIcon(column.id)}</span>
                 </button>
               </th>
             ))}
@@ -68,9 +66,7 @@ export function TableListView<T extends TableRow>({
               ))}
               {hasActions ? (
                 <td className="rounded-sm px-5 py-[14px] align-middle">
-                  <div className="flex items-center justify-end gap-2">
-                    {renderActions(row)}
-                  </div>
+                  <div className="flex items-center justify-end gap-2">{renderActions(row)}</div>
                 </td>
               ) : null}
             </tr>

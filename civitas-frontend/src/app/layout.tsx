@@ -40,7 +40,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="pt-BR" suppressHydrationWarning id="pai">
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet" />
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Static trusted script applies the saved theme before hydration. */}
         <script dangerouslySetInnerHTML={{ __html: themeInitializer }} />
       </head>
       <body className="antialiased">
@@ -57,10 +58,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
             <AccessibilityMenu />
 
-            <main
-              id="conteudo-principal"
-              className="w-full min-h-screen"
-            >
+            <main id="conteudo-principal" className="w-full min-h-screen">
               <div id="accessibility-scale-shell" className="accessibility-scale-shell">
                 {children}
               </div>

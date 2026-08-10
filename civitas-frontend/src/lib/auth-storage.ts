@@ -1,5 +1,5 @@
-export const AUTH_STORAGE_KEY = 'civitas.auth.user';
-export const AUTH_CREDENTIALS_STORAGE_KEY = 'civitas.auth.credentials';
+export const AUTH_STORAGE_KEY = "civitas.auth.user";
+export const AUTH_CREDENTIALS_STORAGE_KEY = "civitas.auth.credentials";
 
 export type AuthStorageUser = {
   id: number;
@@ -15,7 +15,7 @@ export type AuthStoredCredentials = {
   password: string;
 };
 
-const isBrowser = () => typeof window !== 'undefined';
+const isBrowser = () => typeof window !== "undefined";
 
 const isExpired = (expiresAtUtc: string): boolean => {
   const expiresAt = new Date(expiresAtUtc).getTime();
@@ -33,19 +33,19 @@ export const authStorage = {
       const parsed = JSON.parse(raw) as Partial<AuthStorageUser> | null;
       if (
         !parsed ||
-        typeof parsed.id !== 'number' ||
-        typeof parsed.nome !== 'string' ||
-        typeof parsed.token !== 'string' ||
-        parsed.token.trim() === '' ||
-        typeof parsed.expiresAtUtc !== 'string'
+        typeof parsed.id !== "number" ||
+        typeof parsed.nome !== "string" ||
+        typeof parsed.token !== "string" ||
+        parsed.token.trim() === "" ||
+        typeof parsed.expiresAtUtc !== "string"
       ) {
-        console.warn('[authStorage] Dados invalidos encontrados no localStorage. Limpando registro.');
+        console.warn("[authStorage] Dados invalidos encontrados no localStorage. Limpando registro.");
         window.localStorage.removeItem(AUTH_STORAGE_KEY);
         return null;
       }
 
       if (isExpired(parsed.expiresAtUtc)) {
-        console.warn('[authStorage] Sessao expirada encontrada no localStorage. Limpando registro.');
+        console.warn("[authStorage] Sessao expirada encontrada no localStorage. Limpando registro.");
         window.localStorage.removeItem(AUTH_STORAGE_KEY);
         return null;
       }
@@ -53,16 +53,16 @@ export const authStorage = {
       return {
         id: parsed.id,
         nome: parsed.nome,
-        email: typeof parsed.email === 'string' ? parsed.email : undefined,
+        email: typeof parsed.email === "string" ? parsed.email : undefined,
         token: parsed.token,
         expiresAtUtc: parsed.expiresAtUtc,
         tipoUsuario:
-          typeof parsed.tipoUsuario === 'string' || typeof parsed.tipoUsuario === 'number'
+          typeof parsed.tipoUsuario === "string" || typeof parsed.tipoUsuario === "number"
             ? parsed.tipoUsuario
             : undefined,
       };
     } catch (error) {
-      console.error('[authStorage] Falha ao ler usuario salvo no localStorage.', error);
+      console.error("[authStorage] Falha ao ler usuario salvo no localStorage.", error);
       return null;
     }
   },
@@ -72,7 +72,7 @@ export const authStorage = {
     try {
       window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
     } catch (error) {
-      console.error('[authStorage] Falha ao salvar usuario no localStorage.', error);
+      console.error("[authStorage] Falha ao salvar usuario no localStorage.", error);
       throw error;
     }
   },
@@ -82,7 +82,7 @@ export const authStorage = {
     try {
       window.localStorage.removeItem(AUTH_STORAGE_KEY);
     } catch (error) {
-      console.error('[authStorage] Falha ao remover usuario do localStorage.', error);
+      console.error("[authStorage] Falha ao remover usuario do localStorage.", error);
     }
   },
 };
@@ -98,12 +98,12 @@ export const credentialsStorage = {
       const parsed = JSON.parse(raw) as Partial<AuthStoredCredentials> | null;
       if (
         !parsed ||
-        typeof parsed.email !== 'string' ||
-        parsed.email.trim() === '' ||
-        typeof parsed.password !== 'string' ||
-        parsed.password.trim() === ''
+        typeof parsed.email !== "string" ||
+        parsed.email.trim() === "" ||
+        typeof parsed.password !== "string" ||
+        parsed.password.trim() === ""
       ) {
-        console.warn('[credentialsStorage] Dados invalidos encontrados no localStorage. Limpando registro.');
+        console.warn("[credentialsStorage] Dados invalidos encontrados no localStorage. Limpando registro.");
         window.localStorage.removeItem(AUTH_CREDENTIALS_STORAGE_KEY);
         return null;
       }
@@ -113,7 +113,7 @@ export const credentialsStorage = {
         password: parsed.password,
       };
     } catch (error) {
-      console.error('[credentialsStorage] Falha ao ler credenciais salvas no localStorage.', error);
+      console.error("[credentialsStorage] Falha ao ler credenciais salvas no localStorage.", error);
       return null;
     }
   },
@@ -123,7 +123,7 @@ export const credentialsStorage = {
     try {
       window.localStorage.setItem(AUTH_CREDENTIALS_STORAGE_KEY, JSON.stringify(credentials));
     } catch (error) {
-      console.error('[credentialsStorage] Falha ao salvar credenciais no localStorage.', error);
+      console.error("[credentialsStorage] Falha ao salvar credenciais no localStorage.", error);
       throw error;
     }
   },
@@ -133,7 +133,7 @@ export const credentialsStorage = {
     try {
       window.localStorage.removeItem(AUTH_CREDENTIALS_STORAGE_KEY);
     } catch (error) {
-      console.error('[credentialsStorage] Falha ao remover credenciais do localStorage.', error);
+      console.error("[credentialsStorage] Falha ao remover credenciais do localStorage.", error);
     }
   },
 };

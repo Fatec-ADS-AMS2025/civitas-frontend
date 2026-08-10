@@ -1,11 +1,11 @@
-import { GenericService } from './generic';
-import type { ListQuery, PaginatedResult } from './generic';
-import UnidadeConsumidoraDTO from '@/models/unidadeConsumidora';
-import { filterActiveRecords } from '@/global/softDelete';
+import { filterActiveRecords } from "@/global/softDelete";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
+import type { ListQuery, PaginatedResult } from "./generic";
+import { GenericService } from "./generic";
 
 export class UnidadeConsumidoraService extends GenericService<UnidadeConsumidoraDTO> {
   constructor() {
-    super('unidades-consumidoras');
+    super("unidades-consumidoras");
   }
 
   private async getAllActiveItems(query?: ListQuery): Promise<UnidadeConsumidoraDTO[]> {

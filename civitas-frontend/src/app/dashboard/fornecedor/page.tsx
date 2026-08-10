@@ -1,5 +1,5 @@
-import type { PaginatedResult } from "@/hooks/generic";
 import { fornecedorService } from "@/hooks/fornecedor";
+import type { PaginatedResult } from "@/hooks/generic";
 import type FornecedorDTO from "@/models/fornecedor";
 import FornecedorPageClient from "./_components/FornecedorPageClient";
 

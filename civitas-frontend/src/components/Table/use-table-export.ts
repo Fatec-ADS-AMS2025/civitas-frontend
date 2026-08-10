@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { showToast } from "@/hooks/useToast";
-import { exportTableData, getSelectedColumns } from "./export-utils";
 import type { TableColumn, TableExportConfig, TableExportOptions } from "./export-types";
+import { exportTableData, getSelectedColumns } from "./export-utils";
 import type { TableRow } from "./table-types";
 
 type UseTableExportParams<T extends TableRow> = {
@@ -27,12 +27,8 @@ export function useTableExport<T extends TableRow>({
   const exportAllData = exportConfig?.allData ?? data;
   const exportTitle = exportConfig?.title?.trim() || pageName || "Exportacao";
   const exportFileName = exportConfig?.fileName?.trim() || pageName || "exportacao";
-  const exportColumns = useMemo(
-    () => columns.filter((column) => column.id.trim() !== ""),
-    [columns]
-  );
-  const shouldShowExportAction =
-    exportEnabled && !isLoading && !errorMessage && exportAllData.length > 0;
+  const exportColumns = useMemo(() => columns.filter((column) => column.id.trim() !== ""), [columns]);
+  const shouldShowExportAction = exportEnabled && !isLoading && !errorMessage && exportAllData.length > 0;
 
   const handleExport = async ({ outputType, scope, selectedColumnIds }: TableExportOptions) => {
     const rows = scope === "all" ? exportAllData : data;

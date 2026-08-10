@@ -1,348 +1,317 @@
-"use client"
-import React, { useEffect, useMemo, useState } from 'react'
-import FormModal from './form-modal'
+"use client";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { InputMask } from "@/lib/input-mask";
 import {
-    getSectionOrder,
-    groupFieldsBySection,
-    isFieldRequired,
-    isFieldValueEmpty,
-    isRecord,
-    toLabel,
-} from './form-utils'
-import type { InputMask } from '@/lib/input-mask'
+  buildDisplayFormData,
+  buildNormalizedFormData,
+  DEFAULT_HIDDEN_FIELDS,
+  normalizeFieldValue,
+  toFieldConfig,
+} from "./form-helpers";
+import FormModal from "./form-modal";
 import {
-    DEFAULT_HIDDEN_FIELDS,
-    buildDisplayFormData,
-    buildNormalizedFormData,
-    normalizeFieldValue,
-    toFieldConfig,
-} from './form-helpers'
+  getSectionOrder,
+  groupFieldsBySection,
+  isFieldRequired,
+  isFieldValueEmpty,
+  isRecord,
+  toLabel,
+} from "./form-utils";
 
-type FormMode = 'create' | 'edit' | 'view' | 'delete'
+type FormMode = "create" | "edit" | "view" | "delete";
 
 type FormOption = {
-    value: string | number;
-    label: string;
-}
+  value: string | number;
+  label: string;
+};
 
-type ValidationFn = (
-    value: unknown,
-    formData: Record<string, unknown>,
-    mode: FormMode
-) => string | undefined
+type ValidationFn = (value: unknown, formData: Record<string, unknown>, mode: FormMode) => string | undefined;
 
 type SectionDefinition = {
-    title: string
-    description?: string
-    variant?: 'default' | 'highlight'
-}
+  title: string;
+  description?: string;
+  variant?: "default" | "highlight";
+};
 
 type FormFieldConfig = {
-    key: string;
-    label?: string;
-    placeholder?: string;
-    type?: 'text' | 'email' | 'number' | 'password' | 'tel' | 'date' | 'select' | 'textarea' | 'documento';
-    mask?: InputMask;
-    required?: boolean;
-    requiredInModes?: FormMode[];
-    hidden?: boolean;
-    disabled?: boolean;
-    accept?: string;
-    inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
-    maxLength?: number;
-    options?: FormOption[];
-    resolveOptions?: (formData: Record<string, unknown>, mode: FormMode) => FormOption[];
-    readOnlyInModes?: FormMode[];
-    resolveHidden?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
-    resolveDisabled?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
-    clearOnDisable?: boolean;
-    clearOnInvalidOption?: boolean;
-    validate?: ValidationFn;
-    section?: string;
-}
+  key: string;
+  label?: string;
+  placeholder?: string;
+  type?: "text" | "email" | "number" | "password" | "tel" | "date" | "select" | "textarea" | "documento";
+  mask?: InputMask;
+  required?: boolean;
+  requiredInModes?: FormMode[];
+  hidden?: boolean;
+  disabled?: boolean;
+  accept?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  maxLength?: number;
+  options?: FormOption[];
+  resolveOptions?: (formData: Record<string, unknown>, mode: FormMode) => FormOption[];
+  readOnlyInModes?: FormMode[];
+  resolveHidden?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
+  resolveDisabled?: (formData: Record<string, unknown>, mode: FormMode) => boolean;
+  clearOnDisable?: boolean;
+  clearOnInvalidOption?: boolean;
+  validate?: ValidationFn;
+  section?: string;
+};
 
-type FieldConfig = FormFieldConfig
+type FieldConfig = FormFieldConfig;
 
 type FormExtraContentRenderArgs = {
-    formData: Record<string, unknown>
-    mode: FormMode
-    setFieldValue: (key: string, value: unknown) => void
-}
+  formData: Record<string, unknown>;
+  mode: FormMode;
+  setFieldValue: (key: string, value: unknown) => void;
+};
 
 type FormProps = {
-    camps?: string[];
-    name?: string;
-    object?: object | string[];
-    type?: FormMode;
-    fields?: FormFieldConfig[];
-    validationSchema?: Record<string, ValidationFn>;
-    hiddenFields?: string[];
-    extraContent?: React.ReactNode;
-    renderExtraContent?: (args: FormExtraContentRenderArgs) => React.ReactNode;
-    onCancel?: () => void;
-    onConfirm?: (data: Record<string, unknown>) => Promise<unknown> | unknown;
-}
+  camps?: string[];
+  name?: string;
+  object?: object | string[];
+  type?: FormMode;
+  fields?: FormFieldConfig[];
+  validationSchema?: Record<string, ValidationFn>;
+  hiddenFields?: string[];
+  extraContent?: React.ReactNode;
+  renderExtraContent?: (args: FormExtraContentRenderArgs) => React.ReactNode;
+  onCancel?: () => void;
+  onConfirm?: (data: Record<string, unknown>) => Promise<unknown> | unknown;
+};
 
 export type {
-    FieldConfig,
-    FormExtraContentRenderArgs,
-    FormFieldConfig,
-    FormMode,
-    FormOption,
-    SectionDefinition,
-    ValidationFn,
-}
+  FieldConfig,
+  FormExtraContentRenderArgs,
+  FormFieldConfig,
+  FormMode,
+  FormOption,
+  SectionDefinition,
+  ValidationFn,
+};
 
 export default function Form({
-    camps,
-    name,
-    object,
-    type = 'create',
-    fields,
-    validationSchema,
-    hiddenFields,
-    extraContent,
-    renderExtraContent,
-    onCancel,
-    onConfirm,
+  camps,
+  name,
+  object,
+  type = "create",
+  fields,
+  validationSchema,
+  hiddenFields,
+  extraContent,
+  renderExtraContent,
+  onCancel,
+  onConfirm,
 }: FormProps) {
-    const initialData = useMemo(() => (isRecord(object) ? object : {}), [object])
-    const mode: FormMode = type
-    // Resolve a lista de campos via config, keys do objeto ou camps.
-    const sourceFromCamps = useMemo(
-        () => camps ?? (Array.isArray(object) ? object : undefined) ?? [],
-        [camps, object]
-    )
-    const sourceFromObject = useMemo(
-        () => (isRecord(object) ? Object.keys(object) : []),
-        [object]
-    )
-    const mergedFields: FormFieldConfig[] = useMemo(() => {
-        if (fields && fields.length > 0) return fields
-        if (sourceFromObject.length > 0) {
-            return sourceFromObject.map((fieldKey) => toFieldConfig(fieldKey, initialData[fieldKey]))
-        }
-        return sourceFromCamps.map((fieldKey) => toFieldConfig(fieldKey))
-    }, [fields, sourceFromObject, sourceFromCamps, initialData])
+  const initialData = useMemo(() => (isRecord(object) ? object : {}), [object]);
+  const mode: FormMode = type;
+  // Resolve a lista de campos via config, keys do objeto ou camps.
+  const sourceFromCamps = useMemo(() => camps ?? (Array.isArray(object) ? object : undefined) ?? [], [camps, object]);
+  const sourceFromObject = useMemo(() => (isRecord(object) ? Object.keys(object) : []), [object]);
+  const mergedFields: FormFieldConfig[] = useMemo(() => {
+    if (fields && fields.length > 0) return fields;
+    if (sourceFromObject.length > 0) {
+      return sourceFromObject.map((fieldKey) => toFieldConfig(fieldKey, initialData[fieldKey]));
+    }
+    return sourceFromCamps.map((fieldKey) => toFieldConfig(fieldKey));
+  }, [fields, sourceFromObject, sourceFromCamps, initialData]);
 
-    const fieldMap = useMemo(() => {
-        return new Map(mergedFields.map((field) => [field.key, field]))
-    }, [mergedFields])
+  const fieldMap = useMemo(() => {
+    return new Map(mergedFields.map((field) => [field.key, field]));
+  }, [mergedFields]);
 
-    const initialFormData = useMemo(() => {
-        if (isRecord(object)) {
-            return buildDisplayFormData(object, mergedFields, fieldMap)
-        }
-
-        if (Array.isArray(object)) {
-            const emptyObject = object.reduce<Record<string, unknown>>((acc, key) => {
-                acc[key] = ''
-                return acc
-            }, {})
-            return buildDisplayFormData(emptyObject, mergedFields, fieldMap)
-        }
-
-        return {}
-    }, [fieldMap, mergedFields, object])
-
-    const [formData, setFormData] = useState<Record<string, unknown>>(() => initialFormData)
-    const [isLoading, setIsLoading] = useState(false)
-    const [errors, setErrors] = useState<Record<string, string>>({})
-
-    const normalizedFormData = useMemo(
-        () => buildNormalizedFormData(formData, mergedFields, fieldMap, 'change'),
-        [fieldMap, formData, mergedFields]
-    )
-
-    const resolvedFields = useMemo(
-        () =>
-            mergedFields.map((field) => ({
-                ...field,
-                options: field.resolveOptions
-                    ? field.resolveOptions(normalizedFormData, mode)
-                    : field.options,
-                hidden:
-                    field.hidden ||
-                    (field.resolveHidden
-                        ? field.resolveHidden(normalizedFormData, mode)
-                        : false),
-                disabled:
-                    field.disabled ||
-                    (field.resolveDisabled
-                        ? field.resolveDisabled(normalizedFormData, mode)
-                        : false),
-            })),
-        [mergedFields, mode, normalizedFormData]
-    )
-
-    const resolvedFieldMap = useMemo(() => {
-        return new Map(resolvedFields.map((field) => [field.key, field]))
-    }, [resolvedFields])
-
-    useEffect(() => {
-        if (mode === 'view' || mode === 'delete') return
-
-        const nextUpdates: Record<string, unknown> = {}
-
-        resolvedFields.forEach((field) => {
-            if (field.type !== 'select') return
-
-            const currentValue = formData[field.key]
-            const hasCurrentValue =
-                currentValue !== undefined &&
-                currentValue !== null &&
-                String(currentValue).trim().length > 0
-
-            if (!hasCurrentValue) return
-
-            if (field.disabled && field.clearOnDisable) {
-                nextUpdates[field.key] = ''
-                return
-            }
-
-            if (field.clearOnInvalidOption) {
-                const hasMatchingOption = (field.options ?? []).some(
-                    (option) => String(option.value) === String(currentValue)
-                )
-
-                if (!hasMatchingOption) {
-                    nextUpdates[field.key] = ''
-                }
-            }
-        })
-
-        if (Object.keys(nextUpdates).length === 0) return
-
-        setFormData((previous) => {
-            const hasAnyChange = Object.entries(nextUpdates).some(
-                ([key, value]) => previous[key] !== value
-            )
-
-            return hasAnyChange ? { ...previous, ...nextUpdates } : previous
-        })
-    }, [formData, mode, resolvedFields])
-
-    // Oculta identificadores implicitos, salvo override explicito.
-    const fieldsToHide = hiddenFields ?? DEFAULT_HIDDEN_FIELDS
-    const visibleFields = resolvedFields.filter((field) => !field.hidden && !fieldsToHide.includes(field.key))
-
-    const isViewMode = mode === 'view'
-
-    // Valida apenas o subconjunto informado para manter erros localizados.
-    const validateFields = (fieldsForValidation: FormFieldConfig[]) => {
-        const nextErrors: Record<string, string> = {}
-        const validatedKeys = fieldsForValidation.map((field) => field.key)
-        const normalizedFormData = buildNormalizedFormData(formData, resolvedFields, resolvedFieldMap, 'submit')
-
-        fieldsForValidation.forEach((field) => {
-            const value = normalizedFormData[field.key]
-            const fieldLabel = field.label ?? toLabel(field.key)
-            if (isFieldRequired(field, mode) && isFieldValueEmpty(field, value) && !isViewMode && mode !== 'delete') {
-                nextErrors[field.key] = `${fieldLabel} é obrigatório.`
-                return
-            }
-
-            const fieldValidator = field.validate ?? validationSchema?.[field.key]
-            if (fieldValidator) {
-                const message = fieldValidator(value, normalizedFormData, mode)
-                if (message) nextErrors[field.key] = message
-            }
-        })
-
-        setErrors((previousErrors) => {
-            const updatedErrors = { ...previousErrors }
-
-            validatedKeys.forEach((key) => {
-                delete updatedErrors[key]
-            })
-
-            return {
-                ...updatedErrors,
-                ...nextErrors,
-            }
-        })
-
-        return Object.keys(nextErrors).length === 0
+  const initialFormData = useMemo(() => {
+    if (isRecord(object)) {
+      return buildDisplayFormData(object, mergedFields, fieldMap);
     }
 
-    // Fluxo de submit com validacao e normalizacao final.
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        if (isViewMode || isLoading) return
-
-        if (!onConfirm) return
-        if (!validateFields(visibleFields)) return
-
-        const normalizedFormData = buildNormalizedFormData(formData, resolvedFields, resolvedFieldMap, 'submit')
-
-        setIsLoading(true)
-        try {
-            await onConfirm(normalizedFormData)
-        } catch (error) {
-            console.error('Erro no formulário:', error)
-        } finally {
-            setIsLoading(false)
-        }
+    if (Array.isArray(object)) {
+      const emptyObject = object.reduce<Record<string, unknown>>((acc, key) => {
+        acc[key] = "";
+        return acc;
+      }, {});
+      return buildDisplayFormData(emptyObject, mergedFields, fieldMap);
     }
 
-    // Normaliza o valor no change para manter estado consistente.
-    const handleInputChange = (field: FormFieldConfig, value: unknown) => {
-        const normalizedValue = normalizeFieldValue(field, value, 'change', formData)
+    return {};
+  }, [fieldMap, mergedFields, object]);
 
-        setFormData((prev) => {
-            return {
-                ...prev,
-                [field.key]: normalizedValue,
-            }
-        })
+  const [formData, setFormData] = useState<Record<string, unknown>>(() => initialFormData);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-        if (errors[field.key]) {
-            setErrors((prev) => ({ ...prev, [field.key]: '' }))
+  const normalizedFormData = useMemo(
+    () => buildNormalizedFormData(formData, mergedFields, fieldMap, "change"),
+    [fieldMap, formData, mergedFields],
+  );
+
+  const resolvedFields = useMemo(
+    () =>
+      mergedFields.map((field) => ({
+        ...field,
+        options: field.resolveOptions ? field.resolveOptions(normalizedFormData, mode) : field.options,
+        hidden: field.hidden || (field.resolveHidden ? field.resolveHidden(normalizedFormData, mode) : false),
+        disabled: field.disabled || (field.resolveDisabled ? field.resolveDisabled(normalizedFormData, mode) : false),
+      })),
+    [mergedFields, mode, normalizedFormData],
+  );
+
+  const resolvedFieldMap = useMemo(() => {
+    return new Map(resolvedFields.map((field) => [field.key, field]));
+  }, [resolvedFields]);
+
+  useEffect(() => {
+    if (mode === "view" || mode === "delete") return;
+
+    const nextUpdates: Record<string, unknown> = {};
+
+    resolvedFields.forEach((field) => {
+      if (field.type !== "select") return;
+
+      const currentValue = formData[field.key];
+      const hasCurrentValue =
+        currentValue !== undefined && currentValue !== null && String(currentValue).trim().length > 0;
+
+      if (!hasCurrentValue) return;
+
+      if (field.disabled && field.clearOnDisable) {
+        nextUpdates[field.key] = "";
+        return;
+      }
+
+      if (field.clearOnInvalidOption) {
+        const hasMatchingOption = (field.options ?? []).some((option) => String(option.value) === String(currentValue));
+
+        if (!hasMatchingOption) {
+          nextUpdates[field.key] = "";
         }
+      }
+    });
+
+    if (Object.keys(nextUpdates).length === 0) return;
+
+    setFormData((previous) => {
+      const hasAnyChange = Object.entries(nextUpdates).some(([key, value]) => previous[key] !== value);
+
+      return hasAnyChange ? { ...previous, ...nextUpdates } : previous;
+    });
+  }, [formData, mode, resolvedFields]);
+
+  // Oculta identificadores implicitos, salvo override explicito.
+  const fieldsToHide = hiddenFields ?? DEFAULT_HIDDEN_FIELDS;
+  const visibleFields = resolvedFields.filter((field) => !field.hidden && !fieldsToHide.includes(field.key));
+
+  const isViewMode = mode === "view";
+
+  // Valida apenas o subconjunto informado para manter erros localizados.
+  const validateFields = (fieldsForValidation: FormFieldConfig[]) => {
+    const nextErrors: Record<string, string> = {};
+    const validatedKeys = fieldsForValidation.map((field) => field.key);
+    const normalizedFormData = buildNormalizedFormData(formData, resolvedFields, resolvedFieldMap, "submit");
+
+    fieldsForValidation.forEach((field) => {
+      const value = normalizedFormData[field.key];
+      const fieldLabel = field.label ?? toLabel(field.key);
+      if (isFieldRequired(field, mode) && isFieldValueEmpty(field, value) && !isViewMode && mode !== "delete") {
+        nextErrors[field.key] = `${fieldLabel} é obrigatório.`;
+        return;
+      }
+
+      const fieldValidator = field.validate ?? validationSchema?.[field.key];
+      if (fieldValidator) {
+        const message = fieldValidator(value, normalizedFormData, mode);
+        if (message) nextErrors[field.key] = message;
+      }
+    });
+
+    setErrors((previousErrors) => {
+      const updatedErrors = { ...previousErrors };
+
+      validatedKeys.forEach((key) => {
+        delete updatedErrors[key];
+      });
+
+      return {
+        ...updatedErrors,
+        ...nextErrors,
+      };
+    });
+
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  // Fluxo de submit com validacao e normalizacao final.
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isViewMode || isLoading) return;
+
+    if (!onConfirm) return;
+    if (!validateFields(visibleFields)) return;
+
+    const normalizedFormData = buildNormalizedFormData(formData, resolvedFields, resolvedFieldMap, "submit");
+
+    setIsLoading(true);
+    try {
+      await onConfirm(normalizedFormData);
+    } catch (error) {
+      console.error("Erro no formulário:", error);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const setFieldValue = (key: string, value: unknown) => {
-        const field = resolvedFieldMap.get(key) ?? fieldMap.get(key)
-        const normalizedValue = normalizeFieldValue(field, value, 'change', formData)
+  // Normaliza o valor no change para manter estado consistente.
+  const handleInputChange = (field: FormFieldConfig, value: unknown) => {
+    const normalizedValue = normalizeFieldValue(field, value, "change", formData);
 
-        setFormData((prev) => ({
-            ...prev,
-            [key]: normalizedValue,
-        }))
+    setFormData((prev) => {
+      return {
+        ...prev,
+        [field.key]: normalizedValue,
+      };
+    });
 
-        if (errors[key]) {
-            setErrors((prev) => ({ ...prev, [key]: '' }))
-        }
+    if (errors[field.key]) {
+      setErrors((prev) => ({ ...prev, [field.key]: "" }));
     }
+  };
 
-    // Agrupa campos por seção para o modal renderizar na ordem correta.
-    const groupedFields = useMemo(
-        () => groupFieldsBySection(visibleFields),
-        [visibleFields]
-    )
-    const sectionOrder = useMemo(
-        () => getSectionOrder(visibleFields),
-        [visibleFields]
-    )
-    const resolvedExtraContent = renderExtraContent
-        ? renderExtraContent({ formData, mode, setFieldValue })
-        : extraContent
+  const setFieldValue = (key: string, value: unknown) => {
+    const field = resolvedFieldMap.get(key) ?? fieldMap.get(key);
+    const normalizedValue = normalizeFieldValue(field, value, "change", formData);
 
-    return (
-        <FormModal
-            groupedFields={groupedFields}
-            sectionOrder={sectionOrder}
-            formData={formData}
-            errors={errors}
-            onFieldChange={handleInputChange}
-            mode={mode}
-            name={name}
-            isLoading={isLoading}
-            isViewMode={isViewMode}
-            extraContent={resolvedExtraContent}
-            onCancel={onCancel}
-            onSubmit={handleSubmit}
-        />
-    )
+    setFormData((prev) => ({
+      ...prev,
+      [key]: normalizedValue,
+    }));
+
+    if (errors[key]) {
+      setErrors((prev) => ({ ...prev, [key]: "" }));
+    }
+  };
+
+  // Agrupa campos por seção para o modal renderizar na ordem correta.
+  const groupedFields = useMemo(() => groupFieldsBySection(visibleFields), [visibleFields]);
+  const sectionOrder = useMemo(() => getSectionOrder(visibleFields), [visibleFields]);
+  const resolvedExtraContent = renderExtraContent
+    ? renderExtraContent({ formData, mode, setFieldValue })
+    : extraContent;
+
+  return (
+    <FormModal
+      groupedFields={groupedFields}
+      sectionOrder={sectionOrder}
+      formData={formData}
+      errors={errors}
+      onFieldChange={handleInputChange}
+      mode={mode}
+      name={name}
+      isLoading={isLoading}
+      isViewMode={isViewMode}
+      extraContent={resolvedExtraContent}
+      onCancel={onCancel}
+      onSubmit={handleSubmit}
+    />
+  );
 }

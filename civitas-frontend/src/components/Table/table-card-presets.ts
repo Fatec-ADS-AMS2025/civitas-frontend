@@ -20,19 +20,17 @@ const field = <T extends TableRow>(
   label: string,
   columnId: string,
   icon: string,
-  tone?: InfoTone
+  tone?: InfoTone,
 ): TableCardField<T> => ({ label, columnId, icon, tone });
 
 const valueField = <T extends TableRow>(
   label: string,
   icon: string,
   value: (row: T) => string,
-  tone?: InfoTone
+  tone?: InfoTone,
 ): TableCardField<T> => ({ label, icon, value, tone });
 
-export const getRouteCardConfig = <T extends TableRow>(
-  pageKey: string
-): TableCardConfig<T> | undefined => {
+export const getRouteCardConfig = <T extends TableRow>(pageKey: string): TableCardConfig<T> | undefined => {
   switch (pageKey) {
     case "usuarios":
       return {
@@ -49,10 +47,10 @@ export const getRouteCardConfig = <T extends TableRow>(
         ],
         relationshipFields: [
           valueField("Localidade", "location_city", (row) =>
-            joinValues(row, ["cidade", "estado"], " / ", "Localidade nao informada")
+            joinValues(row, ["cidade", "estado"], " / ", "Localidade nao informada"),
           ),
           valueField("Endereco", "home_pin", (row) =>
-            joinValues(row, ["logradouro", "numero", "bairro"], ", ", "Endereco nao informado")
+            joinValues(row, ["logradouro", "numero", "bairro"], ", ", "Endereco nao informado"),
           ),
         ],
       };
@@ -70,10 +68,10 @@ export const getRouteCardConfig = <T extends TableRow>(
         ],
         relationshipFields: [
           valueField("Localidade", "location_city", (row) =>
-            joinValues(row, ["cidade", "estado"], " / ", "Localidade nao informada")
+            joinValues(row, ["cidade", "estado"], " / ", "Localidade nao informada"),
           ),
           valueField("Endereco", "home_work", (row) =>
-            joinValues(row, ["logradouro", "numero", "bairro"], ", ", "Endereco nao informado")
+            joinValues(row, ["logradouro", "numero", "bairro"], ", ", "Endereco nao informado"),
           ),
         ],
       };

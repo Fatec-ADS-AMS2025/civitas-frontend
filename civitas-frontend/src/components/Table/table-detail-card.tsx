@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import type { TableColumn } from "./export-types";
 import { getRouteCardConfig } from "./table-card-presets";
 import { TableCardView } from "./table-card-view";
@@ -28,12 +28,8 @@ export function TableDetailCard<T extends TableRow>({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs font-semibold uppercase text-[var(--foreground-soft)]">
-          Visualizacao
-        </p>
-        <h2 className="mt-1 text-xl font-semibold text-[var(--foreground)]">
-          Detalhes do registro
-        </h2>
+        <p className="text-xs font-semibold uppercase text-[var(--foreground-soft)]">Visualizacao</p>
+        <h2 className="mt-1 text-xl font-semibold text-[var(--foreground)]">Detalhes do registro</h2>
       </div>
 
       <TableCardView

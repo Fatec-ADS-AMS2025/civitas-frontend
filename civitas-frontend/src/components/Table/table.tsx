@@ -1,12 +1,14 @@
-import React, { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
+import type React from "react";
+import { useMemo, useState } from "react";
+import { EmptyState, ErrorState, LoadingState } from "@/components/feedback-states";
+import PaginationControls from "@/components/PaginationControls";
+import { showToast } from "@/hooks/useToast";
+import type { FormMode, FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
 import Form from "../Form/form";
 import Modal from "../modal";
-import type { FieldConfig as ModalFieldConfig, FormMode, ValidationFn } from "../Form/form";
-import PaginationControls from "@/components/PaginationControls";
-import { EmptyState, ErrorState, LoadingState } from "@/components/feedback-states";
-import { showToast } from "@/hooks/useToast";
 import ExportModal from "./export-modal";
+import type { TableColumn, TableExportConfig } from "./export-types";
 import {
   exportTableData,
   getSelectedColumns,
@@ -15,7 +17,6 @@ import {
   getTableCellText,
   isStatusColumn,
 } from "./export-utils";
-import type { TableColumn, TableExportConfig } from "./export-types";
 
 type TableRow = object;
 
@@ -59,13 +60,13 @@ type BaseTableProps<T extends TableRow> = {
 export type TableProps<T extends TableRow> = BaseTableProps<T> &
   (
     | {
-      paginationEnabled: true;
-      pagination: TablePaginationConfig;
-    }
+        paginationEnabled: true;
+        pagination: TablePaginationConfig;
+      }
     | {
-      paginationEnabled?: false;
-      pagination?: TablePaginationConfig;
-    }
+        paginationEnabled?: false;
+        pagination?: TablePaginationConfig;
+      }
   );
 
 function Table<T extends TableRow>({
@@ -111,24 +112,21 @@ function Table<T extends TableRow>({
   const exportTitle = exportConfig?.title?.trim() || nomePagina || "Exportacao";
   const exportFileName = exportConfig?.fileName?.trim() || nomePagina || "exportacao";
   const hasExportData = exportAllData.length > 0;
-  const shouldShowExportAction =
-    exportEnabled && !isLoading && !errorMessage && hasExportData;
+  const shouldShowExportAction = exportEnabled && !isLoading && !errorMessage && hasExportData;
   const exportColumns = useMemo(() => columns.filter((column) => column.id.trim() !== ""), [columns]);
 
   const columnIds = useMemo(() => columns.map((column) => column.id), [columns]);
   const hiddenColumnSet = useMemo(() => new Set(hiddenColumnIds), [hiddenColumnIds]);
   const visibleColumns = useMemo(
     () => columns.filter((column) => !hiddenColumnSet.has(column.id)),
-    [columns, hiddenColumnSet]
+    [columns, hiddenColumnSet],
   );
   const effectiveSortState = useMemo<SortState>(() => {
     if (!sortState.columnId || !sortState.direction) {
       return { columnId: null, direction: null };
     }
 
-    return hiddenColumnSet.has(sortState.columnId)
-      ? { columnId: null, direction: null }
-      : sortState;
+    return hiddenColumnSet.has(sortState.columnId) ? { columnId: null, direction: null } : sortState;
   }, [hiddenColumnSet, sortState]);
 
   const toRecord = (value: T): Record<string, unknown> => value as Record<string, unknown>;
@@ -165,7 +163,6 @@ function Table<T extends TableRow>({
     setModalAction(null);
     setSelectedContent(null);
   };
-
 
   const getMotionStyle = (index: number): React.CSSProperties | undefined => {
     if (index > 5) return undefined;
@@ -335,10 +332,7 @@ function Table<T extends TableRow>({
     return "string";
   };
 
-  const collator = useMemo(
-    () => new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true }),
-    []
-  );
+  const collator = useMemo(() => new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true }), []);
 
   const sortedData = useMemo(() => {
     if (!effectiveSortState.columnId || !effectiveSortState.direction) {
@@ -361,10 +355,10 @@ function Table<T extends TableRow>({
 
       const leftValue = activeColumn.sortValue
         ? activeColumn.sortValue(leftRecord)
-        : leftRecord[activeColumn.id] ?? getTableCellText(left.row, activeColumn);
+        : (leftRecord[activeColumn.id] ?? getTableCellText(left.row, activeColumn));
       const rightValue = activeColumn.sortValue
         ? activeColumn.sortValue(rightRecord)
-        : rightRecord[activeColumn.id] ?? getTableCellText(right.row, activeColumn);
+        : (rightRecord[activeColumn.id] ?? getTableCellText(right.row, activeColumn));
 
       const leftEmpty = leftValue === null || leftValue === undefined || leftValue === "";
       const rightEmpty = rightValue === null || rightValue === undefined || rightValue === "";
@@ -494,12 +488,7 @@ function Table<T extends TableRow>({
   const actionButtonClassName =
     "civitas-table__action flex h-9 w-9 cursor-pointer items-center justify-center rounded-sm border transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4";
 
-  const renderActionButton = (
-    icon: string,
-    action: FormMode,
-    objeto: T,
-    tone: "default" | "danger" = "default"
-  ) => {
+  const renderActionButton = (icon: string, action: FormMode, objeto: T, tone: "default" | "danger" = "default") => {
     const toneClassName =
       tone === "danger"
         ? "civitas-action--danger"
@@ -592,9 +581,7 @@ function Table<T extends TableRow>({
                 ))}
               </div>
 
-              <p className="mt-3 text-xs text-[var(--foreground-soft)]">
-                Ao menos uma coluna deve ficar visivel.
-              </p>
+              <p className="mt-3 text-xs text-[var(--foreground-soft)]">Ao menos uma coluna deve ficar visivel.</p>
             </div>
           ) : null}
 
@@ -618,13 +605,7 @@ function Table<T extends TableRow>({
                         <th
                           key={column.id}
                           className="px-5 py-2.5"
-                          aria-sort={
-                            isActiveSort
-                              ? sortDirection === "asc"
-                                ? "ascending"
-                                : "descending"
-                              : "none"
-                          }
+                          aria-sort={isActiveSort ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
                         >
                           {isSortable ? (
                             <button
@@ -663,8 +644,9 @@ function Table<T extends TableRow>({
                       {visibleColumns.map((column, columnIndex) => (
                         <td
                           key={column.id}
-                          className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${columnIndex === 0 ? "rounded-sm" : ""
-                            }`}
+                          className={`civitas-table__cell break-words border-y border-transparent px-5 py-[14px] align-middle text-sm font-medium text-[var(--foreground)] ${
+                            columnIndex === 0 ? "rounded-sm" : ""
+                          }`}
                         >
                           {renderCellValue(objeto, column)}
                         </td>
@@ -676,17 +658,15 @@ function Table<T extends TableRow>({
                             renderRowActions(objeto)
                           ) : (
                             <div className="flex items-center justify-center gap-2">
-                              {resolvedActions.includes("view") ? (
-                                renderActionButton("visibility", "view", objeto)
-                              ) : null}
+                              {resolvedActions.includes("view")
+                                ? renderActionButton("visibility", "view", objeto)
+                                : null}
 
-                              {resolvedActions.includes("edit") ? (
-                                renderActionButton("edit", "edit", objeto)
-                              ) : null}
+                              {resolvedActions.includes("edit") ? renderActionButton("edit", "edit", objeto) : null}
 
-                              {resolvedActions.includes("delete") ? (
-                                renderActionButton("delete", "delete", objeto, "danger")
-                              ) : null}
+                              {resolvedActions.includes("delete")
+                                ? renderActionButton("delete", "delete", objeto, "danger")
+                                : null}
                             </div>
                           )}
                         </td>
@@ -703,12 +683,9 @@ function Table<T extends TableRow>({
               {sortedData.map((objeto, index) => {
                 const primaryColumn = getPrimaryColumn(visibleColumns);
                 const statusColumn = visibleColumns.find((column) => isStatusColumn(column.id));
-                const showStatus =
-                  statusColumn && primaryColumn && statusColumn.id !== primaryColumn.id;
+                const showStatus = statusColumn && primaryColumn && statusColumn.id !== primaryColumn.id;
                 const detailColumns = visibleColumns.filter(
-                  (column) =>
-                    column.id !== primaryColumn?.id &&
-                    (!statusColumn || column.id !== statusColumn.id)
+                  (column) => column.id !== primaryColumn?.id && (!statusColumn || column.id !== statusColumn.id),
                 );
 
                 return (
@@ -743,21 +720,17 @@ function Table<T extends TableRow>({
                           renderRowActions(objeto)
                         ) : (
                           <>
-                            {resolvedActions.includes("view") ? (
-                              renderActionButton("visibility", "view", objeto)
-                            ) : null}
+                            {resolvedActions.includes("view") ? renderActionButton("visibility", "view", objeto) : null}
 
-                            {resolvedActions.includes("edit") ? (
-                              renderActionButton("edit", "edit", objeto)
-                            ) : null}
+                            {resolvedActions.includes("edit") ? renderActionButton("edit", "edit", objeto) : null}
 
-                            {resolvedActions.includes("delete") ? (
-                              renderActionButton("delete", "delete", objeto, "danger")
-                            ) : null}
+                            {resolvedActions.includes("delete")
+                              ? renderActionButton("delete", "delete", objeto, "danger")
+                              : null}
                           </>
                         )}
                       </div>
-                                        ) : null}
+                    ) : null}
                   </div>
                 );
               })}
@@ -771,9 +744,7 @@ function Table<T extends TableRow>({
                 onClick={() => setIsExportModalOpen(true)}
                 className="civitas-searchbar__action flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-5 py-2.5 font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] sm:w-auto"
               >
-                <span className="material-symbols-outlined text-base text-[var(--foreground)]">
-                  print
-                </span>
+                <span className="material-symbols-outlined text-base text-[var(--foreground)]">print</span>
                 Exportar / Imprimir
               </button>
             </div>
@@ -822,9 +793,7 @@ function Table<T extends TableRow>({
             fields={formFields}
             validationSchema={formValidationSchema}
             hiddenFields={formHiddenFields}
-            extraContent={
-              renderModalExtra ? renderModalExtra(selectedContent, modalAction) : undefined
-            }
+            extraContent={renderModalExtra ? renderModalExtra(selectedContent, modalAction) : undefined}
             onCancel={closeModal}
             onConfirm={async (formData) => {
               try {
@@ -833,16 +802,12 @@ function Table<T extends TableRow>({
                     await onDelete(getResolvedId(selectedContent));
                   }
                 } else if (modalAction === "edit" && onEdit) {
-                  await onEdit(
-                    getResolvedId(selectedContent),
-                    formData as Partial<T> & Record<string, unknown>
-                  );
+                  await onEdit(getResolvedId(selectedContent), formData as Partial<T> & Record<string, unknown>);
                 }
 
                 closeModal();
               } catch (modalError) {
-                const message =
-                  modalError instanceof Error ? modalError.message : "Erro na operacao. Tente novamente.";
+                const message = modalError instanceof Error ? modalError.message : "Erro na operacao. Tente novamente.";
                 showToast(message, "error");
               }
             }}

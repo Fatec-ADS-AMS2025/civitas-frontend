@@ -153,7 +153,7 @@ const getDespesaStatusLabel = (status: number): string => {
 
 const getDespesaValor = (despesa: DespesaDTO): number => {
   const resolvedValue = Number(
-    despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0
+    despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0,
   );
   return Number.isFinite(resolvedValue) ? resolvedValue : 0;
 };
@@ -201,23 +201,12 @@ const buildCodigoResumo = (despesas: FinanceDespesaRelacionada[]): FinanceCodigo
         return next.id - current.id;
       });
 
-      const totalGastos = orderedDespesas.reduce(
-        (accumulator, item) => accumulator + item.valor,
-        0
-      );
+      const totalGastos = orderedDespesas.reduce((accumulator, item) => accumulator + item.valor, 0);
       const instituicoes = Array.from(
-        new Set(
-          orderedDespesas
-            .map((item) => item.instituicaoNome)
-            .filter((value) => value.trim().length > 0)
-        )
+        new Set(orderedDespesas.map((item) => item.instituicaoNome).filter((value) => value.trim().length > 0)),
       );
       const secretarias = Array.from(
-        new Set(
-          orderedDespesas
-            .map((item) => item.secretariaNome)
-            .filter((value) => value.trim().length > 0)
-        )
+        new Set(orderedDespesas.map((item) => item.secretariaNome).filter((value) => value.trim().length > 0)),
       );
       const ultimaReferencia = orderedDespesas[0]?.dataReferencia ?? "";
 
@@ -254,15 +243,9 @@ export const buildFinanceRelations = ({
 }: BuildFinanceRelationsInput): FinanceRelations => {
   const activeDespesas = filterActiveRecords(despesas);
   const activeOrcamentos = filterActiveRecords(orcamentos);
-  const secretariaMap = new Map(
-    secretarias.map((secretaria) => [secretaria.idSecretaria, secretaria])
-  );
-  const instituicaoMap = new Map(
-    instituicoes.map((instituicao) => [instituicao.id, instituicao])
-  );
-  const tipoDespesaMap = new Map(
-    tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa])
-  );
+  const secretariaMap = new Map(secretarias.map((secretaria) => [secretaria.idSecretaria, secretaria]));
+  const instituicaoMap = new Map(instituicoes.map((instituicao) => [instituicao.id, instituicao]));
+  const tipoDespesaMap = new Map(tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa]));
 
   const despesasRelacionadas = activeDespesas
     .map<FinanceDespesaRelacionada>((despesa) => {
@@ -270,9 +253,7 @@ export const buildFinanceRelations = ({
       const instituicao = instituicaoId ? instituicaoMap.get(instituicaoId) : undefined;
       const secretariaId = instituicao?.idSecretaria ?? null;
       const secretaria = secretariaId ? secretariaMap.get(secretariaId) : undefined;
-      const tipoDespesa = despesa.idTipoDespesa
-        ? tipoDespesaMap.get(despesa.idTipoDespesa)
-        : undefined;
+      const tipoDespesa = despesa.idTipoDespesa ? tipoDespesaMap.get(despesa.idTipoDespesa) : undefined;
       const codigo = toTrimmedText(despesa.codigo);
       const valor = getDespesaValor(despesa);
       const dataReferencia = getDespesaDate(despesa);
@@ -286,21 +267,13 @@ export const buildFinanceRelations = ({
         numeroDocumento: toTrimmedText(despesa.numeroDocumento),
         uc: toTrimmedText(despesa.uc),
         descricao:
-          toTrimmedText(despesa.descricao) ||
-          toTrimmedText(despesa.numeroDocumento) ||
-          `Despesa ${despesa.id}`,
-        categoria:
-          tipoDespesa?.descricao ||
-          toTrimmedText(despesa.categoria) ||
-          "Categoria nao informada",
+          toTrimmedText(despesa.descricao) || toTrimmedText(despesa.numeroDocumento) || `Despesa ${despesa.id}`,
+        categoria: tipoDespesa?.descricao || toTrimmedText(despesa.categoria) || "Categoria nao informada",
         valor,
         valorFormatado: formatCurrency(valor),
         dataReferencia,
         dataReferenciaFormatada: formatDateLabel(dataReferencia),
-        dataEmissao:
-          normalizeDateInput(despesa.dataEmissao) ??
-          normalizeDateInput(despesa.dataEmicao) ??
-          "",
+        dataEmissao: normalizeDateInput(despesa.dataEmissao) ?? normalizeDateInput(despesa.dataEmicao) ?? "",
         dataVencimento: normalizeDateInput(despesa.dataVencimento) ?? "",
         status,
         statusLabel: getDespesaStatusLabel(status),
@@ -331,24 +304,13 @@ export const buildFinanceRelations = ({
 
   const instituicoesResumo = instituicoes
     .map<FinanceInstituicaoResumo>((instituicao) => {
-      const despesasDaInstituicao = despesasRelacionadas.filter(
-        (despesa) => despesa.idInstituicao === instituicao.id
-      );
-      const totalGastos = despesasDaInstituicao.reduce(
-        (accumulator, item) => accumulator + item.valor,
-        0
-      );
+      const despesasDaInstituicao = despesasRelacionadas.filter((despesa) => despesa.idInstituicao === instituicao.id);
+      const totalGastos = despesasDaInstituicao.reduce((accumulator, item) => accumulator + item.valor, 0);
       const totalOrcamentos = activeOrcamentos
         .filter((orcamento) => orcamento.idInstituicao === instituicao.id)
-        .reduce(
-          (accumulator, item) =>
-            accumulator + Number(item.valorOrcamento ?? item.valor ?? 0),
-          0
-        );
+        .reduce((accumulator, item) => accumulator + Number(item.valorOrcamento ?? item.valor ?? 0), 0);
       const codigos = buildCodigoResumo(despesasDaInstituicao);
-      const secretaria = instituicao.idSecretaria
-        ? secretariaMap.get(instituicao.idSecretaria)
-        : undefined;
+      const secretaria = instituicao.idSecretaria ? secretariaMap.get(instituicao.idSecretaria) : undefined;
 
       return {
         id: instituicao.id,
@@ -381,18 +343,15 @@ export const buildFinanceRelations = ({
   const secretariasResumo = secretarias
     .map<FinanceSecretariaResumo>((secretaria) => {
       const instituicoesDaSecretaria = instituicoesResumo.filter(
-        (instituicao) => instituicao.secretariaId === secretaria.idSecretaria
+        (instituicao) => instituicao.secretariaId === secretaria.idSecretaria,
       );
       const despesasDaSecretaria = despesasRelacionadas.filter(
-        (despesa) => despesa.idSecretaria === secretaria.idSecretaria
+        (despesa) => despesa.idSecretaria === secretaria.idSecretaria,
       );
-      const totalGastos = instituicoesDaSecretaria.reduce(
-        (accumulator, item) => accumulator + item.totalGastos,
-        0
-      );
+      const totalGastos = instituicoesDaSecretaria.reduce((accumulator, item) => accumulator + item.totalGastos, 0);
       const totalOrcamentos = instituicoesDaSecretaria.reduce(
         (accumulator, item) => accumulator + item.totalOrcamentos,
-        0
+        0,
       );
       const codigos = buildCodigoResumo(despesasDaSecretaria);
 
@@ -401,7 +360,7 @@ export const buildFinanceRelations = ({
         nome: secretaria.nome,
         quantidadeInstituicoes: instituicoesDaSecretaria.length,
         quantidadeInstituicoesComGastos: instituicoesDaSecretaria.filter(
-          (instituicao) => instituicao.quantidadeDespesas > 0
+          (instituicao) => instituicao.quantidadeDespesas > 0,
         ).length,
         quantidadeDespesas: despesasDaSecretaria.length,
         quantidadeCodigos: codigos.length,

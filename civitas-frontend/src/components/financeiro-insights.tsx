@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 import Modal from "@/components/modal";
 import type { FinanceDespesaRelacionada } from "@/lib/financeiro-relations";
 
@@ -11,10 +11,7 @@ export type InsightMetric = {
   tone?: "teal" | "amber" | "slate" | "coral";
 };
 
-const toneStyles: Record<
-  NonNullable<InsightMetric["tone"]>,
-  React.CSSProperties
-> = {
+const toneStyles: Record<NonNullable<InsightMetric["tone"]>, React.CSSProperties> = {
   teal: {
     background: "var(--surface-accent-teal)",
     borderColor: "var(--border-accent-teal)",
@@ -53,9 +50,7 @@ export function InsightsGrid({ metrics }: { metrics: InsightMetric[] }) {
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
                 {metric.label}
               </p>
-              <p className="mt-4 text-[28px] font-semibold leading-none text-[var(--foreground)]">
-                {metric.value}
-              </p>
+              <p className="mt-4 text-[28px] font-semibold leading-none text-[var(--foreground)]">{metric.value}</p>
               <p className="mt-2 text-sm text-[var(--foreground-muted)]">{metric.hint}</p>
             </div>
           </article>
@@ -91,12 +86,8 @@ export function InsightsModal({
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--foreground-soft)]">
             Leitura consolidada
           </p>
-          <h3 className="mt-3 text-[28px] font-semibold leading-tight text-[var(--secundary-1)]">
-            {title}
-          </h3>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-            {subtitle}
-          </p>
+          <h3 className="mt-3 text-[28px] font-semibold leading-tight text-[var(--secundary-1)]">{title}</h3>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">{subtitle}</p>
         </div>
 
         <InsightsGrid metrics={metrics} />
@@ -147,19 +138,13 @@ export function DespesasRelacionadasTable({
                 key={`${despesa.id}-${despesa.codigoNormalizado}`}
                 className="border-t border-[var(--divider)] text-sm text-[var(--foreground)]"
               >
-                <td className="px-4 py-3 font-semibold text-[var(--secundary-1)]">
-                  {despesa.codigo}
-                </td>
+                <td className="px-4 py-3 font-semibold text-[var(--secundary-1)]">{despesa.codigo}</td>
                 <td className="px-4 py-3">{despesa.descricao}</td>
                 {showInstituicao ? (
-                  <td className="px-4 py-3 text-[var(--foreground-muted)]">
-                    {despesa.instituicaoNome}
-                  </td>
+                  <td className="px-4 py-3 text-[var(--foreground-muted)]">{despesa.instituicaoNome}</td>
                 ) : null}
                 {showSecretaria ? (
-                  <td className="px-4 py-3 text-[var(--foreground-muted)]">
-                    {despesa.secretariaNome}
-                  </td>
+                  <td className="px-4 py-3 text-[var(--foreground-muted)]">{despesa.secretariaNome}</td>
                 ) : null}
                 <td className="px-4 py-3 text-right font-semibold text-[var(--secundary-1)]">
                   {despesa.valorFormatado}
@@ -169,9 +154,7 @@ export function DespesasRelacionadasTable({
                     {despesa.statusLabel}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-[var(--foreground-muted)]">
-                  {despesa.dataReferenciaFormatada}
-                </td>
+                <td className="px-4 py-3 text-[var(--foreground-muted)]">{despesa.dataReferenciaFormatada}</td>
               </tr>
             ))}
           </tbody>
@@ -180,5 +163,3 @@ export function DespesasRelacionadasTable({
     </div>
   );
 }
-
-

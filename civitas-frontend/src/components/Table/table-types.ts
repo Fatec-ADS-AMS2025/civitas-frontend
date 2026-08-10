@@ -1,13 +1,11 @@
 import type React from "react";
-import type { FieldConfig as ModalFieldConfig, FormMode, ValidationFn } from "../Form/form";
 import type { InfoTone } from "@/components/DataDisplay";
+import type { FormMode, FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
 import type { TableColumn, TableExportConfig } from "./export-types";
 
 export type TableRow = object;
 
-export type TableCardValue<T extends TableRow> =
-  | React.ReactNode
-  | ((row: T) => React.ReactNode);
+export type TableCardValue<T extends TableRow> = React.ReactNode | ((row: T) => React.ReactNode);
 
 export type TableCardField<T extends TableRow> = {
   label: string;

@@ -43,10 +43,7 @@ export default function ConfiguracoesPage() {
         onCreate={handleCreate}
       />
 
-      <ConfiguracoesTipoSelector
-        selected={tipoSelecionado}
-        onSelect={setTipoSelecionado}
-      />
+      <ConfiguracoesTipoSelector selected={tipoSelecionado} onSelect={setTipoSelecionado} />
 
       <ConfiguracoesTable
         definition={definition}

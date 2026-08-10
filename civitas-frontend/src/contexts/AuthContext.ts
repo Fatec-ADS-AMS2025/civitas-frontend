@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { createContext, createElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { authStorage, type AuthStorageUser } from '@/lib/auth-storage';
+import { createContext, createElement, useCallback, useEffect, useMemo, useState } from "react";
+import { type AuthStorageUser, authStorage } from "@/lib/auth-storage";
 
 type AuthContextValue = {
   user: AuthStorageUser | null;
@@ -25,12 +25,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const storedUser = authStorage.get();
 
     if (storedUser) {
-      console.info('[AuthProvider] Usuario restaurado do localStorage.', {
+      console.info("[AuthProvider] Usuario restaurado do localStorage.", {
         userId: storedUser.id,
       });
       setUser(storedUser);
     } else {
-      console.info('[AuthProvider] Nenhum usuario salvo no localStorage.');
+      console.info("[AuthProvider] Nenhum usuario salvo no localStorage.");
     }
 
     setIsHydrated(true);
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (nextUser) {
       authStorage.set(nextUser);
       setUser(nextUser);
-      console.info('[AuthProvider] Usuario autenticado e persistido.', {
+      console.info("[AuthProvider] Usuario autenticado e persistido.", {
         userId: nextUser.id,
       });
       return;
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     authStorage.clear();
     setUser(null);
-    console.info('[AuthProvider] Sessao local removida.');
+    console.info("[AuthProvider] Sessao local removida.");
   }, []);
 
   const logout = useCallback(() => setAuthenticatedUser(null), [setAuthenticatedUser]);
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAuthenticatedUser,
       logout,
     }),
-    [user, isHydrated, setAuthenticatedUser, logout]
+    [user, isHydrated, setAuthenticatedUser, logout],
   );
 
   return createElement(AuthContext.Provider, { value }, children);
