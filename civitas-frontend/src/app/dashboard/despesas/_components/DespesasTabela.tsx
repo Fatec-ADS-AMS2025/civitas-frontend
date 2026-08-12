@@ -1,13 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Input from "@/components/Input";
 import Table from "@/components/Table/table";
 import type { TableColumn } from "@/components/Table/export-types";
 import type { TablePaginationConfig } from "@/components/Table/table";
 import { normalizeDateInput } from "@/global/formPayload";
-import { despesaService } from "@/hooks/despesa";
-import { documentoService } from "@/hooks/documento";
-import { showToast } from "@/hooks/useToast";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
+import DespesaDocumentoActions from "./DespesaDocumentoActions";
 import { ICON_BUTTON_CLASS_NAME } from "../despesas.constants";
 import type { DespesasListSearchState, DespesasTableData } from "../despesas.types";
 import { getDespesaCodigo, getStatusBadgeClassName } from "../despesas.utils";
@@ -172,7 +170,7 @@ export default function DespesasTabela({
         id: "documento",
         label: "Documento",
         sortable: false,
-        render: (row) => <DocumentoAction despesa={row as DespesaDashboardRow} />,
+        render: (row) => <DespesaDocumentoActions despesa={row as DespesaDashboardRow} showEmptyState />,
       },
     ],
     []
@@ -351,88 +349,3 @@ export default function DespesasTabela({
     </section>
   );
 }
-
-function DocumentoAction({ despesa }: { despesa: DespesaDashboardRow }) {
-  const [isOpening, setIsOpening] = useState(false);
-  const documento = despesa.documento;
-
-  if (!despesa.documentoConfiavel) {
-    return (
-      <span className="inline-flex min-h-9 items-center rounded-sm border border-dashed border-[var(--border-soft)] px-3 text-xs font-semibold text-[var(--foreground-muted)]">
-        Sem anexo
-      </span>
-    );
-  }
-
-  const handleOpen = async () => {
-    try {
-      setIsOpening(true);
-      const resolvedDocumento =
-        documento?.digitalizacao
-          ? documento
-          : despesa.idDocumento
-            ? await documentoService.getDocumentoDataById(despesa.idDocumento)
-            : null;
-
-      if (resolvedDocumento?.digitalizacao) {
-        const fileType = resolvedDocumento.fileType || "application/pdf";
-        const blob = base64ToBlob(resolvedDocumento.digitalizacao, fileType);
-        openBlob(blob);
-        return;
-      }
-
-      if (despesa.raw.hashDocumento) {
-        const blob = await despesaService.getDocumentoBlobByHash(despesa.raw.hashDocumento);
-        openBlob(blob);
-        return;
-      }
-
-      if (!resolvedDocumento?.digitalizacao) {
-        showToast("Documento nao foi encontrado para abertura.", "error");
-        return;
-      }
-    } catch (error) {
-      console.error("Erro ao abrir documento da despesa.", error);
-      showToast("Nao foi possivel abrir o documento.", "error");
-    } finally {
-      setIsOpening(false);
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={() => void handleOpen()}
-      disabled={isOpening}
-      className="inline-flex min-h-9 items-center gap-1.5 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)]"
-      aria-label={`Abrir documento da despesa ${despesa.registro}`}
-    >
-      <span className="material-symbols-outlined !text-[16px]" aria-hidden="true">
-        attach_file
-      </span>
-      {isOpening ? "Abrindo..." : "Abrir"}
-    </button>
-  );
-}
-
-const openBlob = (blob: Blob): void => {
-  const url = window.URL.createObjectURL(blob);
-  const openedWindow = window.open(url, "_blank", "noopener,noreferrer");
-
-  if (!openedWindow) {
-    showToast("O navegador bloqueou a abertura do documento.", "error");
-  }
-
-  window.setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
-};
-
-const base64ToBlob = (base64: string, fileType: string): Blob => {
-  const binary = window.atob(base64);
-  const bytes = new Uint8Array(binary.length);
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
-
-  return new Blob([bytes], { type: fileType });
-};

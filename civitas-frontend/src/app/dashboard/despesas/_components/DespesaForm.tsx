@@ -246,7 +246,7 @@ export default function DespesaForm({
       key: "documento",
       label: "Documento",
       type: "documento",
-      accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
+      accept: ".pdf,application/pdf",
     }),
     []
   );
