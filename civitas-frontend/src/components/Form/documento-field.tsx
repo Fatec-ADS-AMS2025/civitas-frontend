@@ -3,6 +3,16 @@
 import React, { useId, useMemo, useRef, useState } from "react";
 import type { FormFieldConfig } from "./form";
 import { getFieldErrorId } from "./form-utils";
+import {
+  base64ToDocumentBlob,
+  buildDocumentPreviewUrl,
+  canPreviewDocument,
+  downloadDocumentBlob,
+  formatDocumentFileSize,
+  getDocumentMimeType,
+  readDocumentFileAsBase64,
+  validateDocumentFile,
+} from "@/lib/documento-utils";
 
 export type DocumentoUploadStatus = "idle" | "loading" | "ready" | "error";
 
@@ -60,46 +70,6 @@ const getUploadStatus = (status: unknown): DocumentoUploadStatus => {
   return "idle";
 };
 
-const formatFileSize = (bytes?: number): string => {
-  if (!bytes || bytes <= 0) return "0 KB";
-
-  const units = ["B", "KB", "MB", "GB"];
-  let nextSize = bytes;
-  let unitIndex = 0;
-
-  while (nextSize >= 1024 && unitIndex < units.length - 1) {
-    nextSize /= 1024;
-    unitIndex += 1;
-  }
-
-  return `${nextSize.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
-};
-
-const readFileAsBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onerror = () => reject(new Error("Nao foi possivel ler o arquivo selecionado."));
-    reader.onload = () => {
-      if (typeof reader.result !== "string") {
-        reject(new Error("Nao foi possivel converter o arquivo para Base64."));
-        return;
-      }
-
-      // FileReader retorna um Data URL; a API espera apenas o conteudo Base64 cru.
-      const [, rawBase64 = ""] = reader.result.split(",", 2);
-      if (!rawBase64) {
-        reject(new Error("Arquivo convertido sem conteudo Base64."));
-        return;
-      }
-
-      resolve(rawBase64);
-    };
-
-    reader.readAsDataURL(file);
-  });
-};
-
 export default function DocumentoField({
   field,
   value,
@@ -115,18 +85,21 @@ export default function DocumentoField({
   const documento = getDocumentoValue(value);
   const status = documento?.status ?? "idle";
   const hasFile = Boolean(documento?.digitalizacao || documento?.isPersisted);
+  const hasDocumentContent = Boolean(documento?.digitalizacao);
   const isConverting = status === "loading";
   const isDisabled = disabled || isConverting;
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const previewUrl = useMemo(() => {
-    if (!documento?.digitalizacao || !documento?.fileType) return "";
-    return `data:${documento.fileType};base64,${documento.digitalizacao}`;
-  }, [documento?.digitalizacao, documento?.fileType]);
-
-  const isImagePreview = Boolean(documento?.fileType?.startsWith("image/"));
-  const isPdfPreview = Boolean(documento?.fileType?.includes("pdf"));
-  const canPreview = Boolean(documento?.digitalizacao) && (isImagePreview || isPdfPreview);
+  const fileType = getDocumentMimeType(documento?.fileName, documento?.fileType);
+  const previewUrl = useMemo(
+    () =>
+      documento?.digitalizacao
+        ? buildDocumentPreviewUrl(documento.digitalizacao, fileType, documento.fileName)
+        : "",
+    [documento?.digitalizacao, documento?.fileName, fileType]
+  );
+  const canPreview = hasDocumentContent && canPreviewDocument(fileType, documento?.fileName);
+  const isPdfPreview = fileType === "application/pdf";
 
   const statusMessage = useMemo(() => {
     if (status === "loading") return "Convertendo arquivo para Base64...";
@@ -140,7 +113,6 @@ export default function DocumentoField({
     const file = event.target.files?.[0];
 
     if (!file) {
-      onChange(field, "");
       return;
     }
 
@@ -150,15 +122,26 @@ export default function DocumentoField({
       numeroDocumento: documento?.numeroDocumento ?? 0,
       idFornecedor: documento?.idFornecedor ?? 0,
       fileName: file.name,
-      fileType: file.type || "Tipo nao informado",
+      fileType: getDocumentMimeType(file.name, file.type),
       fileSize: file.size,
       status: "loading",
     };
 
+    const validationError = validateDocumentFile(file);
+    if (validationError) {
+      onChange(field, {
+        ...baseValue,
+        status: "error",
+        errorMessage: validationError,
+      });
+      event.target.value = "";
+      return;
+    }
+
     onChange(field, baseValue);
 
     try {
-      const digitalizacao = await readFileAsBase64(file);
+      const digitalizacao = await readDocumentFileAsBase64(file);
       onChange(field, {
         ...baseValue,
         digitalizacao,
@@ -189,6 +172,28 @@ export default function DocumentoField({
     onChange(field, "");
   };
 
+  const handleDownload = () => {
+    if (!documento?.digitalizacao) return;
+
+    try {
+      downloadDocumentBlob(
+        base64ToDocumentBlob(documento.digitalizacao, fileType, documento.fileName),
+        documento.fileName
+      );
+    } catch (downloadError) {
+      const message =
+        downloadError instanceof Error
+          ? downloadError.message
+          : "Nao foi possivel preparar o documento para download.";
+
+      onChange(field, {
+        ...documento,
+        status: "error",
+        errorMessage: message,
+      });
+    }
+  };
+
   return (
     <div className="w-full">
       <label
@@ -204,7 +209,7 @@ export default function DocumentoField({
           ref={inputRef}
           id={inputId}
           type="file"
-          accept={field.accept ?? ".pdf,.png,.jpg,.jpeg,image/*,application/pdf"}
+          accept={field.accept ?? ".pdf,application/pdf"}
           disabled={isDisabled}
           required={false}
           aria-required={required}
@@ -251,6 +256,20 @@ export default function DocumentoField({
               </button>
             ) : null}
 
+            {hasDocumentContent ? (
+              <button
+                type="button"
+                disabled={isConverting}
+                onClick={handleDownload}
+                className="civitas-action civitas-action--ghost min-h-10 rounded-sm px-3 text-xs font-semibold"
+              >
+                <span className="material-symbols-outlined !text-[18px]" aria-hidden="true">
+                  download
+                </span>
+                Baixar
+              </button>
+            ) : null}
+
             {documento ? (
               <button
                 type="button"
@@ -275,11 +294,11 @@ export default function DocumentoField({
             </span>
             <span>
               <strong className="font-semibold text-[var(--foreground)]">Tipo:</strong>{" "}
-              {documento.fileType || "Tipo nao informado"}
+              {fileType || "Tipo nao informado"}
             </span>
             <span>
               <strong className="font-semibold text-[var(--foreground)]">Tamanho:</strong>{" "}
-              {formatFileSize(documento.fileSize)}
+              {formatDocumentFileSize(documento.fileSize)}
             </span>
             <span>
               <strong className="font-semibold text-[var(--foreground)]">Status:</strong>{" "}
@@ -290,14 +309,6 @@ export default function DocumentoField({
 
         {canPreview && isPreviewOpen ? (
           <div className="mt-3 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3">
-            {isImagePreview ? (
-              <img
-                src={previewUrl}
-                alt={documento?.fileName ?? "Pre-visualizacao"}
-                className="max-h-[320px] w-full rounded-sm object-contain"
-              />
-            ) : null}
-
             {isPdfPreview ? (
               <iframe
                 title={documento?.fileName ?? "Pre-visualizacao"}
@@ -307,6 +318,7 @@ export default function DocumentoField({
             ) : null}
           </div>
         ) : null}
+
       </div>
 
       {error && (

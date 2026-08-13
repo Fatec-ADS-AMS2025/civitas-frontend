@@ -8,6 +8,7 @@ import {
 } from "@/components/details/info-details";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { getDespesaCodigo } from "../despesas.utils";
+import DespesaDocumentoActions from "./DespesaDocumentoActions";
 
 type DespesaDetailsViewProps = {
   despesa: DespesaDashboardRow;
@@ -58,6 +59,15 @@ export default function DespesaDetailsView({ despesa }: DespesaDetailsViewProps)
           />
         </DetailCardGrid>
       </DetailSection>
+
+      {despesa.documentoConfiavel ? (
+        <DetailSection
+          title="Anexo"
+          description="Abra ou baixe o documento vinculado a esta despesa."
+        >
+          <DespesaDocumentoActions despesa={despesa} />
+        </DetailSection>
+      ) : null}
 
       <DetailSection title="Relacionamentos">
         <DetailFieldGrid
