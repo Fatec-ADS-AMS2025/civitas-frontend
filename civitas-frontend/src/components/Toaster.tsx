@@ -40,8 +40,8 @@ export default function Toaster() {
     toast.type === "success"
       ? "civitas-toast civitas-toast--success"
       : toast.type === "error"
-      ? "civitas-toast civitas-toast--error"
-      : "civitas-toast civitas-toast--info";
+        ? "civitas-toast civitas-toast--error"
+        : "civitas-toast civitas-toast--info";
 
   return (
     <div className="fixed right-3 top-3 z-[9999] sm:right-5 sm:top-5">

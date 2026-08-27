@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
+import { type FieldConfig, SearchBar } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { normalizeOrcamentoPayload } from "@/global/formPayload";
 import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
@@ -10,10 +10,10 @@ import { despesaService } from "@/hooks/despesa";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
-import DespesaDTO from "@/models/despesa";
-import InstituicaoDTO from "@/models/instituicao";
-import OrcamentoDTO from "@/models/orcamento";
-import TipoDespesaDTO from "@/models/tipoDespesa";
+import type DespesaDTO from "@/models/despesa";
+import type InstituicaoDTO from "@/models/instituicao";
+import type OrcamentoDTO from "@/models/orcamento";
+import type TipoDespesaDTO from "@/models/tipoDespesa";
 import OrcamentoDetailsView from "./OrcamentoDetailsView";
 
 type Orcamento = OrcamentoDTO;
@@ -57,7 +57,7 @@ const columns = [
 
 const buildOrcamentoCampos = (
   instituicaoOptions: FieldConfig["options"],
-  tipoDespesaOptions: FieldConfig["options"]
+  tipoDespesaOptions: FieldConfig["options"],
 ): FieldConfig[] => {
   return [
     { key: "anoOrcamento", placeholder: "Ano", local: "principal" },
@@ -104,9 +104,7 @@ const getOrcamentoValorPrevisto = (orcamento: Orcamento): number => {
 };
 
 const getDespesaValorRealizado = (despesa: Despesa): number => {
-  const value = Number(
-    despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0
-  );
+  const value = Number(despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0);
   return Number.isFinite(value) ? value : 0;
 };
 
@@ -138,26 +136,20 @@ const mapOrcamentoRows = (
   orcamentos: Orcamento[],
   despesas: Despesa[],
   instituicoes: Instituicao[],
-  tiposDespesa: TipoDespesa[]
+  tiposDespesa: TipoDespesa[],
 ): OrcamentoRow[] => {
-  const instituicaoMap = new Map(
-    instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const)
-  );
-  const tipoDespesaMap = new Map(
-    tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa.descricao] as const)
-  );
+  const instituicaoMap = new Map(instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const));
+  const tipoDespesaMap = new Map(tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa.descricao] as const));
 
   return orcamentos.map((orcamento) => {
     const orcamentoId = getOrcamentoId(orcamento);
     const instituicaoId = orcamento.idInstituicao;
     const tipoDespesaId = orcamento.idTipoDespesa;
-    const despesasRelacionadas = despesas.filter(
-      (despesa) => Number(despesa.idOrcamento ?? 0) === orcamentoId
-    );
+    const despesasRelacionadas = despesas.filter((despesa) => Number(despesa.idOrcamento ?? 0) === orcamentoId);
     const valorPrevisto = getOrcamentoValorPrevisto(orcamento);
     const valorRealizado = despesasRelacionadas.reduce(
       (total, despesa) => total + getDespesaValorRealizado(despesa),
-      0
+      0,
     );
     const saldo = valorPrevisto - valorRealizado;
 
@@ -172,11 +164,11 @@ const mapOrcamentoRows = (
       quantidadeDespesasRelacionadas: despesasRelacionadas.length,
       instituicaoLabel:
         instituicaoId !== undefined
-          ? instituicaoMap.get(instituicaoId) ?? `Instituicao #${instituicaoId}`
+          ? (instituicaoMap.get(instituicaoId) ?? `Instituicao #${instituicaoId}`)
           : "Instituicao nao informada",
       tipoDespesaLabel:
         tipoDespesaId !== undefined
-          ? tipoDespesaMap.get(tipoDespesaId) ?? `Tipo #${tipoDespesaId}`
+          ? (tipoDespesaMap.get(tipoDespesaId) ?? `Tipo #${tipoDespesaId}`)
           : "Tipo nao informado",
     };
   });
@@ -203,15 +195,12 @@ type OrcamentosPageClientProps = {
   initialError?: string | null;
 };
 
-export default function OrcamentosPageClient({
-  initialData,
-  initialError = null,
-}: OrcamentosPageClientProps) {
+export default function OrcamentosPageClient({ initialData, initialError = null }: OrcamentosPageClientProps) {
   const initialRows = mapOrcamentoRows(
     initialData.orcamentos,
     initialData.despesas,
     initialData.instituicoes,
-    initialData.tiposDespesa
+    initialData.tiposDespesa,
   );
   const [orcamentos, setOrcamentos] = useState<OrcamentoRow[]>(initialRows);
   const [filteredData, setFilteredData] = useState<OrcamentoRow[]>(initialRows);
@@ -279,12 +268,7 @@ export default function OrcamentosPageClient({
 
   const refreshOrcamentos = async () => {
     const pageData = await fetchOrcamentoPageData();
-    const rows = mapOrcamentoRows(
-      pageData.orcamentos,
-      pageData.despesas,
-      pageData.instituicoes,
-      pageData.tiposDespesa
-    );
+    const rows = mapOrcamentoRows(pageData.orcamentos, pageData.despesas, pageData.instituicoes, pageData.tiposDespesa);
 
     setInstituicoes(pageData.instituicoes);
     setTiposDespesa(pageData.tiposDespesa);
@@ -331,9 +315,7 @@ export default function OrcamentosPageClient({
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={orcamentoFormFields}
-        renderModalExtra={(row, mode) =>
-          mode === "view" ? <OrcamentoDetailsView orcamento={row} /> : null
-        }
+        renderModalExtra={(row, mode) => (mode === "view" ? <OrcamentoDetailsView orcamento={row} /> : null)}
         exportConfig={{
           enabled: true,
           title: "Orcamentos",

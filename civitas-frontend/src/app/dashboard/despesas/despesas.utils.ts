@@ -36,7 +36,7 @@ export const normalizeSearchValue = (value: string): string => {
 export const ensureOption = (
   options: SelectOption[],
   currentValue: number | undefined,
-  fallbackLabel: string
+  fallbackLabel: string,
 ): SelectOption[] => {
   if (!currentValue || options.some((option) => Number(option.value) === currentValue)) {
     return options;
@@ -51,9 +51,7 @@ export const getDespesaCodigo = (despesa: DespesaDashboardRow): string => {
   return codigoText && codigoText !== "0" ? codigoText : "Sem codigo informado";
 };
 
-export const buildDespesaFormObject = (
-  despesa?: DespesaDashboardRow | null
-): Record<string, unknown> => {
+export const buildDespesaFormObject = (despesa?: DespesaDashboardRow | null): Record<string, unknown> => {
   if (!despesa) {
     return EMPTY_DESPESA_FORM;
   }
@@ -77,7 +75,7 @@ export const buildDespesaFormObject = (
     id: despesa.id,
     documento: despesa.documentoConfiavel ? persistedDocumento : "",
     numeroDocumento: despesa.raw.numeroDocumento ?? "",
-    codigo: despesa.raw.codigo === "0" ? "" : despesa.raw.codigo ?? "",
+    codigo: despesa.raw.codigo === "0" ? "" : (despesa.raw.codigo ?? ""),
     idTipoCodigo: despesa.tipoCodigoId ?? "",
     idTipoDespesa: despesa.raw.idTipoDespesa ?? "",
     idUnidadeConsumidora: despesa.raw.idUnidadeConsumidora ?? "",
@@ -92,10 +90,7 @@ export const buildDespesaFormObject = (
       normalizeDateInput(despesa.raw.dataEmicao) ??
       normalizeDateInput(despesa.raw.data) ??
       "",
-    dataVencimento:
-      normalizeDateInput(despesa.raw.dataVencimento) ??
-      normalizeDateInput(despesa.raw.data) ??
-      "",
+    dataVencimento: normalizeDateInput(despesa.raw.dataVencimento) ?? normalizeDateInput(despesa.raw.data) ?? "",
     idInstituicao: despesa.raw.idInstituicao ?? "",
     idOrcamento: despesa.raw.idOrcamento ?? "",
     idFornecedor: despesa.raw.idFornecedor ?? despesa.raw.fornecedorId ?? "",
@@ -115,9 +110,7 @@ export const isPendingDespesa = (status: number): boolean => {
   return status === 1 || status === 3;
 };
 
-export const mapDespesaToExportRow = (
-  despesa: DespesaDashboardRow
-): DespesaExportRow => ({
+export const mapDespesaToExportRow = (despesa: DespesaDashboardRow): DespesaExportRow => ({
   id: despesa.id,
   codigo: getDespesaCodigo(despesa),
   tipoCodigo: despesa.tipoCodigoNome,

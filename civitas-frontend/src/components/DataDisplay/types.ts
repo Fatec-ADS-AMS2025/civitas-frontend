@@ -1,13 +1,6 @@
 import type React from "react";
 
-export type InfoTone =
-  | "default"
-  | "teal"
-  | "amber"
-  | "slate"
-  | "coral"
-  | "success"
-  | "danger";
+export type InfoTone = "default" | "teal" | "amber" | "slate" | "coral" | "success" | "danger";
 
 export type InfoListItem = {
   label: string;

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import PaginationControls from "@/components/PaginationControls";
 import { EmptyState, ErrorState, LoadingState } from "@/components/feedback-states";
+import PaginationControls from "@/components/PaginationControls";
 import type {
   ListingColumn,
   ListingConfig,
@@ -9,11 +9,7 @@ import type {
   ListingRow,
   ListingViewState,
 } from "../types";
-import {
-  buildFilterOptionsFromRows,
-  buildListingRowKey,
-  buildListingScopedKey,
-} from "../utils";
+import { buildFilterOptionsFromRows, buildListingRowKey, buildListingScopedKey } from "../utils";
 
 type ListingPanelViewProps = {
   panelId: ListingPanelId;
@@ -82,11 +78,7 @@ const renderColumnValue = (column: ListingColumn<ListingRow>, row: ListingRow) =
   return String(value);
 };
 
-const buildSelectOptions = (
-  config: ListingConfig<ListingRow>,
-  filter: ListingFilterDefinition,
-  rows: ListingRow[],
-) => {
+const buildSelectOptions = (config: ListingConfig<ListingRow>, filter: ListingFilterDefinition, rows: ListingRow[]) => {
   if (filter.options && filter.options.length > 0) {
     return filter.options;
   }
@@ -156,12 +148,8 @@ export function ListingPanelView({
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
               {panelLabel} / {config.category}
             </p>
-            <h3 className="mt-1 text-2xl font-semibold text-[var(--secundary-1)]">
-              {config.label}
-            </h3>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-              {config.description}
-            </p>
+            <h3 className="mt-1 text-2xl font-semibold text-[var(--secundary-1)]">{config.label}</h3>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">{config.description}</p>
           </div>
 
           <div className="grid gap-3 lg:grid-cols-[minmax(18rem,1fr)_auto]">
@@ -287,18 +275,14 @@ export function ListingPanelView({
                       <input
                         type={inputType}
                         value={from}
-                        onChange={(event) =>
-                          onFilterChange(filter.id, `${event.target.value}|${to}`)
-                        }
+                        onChange={(event) => onFilterChange(filter.id, `${event.target.value}|${to}`)}
                         placeholder="De"
                         className="civitas-control min-h-[44px] rounded-sm px-4 py-2.5"
                       />
                       <input
                         type={inputType}
                         value={to}
-                        onChange={(event) =>
-                          onFilterChange(filter.id, `${from}|${event.target.value}`)
-                        }
+                        onChange={(event) => onFilterChange(filter.id, `${from}|${event.target.value}`)}
                         placeholder="Ate"
                         className="civitas-control min-h-[44px] rounded-sm px-4 py-2.5"
                       />
@@ -322,11 +306,7 @@ export function ListingPanelView({
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={onClearFilters}
-              className="civitas-action civitas-action--ghost rounded-sm"
-            >
+            <button type="button" onClick={onClearFilters} className="civitas-action civitas-action--ghost rounded-sm">
               <span className="material-symbols-outlined !text-[18px]">ink_eraser</span>
               Limpar filtros
             </button>
@@ -381,11 +361,7 @@ export function ListingPanelView({
                   )}
                   className="inline-flex items-center gap-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-3 py-2 text-sm"
                 >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => onColumnToggle(column.id)}
-                  />
+                  <input type="checkbox" checked={checked} onChange={() => onColumnToggle(column.id)} />
                   {column.label}
                 </label>
               );
@@ -471,12 +447,7 @@ export function ListingPanelView({
                     >
                       {visibleColumns.map((column, columnIndex) => (
                         <td
-                          key={buildListingScopedKey(
-                            `${rowKey}:cell-${columnIndex}`,
-                            rowKey,
-                            "cell",
-                            column.id,
-                          )}
+                          key={buildListingScopedKey(`${rowKey}:cell-${columnIndex}`, rowKey, "cell", column.id)}
                           className={`max-w-[22rem] break-words px-4 py-4 align-top text-sm text-[var(--foreground)] ${getCellAlignmentClassName(column.align)}`}
                         >
                           {renderColumnValue(column, row)}
@@ -518,7 +489,9 @@ export function ListingPanelView({
                         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                           {column.label}
                         </p>
-                        <div className={`break-words text-sm text-[var(--foreground)] ${getCellAlignmentClassName(column.align)}`}>
+                        <div
+                          className={`break-words text-sm text-[var(--foreground)] ${getCellAlignmentClassName(column.align)}`}
+                        >
                           {renderColumnValue(column, row)}
                         </div>
                       </div>

@@ -1,11 +1,7 @@
-import { useMemo, type Dispatch, type SetStateAction } from "react";
+import { type Dispatch, type SetStateAction, useId, useMemo } from "react";
 import Input from "@/components/Input";
 import type { DespesasDashboardFilters } from "@/hooks/useDespesasDashboard";
-import {
-  FILTER_FIELD_CLASS_NAME,
-  SOLICITA_UC_OPTIONS,
-  VENCIMENTO_OPTIONS,
-} from "../despesas.constants";
+import { FILTER_FIELD_CLASS_NAME, SOLICITA_UC_OPTIONS, VENCIMENTO_OPTIONS } from "../despesas.constants";
 import type { SelectOption } from "../despesas.types";
 
 type DespesasFiltrosProps = {
@@ -36,19 +32,19 @@ type ActiveFilter = {
   value: string;
 };
 
-function FilterSelect({
-  label,
-  value,
-  emptyLabel,
-  options,
-  onChange,
-}: FilterSelectProps) {
+function FilterSelect({ label, value, emptyLabel, options, onChange }: FilterSelectProps) {
+  const selectId = useId();
+
   return (
     <div className="space-y-2">
-      <label className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]">
+      <label
+        htmlFor={selectId}
+        className="despesas-filter-label block text-sm font-semibold text-[var(--foreground-muted)]"
+      >
         {label}
       </label>
       <select
+        id={selectId}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className={FILTER_FIELD_CLASS_NAME}
@@ -109,7 +105,7 @@ const buildActiveFilters = (
     tipoDespesaOptions: SelectOption[];
     instituicaoOptions: SelectOption[];
     secretariaOptions: SelectOption[];
-  }
+  },
 ): ActiveFilter[] => {
   const activeFilters: ActiveFilter[] = [];
 
@@ -205,13 +201,7 @@ export default function DespesasFiltros({
         instituicaoOptions,
         secretariaOptions,
       }),
-    [
-      filterForm,
-      instituicaoOptions,
-      secretariaOptions,
-      tipoCodigoOptions,
-      tipoDespesaOptions,
-    ]
+    [filterForm, instituicaoOptions, secretariaOptions, tipoCodigoOptions, tipoDespesaOptions],
   );
 
   const updateFilter = (field: keyof DespesasDashboardFilters, value: string) => {
@@ -230,18 +220,15 @@ export default function DespesasFiltros({
       <div className="flex flex-col gap-3 border-b border-[var(--divider)] pb-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="inline-flex items-center gap-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
-            <span className="material-symbols-outlined !text-[16px] text-[var(--secundary-1)]">
-              tune
-            </span>
+            <span className="material-symbols-outlined !text-[16px] text-[var(--secundary-1)]">tune</span>
             Filtros inteligentes
           </div>
           <h3 className="mt-3 text-[28px] font-bold text-[var(--secundary-1)]">
             Encontre a despesa sem tentativa e erro
           </h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-            Os filtros aplicam automaticamente e tambem podem ser confirmados no
-            botao Aplicar. Use os atalhos para vencimento ou refine por
-            secretaria, instituicao, periodo e categoria.
+            Os filtros aplicam automaticamente e tambem podem ser confirmados no botao Aplicar. Use os atalhos para
+            vencimento ou refine por secretaria, instituicao, periodo e categoria.
           </p>
         </div>
 
@@ -370,9 +357,7 @@ export default function DespesasFiltros({
 
       <div className="mt-5 border-t border-[var(--divider)] pt-4">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-[var(--foreground-muted)]">
-            Filtros ativos
-          </p>
+          <p className="text-sm font-semibold text-[var(--foreground-muted)]">Filtros ativos</p>
           <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
             {activeFilters.length} ativo{activeFilters.length === 1 ? "" : "s"}
           </span>

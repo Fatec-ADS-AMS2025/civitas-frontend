@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  DetailCard,
-  DetailCardGrid,
-  DetailFieldGrid,
-  DetailSection,
-} from "@/components/details/info-details";
+import { DetailCard, DetailCardGrid, DetailFieldGrid, DetailSection } from "@/components/details/info-details";
 import type { OrcamentoRow } from "./OrcamentosPageClient";
 
 type OrcamentoDetailsViewProps = {

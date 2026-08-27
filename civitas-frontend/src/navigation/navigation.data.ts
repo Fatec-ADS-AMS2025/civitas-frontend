@@ -1,8 +1,4 @@
-import {
-  type NavigationItem,
-  type ResolvedNavigationMeta,
-  type NavigationBreadcrumb,
-} from "./navigation.types";
+import type { NavigationBreadcrumb, NavigationItem, ResolvedNavigationMeta } from "./navigation.types";
 
 export const NAVIGATION_CATALOG: NavigationItem[] = [
   {
@@ -186,11 +182,7 @@ export const NAVIGATION_CATALOG: NavigationItem[] = [
     label: "Meu Perfil",
     path: "/dashboard/perfil",
     keywords: ["conta", "usuario", "meu perfil"],
-    features: [
-      "ver dados da conta",
-      "consultar perfil do usuario",
-      "acessar informacoes pessoais",
-    ],
+    features: ["ver dados da conta", "consultar perfil do usuario", "acessar informacoes pessoais"],
     category: "Conta",
     icon: "person",
     priority: 50,
@@ -210,9 +202,7 @@ const formatSegmentLabel = (segment: string): string => {
 
 const findItemByPath = (path: string): NavigationItem | undefined => {
   const normalizedPath = normalizePath(path);
-  return NAVIGATION_CATALOG.find(
-    (item) => normalizePath(item.path) === normalizedPath,
-  );
+  return NAVIGATION_CATALOG.find((item) => normalizePath(item.path) === normalizedPath);
 };
 
 export const resolveNavigationMeta = (pathname: string): ResolvedNavigationMeta => {
@@ -233,8 +223,7 @@ export const resolveNavigationMeta = (pathname: string): ResolvedNavigationMeta 
   }
 
   const exactItem = findItemByPath(normalizedPath);
-  const fallbackTitle =
-    breadcrumbs[breadcrumbs.length - 1]?.label ?? "Dashboard";
+  const fallbackTitle = breadcrumbs[breadcrumbs.length - 1]?.label ?? "Dashboard";
 
   return {
     title: exactItem?.label ?? fallbackTitle,

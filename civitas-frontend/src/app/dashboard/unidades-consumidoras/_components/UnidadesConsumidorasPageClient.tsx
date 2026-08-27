@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
+import { type FieldConfig, SearchBar } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
-import CrudRouteSkeleton from "../../_components/crud-route-skeleton";
 import { normalizeUnidadeConsumidoraPayload } from "@/global/formPayload";
 import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
 import { fornecedorService } from "@/hooks/fornecedor";
@@ -14,12 +13,13 @@ import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
 import { unidadeConsumidoraService } from "@/hooks/unidadeConsumidora";
-import FornecedorDTO from "@/models/fornecedor";
-import InstituicaoDTO from "@/models/instituicao";
-import OrcamentoDTO from "@/models/orcamento";
-import SecretariaDTO from "@/models/secretaria";
-import TipoDespesaDTO from "@/models/tipoDespesa";
-import UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
+import type FornecedorDTO from "@/models/fornecedor";
+import type InstituicaoDTO from "@/models/instituicao";
+import type OrcamentoDTO from "@/models/orcamento";
+import type SecretariaDTO from "@/models/secretaria";
+import type TipoDespesaDTO from "@/models/tipoDespesa";
+import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
+import CrudRouteSkeleton from "../../_components/crud-route-skeleton";
 import UnidadeConsumidoraDetailsView from "./UnidadeConsumidoraDetailsView";
 
 const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = { page: 1, size: 20 };
@@ -33,11 +33,32 @@ const columns = [
   { id: "fornecedorLabel", label: "Fornecedor" },
   { id: "situacaoLabel", label: "Situacao", sortable: false },
 ];
-const novaUnidadeConsumidora = { id: 0, identificador: "", idInstituicao: "", idTipoDespesa: "", idSecretaria: "", idOrcamento: "", idFornecedor: "", excluido: false, dataExclusao: "" };
+const novaUnidadeConsumidora = {
+  id: 0,
+  identificador: "",
+  idInstituicao: "",
+  idTipoDespesa: "",
+  idSecretaria: "",
+  idOrcamento: "",
+  idFornecedor: "",
+  excluido: false,
+  dataExclusao: "",
+};
 // Indica quando um registro relacionado está inativo.
-const toLabel = (label: string, situacao?: number) => situacao === SITUACAO_INATIVO ? `${label} (${getSituacaoLabel(situacao)})` : label;
-export type UnidadeConsumidoraRow = UnidadeConsumidoraDTO & { instituicaoLabel: string; tipoDespesaLabel: string; secretariaLabel: string; orcamentoLabel: string; fornecedorLabel: string; situacaoLabel: string };
-type PaginationState = Pick<PaginatedResult<UnidadeConsumidoraRow>, "currentPage" | "pageSize" | "totalPages" | "totalRecords">;
+const toLabel = (label: string, situacao?: number) =>
+  situacao === SITUACAO_INATIVO ? `${label} (${getSituacaoLabel(situacao)})` : label;
+export type UnidadeConsumidoraRow = UnidadeConsumidoraDTO & {
+  instituicaoLabel: string;
+  tipoDespesaLabel: string;
+  secretariaLabel: string;
+  orcamentoLabel: string;
+  fornecedorLabel: string;
+  situacaoLabel: string;
+};
+type PaginationState = Pick<
+  PaginatedResult<UnidadeConsumidoraRow>,
+  "currentPage" | "pageSize" | "totalPages" | "totalRecords"
+>;
 type UnidadeConsumidoraLookups = {
   instituicoes: InstituicaoDTO[];
   tiposDespesa: TipoDespesaDTO[];
@@ -46,8 +67,11 @@ type UnidadeConsumidoraLookups = {
   fornecedores: FornecedorDTO[];
 };
 const emptyPagination: PaginationState = { currentPage: 1, pageSize: 20, totalPages: 0, totalRecords: 0 };
-const shouldLoadPreviousPage = (pageResult: PaginatedResult<UnidadeConsumidoraRow>) => pageResult.totalRecords > 0 && pageResult.totalPages > 0 && pageResult.items.length === 0 && pageResult.currentPage > pageResult.totalPages;
-const emptyLookups: UnidadeConsumidoraLookups = { instituicoes: [], tiposDespesa: [], secretarias: [], orcamentos: [], fornecedores: [] };
+const shouldLoadPreviousPage = (pageResult: PaginatedResult<UnidadeConsumidoraRow>) =>
+  pageResult.totalRecords > 0 &&
+  pageResult.totalPages > 0 &&
+  pageResult.items.length === 0 &&
+  pageResult.currentPage > pageResult.totalPages;
 const toPositiveNumber = (value: unknown): number | null => {
   const parsedValue = Number(value);
   return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : null;
@@ -58,7 +82,7 @@ const hasDependentSelections = (formData: Record<string, unknown>) =>
 // Mapeia IDs de lookups para labels legíveis na tabela.
 const mapUnidadeConsumidoraRows = (
   items: UnidadeConsumidoraDTO[],
-  lkp: UnidadeConsumidoraLookups
+  lkp: UnidadeConsumidoraLookups,
 ): UnidadeConsumidoraRow[] => {
   const instMap = new Map(lkp.instituicoes.map((item) => [item.id, item.nome] as const));
   const tipoMap = new Map(lkp.tiposDespesa.map((item) => [item.id, item.descricao] as const));
@@ -104,11 +128,34 @@ export default function UnidadesConsumidorasPageClient({
   const [pagination, setPagination] = useState<PaginationState>(initialPagination);
 
   const { instituicoes, tiposDespesa, secretarias, orcamentos, fornecedores } = lookups;
-  const instituicaoOptions = useMemo(() => instituicoes.map((item) => ({ value: item.id, label: toLabel(item.nome, item.situacao) })), [instituicoes]);
-  const tipoDespesaOptions = useMemo(() => tiposDespesa.map((item) => ({ value: item.id, label: toLabel(item.descricao, item.situacao) })), [tiposDespesa]);
-  const secretariaOptions = useMemo(() => secretarias.map((item) => ({ value: item.idSecretaria, label: toLabel(item.nome, item.situacao) })), [secretarias]);
-  const orcamentoOptions = useMemo(() => orcamentos.map((item) => ({ value: item.idOrcamento, label: toLabel(`Orcamento #${item.idOrcamento}`, item.situacao) })), [orcamentos]);
-  const fornecedorOptions = useMemo(() => fornecedores.map((item) => ({ value: item.idFornecedor, label: toLabel(item.nomeFantasia || item.nome, item.situacao) })), [fornecedores]);
+  const instituicaoOptions = useMemo(
+    () => instituicoes.map((item) => ({ value: item.id, label: toLabel(item.nome, item.situacao) })),
+    [instituicoes],
+  );
+  const tipoDespesaOptions = useMemo(
+    () => tiposDespesa.map((item) => ({ value: item.id, label: toLabel(item.descricao, item.situacao) })),
+    [tiposDespesa],
+  );
+  const secretariaOptions = useMemo(
+    () => secretarias.map((item) => ({ value: item.idSecretaria, label: toLabel(item.nome, item.situacao) })),
+    [secretarias],
+  );
+  const orcamentoOptions = useMemo(
+    () =>
+      orcamentos.map((item) => ({
+        value: item.idOrcamento,
+        label: toLabel(`Orcamento #${item.idOrcamento}`, item.situacao),
+      })),
+    [orcamentos],
+  );
+  const fornecedorOptions = useMemo(
+    () =>
+      fornecedores.map((item) => ({
+        value: item.idFornecedor,
+        label: toLabel(item.nomeFantasia || item.nome, item.situacao),
+      })),
+    [fornecedores],
+  );
   const instituicaoMap = useMemo(() => new Map(instituicoes.map((item) => [item.id, item] as const)), [instituicoes]);
 
   const getSecretariaOptionsForSelection = (formData: Record<string, unknown>) => {
@@ -144,54 +191,98 @@ export default function UnidadesConsumidorasPageClient({
     return fornecedorOptions;
   };
 
-  const formFields = useMemo<ModalFieldConfig[]>(() => [
-    { key: "id", hidden: true },
-    { key: "identificador", label: "Identificador", placeholder: "Identificador da unidade consumidora", required: true },
-    { key: "idInstituicao", label: "Instituicao", placeholder: "Selecione a instituicao", type: "select", required: true, options: instituicaoOptions },
-    { key: "idTipoDespesa", label: "Tipo de Despesa", placeholder: "Selecione o tipo de despesa", type: "select", required: true, options: tipoDespesaOptions },
-    {
-      key: "idSecretaria",
-      label: "Secretaria",
-      placeholder: "Selecione a secretaria",
-      type: "select",
-      required: true,
-      resolveOptions: getSecretariaOptionsForSelection,
-      resolveDisabled: (formData) => !hasDependentSelections(formData),
-      clearOnDisable: true,
-      clearOnInvalidOption: true,
-    },
-    {
-      key: "idOrcamento",
-      label: "Orcamento",
-      placeholder: "Selecione o orcamento",
-      type: "select",
-      required: true,
-      resolveOptions: getOrcamentoOptionsForSelection,
-      resolveDisabled: (formData) => !hasDependentSelections(formData),
-      clearOnDisable: true,
-      clearOnInvalidOption: true,
-    },
-    {
-      key: "idFornecedor",
-      label: "Fornecedor",
-      placeholder: "Selecione o fornecedor",
-      type: "select",
-      required: true,
-      resolveOptions: getFornecedorOptionsForSelection,
-      resolveDisabled: (formData) => !hasDependentSelections(formData),
-      clearOnDisable: true,
-      clearOnInvalidOption: true,
-    },
-  ], [fornecedorOptions, getFornecedorOptionsForSelection, getOrcamentoOptionsForSelection, getSecretariaOptionsForSelection, instituicaoOptions, tipoDespesaOptions]);
+  const formFields = useMemo<ModalFieldConfig[]>(
+    () => [
+      { key: "id", hidden: true },
+      {
+        key: "identificador",
+        label: "Identificador",
+        placeholder: "Identificador da unidade consumidora",
+        required: true,
+      },
+      {
+        key: "idInstituicao",
+        label: "Instituicao",
+        placeholder: "Selecione a instituicao",
+        type: "select",
+        required: true,
+        options: instituicaoOptions,
+      },
+      {
+        key: "idTipoDespesa",
+        label: "Tipo de Despesa",
+        placeholder: "Selecione o tipo de despesa",
+        type: "select",
+        required: true,
+        options: tipoDespesaOptions,
+      },
+      {
+        key: "idSecretaria",
+        label: "Secretaria",
+        placeholder: "Selecione a secretaria",
+        type: "select",
+        required: true,
+        resolveOptions: getSecretariaOptionsForSelection,
+        resolveDisabled: (formData) => !hasDependentSelections(formData),
+        clearOnDisable: true,
+        clearOnInvalidOption: true,
+      },
+      {
+        key: "idOrcamento",
+        label: "Orcamento",
+        placeholder: "Selecione o orcamento",
+        type: "select",
+        required: true,
+        resolveOptions: getOrcamentoOptionsForSelection,
+        resolveDisabled: (formData) => !hasDependentSelections(formData),
+        clearOnDisable: true,
+        clearOnInvalidOption: true,
+      },
+      {
+        key: "idFornecedor",
+        label: "Fornecedor",
+        placeholder: "Selecione o fornecedor",
+        type: "select",
+        required: true,
+        resolveOptions: getFornecedorOptionsForSelection,
+        resolveDisabled: (formData) => !hasDependentSelections(formData),
+        clearOnDisable: true,
+        clearOnInvalidOption: true,
+      },
+    ],
+    [
+      fornecedorOptions,
+      getFornecedorOptionsForSelection,
+      getOrcamentoOptionsForSelection,
+      getSecretariaOptionsForSelection,
+      instituicaoOptions,
+      tipoDespesaOptions,
+    ],
+  );
 
-  const campos = useMemo<FieldConfig[]>(() => [
-    { key: "identificador", placeholder: "Identificador", local: "principal" },
-    { key: "idInstituicao", placeholder: "Instituicao", local: "filtro", type: "select", options: instituicaoOptions },
-    { key: "idTipoDespesa", placeholder: "Tipo de Despesa", local: "filtro", type: "select", options: tipoDespesaOptions },
-    { key: "idSecretaria", placeholder: "Secretaria", local: "filtro", type: "select", options: secretariaOptions },
-    { key: "idOrcamento", placeholder: "Orcamento", local: "filtro", type: "select", options: orcamentoOptions },
-    { key: "idFornecedor", placeholder: "Fornecedor", local: "filtro", type: "select", options: fornecedorOptions },
-  ], [fornecedorOptions, instituicaoOptions, orcamentoOptions, secretariaOptions, tipoDespesaOptions]);
+  const campos = useMemo<FieldConfig[]>(
+    () => [
+      { key: "identificador", placeholder: "Identificador", local: "principal" },
+      {
+        key: "idInstituicao",
+        placeholder: "Instituicao",
+        local: "filtro",
+        type: "select",
+        options: instituicaoOptions,
+      },
+      {
+        key: "idTipoDespesa",
+        placeholder: "Tipo de Despesa",
+        local: "filtro",
+        type: "select",
+        options: tipoDespesaOptions,
+      },
+      { key: "idSecretaria", placeholder: "Secretaria", local: "filtro", type: "select", options: secretariaOptions },
+      { key: "idOrcamento", placeholder: "Orcamento", local: "filtro", type: "select", options: orcamentoOptions },
+      { key: "idFornecedor", placeholder: "Fornecedor", local: "filtro", type: "select", options: fornecedorOptions },
+    ],
+    [fornecedorOptions, instituicaoOptions, orcamentoOptions, secretariaOptions, tipoDespesaOptions],
+  );
 
   // Carrega página + lookups em paralelo e mantém o estado consistente.
   const loadData = async (query: ListQuery = { page: pagination.currentPage, size: pagination.pageSize }) => {
@@ -217,9 +308,19 @@ export default function UnidadesConsumidorasPageClient({
       if (shouldLoadPreviousPage({ ...page, items: rows })) {
         const resolvedPage = await unidadeConsumidoraService.getPage({ ...query, page: page.totalPages });
         rows = mapUnidadeConsumidoraRows(resolvedPage.items, nextLookups);
-        setPagination({ currentPage: resolvedPage.currentPage, pageSize: resolvedPage.pageSize, totalPages: resolvedPage.totalPages, totalRecords: resolvedPage.totalRecords });
+        setPagination({
+          currentPage: resolvedPage.currentPage,
+          pageSize: resolvedPage.pageSize,
+          totalPages: resolvedPage.totalPages,
+          totalRecords: resolvedPage.totalRecords,
+        });
       } else {
-        setPagination({ currentPage: page.currentPage, pageSize: page.pageSize, totalPages: page.totalPages, totalRecords: page.totalRecords });
+        setPagination({
+          currentPage: page.currentPage,
+          pageSize: page.pageSize,
+          totalPages: page.totalPages,
+          totalRecords: page.totalRecords,
+        });
       }
       setLookups(nextLookups);
       setData(rows);
@@ -283,12 +384,15 @@ export default function UnidadesConsumidorasPageClient({
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={formFields}
-        renderModalExtra={(row, mode) =>
-          mode === "view" ? <UnidadeConsumidoraDetailsView unidade={row} /> : null
-        }
+        renderModalExtra={(row, mode) => (mode === "view" ? <UnidadeConsumidoraDetailsView unidade={row} /> : null)}
         emptyTitle="Nenhuma unidade consumidora cadastrada"
         emptyDescription="Cadastre uma nova unidade consumidora para iniciar o controle."
-        exportConfig={{ enabled: true, title: "Unidades Consumidoras", fileName: "unidades-consumidoras", allData: data }}
+        exportConfig={{
+          enabled: true,
+          title: "Unidades Consumidoras",
+          fileName: "unidades-consumidoras",
+          allData: data,
+        }}
         paginationEnabled={true}
         pagination={{
           currentPage: pagination.currentPage,

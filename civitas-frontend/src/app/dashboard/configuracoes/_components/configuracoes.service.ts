@@ -7,11 +7,7 @@ import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
 import type TipoInstituicaoDTO from "@/models/tipoInstituicao";
 import type UnidadeMedidaDTO from "@/models/unidadeMedida";
-import type {
-  ConfigKind,
-  ConfigRow,
-  ConfiguracoesLookups,
-} from "./configuracoes.types";
+import type { ConfigKind, ConfigRow, ConfiguracoesLookups } from "./configuracoes.types";
 import {
   mapTipoCodigoRows,
   mapTipoDespesaRows,
@@ -33,10 +29,7 @@ export class ConfiguracoesService {
     }
 
     if (kind === "tipoDespesa") {
-      const [tiposDespesa, unidades] = await Promise.all([
-        this.fetchTipoDespesaData(),
-        unidadeMedidaService.getAll(),
-      ]);
+      const [tiposDespesa, unidades] = await Promise.all([this.fetchTipoDespesaData(), unidadeMedidaService.getAll()]);
 
       return mapTipoDespesaRows(tiposDespesa, unidades);
     }
@@ -45,10 +38,7 @@ export class ConfiguracoesService {
   }
 
   async getTipoDespesaLookups(): Promise<ConfiguracoesLookups> {
-    const [unidadesMedida, tipoCodigos] = await Promise.all([
-      this.fetchUnidadeData(),
-      this.fetchTipoCodigoData(true),
-    ]);
+    const [unidadesMedida, tipoCodigos] = await Promise.all([this.fetchUnidadeData(), this.fetchTipoCodigoData(true)]);
 
     return { unidadesMedida, tipoCodigos };
   }
@@ -94,11 +84,7 @@ export class ConfiguracoesService {
     return result.message ?? "Unidade de medida cadastrada com sucesso.";
   }
 
-  async update(
-    kind: ConfigKind,
-    id: number,
-    formData: Record<string, unknown>
-  ): Promise<string> {
+  async update(kind: ConfigKind, id: number, formData: Record<string, unknown>): Promise<string> {
     if (kind === "tipoCodigo") {
       const payload: TipoCodigoDTO = {
         id,
@@ -181,19 +167,13 @@ export class ConfiguracoesService {
   }
 
   private async fetchTipoDespesaData(): Promise<TipoDespesaDTO[]> {
-    const [ativas, inativas] = await Promise.all([
-      tipoDespesaService.getAll(),
-      tipoDespesaService.getInactive(),
-    ]);
+    const [ativas, inativas] = await Promise.all([tipoDespesaService.getAll(), tipoDespesaService.getInactive()]);
 
     return mergeById(ativas, inativas);
   }
 
   private async fetchUnidadeData(): Promise<UnidadeMedidaDTO[]> {
-    const [ativas, inativas] = await Promise.all([
-      unidadeMedidaService.getAll(),
-      unidadeMedidaService.getInactive(),
-    ]);
+    const [ativas, inativas] = await Promise.all([unidadeMedidaService.getAll(), unidadeMedidaService.getInactive()]);
 
     return mergeById(ativas, inativas);
   }

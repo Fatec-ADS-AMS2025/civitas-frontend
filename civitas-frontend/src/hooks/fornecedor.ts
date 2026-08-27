@@ -1,9 +1,9 @@
-import { GenericService } from './generic';
-import FornecedorDTO from '@/models/fornecedor';
+import type FornecedorDTO from "@/models/fornecedor";
+import { GenericService } from "./generic";
 
 export class FornecedorService extends GenericService<FornecedorDTO> {
   constructor() {
-    super('fornecedores');
+    super("fornecedores");
   }
 }
 

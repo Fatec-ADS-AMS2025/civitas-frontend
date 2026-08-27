@@ -1,11 +1,6 @@
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
 import type { FieldConfig } from "@/components/Table/searchbar";
-import {
-  composeValidators,
-  validateDigitsLength,
-  validateMaxLength,
-  validateUfCode,
-} from "@/global/formPayload";
+import { composeValidators, validateDigitsLength, validateMaxLength, validateUfCode } from "@/global/formPayload";
 import { SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 
 export const novaSecretaria = {

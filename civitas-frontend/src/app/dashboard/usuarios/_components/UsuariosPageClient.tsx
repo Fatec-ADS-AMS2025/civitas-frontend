@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
-import Table from "@/components/Table/table";
+import { useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import { type FieldConfig, SearchBar } from "@/components/Table/searchbar";
+import Table from "@/components/Table/table";
 import {
   composeValidators,
   normalizeUsuarioPayload,
@@ -11,22 +11,19 @@ import {
   validateMaxLength,
   validateUfCode,
 } from "@/global/formPayload";
-import { usuarioService } from "@/hooks/usuario";
 import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
-import UsuarioDTO from "@/models/usuario";
 import type { ListQuery, PaginatedResult } from "@/hooks/generic";
-import UsuarioDetailsView from "./UsuarioDetailsView";
+import { usuarioService } from "@/hooks/usuario";
+import type UsuarioDTO from "@/models/usuario";
 import UsuariosSkeleton from "../skeleton";
+import UsuarioDetailsView from "./UsuarioDetailsView";
 
 type User = UsuarioDTO;
 export type UserRow = User & {
   tipoUsuarioLabel: string;
   situacaoLabel: string;
 };
-type PaginationState = Pick<
-  PaginatedResult<UserRow>,
-  "currentPage" | "pageSize" | "totalPages" | "totalRecords"
->;
+type PaginationState = Pick<PaginatedResult<UserRow>, "currentPage" | "pageSize" | "totalPages" | "totalRecords">;
 
 const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
   page: 1,
@@ -124,10 +121,7 @@ const usuarioFormFields: ModalFieldConfig[] = [
     label: "Estado",
     placeholder: "UF",
     required: true,
-    validate: composeValidators(
-      validateUfCode(),
-      validateMaxLength("Estado", 2)
-    ),
+    validate: composeValidators(validateUfCode(), validateMaxLength("Estado", 2)),
     section: "Endereco",
   },
   { key: "senha", label: "Senha", placeholder: "Senha", type: "password", required: true, section: "Acesso" },
@@ -227,10 +221,7 @@ type UsuariosPageClientProps = {
   initialError?: string | null;
 };
 
-const UsuariosPageClient = ({
-  initialPage,
-  initialError = null,
-}: UsuariosPageClientProps) => {
+const UsuariosPageClient = ({ initialPage, initialError = null }: UsuariosPageClientProps) => {
   const initialRowsPage = toUsuarioPageResult(initialPage);
   const [usuarios, setUsuarios] = useState<UserRow[]>(initialRowsPage.items);
   const [filteredData, setFilteredData] = useState<UserRow[]>(initialRowsPage.items);
@@ -259,9 +250,7 @@ const UsuariosPageClient = ({
     setPageSize(pageResult.pageSize);
   };
 
-  const loadUsuarios = async (
-    query: ListQuery = { page: currentPage, size: pageSize }
-  ) => {
+  const loadUsuarios = async (query: ListQuery = { page: currentPage, size: pageSize }) => {
     try {
       setLoading(true);
 
@@ -272,7 +261,7 @@ const UsuariosPageClient = ({
               ...query,
               page: initialPage.totalPages,
               size: initialPage.pageSize,
-            })
+            }),
           )
         : initialPage;
 
@@ -299,9 +288,7 @@ const UsuariosPageClient = ({
 
   const handleUpdate = async (id: number, dadosAtualizados: Partial<User>) => {
     const current = usuarios.find((item) => item.id === id);
-    const payload = normalizeUsuarioPayload(
-      toApiUsuarioPayload({ ...dadosAtualizados, id }, current)
-    );
+    const payload = normalizeUsuarioPayload(toApiUsuarioPayload({ ...dadosAtualizados, id }, current));
 
     await usuarioService.update(id, payload);
     await loadUsuarios({ page: currentPage, size: pageSize });
@@ -354,9 +341,7 @@ const UsuariosPageClient = ({
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={usuarioFormFields}
-        renderModalExtra={(row, mode) =>
-          mode === "view" ? <UsuarioDetailsView usuario={row} /> : null
-        }
+        renderModalExtra={(row, mode) => (mode === "view" ? <UsuarioDetailsView usuario={row} /> : null)}
         exportConfig={{
           enabled: true,
           title: "Usuarios",

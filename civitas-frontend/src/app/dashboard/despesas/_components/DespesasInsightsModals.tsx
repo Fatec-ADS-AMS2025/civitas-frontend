@@ -1,21 +1,12 @@
 import type { Dispatch, SetStateAction } from "react";
-import {
-  DespesasRelacionadasTable,
-  InsightsModal,
-  type InsightMetric,
-} from "@/components/financeiro-insights";
-import type {
-  FinanceCodigoResumo,
-  FinanceInstituicaoResumo,
-} from "@/lib/financeiro-relations";
+import { DespesasRelacionadasTable, type InsightMetric, InsightsModal } from "@/components/financeiro-insights";
+import type { FinanceCodigoResumo, FinanceInstituicaoResumo } from "@/lib/financeiro-relations";
 
 type DespesasInsightsModalsProps = {
   selectedCodigoGroup: FinanceCodigoResumo | null;
   setSelectedCodigoGroup: Dispatch<SetStateAction<FinanceCodigoResumo | null>>;
   selectedInstituicaoGroup: FinanceInstituicaoResumo | null;
-  setSelectedInstituicaoGroup: Dispatch<
-    SetStateAction<FinanceInstituicaoResumo | null>
-  >;
+  setSelectedInstituicaoGroup: Dispatch<SetStateAction<FinanceInstituicaoResumo | null>>;
 };
 
 export default function DespesasInsightsModals({
@@ -44,9 +35,7 @@ export default function DespesasInsightsModals({
         onClose={() => setSelectedInstituicaoGroup(null)}
         title={selectedInstituicaoGroup?.nome ?? ""}
         subtitle={`Agrupamento de debitos por instituicao, com codigos consolidados e relacao direta com a secretaria ${selectedInstituicaoGroup?.secretariaNome ?? ""}.`}
-        metrics={
-          selectedInstituicaoGroup ? getInstituicaoMetrics(selectedInstituicaoGroup) : []
-        }
+        metrics={selectedInstituicaoGroup ? getInstituicaoMetrics(selectedInstituicaoGroup) : []}
       >
         <section className="space-y-3">
           <div>
@@ -106,17 +95,13 @@ function InstituicaoCodigos({
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
                 Codigo
               </p>
-              <h5 className="mt-2 text-lg font-semibold text-[var(--secundary-1)]">
-                {codigo.codigo}
-              </h5>
+              <h5 className="mt-2 text-lg font-semibold text-[var(--secundary-1)]">{codigo.codigo}</h5>
             </div>
             <span className="rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-1 text-xs font-semibold text-[var(--foreground-muted)]">
               {codigo.quantidadeDespesas} despesas
             </span>
           </div>
-          <p className="mt-4 text-base font-semibold text-[var(--foreground)]">
-            {codigo.totalGastosFormatado}
-          </p>
+          <p className="mt-4 text-base font-semibold text-[var(--foreground)]">{codigo.totalGastosFormatado}</p>
         </article>
       ))}
     </div>

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import Form from "../Form/form";
-import type { FormMode, FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
-import Modal from "../modal";
 import { showToast } from "@/hooks/useToast";
+import type { FormMode, FieldConfig as ModalFieldConfig, ValidationFn } from "../Form/form";
+import Form from "../Form/form";
+import Modal from "../modal";
 import { getResolvedId } from "./table-record";
 import type { TableRow } from "./table-types";
 
@@ -71,8 +71,7 @@ export function TableModal<T extends TableRow>({
             }
             onClose();
           } catch (modalError) {
-            const message =
-              modalError instanceof Error ? modalError.message : "Erro na operacao. Tente novamente.";
+            const message = modalError instanceof Error ? modalError.message : "Erro na operacao. Tente novamente.";
             showToast(message, "error");
           }
         }}

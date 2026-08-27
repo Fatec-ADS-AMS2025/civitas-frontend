@@ -10,10 +10,8 @@ import { tipoInstituicaoService } from "@/hooks/tipoInstituicao";
 import { usuarioService } from "@/hooks/usuario";
 import type DespesaDTO from "@/models/despesa";
 import type FornecedorDTO from "@/models/fornecedor";
-import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
 import type SecretariaDTO from "@/models/secretaria";
-import type TipoInstituicaoDTO from "@/models/tipoInstituicao";
 import type UsuarioDTO from "@/models/usuario";
 import type { ListingConfig, ListingPageResult, ListingRegistry } from "./types";
 
@@ -134,8 +132,7 @@ const pickRowIdentifier = (...values: unknown[]) => {
   return "";
 };
 
-const combineRowIdentifier = (...values: unknown[]) =>
-  values.map(normalizeIdentifierPart).filter(Boolean).join("-");
+const combineRowIdentifier = (...values: unknown[]) => values.map(normalizeIdentifierPart).filter(Boolean).join("-");
 
 const buildClientPageResult = <T extends ListingRow>(
   rows: T[],
@@ -159,9 +156,7 @@ const buildClientPageResult = <T extends ListingRow>(
 };
 
 const buildLookupLabel = (label: string, situacao?: number) =>
-  toOptionalNumber(situacao) === SITUACAO_INATIVO
-    ? `${label} (${getSituacaoLabel(SITUACAO_INATIVO)})`
-    : label;
+  toOptionalNumber(situacao) === SITUACAO_INATIVO ? `${label} (${getSituacaoLabel(SITUACAO_INATIVO)})` : label;
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", {
@@ -251,7 +246,9 @@ const loadInstituicaoRows = async () => {
   ]);
 
   const secretariasMap = new Map(
-    secretarias.map((secretaria) => [secretaria.idSecretaria, buildLookupLabel(secretaria.nome, secretaria.situacao)] as const),
+    secretarias.map(
+      (secretaria) => [secretaria.idSecretaria, buildLookupLabel(secretaria.nome, secretaria.situacao)] as const,
+    ),
   );
   const tiposMap = new Map(
     tiposInstituicao.map((tipo) => [tipo.id, buildLookupLabel(tipo.descricao, tipo.situacao)] as const),
@@ -263,18 +260,13 @@ const loadInstituicaoRows = async () => {
     cnpj: instituicao.cnpj,
     cidade: instituicao.cidade,
     estado: instituicao.estado,
-    secretariaLabel:
-      secretariasMap.get(instituicao.idSecretaria ?? -1) ?? "Secretaria nao vinculada",
-    tipoInstituicaoLabel:
-      tiposMap.get(instituicao.idTipoInstituicao ?? -1) ?? "Tipo nao vinculado",
+    secretariaLabel: secretariasMap.get(instituicao.idSecretaria ?? -1) ?? "Secretaria nao vinculada",
+    tipoInstituicaoLabel: tiposMap.get(instituicao.idTipoInstituicao ?? -1) ?? "Tipo nao vinculado",
     situacaoLabel: getListingSituacaoLabel(instituicao.situacao),
   }));
 };
 
-const loadInstituicaoPage: ListingConfig<InstituicaoRow>["loadPage"] = async ({
-  page,
-  pageSize,
-}) => {
+const loadInstituicaoPage: ListingConfig<InstituicaoRow>["loadPage"] = async ({ page, pageSize }) => {
   const rows = await loadInstituicaoRows();
   return buildClientPageResult(rows, page, pageSize);
 };
@@ -286,12 +278,8 @@ const loadOrcamentoRows = async () => {
     tipoInstituicaoService.getAllData({ page: 1, size: LISTING_FETCH_SIZE }),
   ]);
 
-  const instituicoesMap = new Map(
-    instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const),
-  );
-  const tiposMap = new Map(
-    tiposInstituicao.map((tipo) => [tipo.id, tipo.descricao] as const),
-  );
+  const instituicoesMap = new Map(instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const));
+  const tiposMap = new Map(tiposInstituicao.map((tipo) => [tipo.id, tipo.descricao] as const));
 
   return filterActiveRecords(orcamentos).map((orcamento: OrcamentoDTO) => {
     const ano = Number(orcamento.anoOrcamento ?? orcamento.ano ?? 0);
@@ -302,19 +290,14 @@ const loadOrcamentoRows = async () => {
       ano,
       valor,
       valorFormatado: formatCurrency(valor),
-      instituicaoLabel:
-        instituicoesMap.get(orcamento.idInstituicao ?? -1) ?? "Instituicao nao vinculada",
-      tipoDespesaLabel:
-        tiposMap.get(orcamento.idTipoDespesa ?? -1) ?? "Tipo nao vinculado",
+      instituicaoLabel: instituicoesMap.get(orcamento.idInstituicao ?? -1) ?? "Instituicao nao vinculada",
+      tipoDespesaLabel: tiposMap.get(orcamento.idTipoDespesa ?? -1) ?? "Tipo nao vinculado",
       situacaoLabel: getListingSituacaoLabel(orcamento.situacao ?? SITUACAO_ATIVO),
     };
   });
 };
 
-const loadOrcamentoPage: ListingConfig<OrcamentoRow>["loadPage"] = async ({
-  page,
-  pageSize,
-}) => {
+const loadOrcamentoPage: ListingConfig<OrcamentoRow>["loadPage"] = async ({ page, pageSize }) => {
   const rows = await loadOrcamentoRows();
   return buildClientPageResult(rows, page, pageSize);
 };
@@ -348,8 +331,7 @@ const mapDespesaRow = (
     consumoPrevisto: Number.isFinite(consumoPrevisto) ? consumoPrevisto : 0,
     fornecedorLabel:
       fornecedoresMap.get(despesa.idFornecedor ?? despesa.fornecedorId ?? -1) ?? "Fornecedor nao vinculado",
-    tipoDespesaLabel:
-      tiposDespesaMap.get(despesa.idTipoDespesa ?? -1) ?? "Tipo nao vinculado",
+    tipoDespesaLabel: tiposDespesaMap.get(despesa.idTipoDespesa ?? -1) ?? "Tipo nao vinculado",
     situacaoLabel: getListingSituacaoLabel(despesa.status ?? despesa.situacao ?? SITUACAO_ATIVO),
   };
 };
@@ -373,11 +355,7 @@ const loadDespesaRows = async ({
   const despesas = [...firstPage.items];
   const totalPages = Math.max(firstPage.totalPages, 1);
 
-  for (
-    let pageStart = 2;
-    pageStart <= totalPages;
-    pageStart += SERVER_EXPORT_PAGE_BATCH_SIZE
-  ) {
+  for (let pageStart = 2; pageStart <= totalPages; pageStart += SERVER_EXPORT_PAGE_BATCH_SIZE) {
     const batchPages = Array.from(
       { length: Math.min(SERVER_EXPORT_PAGE_BATCH_SIZE, totalPages - pageStart + 1) },
       (_, index) => pageStart + index,
@@ -405,9 +383,7 @@ const loadDespesaRows = async ({
     tiposDespesa.map((tipo) => [tipo.id, buildLookupLabel(tipo.descricao, tipo.situacao)] as const),
   );
 
-  return filterActiveRecords(despesas).map((despesa) =>
-    mapDespesaRow(despesa, fornecedoresMap, tiposDespesaMap)
-  );
+  return filterActiveRecords(despesas).map((despesa) => mapDespesaRow(despesa, fornecedoresMap, tiposDespesaMap));
 };
 
 const loadDespesaPage: ListingConfig<DespesaRow>["loadPage"] = async ({
@@ -572,7 +548,13 @@ const listingRegistry: ListingRegistry = {
     ],
     columns: [
       { id: "nome", label: "Nome", accessor: (row) => row.nome, sortType: "text" },
-      { id: "descricao", label: "Descricao", accessor: (row) => row.descricao, sortType: "text", defaultVisible: false },
+      {
+        id: "descricao",
+        label: "Descricao",
+        accessor: (row) => row.descricao,
+        sortType: "text",
+        defaultVisible: false,
+      },
       { id: "cnpj", label: "CNPJ", accessor: (row) => row.cnpj, sortType: "text" },
       { id: "cidade", label: "Cidade", accessor: (row) => row.cidade, sortType: "text" },
       { id: "estado", label: "Estado", accessor: (row) => row.estado, sortType: "text" },
@@ -663,10 +645,7 @@ const listingRegistry: ListingRegistry = {
     loadPage: loadOrcamentoPage,
     loadExportRows: loadOrcamentoRows,
     getRowId: (row) =>
-      pickRowIdentifier(
-        row.idOrcamento,
-        combineRowIdentifier(row.ano, row.instituicaoLabel, row.tipoDespesaLabel),
-      ),
+      pickRowIdentifier(row.idOrcamento, combineRowIdentifier(row.ano, row.instituicaoLabel, row.tipoDespesaLabel)),
   },
 };
 

@@ -1,18 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import Form, {
-  type FormExtraContentRenderArgs,
-  type FormFieldConfig,
-  type ValidationFn,
-} from "../Form/form";
-import Modal from "../modal";
-import {
-  applySearchFilters,
-  type SearchFieldConfig,
-} from "./search-utils";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
 import { showToast } from "@/hooks/useToast";
+import Form, { type FormExtraContentRenderArgs, type FormFieldConfig, type ValidationFn } from "../Form/form";
+import Modal from "../modal";
+import { applySearchFilters, type SearchFieldConfig } from "./search-utils";
 
 type FieldConfig = SearchFieldConfig;
 
@@ -53,10 +47,7 @@ const SearchBar = ({
   const paths = pathname.split("/").filter(Boolean);
   const nomePagina = paths[paths.length - 1];
 
-  const principalFields = useMemo(
-    () => campos.filter((field) => field.local === "principal"),
-    [campos]
-  );
+  const principalFields = useMemo(() => campos.filter((field) => field.local === "principal"), [campos]);
 
   const hasAnyField = campos.length > 0;
   const globalPlaceholder =
@@ -79,14 +70,10 @@ const SearchBar = ({
   const handleAdvancedChange = (key: string, value: string) => {
     setAdvancedFilterOverrides((prev) => ({ ...prev, [key]: value }));
 
-    setCampos?.((prevCampos) =>
-      prevCampos.map((campo) => (campo.key === key ? { ...campo, value } : campo))
-    );
+    setCampos?.((prevCampos) => prevCampos.map((campo) => (campo.key === key ? { ...campo, value } : campo)));
   };
 
-  const handleFieldKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleFieldKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const form = e.currentTarget.form ?? e.currentTarget.closest("form, div");
@@ -95,7 +82,7 @@ const SearchBar = ({
       const selectors =
         "input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])";
       const focusables = Array.from(form.querySelectorAll<HTMLElement>(selectors)).filter(
-        (el) => el.offsetParent !== null
+        (el) => el.offsetParent !== null,
       );
       const index = focusables.indexOf(e.currentTarget as HTMLElement);
       const next = focusables[index + 1];
@@ -153,7 +140,9 @@ const SearchBar = ({
     <div className="civitas-searchbar civitas-surface civitas-enter flex w-full flex-col gap-4 p-5">
       <div className="civitas-panel-header">
         <p className="civitas-searchbar__title text-base font-semibold text-[var(--foreground)]">Busca</p>
-        <p className="civitas-searchbar__description -mt-1 text-sm text-[var(--foreground-soft)]">Busca global + filtros avancados</p>
+        <p className="civitas-searchbar__description -mt-1 text-sm text-[var(--foreground-soft)]">
+          Busca global + filtros avancados
+        </p>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
@@ -183,9 +172,7 @@ const SearchBar = ({
               onClick={toggleAdvanced}
               className="civitas-searchbar__action civitas-action civitas-action--ghost flex w-full sm:w-auto"
             >
-              <span className="material-symbols-outlined text-base text-inherit">
-                filter_alt
-              </span>
+              <span className="material-symbols-outlined text-base text-inherit">filter_alt</span>
               {showAdvanced ? "Ocultar" : "Filtrar"}
             </button>
           )}
@@ -235,4 +222,4 @@ const SearchBar = ({
   );
 };
 
-export { SearchBar, type FieldConfig };
+export { type FieldConfig, SearchBar };

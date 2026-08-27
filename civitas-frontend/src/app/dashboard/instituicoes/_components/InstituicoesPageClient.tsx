@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { normalizeInstituicaoPayload } from "@/global/formPayload";
 import { instituicaoService } from "@/hooks/instituicao";
 import { buildFinanceRelations } from "@/lib/financeiro-relations";
-import { InstituicoesErrorAlert, InstituicoesTableSection } from ".";
 import type {
   Despesa,
   Instituicao,
@@ -15,11 +14,8 @@ import type {
   TipoInstituicao,
 } from "../_types";
 import { buildInstituicaoCampos, buildInstituicaoFormFields } from "../_utils/form-fields";
-import {
-  buildLookupLabel,
-  fetchInstituicaoPageData,
-  mapInstituicaoRows,
-} from "../_utils/instituicoes-data";
+import { buildLookupLabel, fetchInstituicaoPageData, mapInstituicaoRows } from "../_utils/instituicoes-data";
+import { InstituicoesErrorAlert, InstituicoesTableSection } from ".";
 
 type InstituicaoPageData = Awaited<ReturnType<typeof fetchInstituicaoPageData>>;
 
@@ -28,10 +24,7 @@ type InstituicoesPageClientProps = {
   initialError?: string | null;
 };
 
-export default function InstituicoesPageClient({
-  initialData,
-  initialError = null,
-}: InstituicoesPageClientProps) {
+export default function InstituicoesPageClient({ initialData, initialError = null }: InstituicoesPageClientProps) {
   const initialRelations = buildFinanceRelations({
     despesas: initialData.despesas,
     instituicoes: initialData.instituicoes,
@@ -42,14 +35,12 @@ export default function InstituicoesPageClient({
     initialData.instituicoes,
     initialData.secretarias,
     initialData.tiposInstituicao,
-    initialRelations.instituicoes
+    initialRelations.instituicoes,
   );
   const [instituicoes, setInstituicoes] = useState<Instituicao[]>(initialData.instituicoes);
   const [filteredData, setFilteredData] = useState<InstituicaoRow[]>(initialRows);
   const [secretarias, setSecretarias] = useState<Secretaria[]>(initialData.secretarias);
-  const [tiposInstituicao, setTiposInstituicao] = useState<TipoInstituicao[]>(
-    initialData.tiposInstituicao
-  );
+  const [tiposInstituicao, setTiposInstituicao] = useState<TipoInstituicao[]>(initialData.tiposInstituicao);
   const [despesas, setDespesas] = useState<Despesa[]>(initialData.despesas);
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>(initialData.orcamentos);
   const [error, setError] = useState<string | null>(initialError);
@@ -86,12 +77,7 @@ export default function InstituicoesPageClient({
   }, [despesas, instituicoes, orcamentos, secretarias]);
 
   const instituicaoRows = useMemo(() => {
-    return mapInstituicaoRows(
-      instituicoes,
-      secretarias,
-      tiposInstituicao,
-      relations.instituicoes
-    );
+    return mapInstituicaoRows(instituicoes, secretarias, tiposInstituicao, relations.instituicoes);
   }, [instituicoes, relations.instituicoes, secretarias, tiposInstituicao]);
 
   const refreshInstituicoes = async () => {
@@ -106,7 +92,7 @@ export default function InstituicoesPageClient({
       pageData.instituicoes,
       pageData.secretarias,
       pageData.tiposInstituicao,
-      nextRelations.instituicoes
+      nextRelations.instituicoes,
     );
 
     setInstituicoes(pageData.instituicoes);

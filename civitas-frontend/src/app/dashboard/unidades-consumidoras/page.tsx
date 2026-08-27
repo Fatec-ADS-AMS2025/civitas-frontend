@@ -45,15 +45,14 @@ const emptyLookups: UnidadeConsumidoraLookups = {
 };
 
 const fetchUnidadesConsumidorasPageData = async () => {
-  const [page, instituicoes, tiposDespesa, secretarias, orcamentos, fornecedores] =
-    await Promise.all([
-      unidadeConsumidoraService.getPage(DEFAULT_PAGE_QUERY),
-      instituicaoService.getAll(),
-      tipoDespesaService.getAll(),
-      secretariaService.getAll(),
-      orcamentoService.getAll(),
-      fornecedorService.getAll(),
-    ]);
+  const [page, instituicoes, tiposDespesa, secretarias, orcamentos, fornecedores] = await Promise.all([
+    unidadeConsumidoraService.getPage(DEFAULT_PAGE_QUERY),
+    instituicaoService.getAll(),
+    tipoDespesaService.getAll(),
+    secretariaService.getAll(),
+    orcamentoService.getAll(),
+    fornecedorService.getAll(),
+  ]);
 
   return {
     page,
@@ -71,12 +70,7 @@ export default async function Page() {
   try {
     const initialData = await fetchUnidadesConsumidorasPageData();
 
-    return (
-      <UnidadesConsumidorasPageClient
-        initialPage={initialData.page}
-        initialLookups={initialData.lookups}
-      />
-    );
+    return <UnidadesConsumidorasPageClient initialPage={initialData.page} initialLookups={initialData.lookups} />;
   } catch (error) {
     console.error("Erro ao carregar unidades consumidoras no servidor:", error);
 

@@ -1,8 +1,8 @@
-import {
-  type NavigationItem,
-  type NavigationSearchGroup,
-  type NavigationSearchMatchType,
-  type NavigationSearchResult,
+import type {
+  NavigationItem,
+  NavigationSearchGroup,
+  NavigationSearchMatchType,
+  NavigationSearchResult,
 } from "./navigation.types";
 
 const diacriticsRegex = /[\u0300-\u036f]/g;
@@ -19,17 +19,10 @@ export const normalizeSearchText = (value: string): string => {
     .trim();
 };
 
-const resolveMatchType = (
-  item: NavigationItem,
-  normalizedQuery: string,
-): NavigationSearchMatchType | null => {
+const resolveMatchType = (item: NavigationItem, normalizedQuery: string): NavigationSearchMatchType | null => {
   const normalizedLabel = normalizeSearchText(item.label);
-  const normalizedKeywords = item.keywords.map((keyword) =>
-    normalizeSearchText(keyword),
-  );
-  const normalizedFeatures = item.features.map((feature) =>
-    normalizeSearchText(feature),
-  );
+  const normalizedKeywords = item.keywords.map((keyword) => normalizeSearchText(keyword));
+  const normalizedFeatures = item.features.map((feature) => normalizeSearchText(feature));
 
   if (normalizedLabel.startsWith(normalizedQuery)) {
     return "label-prefix";
@@ -67,10 +60,7 @@ const matchWeight: Record<NavigationSearchMatchType, number> = {
   "feature-includes": 5,
 };
 
-export const searchNavigation = (
-  catalog: NavigationItem[],
-  query: string,
-): NavigationSearchGroup[] => {
+export const searchNavigation = (catalog: NavigationItem[], query: string): NavigationSearchGroup[] => {
   const normalizedQuery = normalizeSearchText(query);
 
   const ranked = catalog

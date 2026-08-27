@@ -1,30 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  digitsOnly,
-  normalizeDespesaPayload,
-  validateDespesaDateRange,
-} from '@/global/formPayload';
-import { despesaService } from '@/hooks/despesa';
-import { fornecedorService } from '@/hooks/fornecedor';
-import { instituicaoService } from '@/hooks/instituicao';
-import { orcamentoService } from '@/hooks/orcamento';
-import { secretariaService } from '@/hooks/secretaria';
-import { tipoDespesaService } from '@/hooks/tipoDespesa';
-import { usuarioService } from '@/hooks/usuario';
-import DespesaDTO from '@/models/despesa';
-import {
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { digitsOnly, normalizeDespesaPayload, validateDespesaDateRange } from "@/global/formPayload";
+import { despesaService } from "@/hooks/despesa";
+import { fornecedorService } from "@/hooks/fornecedor";
+import { instituicaoService } from "@/hooks/instituicao";
+import { orcamentoService } from "@/hooks/orcamento";
+import { secretariaService } from "@/hooks/secretaria";
+import { tipoDespesaService } from "@/hooks/tipoDespesa";
+import { usuarioService } from "@/hooks/usuario";
+import type DespesaDTO from "@/models/despesa";
+import type {
   FinanceiroFiltrosDTO,
   FinanceiroPanoramaDTO,
   FinanceiroPayloadDTO,
   FinanceiroResumoDTO,
   FinanceiroTransacaoDTO,
-} from '@/models/financeiro';
-import FornecedorDTO from '@/models/fornecedor';
-import InstituicaoDTO from '@/models/instituicao';
-import OrcamentoDTO from '@/models/orcamento';
-import SecretariaDTO from '@/models/secretaria';
-import TipoDespesaDTO from '@/models/tipoDespesa';
-import UsuarioDTO from '@/models/usuario';
+} from "@/models/financeiro";
+import type FornecedorDTO from "@/models/fornecedor";
+import type InstituicaoDTO from "@/models/instituicao";
+import type OrcamentoDTO from "@/models/orcamento";
+import type SecretariaDTO from "@/models/secretaria";
+import type TipoDespesaDTO from "@/models/tipoDespesa";
+import type UsuarioDTO from "@/models/usuario";
 
 const parseDate = (value?: string): number => {
   if (!value) return Number.NaN;
@@ -41,15 +37,15 @@ const normalizeOrcamentoDate = (orcamento: OrcamentoDTO): string => {
     return `${orcamento.ano}-01-01`;
   }
 
-  return '';
+  return "";
 };
 
 const mapDespesaToTransacao = (despesa: DespesaDTO): FinanceiroTransacaoDTO => ({
   id: despesa.id,
-  tipo: 'despesa',
+  tipo: "despesa",
   descricao: despesa.descricao ?? despesa.numeroDocumento ?? `Despesa ${despesa.id}`,
   valor: Number(despesa.valor ?? despesa.consumoPrevisto ?? 0),
-  data: despesa.data ?? despesa.dataVencimento ?? despesa.dataEmicao ?? despesa.dataEmissao ?? '',
+  data: despesa.data ?? despesa.dataVencimento ?? despesa.dataEmicao ?? despesa.dataEmissao ?? "",
   situacao: despesa.situacao,
   instituicaoId: despesa.idInstituicao,
   referenciaId: despesa.id,
@@ -57,7 +53,7 @@ const mapDespesaToTransacao = (despesa: DespesaDTO): FinanceiroTransacaoDTO => (
 
 const mapOrcamentoToTransacao = (orcamento: OrcamentoDTO): FinanceiroTransacaoDTO => ({
   id: orcamento.id ?? orcamento.idOrcamento,
-  tipo: 'orcamento',
+  tipo: "orcamento",
   descricao: orcamento.descricao || `Orçamento ${orcamento.anoOrcamento ?? orcamento.ano}`,
   valor: Number(orcamento.valorOrcamento ?? orcamento.valor ?? 0),
   data: normalizeOrcamentoDate(orcamento),
@@ -68,7 +64,7 @@ const mapOrcamentoToTransacao = (orcamento: OrcamentoDTO): FinanceiroTransacaoDT
 
 const filterByPeriodo = (
   transacoes: FinanceiroTransacaoDTO[],
-  filtros: FinanceiroFiltrosDTO
+  filtros: FinanceiroFiltrosDTO,
 ): FinanceiroTransacaoDTO[] => {
   const inicio = parseDate(filtros.dataInicio);
   const fim = parseDate(filtros.dataFim);
@@ -82,7 +78,7 @@ const filterByPeriodo = (
     if (Number.isNaN(itemDate)) return false;
 
     // Budgets are annual by nature, so compare by year instead of strict month window.
-    if (item.tipo === 'orcamento') {
+    if (item.tipo === "orcamento") {
       if (Number.isNaN(inicio) && Number.isNaN(fim)) {
         return true;
       }
@@ -109,10 +105,7 @@ const filterByPeriodo = (
   });
 };
 
-const filterByStatus = (
-  transacoes: FinanceiroTransacaoDTO[],
-  status?: number
-): FinanceiroTransacaoDTO[] => {
+const filterByStatus = (transacoes: FinanceiroTransacaoDTO[], status?: number): FinanceiroTransacaoDTO[] => {
   if (status === undefined || status === null) {
     return transacoes;
   }
@@ -122,7 +115,7 @@ const filterByStatus = (
 
 const filterByInstituicao = (
   transacoes: FinanceiroTransacaoDTO[],
-  instituicaoId?: number
+  instituicaoId?: number,
 ): FinanceiroTransacaoDTO[] => {
   if (!instituicaoId) {
     return transacoes;
@@ -136,7 +129,7 @@ const isHttpNotFound = (error: unknown): boolean => {
     return false;
   }
 
-  return error.message.includes('HTTP 404');
+  return error.message.includes("HTTP 404");
 };
 
 const toArray = <T>(value: T[] | null | undefined): T[] => {
@@ -149,7 +142,7 @@ const safeListRequest = async <T>(request: () => Promise<T[] | null | undefined>
     return toArray(response);
   } catch (error) {
     if (!isHttpNotFound(error)) {
-      console.error('Erro ao carregar lista financeira:', error);
+      console.error("Erro ao carregar lista financeira:", error);
     }
 
     return [];
@@ -167,7 +160,7 @@ const buildNumeroDocumento = (payload: FinanceiroPayloadDTO): string => {
     return descriptionDigits;
   }
 
-  return '';
+  return "";
 };
 
 const compareByTotalGastosDesc = <T extends { totalGastos: number }>(a: T, b: T): number => {
@@ -203,18 +196,11 @@ export class FinanceiroService {
 
   async listarTransacoes(filtros: FinanceiroFiltrosDTO = {}): Promise<FinanceiroTransacaoDTO[]> {
     const [despesas, orcamentos] = await Promise.all([
-      safeListRequest(() =>
-        despesaService.getByFilters({ page: filtros.pageNumber, size: filtros.pageSize })
-      ),
-      safeListRequest(() =>
-        orcamentoService.getByFilters({ page: filtros.pageNumber, size: filtros.pageSize })
-      ),
+      safeListRequest(() => despesaService.getByFilters({ page: filtros.pageNumber, size: filtros.pageSize })),
+      safeListRequest(() => orcamentoService.getByFilters({ page: filtros.pageNumber, size: filtros.pageSize })),
     ]);
 
-    const transacoes = [
-      ...despesas.map(mapDespesaToTransacao),
-      ...orcamentos.map(mapOrcamentoToTransacao),
-    ];
+    const transacoes = [...despesas.map(mapDespesaToTransacao), ...orcamentos.map(mapOrcamentoToTransacao)];
 
     const byPeriodo = filterByPeriodo(transacoes, filtros);
     const byStatus = filterByStatus(byPeriodo, filtros.status);
@@ -227,11 +213,11 @@ export class FinanceiroService {
     const transacoes = await this.listarTransacoes(filtros);
 
     const totalDespesas = transacoes
-      .filter((item) => item.tipo === 'despesa')
+      .filter((item) => item.tipo === "despesa")
       .reduce((acc, item) => acc + item.valor, 0);
 
     const totalOrcamentos = transacoes
-      .filter((item) => item.tipo === 'orcamento')
+      .filter((item) => item.tipo === "orcamento")
       .reduce((acc, item) => acc + item.valor, 0);
 
     const saldo = totalOrcamentos - totalDespesas;
@@ -247,10 +233,7 @@ export class FinanceiroService {
     };
   }
 
-  async getPanorama(
-    secretarias: SecretariaDTO[],
-    instituicoes: InstituicaoDTO[]
-  ): Promise<FinanceiroPanoramaDTO> {
+  async getPanorama(secretarias: SecretariaDTO[], instituicoes: InstituicaoDTO[]): Promise<FinanceiroPanoramaDTO> {
     const [secretariasComGastos, instituicoesComGastos] = await Promise.all([
       Promise.all(
         secretarias.map(async (secretaria) => {
@@ -261,7 +244,7 @@ export class FinanceiroService {
                 nomeSecretaria: gastos.nomeSecretaria || secretaria.nome,
               }
             : null;
-        })
+        }),
       ),
       Promise.all(
         instituicoes.map(async (instituicao) => {
@@ -273,10 +256,10 @@ export class FinanceiroService {
                 secretariaId: instituicao.idSecretaria,
                 secretariaNome:
                   secretarias.find((secretaria) => secretaria.idSecretaria === instituicao.idSecretaria)?.nome ||
-                  'Sem secretaria vinculada',
+                  "Sem secretaria vinculada",
               }
             : null;
-        })
+        }),
       ),
     ]);
 
@@ -287,17 +270,17 @@ export class FinanceiroService {
   }
 
   async cadastrar(payload: FinanceiroPayloadDTO): Promise<DespesaDTO | OrcamentoDTO> {
-    if (payload.tipo === 'orcamento') {
+    if (payload.tipo === "orcamento") {
       if (!payload.anoOrcamento || payload.anoOrcamento <= 0) {
-        throw new Error('Ano do orçamento inválido.');
+        throw new Error("Ano do orçamento inválido.");
       }
 
       if (!(payload.valorOrcamento ?? payload.valor) || (payload.valorOrcamento ?? payload.valor)! <= 0) {
-        throw new Error('Valor do orçamento inválido.');
+        throw new Error("Valor do orçamento inválido.");
       }
 
       if (!payload.idInstituicao || !payload.idTipoDespesa) {
-        throw new Error('Instituição e tipo de despesa são obrigatórios para orçamento.');
+        throw new Error("Instituição e tipo de despesa são obrigatórios para orçamento.");
       }
 
       const body = {
@@ -312,15 +295,15 @@ export class FinanceiroService {
     }
 
     if (!payload.idOrcamento || !payload.idTipoDespesa || !payload.idInstituicao) {
-      throw new Error('Despesa exige idOrcamento, idTipoDespesa e idInstituicao válidos.');
+      throw new Error("Despesa exige idOrcamento, idTipoDespesa e idInstituicao válidos.");
     }
 
     if (!payload.dataVencimento && !payload.data) {
-      throw new Error('Despesa exige data de vencimento.');
+      throw new Error("Despesa exige data de vencimento.");
     }
 
-    if (!payload.uc || !payload.uc.trim()) {
-      throw new Error('Despesa exige UC preenchida.');
+    if (!payload.uc?.trim()) {
+      throw new Error("Despesa exige UC preenchida.");
     }
 
     const body = normalizeDespesaPayload({
@@ -339,7 +322,7 @@ export class FinanceiroService {
     }) as DespesaDTO;
 
     if (!body.numeroDocumento) {
-      throw new Error('Despesa exige numero de documento numerico.');
+      throw new Error("Despesa exige numero de documento numerico.");
     }
 
     const dateRangeError = validateDespesaDateRange(body.dataEmicao, body.dataVencimento);
@@ -351,17 +334,17 @@ export class FinanceiroService {
   }
 
   async atualizar(id: number, payload: FinanceiroPayloadDTO): Promise<DespesaDTO | OrcamentoDTO> {
-    if (payload.tipo === 'orcamento') {
+    if (payload.tipo === "orcamento") {
       if (!payload.anoOrcamento || payload.anoOrcamento <= 0) {
-        throw new Error('Ano do orçamento inválido.');
+        throw new Error("Ano do orçamento inválido.");
       }
 
       if (!(payload.valorOrcamento ?? payload.valor) || (payload.valorOrcamento ?? payload.valor)! <= 0) {
-        throw new Error('Valor do orçamento inválido.');
+        throw new Error("Valor do orçamento inválido.");
       }
 
       if (!payload.idInstituicao || !payload.idTipoDespesa) {
-        throw new Error('Instituição e tipo de despesa são obrigatórios para orçamento.');
+        throw new Error("Instituição e tipo de despesa são obrigatórios para orçamento.");
       }
 
       const body = {
@@ -387,7 +370,7 @@ export class FinanceiroService {
       numeroDocumento: payload.numeroDocumento ?? current.numeroDocumento,
       descricao: payload.descricao ?? current.descricao,
     });
-    const uc = payload.uc?.trim() || current.uc || '';
+    const uc = payload.uc?.trim() || current.uc || "";
     const dataVencimento = payload.dataVencimento ?? payload.data ?? current.dataVencimento ?? current.data;
     const dataEmicao = payload.dataEmicao ?? payload.data ?? current.dataEmicao ?? current.data ?? dataVencimento;
     const consumoPrevisto = payload.consumoPrevisto ?? payload.valor ?? current.consumoPrevisto ?? current.valor;
@@ -398,15 +381,15 @@ export class FinanceiroService {
     const idUsuario = payload.idUsuario ?? current.idUsuario;
 
     if (!idOrcamento || !idTipoDespesa || !idInstituicao) {
-      throw new Error('Despesa exige idOrcamento, idTipoDespesa e idInstituicao válidos.');
+      throw new Error("Despesa exige idOrcamento, idTipoDespesa e idInstituicao válidos.");
     }
 
     if (!dataVencimento) {
-      throw new Error('Despesa exige data de vencimento.');
+      throw new Error("Despesa exige data de vencimento.");
     }
 
     if (!uc.trim()) {
-      throw new Error('Despesa exige UC preenchida.');
+      throw new Error("Despesa exige UC preenchida.");
     }
 
     const body = normalizeDespesaPayload({
@@ -425,7 +408,7 @@ export class FinanceiroService {
     }) as DespesaDTO;
 
     if (!body.numeroDocumento) {
-      throw new Error('Despesa exige numero de documento numerico.');
+      throw new Error("Despesa exige numero de documento numerico.");
     }
 
     const dateRangeError = validateDespesaDateRange(body.dataEmicao, body.dataVencimento);
@@ -436,8 +419,8 @@ export class FinanceiroService {
     return despesaService.updateData(id, body);
   }
 
-  async excluir(id: number, tipo: 'despesa' | 'orcamento'): Promise<void> {
-    if (tipo === 'orcamento') {
+  async excluir(id: number, tipo: "despesa" | "orcamento"): Promise<void> {
+    if (tipo === "orcamento") {
       await orcamentoService.delete(id);
       return;
     }
@@ -510,7 +493,7 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       setUsuarios(usuariosData);
       setError(null);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao carregar dados financeiros.';
+      const message = err instanceof Error ? err.message : "Erro ao carregar dados financeiros.";
       setError(message);
       setTransacoes([]);
       setAllTransacoes([]);
@@ -547,7 +530,7 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       await financeiroService.cadastrar(payload);
       await loadFinanceiro(filtros);
     },
-    [filtros, loadFinanceiro]
+    [filtros, loadFinanceiro],
   );
 
   const atualizar = useCallback(
@@ -555,15 +538,15 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       await financeiroService.atualizar(id, payload);
       await loadFinanceiro(filtros);
     },
-    [filtros, loadFinanceiro]
+    [filtros, loadFinanceiro],
   );
 
   const excluir = useCallback(
-    async (id: number, tipo: 'despesa' | 'orcamento') => {
+    async (id: number, tipo: "despesa" | "orcamento") => {
       await financeiroService.excluir(id, tipo);
       await loadFinanceiro(filtros);
     },
-    [filtros, loadFinanceiro]
+    [filtros, loadFinanceiro],
   );
 
   return useMemo(
@@ -607,6 +590,6 @@ export const useFinanceiro = (initialFilters: FinanceiroFiltrosDTO = {}) => {
       cadastrar,
       atualizar,
       excluir,
-    ]
+    ],
   );
 };

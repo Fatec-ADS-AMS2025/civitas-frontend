@@ -1,8 +1,7 @@
 import type React from "react";
 import type { TableRow } from "./table-types";
 
-export const toRecord = <T extends TableRow>(value: T): Record<string, unknown> =>
-  value as Record<string, unknown>;
+export const toRecord = <T extends TableRow>(value: T): Record<string, unknown> => value as Record<string, unknown>;
 
 export const getResolvedId = <T extends TableRow>(row: T): number => {
   const record = toRecord(row);

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap");
 @import "tailwindcss";
 
 button {
@@ -60,7 +60,8 @@ button {
   --foreground-on-brand-soft: rgba(255, 255, 255, 0.72);
   --foreground-on-brand-subtle: rgba(255, 255, 255, 0.68);
   --foreground-disabled: #8f9ea6;
-  --finance-panorama-hero-bg: radial-gradient(circle at top left, rgba(255, 99, 36, 0.16), transparent 34%),
+  --finance-panorama-hero-bg:
+    radial-gradient(circle at top left, rgba(255, 99, 36, 0.16), transparent 34%),
     linear-gradient(135deg, #004c57 0%, #0b6470 52%, #148e95 100%);
 
   --border-soft: #dce8ea;
@@ -211,7 +212,8 @@ html[data-theme="dark"] {
   --foreground-on-brand-soft: rgba(255, 255, 255, 0.76);
   --foreground-on-brand-subtle: rgba(255, 255, 255, 0.7);
   --foreground-disabled: #7f98a0;
-  --finance-panorama-hero-bg: radial-gradient(circle at top left, rgba(255, 135, 41, 0.14), transparent 34%),
+  --finance-panorama-hero-bg:
+    radial-gradient(circle at top left, rgba(255, 135, 41, 0.14), transparent 34%),
     linear-gradient(135deg, #0a3940 0%, #115861 52%, #2d8689 100%);
 
   --border-soft: #1f373d;
@@ -777,12 +779,12 @@ html[data-theme="dark"] {
 .civitas-scrollbar::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
   @apply rounded-sm;
-  background-clip: padding-box;
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--primary-1) 84%, white 16%),
     color-mix(in srgb, var(--secundary-1) 88%, black 12%)
   );
+  background-clip: padding-box;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
@@ -828,12 +830,12 @@ html[data-theme="dark"] {
 .sidebar-scroll::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   @apply rounded-sm;
-  background-clip: padding-box;
   background: linear-gradient(
     180deg,
     var(--sidebar-scroll-thumb),
     color-mix(in srgb, var(--sidebar-scroll-thumb) 82%, var(--secundary-1) 18%)
   );
+  background-clip: padding-box;
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
@@ -859,7 +861,11 @@ html[data-theme="dark"] {
 }
 
 .material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
   font-size: 22px;
   line-height: 1;
   display: inline-flex;
@@ -872,7 +878,7 @@ html[data-theme="dark"] {
 }
 
 .material-symbols-outlined.filled {
-  font-variation-settings: 'FILL' 1;
+  font-variation-settings: "FILL" 1;
   font-size: 26px;
 }
 
@@ -1199,13 +1205,7 @@ html[data-contrast="high"] .civitas-overlay {
 }
 
 html[data-contrast="high"] .skeleton-line {
-  background-image: linear-gradient(
-    100deg,
-    #182228 18%,
-    #24353b 40%,
-    #355058 58%,
-    #182228 82%
-  ) !important;
+  background-image: linear-gradient(100deg, #182228 18%, #24353b 40%, #355058 58%, #182228 82%) !important;
 }
 
 html[data-contrast="high"] .despesas-hero__decor,

@@ -1,16 +1,13 @@
-import { GenericService } from "./generic";
-import OrcamentoDTO from "@/models/orcamento";
 import { filterActiveRecords } from "@/global/softDelete";
+import type OrcamentoDTO from "@/models/orcamento";
+import { GenericService } from "./generic";
 
 export class OrcamentoService extends GenericService<OrcamentoDTO> {
   constructor() {
-    super('orcamentos');
+    super("orcamentos");
   }
 
-  async getByFilters(filters?: {
-    page?: number;
-    size?: number;
-  }): Promise<OrcamentoDTO[]> {
+  async getByFilters(filters?: { page?: number; size?: number }): Promise<OrcamentoDTO[]> {
     return filterActiveRecords(await this.getAllData(filters));
   }
 

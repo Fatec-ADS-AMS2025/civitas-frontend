@@ -1,12 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { LISTING_CENTER_CONFIGS, LISTING_CENTER_REGISTRY } from "./registry";
-import type {
-  ListingPanelId,
-  ListingPanelSelection,
-  ListingViewMode,
-  ListingViewState,
-} from "./types";
+import type { ListingPanelId, ListingPanelSelection, ListingViewMode, ListingViewState } from "./types";
 import { getInitialListingViewState } from "./utils";
 
 type ListingCenterStore = {
@@ -27,8 +22,7 @@ type ListingCenterStore = {
 const fallbackListingId = LISTING_CENTER_CONFIGS[0]?.id ?? "central-usuarios";
 const fallbackSecondaryListingId = LISTING_CENTER_CONFIGS[1]?.id ?? fallbackListingId;
 
-export const getListingPanelViewKey = (panelId: ListingPanelId, listingId: string) =>
-  `${panelId}:${listingId}`;
+export const getListingPanelViewKey = (panelId: ListingPanelId, listingId: string) => `${panelId}:${listingId}`;
 
 const buildInitialView = (listingId: string): ListingViewState => {
   const config = LISTING_CENTER_REGISTRY[listingId];

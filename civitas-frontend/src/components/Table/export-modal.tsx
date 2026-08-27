@@ -1,13 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Modal from "../modal";
-import type {
-  TableColumn,
-  TableExportOptions,
-  TableExportOutputType,
-  TableExportScope,
-} from "./export-types";
+import type { TableColumn, TableExportOptions, TableExportOutputType, TableExportScope } from "./export-types";
 
 type ExportModalProps = {
   open: boolean;
@@ -32,12 +27,8 @@ export default function ExportModal({
   onGenerate,
 }: ExportModalProps) {
   const [outputType, setOutputType] = useState<TableExportOutputType>(DEFAULT_OUTPUT_TYPE);
-  const [scope, setScope] = useState<TableExportScope>(() =>
-    filteredCount > 0 ? "filtered" : "all"
-  );
-  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(() =>
-    columns.map((column) => column.id)
-  );
+  const [scope, setScope] = useState<TableExportScope>(() => (filteredCount > 0 ? "filtered" : "all"));
+  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(() => columns.map((column) => column.id));
 
   const selectedCount = selectedColumnIds.length;
   const selectedScopeCount = scope === "filtered" ? filteredCount : allCount;
@@ -103,7 +94,9 @@ export default function ExportModal({
                 />
                 <span>
                   <strong className="block font-semibold">Excel (.xlsx)</strong>
-                  <span className="text-[var(--foreground-muted)]">Planilha com cabecalho destacado e colunas ajustadas.</span>
+                  <span className="text-[var(--foreground-muted)]">
+                    Planilha com cabecalho destacado e colunas ajustadas.
+                  </span>
                 </span>
               </label>
 
@@ -118,7 +111,9 @@ export default function ExportModal({
                 />
                 <span>
                   <strong className="block font-semibold">PDF</strong>
-                  <span className="text-[var(--foreground-muted)]">Arquivo pronto para compartilhamento e impressao.</span>
+                  <span className="text-[var(--foreground-muted)]">
+                    Arquivo pronto para compartilhamento e impressao.
+                  </span>
                 </span>
               </label>
             </div>

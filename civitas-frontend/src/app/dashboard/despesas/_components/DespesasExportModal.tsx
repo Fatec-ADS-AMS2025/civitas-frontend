@@ -1,9 +1,6 @@
 import ExportModal from "@/components/Table/export-modal";
 import type { TableExportOptions } from "@/components/Table/export-types";
-import {
-  DESPESAS_EXPORT_COLUMNS,
-  DESPESAS_EXPORT_TITLE,
-} from "../despesas.constants";
+import { DESPESAS_EXPORT_COLUMNS, DESPESAS_EXPORT_TITLE } from "../despesas.constants";
 
 type DespesasExportModalProps = {
   open: boolean;

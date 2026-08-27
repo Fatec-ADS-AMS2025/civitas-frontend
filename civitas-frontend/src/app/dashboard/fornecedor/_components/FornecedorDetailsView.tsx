@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  DetailCard,
-  DetailCardGrid,
-  DetailFieldGrid,
-  DetailSection,
-} from "@/components/details/info-details";
+import { DetailCard, DetailCardGrid, DetailFieldGrid, DetailSection } from "@/components/details/info-details";
 import type { FornecedorRow } from "./FornecedorPageClient";
 
 type FornecedorDetailsViewProps = {
@@ -20,15 +15,10 @@ const getLocalidade = (fornecedor: FornecedorRow): string => {
   return fornecedor.cidade || fornecedor.estado || "";
 };
 
-export default function FornecedorDetailsView({
-  fornecedor,
-}: FornecedorDetailsViewProps) {
+export default function FornecedorDetailsView({ fornecedor }: FornecedorDetailsViewProps) {
   return (
     <div className="space-y-5">
-      <DetailSection
-        title="Resumo do fornecedor"
-        description="Identificacao fiscal, contato e situacao cadastral."
-      >
+      <DetailSection title="Resumo do fornecedor" description="Identificacao fiscal, contato e situacao cadastral.">
         <DetailCardGrid>
           <DetailCard
             title="Status"

@@ -1,5 +1,5 @@
+import type TipoCodigoDTO from "@/models/tipoCodigo";
 import { GenericService, type ListQuery, type ResponseEnvelope } from "./generic";
-import TipoCodigoDTO from "@/models/tipoCodigo";
 
 const TIPO_CODIGO_ENDPOINT = "tipo-codigo";
 
@@ -14,7 +14,7 @@ const logOptionalTipoCodigoFallback = (error: unknown): void => {
   if (process.env.NODE_ENV === "development") {
     console.warn(
       `Lookup opcional ignorado para /api/${TIPO_CODIGO_ENDPOINT} porque o endpoint nao existe no backend atual.`,
-      error
+      error,
     );
   }
 };
@@ -86,10 +86,7 @@ export class TipoCodigoService extends GenericService<TipoCodigoDTO> {
     }
   }
 
-  async updateEnvelope(
-    id: number,
-    data: Partial<TipoCodigoDTO>
-  ): Promise<ResponseEnvelope<TipoCodigoDTO>> {
+  async updateEnvelope(id: number, data: Partial<TipoCodigoDTO>): Promise<ResponseEnvelope<TipoCodigoDTO>> {
     try {
       const response = await fetch(`${this.getUrlEndpoint()}/${id}`, {
         method: "PUT",

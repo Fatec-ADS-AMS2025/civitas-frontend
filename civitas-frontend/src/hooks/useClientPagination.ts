@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, useTransition } from "react";
-import { TablePaginationConfig } from "@/components/Table/table";
+import type { TablePaginationConfig } from "@/components/Table/table";
 
 type UseClientPaginationOptions = {
   initialPageSize?: number;
@@ -13,10 +13,7 @@ const clampPage = (page: number, totalPages: number) => {
   return Math.min(Math.max(page, 1), totalPages);
 };
 
-export function useClientPagination<T>(
-  items: T[],
-  options: UseClientPaginationOptions = {}
-) {
+export function useClientPagination<T>(items: T[], options: UseClientPaginationOptions = {}) {
   const { initialPageSize = 5, pageSizeOptions = [5, 10, 20] } = options;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
@@ -32,14 +29,17 @@ export function useClientPagination<T>(
     return items.slice(startIndex, startIndex + pageSize);
   }, [items, pageSize, resolvedCurrentPage]);
 
-  const goToPage = useCallback((nextPage: number) => {
-    startTransition(() => {
-      setCurrentPage((previousPage) => {
-        const targetPage = clampPage(nextPage, totalPages);
-        return targetPage === previousPage ? previousPage : targetPage;
+  const goToPage = useCallback(
+    (nextPage: number) => {
+      startTransition(() => {
+        setCurrentPage((previousPage) => {
+          const targetPage = clampPage(nextPage, totalPages);
+          return targetPage === previousPage ? previousPage : targetPage;
+        });
       });
-    });
-  }, [totalPages]);
+    },
+    [totalPages],
+  );
 
   const changePageSize = useCallback((nextSize: number) => {
     startTransition(() => {
@@ -64,7 +64,7 @@ export function useClientPagination<T>(
       onPageChange: goToPage,
       onPageSizeChange: changePageSize,
     }),
-    [changePageSize, goToPage, pageSize, pageSizeOptions, resolvedCurrentPage, totalPages, totalRecords]
+    [changePageSize, goToPage, pageSize, pageSizeOptions, resolvedCurrentPage, totalPages, totalRecords],
   );
 
   return {

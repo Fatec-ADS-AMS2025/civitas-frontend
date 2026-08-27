@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React, { useId } from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -7,12 +7,10 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className = '', id, ...props }, ref) => {
+  ({ label, error, className = "", id, ...props }, ref) => {
     const autoId = useId();
     const stableInputId = id ?? autoId;
-    const describedBy = typeof props['aria-describedby'] === 'string'
-      ? props['aria-describedby']
-      : undefined;
+    const describedBy = typeof props["aria-describedby"] === "string" ? props["aria-describedby"] : undefined;
     const errorId = describedBy ?? `${stableInputId}-error`;
 
     return (
@@ -44,9 +42,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             disabled:cursor-not-allowed
             placeholder:text-[var(--foreground-soft)]
             transition-all duration-[var(--motion-duration-fast)]
-            ${error ? 'civitas-input--error' : ''}
+            ${error ? "civitas-input--error" : ""}
             ${className}
-          `.trim().replace(/\s+/g, ' ')}
+          `
+            .trim()
+            .replace(/\s+/g, " ")}
           aria-describedby={error ? errorId : describedBy}
           {...props}
         />
@@ -57,9 +57,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
-Input.displayName = 'Input';
+Input.displayName = "Input";
 
 export default Input;

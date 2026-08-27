@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Button from '@/components/button';
-import { Input } from '@/components/Input';
-import useForgotPassword from '@/hooks/useForgotPassword';
+import Link from "next/link";
+import { useState } from "react";
+import Button from "@/components/button";
+import { Input } from "@/components/Input";
+import useForgotPassword from "@/hooks/useForgotPassword";
 
 type FormErrors = {
   email: string;
@@ -16,19 +16,19 @@ const validateEmail = (email: string) => {
   const normalizedEmail = email.trim();
 
   if (!normalizedEmail) {
-    return 'Informe o e-mail';
+    return "Informe o e-mail";
   }
 
   if (!EMAIL_PATTERN.test(normalizedEmail)) {
-    return 'Informe um e-mail valido';
+    return "Informe um e-mail valido";
   }
 
-  return '';
+  return "";
 };
 
 export default function ForgotPasswordForm() {
-  const [email, setEmail] = useState('');
-  const [errors, setErrors] = useState<FormErrors>({ email: '' });
+  const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({ email: "" });
 
   const { requestPasswordRecovery, isLoading, error, successMessage, clearMessages } = useForgotPassword();
 
@@ -110,7 +110,7 @@ export default function ForgotPasswordForm() {
                 value={email}
                 onChange={(event) => {
                   setEmail(event.target.value);
-                  if (errors.email) setErrors({ email: '' });
+                  if (errors.email) setErrors({ email: "" });
                   if (error || successMessage) clearMessages();
                 }}
                 disabled={isLoading}
@@ -127,7 +127,7 @@ export default function ForgotPasswordForm() {
                     aria-hidden="true"
                   />
                 )}
-                {isLoading ? 'Enviando...' : 'Enviar instrucoes'}
+                {isLoading ? "Enviando..." : "Enviar instrucoes"}
               </Button>
             </form>
 

@@ -53,7 +53,7 @@ export function useTableSort<T extends TableRow>(data: T[], columns: TableColumn
     setSortState((current) =>
       current?.columnId === columnId
         ? { columnId, direction: current.direction === "asc" ? "desc" : "asc" }
-        : { columnId, direction: "asc" }
+        : { columnId, direction: "asc" },
     );
   };
 

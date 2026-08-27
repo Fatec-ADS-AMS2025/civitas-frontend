@@ -1,7 +1,4 @@
-import type {
-  FinanceCodigoResumo,
-  FinanceInstituicaoResumo,
-} from "@/lib/financeiro-relations";
+import type { FinanceCodigoResumo, FinanceInstituicaoResumo } from "@/lib/financeiro-relations";
 
 type DespesasExplorerGroupsProps = {
   codigoGroups: FinanceCodigoResumo[];
@@ -37,12 +34,9 @@ export default function DespesasExplorerGroups({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h4 className="truncate text-base font-semibold text-[var(--secundary-1)]">
-                      {codigo.codigo}
-                    </h4>
+                    <h4 className="truncate text-base font-semibold text-[var(--secundary-1)]">{codigo.codigo}</h4>
                     <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                      {codigo.quantidadeDespesas} despesas em{" "}
-                      {codigo.quantidadeInstituicoes} instituicoes
+                      {codigo.quantidadeDespesas} despesas em {codigo.quantidadeInstituicoes} instituicoes
                     </p>
                   </div>
                   <button
@@ -53,9 +47,7 @@ export default function DespesasExplorerGroups({
                     Ver gastos
                   </button>
                 </div>
-                <p className="mt-3 text-lg font-semibold text-[var(--foreground)]">
-                  {codigo.totalGastosFormatado}
-                </p>
+                <p className="mt-3 text-lg font-semibold text-[var(--foreground)]">{codigo.totalGastosFormatado}</p>
               </article>
             ))
           ) : (
@@ -90,12 +82,9 @@ export default function DespesasExplorerGroups({
                     <span className="inline-flex rounded-sm border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
                       {instituicao.secretariaNome}
                     </span>
-                    <h4 className="mt-3 truncate text-lg font-semibold text-[var(--foreground)]">
-                      {instituicao.nome}
-                    </h4>
+                    <h4 className="mt-3 truncate text-lg font-semibold text-[var(--foreground)]">{instituicao.nome}</h4>
                     <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                      {instituicao.quantidadeDespesas} despesas em{" "}
-                      {instituicao.quantidadeCodigos} codigos
+                      {instituicao.quantidadeDespesas} despesas em {instituicao.quantidadeCodigos} codigos
                     </p>
                   </div>
                   <button
@@ -109,10 +98,7 @@ export default function DespesasExplorerGroups({
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   <ExplorerMiniStat label="Gasto" value={instituicao.totalGastosFormatado} />
-                  <ExplorerMiniStat
-                    label="Orcamento"
-                    value={instituicao.totalOrcamentosFormatado}
-                  />
+                  <ExplorerMiniStat label="Orcamento" value={instituicao.totalOrcamentosFormatado} />
                   <ExplorerMiniStat label="Saldo" value={instituicao.saldoFormatado} />
                 </div>
               </article>
@@ -135,9 +121,7 @@ export default function DespesasExplorerGroups({
 function ExplorerMiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
-        {label}
-      </p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">{label}</p>
       <p className="mt-2 text-base font-semibold text-[var(--secundary-1)]">{value}</p>
     </div>
   );

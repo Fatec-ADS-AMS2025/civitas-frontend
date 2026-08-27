@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 import { SkeletonTable } from "@/components/skeleton";
 
 type StateContainerProps = {
@@ -80,7 +80,9 @@ export function EmptyState({
           <span className="material-symbols-outlined !text-[28px]">inventory_2</span>
         </div>
         <h3 className="civitas-state__title mt-4 text-base font-semibold text-[var(--foreground)]">{title}</h3>
-        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[var(--foreground-muted)]">{description}</p>
+        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[var(--foreground-muted)]">
+          {description}
+        </p>
         {action ? <div className="mt-5">{action}</div> : null}
       </div>
     </StateContainer>
@@ -100,7 +102,9 @@ export function ErrorState({
           <span className="material-symbols-outlined !text-[28px]">error</span>
         </div>
         <h3 className="civitas-state__title mt-4 text-base font-semibold text-[var(--tone-danger-text)]">{title}</h3>
-        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[var(--tone-danger-text)]">{description}</p>
+        <p className="civitas-state__description mt-2 max-w-xl text-sm leading-6 text-[var(--tone-danger-text)]">
+          {description}
+        </p>
         {onRetry ? (
           <button
             type="button"

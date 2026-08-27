@@ -31,23 +31,16 @@ const getEndereco = (instituicao: InstituicaoRow): string => {
 const renderCodigo = (codigo: FinanceCodigoResumo) => (
   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div className="min-w-0">
-      <h4 className="truncate text-base font-semibold text-[var(--secundary-1)]">
-        {codigo.codigo}
-      </h4>
+      <h4 className="truncate text-base font-semibold text-[var(--secundary-1)]">{codigo.codigo}</h4>
       <p className="mt-1 text-sm text-[var(--foreground-muted)]">
         {codigo.quantidadeDespesas} despesa
-        {codigo.quantidadeDespesas === 1 ? "" : "s"} em{" "}
-        {codigo.quantidadeSecretarias} secretaria
+        {codigo.quantidadeDespesas === 1 ? "" : "s"} em {codigo.quantidadeSecretarias} secretaria
         {codigo.quantidadeSecretarias === 1 ? "" : "s"}
       </p>
     </div>
     <div className="text-left sm:text-right">
-      <span className="block text-sm font-semibold text-[var(--foreground)]">
-        {codigo.totalGastosFormatado}
-      </span>
-      <span className="text-xs text-[var(--foreground-soft)]">
-        Ultima ref.: {codigo.ultimaReferenciaFormatada}
-      </span>
+      <span className="block text-sm font-semibold text-[var(--foreground)]">{codigo.totalGastosFormatado}</span>
+      <span className="text-xs text-[var(--foreground-soft)]">Ultima ref.: {codigo.ultimaReferenciaFormatada}</span>
     </div>
   </div>
 );
@@ -70,15 +63,11 @@ const renderDespesa = (despesa: FinanceDespesaRelacionada) => (
         {despesa.statusLabel} | {despesa.dataReferenciaFormatada}
       </span>
     </div>
-    <strong className="text-left text-sm text-[var(--secundary-1)] md:text-right">
-      {despesa.valorFormatado}
-    </strong>
+    <strong className="text-left text-sm text-[var(--secundary-1)] md:text-right">{despesa.valorFormatado}</strong>
   </div>
 );
 
-export default function InstituicaoDetailsView({
-  instituicao,
-}: InstituicaoDetailsViewProps) {
+export default function InstituicaoDetailsView({ instituicao }: InstituicaoDetailsViewProps) {
   const financeiro = instituicao.financeiroResumo;
   const codigos = financeiro?.codigos ?? [];
   const despesas = financeiro?.despesas ?? [];
@@ -89,16 +78,11 @@ export default function InstituicaoDetailsView({
         <span className="font-semibold text-[var(--foreground)]">Instituicao:</span>{" "}
         {instituicao.nome || "Instituicao nao informada"}
         <span className="mx-2 text-[var(--foreground-soft)]">|</span>
-        <span className="font-semibold text-[var(--foreground)]">
-          Secretaria vinculada:
-        </span>{" "}
+        <span className="font-semibold text-[var(--foreground)]">Secretaria vinculada:</span>{" "}
         {instituicao.secretariaLabel}
       </div>
 
-      <DetailSection
-        title="Resumo da instituicao"
-        description="Indicadores principais e relacionamento institucional."
-      >
+      <DetailSection title="Resumo da instituicao" description="Indicadores principais e relacionamento institucional.">
         <DetailCardGrid>
           <DetailCard
             title="Status"
@@ -158,10 +142,7 @@ export default function InstituicaoDetailsView({
         />
       </DetailSection>
 
-      <DetailSection
-        title="Despesas relacionadas"
-        description="Lancamentos financeiros associados a instituicao."
-      >
+      <DetailSection title="Despesas relacionadas" description="Lancamentos financeiros associados a instituicao.">
         <DetailList
           items={despesas}
           emptyMessage="Nenhuma despesa encontrada para esta instituicao."

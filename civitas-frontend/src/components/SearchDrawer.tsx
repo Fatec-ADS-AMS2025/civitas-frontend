@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import SearchInput from "@/components/Sidebar/SearchInput";
 import SearchResults from "@/components/Sidebar/SearchResults";
 import { useNavigationSearch } from "@/hooks/useNavigationSearch";
@@ -55,9 +55,7 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
         tabIndex={isOpen ? 0 : -1}
         onClick={onClose}
         className={`fixed inset-0 z-[120] rounded-sm bg-[var(--search-drawer-overlay)] backdrop-blur-[1px] transition-opacity duration-200 ${
-          isOpen
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
+          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
@@ -69,9 +67,7 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
         }`}
       >
         <div className="flex items-center justify-between border-b border-[var(--search-drawer-divider)] px-4 py-3">
-          <h2 className="font-title text-lg font-semibold text-[var(--search-drawer-title)]">
-            Buscar funcionalidade
-          </h2>
+          <h2 className="font-title text-lg font-semibold text-[var(--search-drawer-title)]">Buscar funcionalidade</h2>
           <button
             type="button"
             onClick={onClose}

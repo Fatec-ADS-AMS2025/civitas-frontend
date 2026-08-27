@@ -1,5 +1,5 @@
+import type TipoInstituicaoDTO from "@/models/tipoInstituicao";
 import { GenericService } from "./generic";
-import TipoInstituicaoDTO from "@/models/tipoInstituicao";
 
 export class TipoInstituicaoService extends GenericService<TipoInstituicaoDTO> {
   constructor() {

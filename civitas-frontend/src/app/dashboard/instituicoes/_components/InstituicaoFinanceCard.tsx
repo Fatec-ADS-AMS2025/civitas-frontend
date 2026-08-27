@@ -7,10 +7,7 @@ type InstituicaoFinanceCardProps = {
   onOpenDetails: (instituicao: InstituicaoFinanceResumo) => void;
 };
 
-export default function InstituicaoFinanceCard({
-  instituicao,
-  onOpenDetails,
-}: InstituicaoFinanceCardProps) {
+export default function InstituicaoFinanceCard({ instituicao, onOpenDetails }: InstituicaoFinanceCardProps) {
   return (
     <article className="rounded-sm border border-[var(--border-soft)] bg-[linear-gradient(180deg,var(--surface-elevated),var(--surface-subtle))] p-5 shadow-[var(--shadow-sm)]">
       <div className="flex items-start justify-between gap-3">
@@ -18,12 +15,9 @@ export default function InstituicaoFinanceCard({
           <span className="inline-flex rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
             {instituicao.secretariaNome}
           </span>
-          <h3 className="mt-3 truncate text-xl font-semibold text-[var(--foreground)]">
-            {instituicao.nome}
-          </h3>
+          <h3 className="mt-3 truncate text-xl font-semibold text-[var(--foreground)]">{instituicao.nome}</h3>
           <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-            {instituicao.quantidadeDespesas} despesas em {instituicao.quantidadeCodigos}{" "}
-            codigos consolidados
+            {instituicao.quantidadeDespesas} despesas em {instituicao.quantidadeCodigos} codigos consolidados
           </p>
         </div>
 
@@ -38,28 +32,18 @@ export default function InstituicaoFinanceCard({
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
-            Gasto
-          </p>
-          <p className="mt-2 text-lg font-semibold text-[var(--secundary-1)]">
-            {instituicao.totalGastosFormatado}
-          </p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">Gasto</p>
+          <p className="mt-2 text-lg font-semibold text-[var(--secundary-1)]">{instituicao.totalGastosFormatado}</p>
         </div>
         <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-3">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
             Orcamento
           </p>
-          <p className="mt-2 text-lg font-semibold text-[var(--foreground)]">
-            {instituicao.totalOrcamentosFormatado}
-          </p>
+          <p className="mt-2 text-lg font-semibold text-[var(--foreground)]">{instituicao.totalOrcamentosFormatado}</p>
         </div>
         <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">
-            Saldo
-          </p>
-          <p className="mt-2 text-lg font-semibold text-[var(--foreground)]">
-            {instituicao.saldoFormatado}
-          </p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--foreground-soft)]">Saldo</p>
+          <p className="mt-2 text-lg font-semibold text-[var(--foreground)]">{instituicao.saldoFormatado}</p>
         </div>
       </div>
     </article>

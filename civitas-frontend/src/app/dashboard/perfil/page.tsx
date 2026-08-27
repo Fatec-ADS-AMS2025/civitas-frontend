@@ -34,9 +34,7 @@ const ProfileSkeleton = () => (
 
 const ProfileField = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
-    <dt className="text-xs font-semibold uppercase tracking-normal text-[var(--foreground-soft)]">
-      {label}
-    </dt>
+    <dt className="text-xs font-semibold uppercase tracking-normal text-[var(--foreground-soft)]">{label}</dt>
     <dd className="mt-2 break-words text-sm font-semibold text-[var(--foreground)] sm:text-base">
       {value || "Nao informado"}
     </dd>

@@ -1,10 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { InsightMetric } from "@/components/financeiro-insights";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
-import type {
-  FinanceCodigoResumo,
-  FinanceInstituicaoResumo,
-} from "@/lib/financeiro-relations";
+import type { FinanceCodigoResumo, FinanceInstituicaoResumo } from "@/lib/financeiro-relations";
 
 export type SelectOption = {
   value: string | number;

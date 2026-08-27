@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  DetailCard,
-  DetailCardGrid,
-  DetailFieldGrid,
-  DetailSection,
-} from "@/components/details/info-details";
+import { DetailCard, DetailCardGrid, DetailFieldGrid, DetailSection } from "@/components/details/info-details";
 import type { UserRow } from "./UsuariosPageClient";
 
 type UsuarioDetailsViewProps = {
@@ -32,10 +27,7 @@ const getLocalidade = (usuario: UserRow): string => {
 export default function UsuarioDetailsView({ usuario }: UsuarioDetailsViewProps) {
   return (
     <div className="space-y-5">
-      <DetailSection
-        title="Resumo do usuario"
-        description="Perfil de acesso, permissao e identificadores funcionais."
-      >
+      <DetailSection title="Resumo do usuario" description="Perfil de acesso, permissao e identificadores funcionais.">
         <DetailCardGrid>
           <DetailCard
             title="Cargo / perfil"

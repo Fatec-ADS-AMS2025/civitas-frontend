@@ -1,6 +1,6 @@
 "use client";
 
-import { InsightsGrid, type InsightMetric } from "@/components/financeiro-insights";
+import { type InsightMetric, InsightsGrid } from "@/components/financeiro-insights";
 import type { InstituicaoFinanceResumo } from "../_types";
 import InstituicaoFinanceCard from "./InstituicaoFinanceCard";
 
@@ -26,9 +26,8 @@ export default function InstituicoesOverviewSection({
             Instituicao x secretaria com gastos e saldo em contexto.
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-            O backend fornece a amarracao entre instituicao e secretaria, e aqui a
-            leitura financeira combina despesas, orcamentos e codigos para abrir
-            detalhes sem sair da listagem.
+            O backend fornece a amarracao entre instituicao e secretaria, e aqui a leitura financeira combina despesas,
+            orcamentos e codigos para abrir detalhes sem sair da listagem.
           </p>
         </div>
       </div>
@@ -37,11 +36,7 @@ export default function InstituicoesOverviewSection({
 
       <div className="grid gap-4 xl:grid-cols-2">
         {topInstituicoes.map((instituicao) => (
-          <InstituicaoFinanceCard
-            key={instituicao.id}
-            instituicao={instituicao}
-            onOpenDetails={onOpenInstituicao}
-          />
+          <InstituicaoFinanceCard key={instituicao.id} instituicao={instituicao} onOpenDetails={onOpenInstituicao} />
         ))}
       </div>
     </section>
