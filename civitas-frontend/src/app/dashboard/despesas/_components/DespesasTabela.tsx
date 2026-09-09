@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Input from "@/components/Input";
 import type { TableColumn } from "@/components/Table/export-types";
 import type { TablePaginationConfig } from "@/components/Table/table";
@@ -8,6 +8,8 @@ import { despesaService } from "@/hooks/despesa";
 import { documentoService } from "@/hooks/documento";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { showToast } from "@/hooks/useToast";
+import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
+import DespesaDocumentoActions from "./DespesaDocumentoActions";
 import { ICON_BUTTON_CLASS_NAME } from "../despesas.constants";
 import type { DespesasListSearchState, DespesasTableData } from "../despesas.types";
 import { getDespesaCodigo, getStatusBadgeClassName } from "../despesas.utils";
@@ -148,7 +150,7 @@ export default function DespesasTabela({
         id: "documento",
         label: "Documento",
         sortable: false,
-        render: (row) => <DocumentoAction despesa={row as DespesaDashboardRow} />,
+        render: (row) => <DespesaDocumentoActions despesa={row as DespesaDashboardRow} showEmptyState />,
       },
     ],
     [],

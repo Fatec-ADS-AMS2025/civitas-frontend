@@ -3,6 +3,12 @@ import type DespesaDTO from "@/models/despesa";
 import type DocumentoDTO from "@/models/documento";
 import type { ListQuery } from "./generic";
 import { GenericService } from "./generic";
+import { GenericService } from './generic';
+import DespesaDTO from '@/models/despesa';
+import type DocumentoDTO from '@/models/documento';
+import type { ListQuery } from './generic';
+import { filterActiveRecords } from '@/global/softDelete';
+import { base64ToDocumentBlob, getDocumentFileName, getDocumentMimeType } from '@/lib/documento-utils';
 
 const mergeUniqueById = (despesas: DespesaDTO[]): DespesaDTO[] => {
   return Array.from(new Map(despesas.map((despesa) => [despesa.id, despesa])).values());
@@ -54,12 +60,15 @@ const appendDocumentoIfPresent = (formData: FormData, documento: unknown): void 
   const digitalizacao = typeof documento.digitalizacao === "string" ? documento.digitalizacao.trim() : "";
   if (!digitalizacao) return;
 
-  const fileName =
-    typeof documento.fileName === "string" && documento.fileName.trim() ? documento.fileName.trim() : "documento.pdf";
-  const fileType =
-    typeof documento.fileType === "string" && documento.fileType.trim() ? documento.fileType.trim() : "application/pdf";
+  const fileName = getDocumentFileName(
+    typeof documento.fileName === 'string' ? documento.fileName : undefined
+  );
+  const fileType = getDocumentMimeType(
+    fileName,
+    typeof documento.fileType === 'string' ? documento.fileType : undefined
+  );
 
-  formData.append("Documento", base64ToBlob(digitalizacao, fileType), fileName);
+  formData.append('Documento', base64ToDocumentBlob(digitalizacao, fileType, fileName), fileName);
 };
 
 const buildDespesaFormData = (data: Partial<DespesaDTO>): FormData => {
