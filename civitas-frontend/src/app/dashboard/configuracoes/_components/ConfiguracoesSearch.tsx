@@ -1,8 +1,8 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { SearchBar, type FieldConfig } from "@/components/Table/searchbar";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import { type FieldConfig, SearchBar } from "@/components/Table/searchbar";
 import { CONFIG_FORM_HIDDEN_FIELDS } from "./configuracoes.constants";
 import type { ConfigDefinition, ConfigRow } from "./configuracoes.types";
 

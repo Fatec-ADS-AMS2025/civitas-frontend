@@ -1,5 +1,5 @@
+import type DocumentoDTO from "@/models/documento";
 import { GenericService } from "./generic";
-import DocumentoDTO from "@/models/documento";
 
 export type LegacyDocumentoLookupResult =
   | { status: "found"; documento: DocumentoDTO }
@@ -29,17 +29,12 @@ export class DocumentoService extends GenericService<DocumentoDTO> {
 
   async findUniqueLegacyDocumentoByNumeroFornecedor(
     numeroDocumento: unknown,
-    idFornecedor: unknown
+    idFornecedor: unknown,
   ): Promise<LegacyDocumentoLookupResult> {
     const numero = Number(digitsOnly(numeroDocumento));
     const fornecedor = Number(idFornecedor);
 
-    if (
-      !Number.isFinite(numero) ||
-      numero <= 0 ||
-      !Number.isFinite(fornecedor) ||
-      fornecedor <= 0
-    ) {
+    if (!Number.isFinite(numero) || numero <= 0 || !Number.isFinite(fornecedor) || fornecedor <= 0) {
       return { status: "not-found" };
     }
 
@@ -54,10 +49,7 @@ export class DocumentoService extends GenericService<DocumentoDTO> {
     while (currentPage <= totalPages && matches.length < 2) {
       const page = await this.getPage({ page: currentPage, size: pageSize });
       page.items.forEach((documento) => {
-        if (
-          Number(documento.numeroDocumento) === numero &&
-          Number(documento.idFornecedor) === fornecedor
-        ) {
+        if (Number(documento.numeroDocumento) === numero && Number(documento.idFornecedor) === fornecedor) {
           matches.push(normalizeDocumentoForUi(documento));
         }
       });

@@ -7,22 +7,28 @@ on:
     branches: ["**"]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./civitas-frontend
 
-        steps:
-            - name: Baixar Projeto
-              uses: actions/checkout@v4
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
 
-            - name: Configurar Node.js
-              uses: actions/setup-node@v4
-              with:
-                node-version: 18
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: ./civitas-frontend/package-lock.json
 
-            - name: Instalar Dependências
-              run: npm install
-              working-directory: ./civitas-frontend
+      - name: Instalar dependências
+        run: npm ci
 
-            - name: Rodar Build
-              run: npm run build
-              working-directory: ./civitas-frontend
+      - name: Validar lint, formatação e imports com Biome
+        run: npm run check
+
+      - name: Rodar build
+        run: npm run build

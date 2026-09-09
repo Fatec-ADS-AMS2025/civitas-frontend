@@ -1,16 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
+import { EmptyState, ErrorState } from "@/components/feedback-states";
 import Input from "@/components/Input";
 import PaginationControls from "@/components/PaginationControls";
-import { EmptyState, ErrorState } from "@/components/feedback-states";
-import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
-import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import { useClientPagination } from "@/hooks/useClientPagination";
-import {
-  type DespesaDashboardRow,
-  useDespesasDashboard,
-} from "@/hooks/useDespesasDashboard";
+import { type DespesaDashboardRow, useDespesasDashboard } from "@/hooks/useDespesasDashboard";
+import { useAppNavigation } from "@/hooks/useNavigationProgress";
 import DashboardSkeleton from "./skeleton";
 
 type SummaryRow = {
@@ -70,17 +67,8 @@ export default function Dashboard() {
   const [showMoneyValues, setShowMoneyValues] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const {
-    filteredDespesas,
-    orcamentos,
-    instituicoes,
-    fornecedores,
-    usuarios,
-    summary,
-    loading,
-    error,
-    refetch,
-  } = useDespesasDashboard();
+  const { filteredDespesas, orcamentos, instituicoes, fornecedores, usuarios, summary, loading, error, refetch } =
+    useDespesasDashboard();
 
   const hiddenValue = "* * * * * *";
 
@@ -93,10 +81,7 @@ export default function Dashboard() {
       title: "Dashboard",
       eyebrow: "Visao geral",
       subtitle: "Resumo operacional e financeiro do sistema.",
-      breadcrumbs: [
-        { label: "Home", href: "/dashboard" },
-        { label: "Dashboard" },
-      ],
+      breadcrumbs: [{ label: "Home", href: "/dashboard" }, { label: "Dashboard" }],
       actions: [
         {
           label: "Atualizar painel",
@@ -116,7 +101,7 @@ export default function Dashboard() {
         },
       ],
     }),
-    [refetch, showMoneyValues]
+    [refetch, showMoneyValues],
   );
 
   useDashboardHeader(headerConfig);
@@ -155,7 +140,7 @@ export default function Dashboard() {
       summary.saida,
       summary.saldoTotal,
       usuarios.length,
-    ]
+    ],
   );
 
   const quickLinks = useMemo(
@@ -165,7 +150,7 @@ export default function Dashboard() {
       { label: "Instituicoes", href: "/dashboard/instituicoes" },
       { label: "Fornecedores", href: "/dashboard/fornecedor" },
     ],
-    []
+    [],
   );
 
   const filteredRecentExpenses = useMemo(() => {
@@ -176,22 +161,12 @@ export default function Dashboard() {
     }
 
     return filteredDespesas.filter((item) => {
-      return normalizeText(
-        `${item.descricao} ${item.numeroDocumento} ${item.categoria} ${item.id}`
-      ).includes(query);
+      return normalizeText(`${item.descricao} ${item.numeroDocumento} ${item.categoria} ${item.id}`).includes(query);
     });
   }, [filteredDespesas, searchTerm]);
 
-  const {
-    currentPage,
-    pageSize,
-    totalPages,
-    totalRecords,
-    paginatedItems,
-    isPending,
-    goToPage,
-    changePageSize,
-  } = useClientPagination(filteredRecentExpenses, { initialPageSize: 5 });
+  const { currentPage, pageSize, totalPages, totalRecords, paginatedItems, isPending, goToPage, changePageSize } =
+    useClientPagination(filteredRecentExpenses, { initialPageSize: 5 });
 
   const dueSoonExpenses = useMemo(() => {
     return filteredDespesas
@@ -227,9 +202,7 @@ export default function Dashboard() {
             <span className="inline-flex rounded-sm border border-[var(--border-default)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
               Painel principal
             </span>
-            <h2 className="mt-3 text-[22px] font-semibold text-[var(--secundary-1)] sm:text-[24px]">
-              Operacao direta
-            </h2>
+            <h2 className="mt-3 text-[22px] font-semibold text-[var(--secundary-1)] sm:text-[24px]">Operacao direta</h2>
             <p className="mt-1 text-sm text-[var(--foreground-muted)]">
               Resumo financeiro, acessos centrais e fila recente de despesas sem blocos duplicados.
             </p>
@@ -251,37 +224,26 @@ export default function Dashboard() {
 
         <div className="mt-6 divide-y divide-[var(--border-soft)]">
           {summaryRows.map((item) => (
-            <div
-              key={item.label}
-              className="grid gap-2 py-3 sm:grid-cols-[180px_1fr] sm:items-center"
-            >
+            <div key={item.label} className="grid gap-2 py-3 sm:grid-cols-[180px_1fr] sm:items-center">
               <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
                 {item.label}
               </span>
               <div>
                 <div className="flex gap-3">
-                  <p className="text-base font-semibold text-[var(--foreground)]">
-                    {item.value}
-                  </p>
+                  <p className="text-base font-semibold text-[var(--foreground)]">{item.value}</p>
 
-                  {!((item.label).toLocaleLowerCase().includes("base ativa")) && (
-                    <button onClick={verValores}>
+                  {!item.label.toLocaleLowerCase().includes("base ativa") && (
+                    <button type="button" onClick={verValores}>
                       {item.value === hiddenValue ? (
-                        <span className="material-symbols-outlined text-[20px]">
-                          visibility
-                        </span>
+                        <span className="material-symbols-outlined text-[20px]">visibility</span>
                       ) : (
-                        <span className="material-symbols-outlined text-[20px]">
-                          visibility_off
-                        </span>
+                        <span className="material-symbols-outlined text-[20px]">visibility_off</span>
                       )}
                     </button>
-                  )
-                  }
+                  )}
                 </div>
                 <p className="mt-1 text-sm text-[var(--foreground-muted)]">{item.helper}</p>
               </div>
-
             </div>
           ))}
         </div>
@@ -294,9 +256,7 @@ export default function Dashboard() {
               <span className="inline-flex rounded-sm bg-[#F4F8F9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7A8B94]">
                 Registros
               </span>
-              <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
-                Despesas recentes
-              </h2>
+              <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">Despesas recentes</h2>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">
                 Busca local por descricao, documento ou categoria.
               </p>
@@ -322,11 +282,7 @@ export default function Dashboard() {
               <>
                 <div className="grid gap-3">
                   {paginatedItems.map((item) => (
-                    <RecentExpenseCard
-                      key={item.id}
-                      item={item}
-                      showMoneyValues={showMoneyValues}
-                    />
+                    <RecentExpenseCard key={item.id} item={item} showMoneyValues={showMoneyValues} />
                   ))}
                 </div>
 
@@ -351,12 +307,8 @@ export default function Dashboard() {
           <span className="inline-flex rounded-sm bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
             Prioridades
           </span>
-          <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">
-            Vencimentos proximos
-          </h2>
-          <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-            Despesas com vencimento em ate 7 dias.
-          </p>
+          <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">Vencimentos proximos</h2>
+          <p className="mt-1 text-sm text-[var(--foreground-muted)]">Despesas com vencimento em ate 7 dias.</p>
 
           <div className="mt-5 space-y-3">
             {dueSoonExpenses.length === 0 ? (
@@ -366,15 +318,10 @@ export default function Dashboard() {
               />
             ) : (
               dueSoonExpenses.map((item) => (
-                <div
-                  key={`due-${item.id}`}
-                  className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5"
-                >
+                <div key={`due-${item.id}`} className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-[var(--foreground)]">
-                        {item.descricao}
-                      </p>
+                      <p className="text-sm font-semibold text-[var(--foreground)]">{item.descricao}</p>
                       <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
                         {item.categoria}
                       </p>
@@ -402,13 +349,7 @@ export default function Dashboard() {
   );
 }
 
-function RecentExpenseCard({
-  item,
-  showMoneyValues,
-}: {
-  item: DespesaDashboardRow;
-  showMoneyValues: boolean;
-}) {
+function RecentExpenseCard({ item, showMoneyValues }: { item: DespesaDashboardRow; showMoneyValues: boolean }) {
   return (
     <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
       <div>

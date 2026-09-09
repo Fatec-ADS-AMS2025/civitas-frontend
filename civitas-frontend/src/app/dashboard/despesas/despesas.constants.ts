@@ -1,6 +1,6 @@
 import type { TableColumn } from "@/components/Table/export-types";
-import type { DespesasDashboardFilters } from "@/hooks/useDespesasDashboard";
 import { SITUACAO_ATIVO } from "@/global/situacao";
+import type { DespesasDashboardFilters } from "@/hooks/useDespesasDashboard";
 import type { SelectOption } from "./despesas.types";
 
 export const DESPESAS_EXPORT_COLUMNS: TableColumn[] = [

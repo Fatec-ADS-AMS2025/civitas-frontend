@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { useNavigationProgressStore } from "@/hooks/useNavigationProgress";
 
 export default function NavigationFeedback() {
@@ -91,15 +91,8 @@ export default function NavigationFeedback() {
   const safeProgress = Math.min(Math.max(progress, 0.02), 1);
 
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[10050] h-[10px] overflow-hidden"
-    >
-      <div
-        className={`absolute inset-0 transition-opacity duration-200 ${
-          isActive ? "opacity-100" : "opacity-0"
-        }`}
-      >
+    <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[10050] h-[10px] overflow-hidden">
+      <div className={`absolute inset-0 transition-opacity duration-200 ${isActive ? "opacity-100" : "opacity-0"}`}>
         <div
           className={`relative h-full origin-left rounded-sm bg-primary-1 ${
             status === "finishing" ? "duration-180 opacity-0" : "duration-200 opacity-100"

@@ -1,14 +1,11 @@
 "use client";
 
-import React, { useEffect } from "react";
+import type React from "react";
+import { useEffect } from "react";
+import { DashboardHeaderProvider, DashboardPageHeader } from "@/components/dashboard/dashboard-header";
 import Sidebar from "@/components/Sidebar/sidebar";
-import {
-  DashboardHeaderProvider,
-  DashboardPageHeader,
-} from "@/components/dashboard/dashboard-header";
 import useAuth from "@/hooks/useAuth";
 import { useAppNavigation } from "@/hooks/useNavigationProgress";
-
 
 export default function Layout({
   children,
@@ -42,7 +39,8 @@ export default function Layout({
     <DashboardHeaderProvider>
       <div className="dashboard-shell flex min-h-screen w-full bg-[var(--surface-page)]">
         <Sidebar />
-        <button 
+        <button
+          type="button"
           className="civitas-action civitas-action--primary fixed right-4 top-4 z-[9997] gap-2 px-4 py-2 sm:right-10 sm:top-5"
           onClick={() => {
             logout();
@@ -52,10 +50,7 @@ export default function Layout({
           Sair
           <span className="material-symbols-outlined text-[20px]">logout</span>
         </button>
-        <div
-          data-contrast-target="content"
-          className="dashboard-content-region"
-        >
+        <div data-contrast-target="content" className="dashboard-content-region">
           <div className="dashboard-content-shell">
             <div className="mb-4 flex items-center justify-between gap-3 sm:hidden">
               <button
@@ -83,13 +78,10 @@ export default function Layout({
             </div>
             <DashboardPageHeader />
 
-            <div className="w-full">
-              {children}
-            </div>
+            <div className="w-full">{children}</div>
           </div>
         </div>
       </div>
     </DashboardHeaderProvider>
-
   );
 }

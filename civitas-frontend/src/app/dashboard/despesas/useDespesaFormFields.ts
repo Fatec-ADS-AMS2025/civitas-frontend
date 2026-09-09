@@ -3,12 +3,7 @@
 import { useCallback, useMemo } from "react";
 import type { DocumentoFieldValue } from "@/components/Form/documento-field";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import {
-  digitsOnly,
-  normalizeDateInput,
-  validateDespesaDateRange,
-  validateRequiredUc,
-} from "@/global/formPayload";
+import { digitsOnly, normalizeDateInput, validateDespesaDateRange, validateRequiredUc } from "@/global/formPayload";
 import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
 import { STATUS_OPTIONS } from "./despesas.constants";
@@ -38,28 +33,24 @@ export function useDespesaFormFields({
   resolvedOrcamentoOptions,
   resolvedFornecedorOptions,
   resolvedUsuarioOptions,
-  resolvedUnidadeConsumidoraOptions,
   isOptionsLoading = false,
   hideDocumento = false,
 }: UseDespesaFormFieldsInput): ModalFieldConfig[] {
-  const isDocumentoValue = useCallback(
-    (value: unknown): value is DocumentoFieldValue => {
-      if (!value || typeof value !== "object" || Array.isArray(value)) {
-        return false;
-      }
+  const isDocumentoValue = useCallback((value: unknown): value is DocumentoFieldValue => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return false;
+    }
 
-      const documento = value as Partial<DocumentoFieldValue>;
-      return typeof documento.digitalizacao === "string" && documento.digitalizacao.trim().length > 0;
-    },
-    []
-  );
+    const documento = value as Partial<DocumentoFieldValue>;
+    return typeof documento.digitalizacao === "string" && documento.digitalizacao.trim().length > 0;
+  }, []);
 
   const resolveTipoDespesa = useCallback(
     (value: unknown) => {
       const tipoDespesaId = Number(value);
       return tiposDespesa.find((tipoDespesa) => tipoDespesa.id === tipoDespesaId);
     },
-    [tiposDespesa]
+    [tiposDespesa],
   );
 
   const resolveTipoCodigo = useCallback(
@@ -67,12 +58,12 @@ export function useDespesaFormFields({
       const tipoCodigoId = Number(value);
       return tipoCodigos.find((tipoCodigo) => tipoCodigo.id === tipoCodigoId);
     },
-    [tipoCodigos]
+    [tipoCodigos],
   );
 
   const resolveDocumento = useCallback(
     (value: unknown) => (isDocumentoValue(value) ? value : undefined),
-    [isDocumentoValue]
+    [isDocumentoValue],
   );
 
   return useMemo<ModalFieldConfig[]>(
@@ -175,11 +166,7 @@ export function useDespesaFormFields({
           const tipoDespesa = resolveTipoDespesa(value);
           const tipoCodigoSelecionado = resolveTipoCodigo(formData.idTipoCodigo);
 
-          if (
-            tipoDespesa &&
-            tipoCodigoSelecionado &&
-            tipoDespesa.idTipoCodigo !== tipoCodigoSelecionado.id
-          ) {
+          if (tipoDespesa && tipoCodigoSelecionado && tipoDespesa.idTipoCodigo !== tipoCodigoSelecionado.id) {
             return "Selecione uma categoria compativel com o tipo de codigo informado.";
           }
 
@@ -303,8 +290,7 @@ export function useDespesaFormFields({
         required: true,
         section: "Relacionamentos",
         options: resolvedInstituicaoOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0 ? "Selecione uma instituicao valida." : undefined,
+        validate: (value) => (toPositiveNumber(value) <= 0 ? "Selecione uma instituicao valida." : undefined),
       },
       {
         key: "idOrcamento",
@@ -314,8 +300,7 @@ export function useDespesaFormFields({
         required: true,
         section: "Relacionamentos",
         options: resolvedOrcamentoOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0 ? "Selecione um orcamento valido." : undefined,
+        validate: (value) => (toPositiveNumber(value) <= 0 ? "Selecione um orcamento valido." : undefined),
       },
       {
         key: "idFornecedor",
@@ -325,8 +310,7 @@ export function useDespesaFormFields({
         required: true,
         section: "Relacionamentos",
         options: resolvedFornecedorOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0 ? "Selecione um fornecedor valido." : undefined,
+        validate: (value) => (toPositiveNumber(value) <= 0 ? "Selecione um fornecedor valido." : undefined),
       },
       {
         key: "idUsuario",
@@ -336,8 +320,7 @@ export function useDespesaFormFields({
         required: true,
         section: "Relacionamentos",
         options: resolvedUsuarioOptions,
-        validate: (value) =>
-          toPositiveNumber(value) <= 0 ? "Selecione um usuario valido." : undefined,
+        validate: (value) => (toPositiveNumber(value) <= 0 ? "Selecione um usuario valido." : undefined),
       },
       {
         key: "situacao",
@@ -360,6 +343,6 @@ export function useDespesaFormFields({
       resolveDocumento,
       resolveTipoCodigo,
       resolveTipoDespesa,
-    ]
+    ],
   );
 }

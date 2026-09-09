@@ -19,14 +19,7 @@ const normalizeSearchText = (value: string): string =>
     .toLowerCase()
     .trim();
 
-export default function UcCombobox({
-  ucs,
-  selectedUc,
-  disabled,
-  error,
-  onSelect,
-  onClearSelection,
-}: UcComboboxProps) {
+export default function UcCombobox({ ucs, selectedUc, disabled, error, onSelect, onClearSelection }: UcComboboxProps) {
   const comboboxId = useId();
   const listboxId = `${comboboxId}-listbox`;
   const [query, setQuery] = useState(() => selectedUc?.identificador ?? "");
@@ -43,14 +36,9 @@ export default function UcCombobox({
     return ucs
       .filter((uc) => {
         const target = normalizeSearchText(
-          [
-            uc.id,
-            uc.identificador,
-            uc.instituicaoNome,
-            uc.secretariaNome,
-            uc.tipoDespesaNome,
-            uc.fornecedorNome,
-          ].join(" ")
+          [uc.id, uc.identificador, uc.instituicaoNome, uc.secretariaNome, uc.tipoDespesaNome, uc.fornecedorNome].join(
+            " ",
+          ),
         );
 
         return target.includes(normalizedQuery);
@@ -62,10 +50,7 @@ export default function UcCombobox({
     setQuery(nextQuery);
     setIsOpen(true);
 
-    if (
-      selectedUc &&
-      normalizeSearchText(nextQuery) !== normalizeSearchText(selectedUc.identificador)
-    ) {
+    if (selectedUc && normalizeSearchText(nextQuery) !== normalizeSearchText(selectedUc.identificador)) {
       onClearSelection();
     }
   };
@@ -87,9 +72,7 @@ export default function UcCombobox({
       </label>
       <div className="relative">
         <div className="flex items-center gap-2 rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 focus-within:border-[var(--primary-1)] focus-within:ring-4 focus-within:ring-[var(--focus-ring)]">
-          <span className="material-symbols-outlined !text-[18px] text-[var(--foreground-muted)]">
-            search
-          </span>
+          <span className="material-symbols-outlined !text-[18px] text-[var(--foreground-muted)]">search</span>
           <input
             id={comboboxId}
             type="text"
@@ -127,9 +110,7 @@ export default function UcCombobox({
               className="flex h-8 w-8 items-center justify-center rounded-sm text-[var(--foreground-muted)] hover:bg-[var(--surface-subtle)] disabled:cursor-not-allowed"
               aria-label="Alternar lista de unidades consumidoras"
             >
-              <span className="material-symbols-outlined !text-[18px]">
-                {isOpen ? "expand_less" : "expand_more"}
-              </span>
+              <span className="material-symbols-outlined !text-[18px]">{isOpen ? "expand_less" : "expand_more"}</span>
             </button>
           )}
         </div>
@@ -141,13 +122,9 @@ export default function UcCombobox({
             className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] p-1 shadow-[var(--shadow-lg)]"
           >
             {isSearching ? (
-              <div className="px-3 py-4 text-sm text-[var(--foreground-muted)]">
-                Buscando UCs...
-              </div>
+              <div className="px-3 py-4 text-sm text-[var(--foreground-muted)]">Buscando UCs...</div>
             ) : filteredUcs.length === 0 ? (
-              <div className="px-3 py-4 text-sm text-[var(--foreground-muted)]">
-                Nenhuma UC encontrada.
-              </div>
+              <div className="px-3 py-4 text-sm text-[var(--foreground-muted)]">Nenhuma UC encontrada.</div>
             ) : (
               filteredUcs.map((uc) => {
                 const isSelected = selectedUc?.id === uc.id;
@@ -159,9 +136,7 @@ export default function UcCombobox({
                     aria-selected={isSelected}
                     onClick={() => handleSelect(uc)}
                     className={`flex w-full flex-col gap-1 rounded-sm px-3 py-2.5 text-left text-sm transition hover:bg-[var(--surface-subtle)] ${
-                      isSelected
-                        ? "bg-[var(--surface-subtle)] text-[var(--text-accent-teal)]"
-                        : ""
+                      isSelected ? "bg-[var(--surface-subtle)] text-[var(--text-accent-teal)]" : ""
                     }`}
                   >
                     <span className="font-semibold">
@@ -179,8 +154,7 @@ export default function UcCombobox({
       </div>
       {selectedUc ? (
         <p className="text-xs font-semibold text-[var(--text-accent-teal)]">
-          UC selecionada: {String(selectedUc.id).padStart(3, "0")} -{" "}
-          {selectedUc.identificador}
+          UC selecionada: {String(selectedUc.id).padStart(3, "0")} - {selectedUc.identificador}
         </p>
       ) : null}
       {error ? <p className="text-sm font-medium text-[#C23D3D]">{error}</p> : null}

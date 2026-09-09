@@ -2,10 +2,8 @@
 
 import { useMemo } from "react";
 import type { InsightMetric } from "@/components/financeiro-insights";
-import type {
-  DespesaDashboardRow,
-  DespesaDashboardSummary,
-} from "@/hooks/useDespesasDashboard";
+import type { DespesaDashboardRow, DespesaDashboardSummary } from "@/hooks/useDespesasDashboard";
+import { buildFinanceRelations } from "@/lib/financeiro-relations";
 import type FornecedorDTO from "@/models/fornecedor";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -14,7 +12,6 @@ import type TipoCodigoDTO from "@/models/tipoCodigo";
 import type TipoDespesaDTO from "@/models/tipoDespesa";
 import type UnidadeConsumidoraDTO from "@/models/unidadeConsumidora";
 import type UsuarioDTO from "@/models/usuario";
-import { buildFinanceRelations } from "@/lib/financeiro-relations";
 import { MAX_EXPLORER_ITEMS } from "./despesas.constants";
 import {
   formatCurrency,
@@ -75,7 +72,7 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
         orcamentos,
         tiposDespesa,
       }),
-    [filteredDespesas, instituicoes, orcamentos, secretarias, tiposDespesa]
+    [filteredDespesas, instituicoes, orcamentos, secretarias, tiposDespesa],
   );
 
   const options = useDespesasOptions({
@@ -91,9 +88,7 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
   });
 
   const normalizedRelationsCodigoSearch = normalizeSearchValue(relationsCodigoSearch);
-  const normalizedRelationsInstituicaoSearch = normalizeSearchValue(
-    relationsInstituicaoSearch
-  );
+  const normalizedRelationsInstituicaoSearch = normalizeSearchValue(relationsInstituicaoSearch);
   const normalizedListCodigoSearch = normalizeSearchValue(listCodigoSearch);
   const normalizedListInstituicaoSearch = normalizeSearchValue(listInstituicaoSearch);
 
@@ -107,19 +102,13 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
       },
       {
         label: "Instituicoes",
-        value: String(
-          filteredRelations.instituicoes.filter((item) => item.quantidadeDespesas > 0)
-            .length
-        ),
+        value: String(filteredRelations.instituicoes.filter((item) => item.quantidadeDespesas > 0).length),
         hint: "Com despesas no recorte filtrado",
         tone: "amber",
       },
       {
         label: "Secretarias",
-        value: String(
-          filteredRelations.secretarias.filter((item) => item.quantidadeDespesas > 0)
-            .length
-        ),
+        value: String(filteredRelations.secretarias.filter((item) => item.quantidadeDespesas > 0).length),
         hint: "Redes institucionais relacionadas",
         tone: "slate",
       },
@@ -130,7 +119,7 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
         tone: "coral",
       },
     ],
-    [filteredRelations, summary.saida]
+    [filteredRelations, summary.saida],
   );
 
   const filteredCodigoGroups = useMemo(
@@ -139,23 +128,17 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
         const matchesCodigo =
           !normalizedRelationsCodigoSearch ||
           normalizeSearchValue(`${codigo.codigo} ${codigo.codigoNormalizado}`).includes(
-            normalizedRelationsCodigoSearch
+            normalizedRelationsCodigoSearch,
           );
         const matchesInstituicao =
           !normalizedRelationsInstituicaoSearch ||
           codigo.instituicoes.some((item) =>
-            normalizeSearchValue(item).includes(normalizedRelationsInstituicaoSearch)
+            normalizeSearchValue(item).includes(normalizedRelationsInstituicaoSearch),
           ) ||
-          codigo.secretarias.some((item) =>
-            normalizeSearchValue(item).includes(normalizedRelationsInstituicaoSearch)
-          );
+          codigo.secretarias.some((item) => normalizeSearchValue(item).includes(normalizedRelationsInstituicaoSearch));
         return matchesCodigo && matchesInstituicao;
       }),
-    [
-      filteredRelations.codigos,
-      normalizedRelationsCodigoSearch,
-      normalizedRelationsInstituicaoSearch,
-    ]
+    [filteredRelations.codigos, normalizedRelationsCodigoSearch, normalizedRelationsInstituicaoSearch],
   );
 
   const filteredInstituicaoGroups = useMemo(
@@ -170,45 +153,32 @@ export function useDespesasViewModel(input: UseDespesasViewModelInput) {
           !normalizedRelationsCodigoSearch ||
           instituicao.codigos.some((codigo) =>
             normalizeSearchValue(`${codigo.codigo} ${codigo.codigoNormalizado}`).includes(
-              normalizedRelationsCodigoSearch
-            )
+              normalizedRelationsCodigoSearch,
+            ),
           );
         return matchesInstituicao && matchesCodigo;
       }),
-    [
-      filteredRelations.instituicoes,
-      normalizedRelationsCodigoSearch,
-      normalizedRelationsInstituicaoSearch,
-    ]
+    [filteredRelations.instituicoes, normalizedRelationsCodigoSearch, normalizedRelationsInstituicaoSearch],
   );
 
   const instituicaoNameMap = useMemo(
     () => new Map(instituicoes.map((item) => [item.id, item.nome] as const)),
-    [instituicoes]
+    [instituicoes],
   );
 
   const visibleDespesas = useMemo(
     () =>
       filteredDespesas.filter((despesa) => {
         const codigo = getDespesaCodigo(despesa);
-        const instituicaoNome =
-          instituicaoNameMap.get(despesa.raw.idInstituicao ?? 0) ?? "";
+        const instituicaoNome = instituicaoNameMap.get(despesa.raw.idInstituicao ?? 0) ?? "";
         const matchesCodigo =
-          !normalizedListCodigoSearch ||
-          normalizeSearchValue(codigo).includes(normalizedListCodigoSearch);
+          !normalizedListCodigoSearch || normalizeSearchValue(codigo).includes(normalizedListCodigoSearch);
         const matchesInstituicao =
           !normalizedListInstituicaoSearch ||
-          normalizeSearchValue(instituicaoNome).includes(
-            normalizedListInstituicaoSearch
-          );
+          normalizeSearchValue(instituicaoNome).includes(normalizedListInstituicaoSearch);
         return matchesCodigo && matchesInstituicao;
       }),
-    [
-      filteredDespesas,
-      instituicaoNameMap,
-      normalizedListCodigoSearch,
-      normalizedListInstituicaoSearch,
-    ]
+    [filteredDespesas, instituicaoNameMap, normalizedListCodigoSearch, normalizedListInstituicaoSearch],
   );
 
   const hasLocalListSearch = Boolean(listCodigoSearch || listInstituicaoSearch);

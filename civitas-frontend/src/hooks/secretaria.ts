@@ -1,10 +1,10 @@
-import { GenericService } from './generic';
-import SecretariaDTO from '@/models/secretaria';
-import { SecretariaGastosDTO } from '@/models/financeiro';
+import type { SecretariaGastosDTO } from "@/models/financeiro";
+import type SecretariaDTO from "@/models/secretaria";
+import { GenericService } from "./generic";
 
 export class SecretariaService extends GenericService<SecretariaDTO> {
   constructor() {
-    super('secretarias');
+    super("secretarias");
   }
 
   async getGastos(id: number): Promise<SecretariaGastosDTO | null> {

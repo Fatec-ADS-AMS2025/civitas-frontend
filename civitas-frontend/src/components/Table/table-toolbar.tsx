@@ -35,9 +35,7 @@ export function TableToolbar({
     <div className="flex flex-col gap-4 border-b border-[var(--divider)] px-4 py-4 sm:px-5 md:flex-row md:items-center md:justify-between lg:px-6">
       <div>
         <h2 className="text-sm font-semibold text-[var(--foreground)]">{title}</h2>
-        <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-          {subtitle}
-        </p>
+        <p className="mt-1 text-sm text-[var(--foreground-muted)]">{subtitle}</p>
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">

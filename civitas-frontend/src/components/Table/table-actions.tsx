@@ -29,31 +29,19 @@ function ActionButton<T extends TableRow>({
       : "border-[var(--border-soft)] bg-[var(--surface-elevated)] text-[var(--secundary-1)] hover:bg-[var(--surface-subtle)] focus-visible:ring-[var(--focus-ring)]";
 
   return (
-    <button
-      type="button"
-      onClick={() => onOpen(action, row)}
-      className={`${actionButtonClassName} ${toneClassName}`}
-    >
+    <button type="button" onClick={() => onOpen(action, row)} className={`${actionButtonClassName} ${toneClassName}`}>
       <span className="material-symbols-outlined !text-[21px]">{icon}</span>
     </button>
   );
 }
 
-export function TableActions<T extends TableRow>({
-  row,
-  actions,
-  onOpen,
-}: TableActionsProps<T>) {
+export function TableActions<T extends TableRow>({ row, actions, onOpen }: TableActionsProps<T>) {
   if (actions.length === 0) return null;
 
   return (
     <>
-      {actions.includes("view") ? (
-        <ActionButton icon="visibility" action="view" row={row} onOpen={onOpen} />
-      ) : null}
-      {actions.includes("edit") ? (
-        <ActionButton icon="edit" action="edit" row={row} onOpen={onOpen} />
-      ) : null}
+      {actions.includes("view") ? <ActionButton icon="visibility" action="view" row={row} onOpen={onOpen} /> : null}
+      {actions.includes("edit") ? <ActionButton icon="edit" action="edit" row={row} onOpen={onOpen} /> : null}
       {actions.includes("delete") ? (
         <ActionButton icon="delete" action="delete" row={row} tone="danger" onOpen={onOpen} />
       ) : null}

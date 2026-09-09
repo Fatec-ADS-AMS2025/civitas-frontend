@@ -1,14 +1,7 @@
 "use client";
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
 import { usePathname } from "next/navigation";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAppNavigation } from "@/hooks/useNavigationProgress";
 
 export type DashboardHeaderBreadcrumb = {
@@ -49,19 +42,13 @@ const DASHBOARD_HEADER_META: Record<string, DashboardHeaderConfig> = {
     title: "Dashboard",
     eyebrow: "Visão geral",
     subtitle: "Panorama operacional e financeiro com leitura rápida do sistema.",
-    breadcrumbs: [
-      { label: "Home", href: "/dashboard" },
-      { label: "Dashboard" },
-    ],
+    breadcrumbs: [{ label: "Home", href: "/dashboard" }, { label: "Dashboard" }],
   },
   "/dashboard/central-listagens": {
     title: "Central de Listagens",
     eyebrow: "Operacao",
     subtitle: "Fluxo unico para navegar entre tabelas dinamicas, filtros e exportacoes.",
-    breadcrumbs: [
-      { label: "Home", href: "/dashboard" },
-      { label: "Central de Listagens" },
-    ],
+    breadcrumbs: [{ label: "Home", href: "/dashboard" }, { label: "Central de Listagens" }],
   },
   "/dashboard/despesas": {
     title: "Despesas",
@@ -117,46 +104,32 @@ const DASHBOARD_HEADER_META: Record<string, DashboardHeaderConfig> = {
     title: "Financeiro",
     eyebrow: "Monitoramento",
     subtitle: "Resumo financeiro, filtros operacionais e movimentações do painel.",
-    breadcrumbs: [
-      { label: "Home", href: "/dashboard" },
-      { label: "Financeiro" },
-    ],
+    breadcrumbs: [{ label: "Home", href: "/dashboard" }, { label: "Financeiro" }],
   },
   "/dashboard/configuracoes": {
     title: "Configurações",
     eyebrow: "Administração",
     subtitle: "Parâmetros de apoio ao sistema e cadastros auxiliares do dashboard.",
-    breadcrumbs: [
-      { label: "Home", href: "/dashboard" },
-      { label: "Configurações" },
-    ],
+    breadcrumbs: [{ label: "Home", href: "/dashboard" }, { label: "Configurações" }],
   },
   "/dashboard/usuarios": {
     title: "Usuários",
     eyebrow: "Acesso",
     subtitle: "Gerencie usuários, perfis e situação de acesso ao sistema.",
-    breadcrumbs: [
-      { label: "Home", href: "/dashboard" },
-      { label: "Usuários" },
-    ],
+    breadcrumbs: [{ label: "Home", href: "/dashboard" }, { label: "Usuários" }],
   },
   "/dashboard/perfil": {
     title: "Meu Perfil",
     eyebrow: "Conta",
     subtitle: "Consulte os dados do usuario autenticado.",
-    breadcrumbs: [
-      { label: "Home", href: "/dashboard" },
-      { label: "Meu Perfil" },
-    ],
+    breadcrumbs: [{ label: "Home", href: "/dashboard" }, { label: "Meu Perfil" }],
   },
 };
 
 const DashboardHeaderContext = createContext<DashboardHeaderContextValue | null>(null);
 
 const normalizeSegmentLabel = (segment: string): string => {
-  const normalized = segment
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  const normalized = segment.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
   return normalized;
 };
@@ -177,22 +150,13 @@ const buildFallbackConfig = (pathname: string): DashboardHeaderConfig => {
   };
 };
 
-const areBreadcrumbsEqual = (
-  left: DashboardHeaderBreadcrumb[] = [],
-  right: DashboardHeaderBreadcrumb[] = []
-) => {
+const areBreadcrumbsEqual = (left: DashboardHeaderBreadcrumb[] = [], right: DashboardHeaderBreadcrumb[] = []) => {
   if (left.length !== right.length) return false;
 
-  return left.every(
-    (item, index) =>
-      item.label === right[index]?.label && item.href === right[index]?.href
-  );
+  return left.every((item, index) => item.label === right[index]?.label && item.href === right[index]?.href);
 };
 
-const areActionsEqual = (
-  left: DashboardHeaderAction[] = [],
-  right: DashboardHeaderAction[] = []
-) => {
+const areActionsEqual = (left: DashboardHeaderAction[] = [], right: DashboardHeaderAction[] = []) => {
   if (left.length !== right.length) return false;
 
   return left.every((item, index) => {
@@ -207,10 +171,7 @@ const areActionsEqual = (
   });
 };
 
-const areHeaderConfigsEqual = (
-  left: DashboardHeaderConfig,
-  right: DashboardHeaderConfig
-) => {
+const areHeaderConfigsEqual = (left: DashboardHeaderConfig, right: DashboardHeaderConfig) => {
   return (
     left.title === right.title &&
     left.subtitle === right.subtitle &&
@@ -220,9 +181,7 @@ const areHeaderConfigsEqual = (
   );
 };
 
-export function DashboardHeaderProvider({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export function DashboardHeaderProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname() || "/dashboard";
   const [overrideConfig, setOverrideConfig] = useState<DashboardHeaderOverride | null>(null);
 
@@ -230,26 +189,25 @@ export function DashboardHeaderProvider({
     return DASHBOARD_HEADER_META[pathname] ?? buildFallbackConfig(pathname);
   }, [pathname]);
 
-  const setHeaderConfig = useCallback((config: DashboardHeaderConfig) => {
-    setOverrideConfig((current) => {
-      if (
-        current?.pathname === pathname &&
-        areHeaderConfigsEqual(current.config, config)
-      ) {
-        return current;
-      }
+  const setHeaderConfig = useCallback(
+    (config: DashboardHeaderConfig) => {
+      setOverrideConfig((current) => {
+        if (current?.pathname === pathname && areHeaderConfigsEqual(current.config, config)) {
+          return current;
+        }
 
-      return { pathname, config };
-    });
-  }, [pathname]);
+        return { pathname, config };
+      });
+    },
+    [pathname],
+  );
 
   const clearHeaderConfig = useCallback(() => {
     setOverrideConfig(null);
   }, []);
 
   const headerConfig = useMemo<DashboardHeaderConfig>(() => {
-    const currentOverride =
-      overrideConfig?.pathname === pathname ? overrideConfig.config : null;
+    const currentOverride = overrideConfig?.pathname === pathname ? overrideConfig.config : null;
 
     if (!currentOverride) return baseConfig;
 
@@ -267,14 +225,10 @@ export function DashboardHeaderProvider({
       setHeaderConfig,
       clearHeaderConfig,
     }),
-    [clearHeaderConfig, headerConfig, setHeaderConfig]
+    [clearHeaderConfig, headerConfig, setHeaderConfig],
   );
 
-  return (
-    <DashboardHeaderContext.Provider value={value}>
-      {children}
-    </DashboardHeaderContext.Provider>
-  );
+  return <DashboardHeaderContext.Provider value={value}>{children}</DashboardHeaderContext.Provider>;
 }
 
 export function useDashboardHeader(config: DashboardHeaderConfig) {
@@ -359,9 +313,7 @@ export function DashboardPageHeader() {
           </h1>
 
           {header.subtitle ? (
-            <p className="mt-1.5 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-              {header.subtitle}
-            </p>
+            <p className="mt-1.5 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">{header.subtitle}</p>
           ) : null}
         </div>
 
@@ -393,9 +345,7 @@ export function DashboardPageHeader() {
                   }}
                   className={`${actionClassName} rounded-sm`}
                 >
-                  {action.icon ? (
-                    <span className="material-symbols-outlined !text-[18px]">{action.icon}</span>
-                  ) : null}
+                  {action.icon ? <span className="material-symbols-outlined !text-[18px]">{action.icon}</span> : null}
                   {action.label}
                 </button>
               );

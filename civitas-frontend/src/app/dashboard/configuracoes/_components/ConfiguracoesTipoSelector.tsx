@@ -8,21 +8,14 @@ type ConfiguracoesTipoSelectorProps = {
   onSelect: (kind: ConfigKind) => void;
 };
 
-export default function ConfiguracoesTipoSelector({
-  selected,
-  onSelect,
-}: ConfiguracoesTipoSelectorProps) {
+export default function ConfiguracoesTipoSelector({ selected, onSelect }: ConfiguracoesTipoSelectorProps) {
   return (
     <section className="civitas-surface p-4">
-      <div className="mb-3 text-sm font-medium text-[var(--foreground-muted)]">
-        Selecione o tipo:
-      </div>
+      <div className="mb-3 text-sm font-medium text-[var(--foreground-muted)]">Selecione o tipo:</div>
       <div className="flex flex-wrap gap-2">
         {CONFIG_SELECTOR_ITEMS.map((item) => {
           const isActive = selected === item.key;
-          const classes = isActive
-            ? "civitas-action--primary"
-            : "civitas-action--ghost";
+          const classes = isActive ? "civitas-action--primary" : "civitas-action--ghost";
 
           return (
             <button

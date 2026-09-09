@@ -1,20 +1,13 @@
 "use client";
 
-import {
-  DetailCard,
-  DetailCardGrid,
-  DetailFieldGrid,
-  DetailSection,
-} from "@/components/details/info-details";
+import { DetailCard, DetailCardGrid, DetailFieldGrid, DetailSection } from "@/components/details/info-details";
 import type { UnidadeConsumidoraRow } from "./UnidadesConsumidorasPageClient";
 
 type UnidadeConsumidoraDetailsViewProps = {
   unidade: UnidadeConsumidoraRow;
 };
 
-export default function UnidadeConsumidoraDetailsView({
-  unidade,
-}: UnidadeConsumidoraDetailsViewProps) {
+export default function UnidadeConsumidoraDetailsView({ unidade }: UnidadeConsumidoraDetailsViewProps) {
   return (
     <div className="space-y-5">
       <DetailSection

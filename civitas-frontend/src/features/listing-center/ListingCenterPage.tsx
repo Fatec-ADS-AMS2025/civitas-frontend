@@ -6,10 +6,7 @@ import { showToast } from "@/hooks/useToast";
 import { ListingPanelView } from "./components/ListingPanelView";
 import { ListingSelector } from "./components/ListingSelector";
 import { LISTING_CENTER_CONFIGS, LISTING_CENTER_REGISTRY } from "./registry";
-import {
-  getListingPanelViewKey,
-  useListingCenterStore,
-} from "./store";
+import { getListingPanelViewKey, useListingCenterStore } from "./store";
 import type {
   ListingColumn,
   ListingConfig,
@@ -70,17 +67,8 @@ type ListingPanelModel = {
   handleExport: (outputType: "xlsx" | "pdf") => Promise<void>;
 };
 
-function useListingPanelModel(
-  panelId: ListingPanelId,
-  refreshToken: number,
-): ListingPanelModel {
-  const {
-    panelListingIds,
-    views,
-    resetPanelView,
-    setPanelListing,
-    updatePanelView,
-  } = useListingCenterStore();
+function useListingPanelModel(panelId: ListingPanelId, refreshToken: number): ListingPanelModel {
+  const { panelListingIds, views, resetPanelView, setPanelListing, updatePanelView } = useListingCenterStore();
   const [result, setResult] = useState<ListingPageResult<ListingRow> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
@@ -100,9 +88,7 @@ function useListingPanelModel(
     [config.paginationMode, viewState.filterValues],
   );
   const serverSortSignature =
-    config.paginationMode === "server"
-      ? `${viewState.sortColumnId ?? ""}:${viewState.sortDirection}`
-      : "";
+    config.paginationMode === "server" ? `${viewState.sortColumnId ?? ""}:${viewState.sortDirection}` : "";
   const serverPageSignature = config.paginationMode === "server" ? viewState.page : 1;
 
   useEffect(() => {
@@ -161,13 +147,7 @@ function useListingPanelModel(
     [config, sourceRows, viewState],
   );
   const sortedRows = useMemo(
-    () =>
-      applyListingSort(
-        filteredRows,
-        config.columns,
-        viewState.sortColumnId,
-        viewState.sortDirection,
-      ),
+    () => applyListingSort(filteredRows, config.columns, viewState.sortColumnId, viewState.sortDirection),
     [config.columns, filteredRows, viewState.sortColumnId, viewState.sortDirection],
   );
   const visibleColumns = useMemo(() => {
@@ -176,12 +156,12 @@ function useListingPanelModel(
   }, [config.columns, viewState.visibleColumnIds]);
   const usesServerRows = config.paginationMode === "server" && !result?.allRows;
   const totalPages = usesServerRows
-    ? result?.totalPages ?? 0
+    ? (result?.totalPages ?? 0)
     : sortedRows.length === 0
       ? 0
       : Math.ceil(sortedRows.length / viewState.pageSize);
   const resolvedPage = usesServerRows
-    ? result?.currentPage ?? viewState.page
+    ? (result?.currentPage ?? viewState.page)
     : totalPages === 0
       ? 1
       : Math.min(viewState.page, totalPages);
@@ -191,7 +171,7 @@ function useListingPanelModel(
     const start = (resolvedPage - 1) * viewState.pageSize;
     return sortedRows.slice(start, start + viewState.pageSize);
   }, [resolvedPage, sortedRows, usesServerRows, viewState.pageSize]);
-  const totalRecords = usesServerRows ? result?.totalRecords ?? sortedRows.length : sortedRows.length;
+  const totalRecords = usesServerRows ? (result?.totalRecords ?? sortedRows.length) : sortedRows.length;
   const summaryText = usesServerRows
     ? `${sortedRows.length} registro(s) nesta pagina de ${result?.totalRecords ?? sourceRows.length}`
     : `${sortedRows.length} registro(s) visiveis de ${sourceRows.length}`;
@@ -282,8 +262,7 @@ function useListingPanelModel(
 
         return {
           ...currentView,
-          visibleColumnIds:
-            nextVisible.length > 0 ? nextVisible : currentView.visibleColumnIds,
+          visibleColumnIds: nextVisible.length > 0 ? nextVisible : currentView.visibleColumnIds,
         };
       });
     },
@@ -344,12 +323,8 @@ export default function ListingCenterPage() {
     () => ({
       title: "Central de Listagens",
       eyebrow: "Operacao",
-      subtitle:
-        "Hub reutilizavel para alternar, comparar, filtrar e exportar listagens dinamicas.",
-      breadcrumbs: [
-        { label: "Home", href: "/dashboard" },
-        { label: "Central de Listagens" },
-      ],
+      subtitle: "Hub reutilizavel para alternar, comparar, filtrar e exportar listagens dinamicas.",
+      breadcrumbs: [{ label: "Home", href: "/dashboard" }, { label: "Central de Listagens" }],
       actions: [
         {
           label: "Atualizar",

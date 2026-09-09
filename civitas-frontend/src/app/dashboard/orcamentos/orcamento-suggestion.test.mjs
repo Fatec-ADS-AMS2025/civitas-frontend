@@ -22,7 +22,7 @@ test("calcula a media apenas de orcamentos com mesma instituicao e tipo", () => 
       { idOrcamento: 4, idInstituicao: 10, idTipoDespesa: 99, valorOrcamento: 900 },
       { idOrcamento: 5, idInstituicao: 10, idTipoDespesa: 20, valorOrcamento: "invalido" },
     ],
-    { idInstituicao: "10", idTipoDespesa: "20" }
+    { idInstituicao: "10", idTipoDespesa: "20" },
   );
 
   assert.deepEqual(result, {
@@ -35,7 +35,7 @@ test("calcula a media apenas de orcamentos com mesma instituicao e tipo", () => 
 test("nao calcula sugestao antes de instituicao e tipo estarem preenchidos", () => {
   const result = calculateOrcamentoSuggestion(
     [{ idOrcamento: 1, idInstituicao: 10, idTipoDespesa: 20, valorOrcamento: 100 }],
-    { idInstituicao: "10", idTipoDespesa: "" }
+    { idInstituicao: "10", idTipoDespesa: "" },
   );
 
   assert.deepEqual(result, {
@@ -47,7 +47,7 @@ test("nao calcula sugestao antes de instituicao e tipo estarem preenchidos", () 
 test("retorna vazio quando nao ha orcamentos similares com valor valido", () => {
   const result = calculateOrcamentoSuggestion(
     [{ idOrcamento: 1, idInstituicao: 10, idTipoDespesa: 99, valorOrcamento: 100 }],
-    { idInstituicao: "10", idTipoDespesa: "20" }
+    { idInstituicao: "10", idTipoDespesa: "20" },
   );
 
   assert.deepEqual(result, {

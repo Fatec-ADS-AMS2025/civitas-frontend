@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import type React from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 export type ThemeMode = "system" | "light" | "dark";
 export type ResolvedTheme = Exclude<ThemeMode, "system">;
@@ -17,8 +18,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 const getSystemTheme = (): ResolvedTheme =>
   window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
-const resolveTheme = (themeMode: ThemeMode): ResolvedTheme =>
-  themeMode === "system" ? getSystemTheme() : themeMode;
+const resolveTheme = (themeMode: ThemeMode): ResolvedTheme => (themeMode === "system" ? getSystemTheme() : themeMode);
 
 const applyTheme = (themeMode: ThemeMode) => {
   const resolvedTheme = resolveTheme(themeMode);
@@ -83,7 +83,7 @@ export function ThemeProvider({ children }: Readonly<{ children: React.ReactNode
       resolvedTheme,
       setThemeMode,
     }),
-    [resolvedTheme, themeMode]
+    [resolvedTheme, themeMode],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

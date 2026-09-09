@@ -1,27 +1,14 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormExtraContentRenderArgs } from "@/components/Form/form";
 import { orcamentoService } from "@/hooks/orcamento";
 import type OrcamentoDTO from "@/models/orcamento";
-import {
-  calculateOrcamentoSuggestion,
-  type OrcamentoSuggestionResult,
-} from "../orcamento-suggestion";
+import { calculateOrcamentoSuggestion, type OrcamentoSuggestionResult } from "../orcamento-suggestion";
 
-type SuggestionUiStatus =
-  | "idle"
-  | "loading"
-  | "available"
-  | "empty"
-  | "error"
-  | "accepted"
-  | "ignored";
+type SuggestionUiStatus = "idle" | "loading" | "available" | "empty" | "error" | "accepted" | "ignored";
 
-type OrcamentoSuggestionPanelProps = Pick<
-  FormExtraContentRenderArgs,
-  "formData" | "setFieldValue"
->;
+type OrcamentoSuggestionPanelProps = Pick<FormExtraContentRenderArgs, "formData" | "setFieldValue">;
 
 const MONTHLY_FIELD_KEYS = [
   "valorJaneiro",
@@ -54,13 +41,7 @@ const toNumber = (value: unknown): number => {
     return 0;
   }
 
-  const numericValue = Number(
-    value
-      .replace(/\s/g, "")
-      .replace("R$", "")
-      .replace(/\./g, "")
-      .replace(",", ".")
-  );
+  const numericValue = Number(value.replace(/\s/g, "").replace("R$", "").replace(/\./g, "").replace(",", "."));
 
   return Number.isFinite(numericValue) ? numericValue : 0;
 };
@@ -69,10 +50,7 @@ const roundCurrency = (value: number): number => {
   return Math.round(value * 100) / 100;
 };
 
-export default function OrcamentoSuggestionPanel({
-  formData,
-  setFieldValue,
-}: OrcamentoSuggestionPanelProps) {
+export default function OrcamentoSuggestionPanel({ formData, setFieldValue }: OrcamentoSuggestionPanelProps) {
   const idInstituicao = formData.idInstituicao;
   const idTipoDespesa = formData.idTipoDespesa;
   const isMonthly = formData.tipoCadastroOrcamento === "mensal";
@@ -87,15 +65,13 @@ export default function OrcamentoSuggestionPanel({
   const suggestedValue = suggestion.averageValue;
   const suggestedValueLabel = useMemo(
     () => (suggestedValue !== undefined ? formatCurrency(suggestedValue) : ""),
-    [suggestedValue]
+    [suggestedValue],
   );
 
   useEffect(() => {
     if (!isMonthly) return;
 
-    const monthlyTotal = roundCurrency(
-      MONTHLY_FIELD_KEYS.reduce((total, key) => total + toNumber(formData[key]), 0)
-    );
+    const monthlyTotal = roundCurrency(MONTHLY_FIELD_KEYS.reduce((total, key) => total + toNumber(formData[key]), 0));
     const currentTotal = roundCurrency(toNumber(formData.valorOrcamento));
 
     if (monthlyTotal !== currentTotal) {
@@ -169,10 +145,7 @@ export default function OrcamentoSuggestionPanel({
       const remainder = roundCurrency(suggestedValue - distributedTotal);
 
       MONTHLY_FIELD_KEYS.forEach((key, index) => {
-        setFieldValue(
-          key,
-          roundCurrency(baseMonthlyValue + (index === MONTHLY_FIELD_KEYS.length - 1 ? remainder : 0))
-        );
+        setFieldValue(key, roundCurrency(baseMonthlyValue + (index === MONTHLY_FIELD_KEYS.length - 1 ? remainder : 0)));
       });
     } else {
       setFieldValue("valorOrcamento", suggestedValue);
@@ -254,12 +227,10 @@ export default function OrcamentoSuggestionPanel({
       aria-live="polite"
     >
       <p className="text-sm font-semibold text-[var(--foreground)]">
-        Encontramos um valor sugerido de {suggestedValueLabel} com base em {suggestion.count}{" "}
-        orcamento{suggestion.count === 1 ? "" : "s"} anterior{suggestion.count === 1 ? "" : "es"}.
+        Encontramos um valor sugerido de {suggestedValueLabel} com base em {suggestion.count} orcamento
+        {suggestion.count === 1 ? "" : "s"} anterior{suggestion.count === 1 ? "" : "es"}.
       </p>
-      <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-        Deseja usar esse valor?
-      </p>
+      <p className="mt-1 text-sm text-[var(--foreground-muted)]">Deseja usar esse valor?</p>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <button

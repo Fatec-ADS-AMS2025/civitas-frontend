@@ -6,6 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
     "task:context": "node scripts/fetch-github-task-context.mjs"
   },
   "dependencies": {
@@ -19,6 +24,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.7",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

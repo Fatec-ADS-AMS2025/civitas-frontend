@@ -9,11 +9,7 @@ export function Skeleton({ lines = 5, height = 40 }: SkeletonProps) {
   return (
     <div className="skeleton-loader w-full space-y-3">
       {Array.from({ length: lines }).map((_, index) => (
-        <div
-          key={index}
-          className="skeleton-line rounded-sm"
-          style={{ height: `${height}px` }}
-        />
+        <div key={index} className="skeleton-line rounded-sm" style={{ height: `${height}px` }} />
       ))}
     </div>
   );

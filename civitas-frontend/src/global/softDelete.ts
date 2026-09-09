@@ -41,5 +41,4 @@ export const isSoftDeletedRecord = (value: unknown): boolean => {
   return SOFT_DELETE_STATUS_KEYS.some((key) => isDeletedStatus(value[key]));
 };
 
-export const filterActiveRecords = <T>(items: T[]): T[] =>
-  items.filter((item) => !isSoftDeletedRecord(item));
+export const filterActiveRecords = <T>(items: T[]): T[] => items.filter((item) => !isSoftDeletedRecord(item));

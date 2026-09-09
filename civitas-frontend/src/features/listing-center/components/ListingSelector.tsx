@@ -7,12 +7,7 @@ type ListingSelectorProps = {
   compact?: boolean;
 };
 
-export function ListingSelector({
-  configs,
-  activeListingId,
-  onSelect,
-  compact = false,
-}: ListingSelectorProps) {
+export function ListingSelector({ configs, activeListingId, onSelect, compact = false }: ListingSelectorProps) {
   return (
     <div className={compact ? "grid gap-2 sm:grid-cols-2" : "grid gap-3 md:grid-cols-2 xl:grid-cols-3"}>
       {configs.map((config) => {
@@ -34,16 +29,12 @@ export function ListingSelector({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[20px] text-[var(--secundary-1)]">
-                    {config.icon}
-                  </span>
+                  <span className="material-symbols-outlined text-[20px] text-[var(--secundary-1)]">{config.icon}</span>
                   <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
                     {config.category}
                   </span>
                 </div>
-                <h3 className="mt-2 text-base font-semibold text-[var(--foreground)]">
-                  {config.label}
-                </h3>
+                <h3 className="mt-2 text-base font-semibold text-[var(--foreground)]">{config.label}</h3>
               </div>
               {isActive ? (
                 <span className="rounded-sm bg-[var(--primary-1)] px-2 py-1 text-xs font-semibold text-white">
@@ -52,9 +43,7 @@ export function ListingSelector({
               ) : null}
             </div>
             {!compact ? (
-              <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">
-                {config.description}
-              </p>
+              <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">{config.description}</p>
             ) : null}
           </button>
         );

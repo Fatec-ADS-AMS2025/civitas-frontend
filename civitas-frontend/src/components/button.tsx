@@ -1,6 +1,6 @@
 "use client";
 
-import { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type ButtonVariant = "primary" | "secondary" | "tertiary" | "login";
 
@@ -10,12 +10,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
 }
 
-function Button({
-  variant = "primary",
-  children,
-  className = "",
-  ...props
-}: ButtonProps) {
+function Button({ variant = "primary", children, className = "", ...props }: ButtonProps) {
   const base =
     "inline-flex w-full items-center justify-center gap-2 rounded-sm border px-4 py-2.5 text-sm font-semibold transition-all duration-[var(--motion-duration-fast)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50";
 

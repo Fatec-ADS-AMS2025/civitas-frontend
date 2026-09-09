@@ -1,15 +1,12 @@
 "use client";
 
-import Table from "@/components/Table/table";
 import { SkeletonTable } from "@/components/skeleton";
+import Table from "@/components/Table/table";
 import type { useSecretariaPage } from "@/hooks/useSecretariaPage";
-import {
-  secretariaColumns,
-  secretariaFormFields,
-} from "./secretariaConfig";
 import SecretariaFilters from "./SecretariaFilters";
 import SecretariaInstituicoesView from "./SecretariaInstituicoesView";
 import SecretariaRelationshipCards from "./SecretariaRelationshipCards";
+import { secretariaColumns, secretariaFormFields } from "./secretariaConfig";
 
 type SecretariaPageContentProps = ReturnType<typeof useSecretariaPage>;
 
@@ -64,9 +61,7 @@ export default function SecretariaPageContent({
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={secretariaFormFields}
-        renderModalExtra={(row, mode) =>
-          mode === "view" ? <SecretariaInstituicoesView secretaria={row} /> : null
-        }
+        renderModalExtra={(row, mode) => (mode === "view" ? <SecretariaInstituicoesView secretaria={row} /> : null)}
       />
     </>
   );

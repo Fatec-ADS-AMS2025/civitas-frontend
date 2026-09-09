@@ -28,23 +28,21 @@ const createRowId = () => {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 };
 
-export const camposAdicionaisFromObject = (
-  value?: CamposAdicionaisValue | null
-): CampoAdicionalRow[] => {
+export const camposAdicionaisFromObject = (value?: CamposAdicionaisValue | null): CampoAdicionalRow[] => {
   if (!value || typeof value !== "object") {
     return [];
   }
 
-  return Object.entries(value).slice(0, MAX_CAMPOS_ADICIONAIS).map(([nome, valor]) => ({
-    id: createRowId(),
-    nome,
-    valor: valor === null || valor === undefined ? "" : String(valor),
-  }));
+  return Object.entries(value)
+    .slice(0, MAX_CAMPOS_ADICIONAIS)
+    .map(([nome, valor]) => ({
+      id: createRowId(),
+      nome,
+      valor: valor === null || valor === undefined ? "" : String(valor),
+    }));
 };
 
-export const camposAdicionaisToObject = (
-  rows: CampoAdicionalRow[]
-): CamposAdicionaisValue | undefined => {
+export const camposAdicionaisToObject = (rows: CampoAdicionalRow[]): CamposAdicionaisValue | undefined => {
   const entries = rows
     .map((row) => ({
       nome: row.nome.trim(),
@@ -62,9 +60,7 @@ export const camposAdicionaisToObject = (
   }, {});
 };
 
-export const validateCamposAdicionaisRows = (
-  rows: CampoAdicionalRow[]
-): Record<string, string> => {
+export const validateCamposAdicionaisRows = (rows: CampoAdicionalRow[]): Record<string, string> => {
   const nextErrors: Record<string, string> = {};
 
   if (rows.length > MAX_CAMPOS_ADICIONAIS) {
@@ -97,12 +93,7 @@ export const validateCamposAdicionaisRows = (
   return nextErrors;
 };
 
-export default function DespesaCamposAdicionais({
-  rows,
-  errors,
-  disabled,
-  onChange,
-}: DespesaCamposAdicionaisProps) {
+export default function DespesaCamposAdicionais({ rows, errors, disabled, onChange }: DespesaCamposAdicionaisProps) {
   const canAdd = !disabled && rows.length < MAX_CAMPOS_ADICIONAIS;
 
   const handleAdd = () => {
@@ -110,11 +101,7 @@ export default function DespesaCamposAdicionais({
     onChange([...rows, { id: createRowId(), nome: "", valor: "" }]);
   };
 
-  const handleUpdate = (
-    id: string,
-    key: "nome" | "valor",
-    value: string
-  ) => {
+  const handleUpdate = (id: string, key: "nome" | "valor", value: string) => {
     onChange(rows.map((row) => (row.id === id ? { ...row, [key]: value } : row)));
   };
 
@@ -136,13 +123,7 @@ export default function DespesaCamposAdicionais({
           </span>
         </div>
         {!disabled ? (
-          <Button
-            variant="secondary"
-            type="button"
-            onClick={handleAdd}
-            disabled={!canAdd}
-            className="sm:w-auto"
-          >
+          <Button variant="secondary" type="button" onClick={handleAdd} disabled={!canAdd} className="sm:w-auto">
             <span className="material-symbols-outlined !text-[17px]">add</span>
             Novo campo adicional
           </Button>
@@ -150,9 +131,7 @@ export default function DespesaCamposAdicionais({
       </div>
 
       {errors?.camposAdicionais ? (
-        <p className="mb-3 text-sm font-medium text-[var(--tone-danger-text)]">
-          {errors.camposAdicionais}
-        </p>
+        <p className="mb-3 text-sm font-medium text-[var(--tone-danger-text)]">{errors.camposAdicionais}</p>
       ) : null}
 
       {rows.length === 0 ? (

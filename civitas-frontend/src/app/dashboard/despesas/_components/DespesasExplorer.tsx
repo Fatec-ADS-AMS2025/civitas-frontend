@@ -1,9 +1,6 @@
 import { InsightsGrid } from "@/components/financeiro-insights";
 import Input from "@/components/Input";
-import type {
-  FinanceCodigoResumo,
-  FinanceInstituicaoResumo,
-} from "@/lib/financeiro-relations";
+import type { FinanceCodigoResumo, FinanceInstituicaoResumo } from "@/lib/financeiro-relations";
 import type { DespesasExplorerData, DespesasExplorerState } from "../despesas.types";
 import DespesasExplorerGroups from "./DespesasExplorerGroups";
 
@@ -35,9 +32,8 @@ export default function DespesasExplorer({
             Abra a secao abaixo para pesquisar por codigo ou instituicao.
           </h3>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-            A exploracao detalhada fica fechada por padrao para reduzir ruido visual.
-            Quando abrir, voce pode localizar um codigo especifico ou uma instituicao
-            e abrir os gastos consolidados daquele recorte.
+            A exploracao detalhada fica fechada por padrao para reduzir ruido visual. Quando abrir, voce pode localizar
+            um codigo especifico ou uma instituicao e abrir os gastos consolidados daquele recorte.
           </p>
         </div>
 
@@ -46,17 +42,14 @@ export default function DespesasExplorer({
           onClick={onToggleOpen}
           className="civitas-action civitas-action--ghost rounded-sm px-4 py-2.5 text-sm"
         >
-          <span className="material-symbols-outlined !text-[18px]">
-            {isOpen ? "expand_less" : "expand_more"}
-          </span>
+          <span className="material-symbols-outlined !text-[18px]">{isOpen ? "expand_less" : "expand_more"}</span>
           {isOpen ? "Fechar explorador" : "Abrir explorador"}
         </button>
       </div>
 
       {!isOpen ? (
         <div className="rounded-sm border border-dashed border-[var(--border-default)] bg-[var(--surface-subtle)] px-5 py-8 text-sm text-[var(--foreground-soft)]">
-          Abra esta secao para usar a pesquisa por codigo e instituicao e navegar
-          pelos agrupamentos de despesas.
+          Abra esta secao para usar a pesquisa por codigo e instituicao e navegar pelos agrupamentos de despesas.
         </div>
       ) : (
         <>

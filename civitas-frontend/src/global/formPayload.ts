@@ -255,10 +255,7 @@ export const normalizeUsuarioPayload = <T extends FormPayload>(data: T): T => {
   } as T;
 };
 
-export const validateRequiredUc = (
-  value: unknown,
-  requiresUc: boolean
-): string | undefined => {
+export const validateRequiredUc = (value: unknown, requiresUc: boolean): string | undefined => {
   if (!requiresUc) {
     return undefined;
   }
@@ -270,10 +267,7 @@ export const validateRequiredUc = (
   return undefined;
 };
 
-export const validateDespesaDateRange = (
-  dataEmicao: unknown,
-  dataVencimento: unknown
-): string | undefined => {
+export const validateDespesaDateRange = (dataEmicao: unknown, dataVencimento: unknown): string | undefined => {
   const emissaoTimestamp = toDateTimestamp(dataEmicao);
   const vencimentoTimestamp = toDateTimestamp(dataVencimento);
 
@@ -281,11 +275,7 @@ export const validateDespesaDateRange = (
     return "Data de emissao nao pode ser futura.";
   }
 
-  if (
-    !Number.isNaN(emissaoTimestamp) &&
-    !Number.isNaN(vencimentoTimestamp) &&
-    vencimentoTimestamp < emissaoTimestamp
-  ) {
+  if (!Number.isNaN(emissaoTimestamp) && !Number.isNaN(vencimentoTimestamp) && vencimentoTimestamp < emissaoTimestamp) {
     return "Data de vencimento nao pode ser anterior a data de emissao.";
   }
 
@@ -295,9 +285,7 @@ export const validateDespesaDateRange = (
 export const normalizeDespesaPayload = <T extends FormPayload>(data: T): T => {
   const payload = data as Record<string, unknown>;
   const normalizedCodigo = toTrimmedString(payload.codigo);
-  const normalizedDataEmissao = normalizeDateInput(
-    payload.dataEmissao ?? payload.dataEmicao
-  );
+  const normalizedDataEmissao = normalizeDateInput(payload.dataEmissao ?? payload.dataEmicao);
   const normalizedStatus = toOptionalNumber(payload.status ?? payload.situacao);
 
   return {

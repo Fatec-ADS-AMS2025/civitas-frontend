@@ -25,11 +25,7 @@ const includesNormalized = (source: unknown, target: string): boolean => {
   return normalizeText(source).includes(target);
 };
 
-const matchesGlobal = (
-  item: Record<string, unknown>,
-  query: string,
-  globalFields: SearchFieldConfig[]
-): boolean => {
+const matchesGlobal = (item: Record<string, unknown>, query: string, globalFields: SearchFieldConfig[]): boolean => {
   if (!query) return true;
   if (globalFields.length === 0) return false;
 
@@ -39,7 +35,7 @@ const matchesGlobal = (
 const matchesAdvanced = (
   item: Record<string, unknown>,
   advancedFilters: Record<string, string>,
-  allFields: SearchFieldConfig[]
+  allFields: SearchFieldConfig[],
 ): boolean => {
   return allFields.every((field) => {
     const filterValue = advancedFilters[field.key] || "";
@@ -48,9 +44,7 @@ const matchesAdvanced = (
   });
 };
 
-export const buildInitialAdvancedFilters = (
-  fields: SearchFieldConfig[]
-): Record<string, string> => {
+export const buildInitialAdvancedFilters = (fields: SearchFieldConfig[]): Record<string, string> => {
   return fields.reduce<Record<string, string>>((acc, field) => {
     acc[field.key] = String(field.value ?? "");
     return acc;
@@ -61,16 +55,13 @@ export const applySearchFilters = <T extends Record<string, unknown>>(
   data: T[],
   fields: SearchFieldConfig[],
   globalQuery: string,
-  advancedFilters: Record<string, string>
+  advancedFilters: Record<string, string>,
 ): T[] => {
   const normalizedGlobalQuery = normalizeText(globalQuery);
-  const normalizedAdvanced = Object.entries(advancedFilters).reduce<Record<string, string>>(
-    (acc, [key, value]) => {
-      acc[key] = normalizeText(value);
-      return acc;
-    },
-    {}
-  );
+  const normalizedAdvanced = Object.entries(advancedFilters).reduce<Record<string, string>>((acc, [key, value]) => {
+    acc[key] = normalizeText(value);
+    return acc;
+  }, {});
 
   const globalFields = fields.filter((field) => field.local === "principal");
 

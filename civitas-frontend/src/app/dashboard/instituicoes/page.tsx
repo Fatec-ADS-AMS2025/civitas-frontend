@@ -1,6 +1,6 @@
-import { fetchInstituicaoPageData } from "./_utils/instituicoes-data";
-import type { InstituicaoPageData } from "./_types";
 import InstituicoesPageClient from "./_components/InstituicoesPageClient";
+import type { InstituicaoPageData } from "./_types";
+import { fetchInstituicaoPageData } from "./_utils/instituicoes-data";
 
 export const dynamic = "force-dynamic";
 

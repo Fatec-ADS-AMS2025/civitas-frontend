@@ -8,8 +8,8 @@ import { despesaService } from "@/hooks/despesa";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { secretariaService } from "@/hooks/secretaria";
-import { buildFinanceRelations } from "@/lib/financeiro-relations";
 import type { FinanceSecretariaResumo } from "@/lib/financeiro-relations";
+import { buildFinanceRelations } from "@/lib/financeiro-relations";
 import type DespesaDTO from "@/models/despesa";
 import type InstituicaoDTO from "@/models/instituicao";
 import type OrcamentoDTO from "@/models/orcamento";
@@ -69,10 +69,7 @@ const normalizeSearch = (value: unknown): string => {
     .trim();
 };
 
-const matchesTextFilters = (
-  secretaria: SecretariaRow,
-  filters: SecretariaTextFilters
-): boolean => {
+const matchesTextFilters = (secretaria: SecretariaRow, filters: SecretariaTextFilters): boolean => {
   const query = normalizeSearch(filters.search);
   const cityQuery = normalizeSearch(filters.cidade);
   const searchTarget = normalizeSearch(
@@ -86,7 +83,7 @@ const matchesTextFilters = (
       secretaria.cidade,
       secretaria.estado,
       secretaria.situacaoLabel,
-    ].join(" ")
+    ].join(" "),
   );
 
   if (query && !searchTarget.includes(query)) return false;
@@ -134,7 +131,7 @@ const mapSecretariaRows = (
   items: Secretaria[],
   instituicoes: InstituicaoDTO[],
   despesas: DespesaDTO[],
-  orcamentos: OrcamentoDTO[]
+  orcamentos: OrcamentoDTO[],
 ): SecretariaRow[] => {
   const relations = buildFinanceRelations({
     despesas,
@@ -142,13 +139,11 @@ const mapSecretariaRows = (
     secretarias: items,
     orcamentos,
   });
-  const financeiroMap = new Map(
-    relations.secretarias.map((secretaria) => [secretaria.id, secretaria])
-  );
+  const financeiroMap = new Map(relations.secretarias.map((secretaria) => [secretaria.id, secretaria]));
 
   return items.map((item) => {
     const instituicoesRelacionadas = instituicoes.filter(
-      (instituicao) => instituicao.idSecretaria === item.idSecretaria
+      (instituicao) => instituicao.idSecretaria === item.idSecretaria,
     );
     const financeiroResumo = financeiroMap.get(item.idSecretaria);
 
@@ -171,9 +166,7 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
   const [secretarias, setSecretarias] = useState<SecretariaRow[]>([]);
   const [instituicoes, setInstituicoes] = useState<InstituicaoDTO[]>([]);
   const [cardFilter, setCardFilter] = useState<SecretariaCardFilter>({ type: "all" });
-  const [textFilters, setTextFilters] = useState<SecretariaTextFilters>(
-    INITIAL_SECRETARIA_TEXT_FILTERS
-  );
+  const [textFilters, setTextFilters] = useState<SecretariaTextFilters>(INITIAL_SECRETARIA_TEXT_FILTERS);
   const [campos, setCampos] = useState<FieldConfig[]>(initialFields);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -185,12 +178,7 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
       loadDespesasSafely(),
       loadOrcamentosSafely(),
     ]);
-    const rows = mapSecretariaRows(
-      items,
-      instituicoesItems,
-      despesasItems,
-      orcamentosItems
-    );
+    const rows = mapSecretariaRows(items, instituicoesItems, despesasItems, orcamentosItems);
 
     setInstituicoes(instituicoesItems);
     setSecretarias(rows);
@@ -203,10 +191,7 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
       case "withoutInstituicoes":
         return secretarias.filter((secretaria) => secretaria.totalInstituicoes === 0);
       case "secretaria":
-        return secretarias.filter(
-          (secretaria) => secretaria.idSecretaria === cardFilter.idSecretaria
-        );
-      case "all":
+        return secretarias.filter((secretaria) => secretaria.idSecretaria === cardFilter.idSecretaria);
       default:
         return secretarias;
     }
@@ -215,12 +200,8 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
   const secretariaMetrics = useMemo<SecretariaMetrics>(() => {
     const totalSecretarias = secretarias.length;
     const totalInstituicoes = instituicoes.length;
-    const secretariasComInstituicoes = secretarias.filter(
-      (secretaria) => secretaria.totalInstituicoes > 0
-    ).length;
-    const secretariasSemInstituicoes = secretarias.filter(
-      (secretaria) => secretaria.totalInstituicoes === 0
-    ).length;
+    const secretariasComInstituicoes = secretarias.filter((secretaria) => secretaria.totalInstituicoes > 0).length;
+    const secretariasSemInstituicoes = secretarias.filter((secretaria) => secretaria.totalInstituicoes === 0).length;
 
     return {
       totalSecretarias,
@@ -231,9 +212,7 @@ export function useSecretariaPage(initialFields: FieldConfig[]) {
   }, [instituicoes, secretarias]);
 
   const filteredData = useMemo(() => {
-    return cardFilteredSecretarias.filter((secretaria) =>
-      matchesTextFilters(secretaria, textFilters)
-    );
+    return cardFilteredSecretarias.filter((secretaria) => matchesTextFilters(secretaria, textFilters));
   }, [cardFilteredSecretarias, textFilters]);
 
   useEffect(() => {

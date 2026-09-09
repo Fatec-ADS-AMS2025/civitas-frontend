@@ -9,7 +9,7 @@ export interface FinanceiroFiltrosDTO {
 
 export interface FinanceiroTransacaoDTO {
   id: number;
-  tipo: 'despesa' | 'orcamento';
+  tipo: "despesa" | "orcamento";
   descricao: string;
   valor: number;
   data: string;
@@ -54,7 +54,7 @@ export interface FinanceiroPanoramaDTO {
 }
 
 export interface FinanceiroPayloadDTO {
-  tipo: 'despesa' | 'orcamento';
+  tipo: "despesa" | "orcamento";
   descricao?: string;
   valor?: number;
   data?: string;

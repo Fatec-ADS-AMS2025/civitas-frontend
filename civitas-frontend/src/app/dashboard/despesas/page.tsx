@@ -10,8 +10,6 @@ export default async function Page() {
   } catch (error) {
     console.error("Erro ao carregar despesas no servidor:", error);
 
-    return (
-      <DespesasPageClient initialError="Nao foi possivel carregar os dados de despesas." />
-    );
+    return <DespesasPageClient initialError="Nao foi possivel carregar os dados de despesas." />;
   }
 }

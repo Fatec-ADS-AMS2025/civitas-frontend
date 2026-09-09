@@ -50,37 +50,23 @@ const toDisplayValue = (value: ReactNode) => {
   return value;
 };
 
-export function DetailCard({
-  title,
-  value,
-  description,
-  icon,
-  tone = "default",
-}: DetailCardProps) {
+export function DetailCard({ title, value, description, icon, tone = "default" }: DetailCardProps) {
   return (
     <article
       className={`min-h-[124px] rounded-sm border p-4 text-[var(--foreground)] shadow-[var(--shadow-xs)] ${cardToneClassNames[tone]}`}
     >
       <div className="flex h-full flex-col justify-between gap-4">
         <div className="flex items-start justify-between gap-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-            {title}
-          </p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-soft)]">{title}</p>
           {icon ? (
-            <span className="material-symbols-outlined !text-[20px] text-[var(--secundary-1)]">
-              {icon}
-            </span>
+            <span className="material-symbols-outlined !text-[20px] text-[var(--secundary-1)]">{icon}</span>
           ) : null}
         </div>
         <div>
           <div className="break-words text-2xl font-semibold leading-tight text-[var(--foreground)]">
             {toDisplayValue(value)}
           </div>
-          {description ? (
-            <p className="mt-2 text-sm leading-5 text-[var(--foreground-muted)]">
-              {description}
-            </p>
-          ) : null}
+          {description ? <p className="mt-2 text-sm leading-5 text-[var(--foreground-muted)]">{description}</p> : null}
         </div>
       </div>
     </article>
@@ -116,23 +102,14 @@ export function DetailSection({ title, description, children }: DetailSectionPro
     <section className="space-y-3">
       <div>
         <h3 className="text-base font-semibold text-[var(--foreground)]">{title}</h3>
-        {description ? (
-          <p className="mt-1 text-sm leading-5 text-[var(--foreground-soft)]">
-            {description}
-          </p>
-        ) : null}
+        {description ? <p className="mt-1 text-sm leading-5 text-[var(--foreground-soft)]">{description}</p> : null}
       </div>
       {children}
     </section>
   );
 }
 
-export function DetailList<T>({
-  items,
-  emptyMessage,
-  getKey,
-  renderItem,
-}: DetailListProps<T>) {
+export function DetailList<T>({ items, emptyMessage, getKey, renderItem }: DetailListProps<T>) {
   if (items.length === 0) {
     return (
       <div className="rounded-sm border border-dashed border-[var(--border-default)] bg-[var(--surface-subtle)] px-4 py-6 text-sm text-[var(--foreground-soft)]">

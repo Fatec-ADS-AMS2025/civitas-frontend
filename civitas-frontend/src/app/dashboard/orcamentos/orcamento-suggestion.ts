@@ -32,7 +32,7 @@ const getOrcamentoValue = (orcamento: OrcamentoDTO): number | null => {
 
 export const calculateOrcamentoSuggestion = (
   orcamentos: OrcamentoDTO[],
-  filters: OrcamentoSuggestionFilters
+  filters: OrcamentoSuggestionFilters,
 ): OrcamentoSuggestionResult => {
   const idInstituicao = toPositiveNumber(filters.idInstituicao);
   const idTipoDespesa = toPositiveNumber(filters.idTipoDespesa);
@@ -47,8 +47,7 @@ export const calculateOrcamentoSuggestion = (
   const values = orcamentos
     .filter(
       (orcamento) =>
-        Number(orcamento.idInstituicao) === idInstituicao &&
-        Number(orcamento.idTipoDespesa) === idTipoDespesa
+        Number(orcamento.idInstituicao) === idInstituicao && Number(orcamento.idTipoDespesa) === idTipoDespesa,
     )
     .map(getOrcamentoValue)
     .filter((value): value is number => value !== null);

@@ -46,9 +46,7 @@ export function InfoCard({
                 <InfoValue value={title} />
               </h3>
               {subtitle ? (
-                <p className="mt-1 break-words text-sm leading-5 text-[var(--foreground-muted)]">
-                  {subtitle}
-                </p>
+                <p className="mt-1 break-words text-sm leading-5 text-[var(--foreground-muted)]">{subtitle}</p>
               ) : null}
             </div>
             {badge ? <div className="shrink-0">{badge}</div> : null}
@@ -65,17 +63,11 @@ export function InfoCard({
           <InfoList items={relationshipItems} compact />
         </div>
       ) : null}
-      {secondaryItems.length > 0 ? (
-        <InfoList items={secondaryItems} compact className="mt-4" />
-      ) : null}
+      {secondaryItems.length > 0 ? <InfoList items={secondaryItems} compact className="mt-4" /> : null}
       {children ? <div className="mt-4">{children}</div> : null}
       {(footerItems.length > 0 || actions) && (
         <div className="mt-auto flex flex-col gap-4 border-t border-[var(--divider)] pt-4 sm:flex-row sm:items-end sm:justify-between">
-          {footerItems.length > 0 ? (
-            <InfoList items={footerItems} compact className="flex-1" />
-          ) : (
-            <span />
-          )}
+          {footerItems.length > 0 ? <InfoList items={footerItems} compact className="flex-1" /> : <span />}
           {actions ? <div className="flex shrink-0 items-center justify-end gap-2">{actions}</div> : null}
         </div>
       )}

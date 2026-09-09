@@ -1,12 +1,4 @@
-export type InputMaskName =
-  | "cpf"
-  | "cnpj"
-  | "cpfCnpj"
-  | "cep"
-  | "phone"
-  | "currency"
-  | "integer"
-  | "year";
+export type InputMaskName = "cpf" | "cnpj" | "cpfCnpj" | "cep" | "phone" | "currency" | "integer" | "year";
 
 type InputMode = "text" | "numeric" | "decimal" | "tel" | "email" | "search" | "url" | "none";
 
@@ -168,9 +160,7 @@ const INPUT_MASKS: Record<InputMaskName, InputMaskDefinition> = {
   },
 };
 
-export const resolveInputMask = (
-  mask?: InputMask | null
-): InputMaskDefinition | undefined => {
+export const resolveInputMask = (mask?: InputMask | null): InputMaskDefinition | undefined => {
   if (!mask) {
     return undefined;
   }

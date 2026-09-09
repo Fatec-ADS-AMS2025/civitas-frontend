@@ -1,12 +1,6 @@
-import { exportTableData } from "@/components/Table/export-utils";
 import type { TableColumn } from "@/components/Table/export-types";
-import type {
-  ListingColumn,
-  ListingConfig,
-  ListingFilterDefinition,
-  ListingPanelId,
-  ListingViewState,
-} from "./types";
+import { exportTableData } from "@/components/Table/export-utils";
+import type { ListingColumn, ListingConfig, ListingFilterDefinition, ListingPanelId, ListingViewState } from "./types";
 
 type ListingExportSection<T extends Record<string, unknown>> = {
   title: string;
@@ -34,10 +28,7 @@ const normalizeKeyPart = (value: unknown): string | null => {
   return text;
 };
 
-export const buildListingScopedKey = (
-  fallback: string,
-  ...parts: unknown[]
-): string => {
+export const buildListingScopedKey = (fallback: string, ...parts: unknown[]): string => {
   const normalizedParts = parts.map(normalizeKeyPart);
 
   if (normalizedParts.length === 0 || normalizedParts.some((part) => !part)) {
@@ -61,12 +52,7 @@ export const buildListingRowKey = <T extends Record<string, unknown>>({
   getRowId: (row: T) => string;
 }) => {
   const rowId = normalizeKeyPart(getRowId(row));
-  return buildListingScopedKey(
-    `${panelId}:${listingId}:row-${index}`,
-    panelId,
-    listingId,
-    rowId,
-  );
+  return buildListingScopedKey(`${panelId}:${listingId}:row-${index}`, panelId, listingId, rowId);
 };
 
 const parseNumber = (value: unknown): number | null => {
@@ -76,9 +62,7 @@ const parseNumber = (value: unknown): number | null => {
 
   if (typeof value === "string") {
     const cleaned = value.replace(/[^\d,.-]/g, "");
-    const normalized = cleaned.includes(",")
-      ? cleaned.replace(/\./g, "").replace(",", ".")
-      : cleaned.replace(/,/g, "");
+    const normalized = cleaned.includes(",") ? cleaned.replace(/\./g, "").replace(",", ".") : cleaned.replace(/,/g, "");
     const parsed = Number(normalized);
     return Number.isFinite(parsed) ? parsed : null;
   }
@@ -101,11 +85,7 @@ const parseDate = (value: unknown): number | null => {
   return null;
 };
 
-const matchesFilter = (
-  rowValue: unknown,
-  filterDefinition: ListingFilterDefinition,
-  filterValue: string,
-): boolean => {
+const matchesFilter = (rowValue: unknown, filterDefinition: ListingFilterDefinition, filterValue: string): boolean => {
   if (!filterValue) {
     return true;
   }
@@ -145,9 +125,7 @@ const matchesFilter = (
   return true;
 };
 
-export const getDefaultVisibleColumnIds = <T extends Record<string, unknown>>(
-  columns: ListingColumn<T>[],
-) => {
+export const getDefaultVisibleColumnIds = <T extends Record<string, unknown>>(columns: ListingColumn<T>[]) => {
   const explicitVisible = columns.filter((column) => column.defaultVisible !== false);
   return (explicitVisible.length > 0 ? explicitVisible : columns).map((column) => column.id);
 };
@@ -188,9 +166,7 @@ export const applyListingFilters = <T extends Record<string, unknown>>(
   return rows.filter((row) => {
     const searchMatch =
       normalizedSearch.length === 0 ||
-      config.columns.some((column) =>
-        normalizeText(column.accessor(row)).includes(normalizedSearch),
-      );
+      config.columns.some((column) => normalizeText(column.accessor(row)).includes(normalizedSearch));
 
     if (!searchMatch) {
       return false;
@@ -260,9 +236,7 @@ export const buildExportRows = <T extends Record<string, unknown>>(
   );
 };
 
-export const buildExportColumns = <T extends Record<string, unknown>>(
-  columns: ListingColumn<T>[],
-): TableColumn[] => {
+export const buildExportColumns = <T extends Record<string, unknown>>(columns: ListingColumn<T>[]): TableColumn[] => {
   return columns.map((column) => ({
     id: column.id,
     label: column.label,
@@ -308,7 +282,7 @@ export const loadListingRowsForExport = async <T extends Record<string, unknown>
   const fallbackResult = config.loadExportRows ? null : await config.loadPage(loadParams);
   const sourceRows = config.loadExportRows
     ? await config.loadExportRows(loadParams)
-    : fallbackResult?.allRows ?? fallbackResult?.rows ?? [];
+    : (fallbackResult?.allRows ?? fallbackResult?.rows ?? []);
 
   return applyListingSort(
     applyListingFilters(sourceRows, config, viewState),
@@ -351,7 +325,10 @@ const getExportDateTime = () =>
   }).format(new Date());
 
 const toSafeSheetName = (value: string, fallback: string) => {
-  const cleaned = value.replace(/[\\/*?:[\]]/g, " ").replace(/\s+/g, " ").trim();
+  const cleaned = value
+    .replace(/[\\/*?:[\]]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   return (cleaned || fallback).slice(0, 31);
 };
 
@@ -396,13 +373,8 @@ const styleWorksheet = (worksheet: import("exceljs").Worksheet, columns: TableCo
   });
 
   worksheet.columns = columns.map((column, index) => {
-    const columnValues = worksheet
-      .getColumn(index + 1)
-      .values.filter((value) => value !== undefined && value !== null);
-    const maxContentLength = Math.max(
-      column.label.length,
-      ...columnValues.map((value) => String(value).length),
-    );
+    const columnValues = worksheet.getColumn(index + 1).values.filter((value) => value !== undefined && value !== null);
+    const maxContentLength = Math.max(column.label.length, ...columnValues.map((value) => String(value).length));
 
     return {
       width: Math.min(Math.max(maxContentLength + 4, 14), 36),
@@ -418,9 +390,7 @@ const styleWorksheet = (worksheet: import("exceljs").Worksheet, columns: TableCo
   worksheet.views = [{ state: "frozen", ySplit: 1 }];
 };
 
-export const exportListingComparison = async <
-  T extends Record<string, unknown>,
->({
+export const exportListingComparison = async <T extends Record<string, unknown>>({
   outputType,
   title,
   fileName,
@@ -457,10 +427,7 @@ export const exportListingComparison = async <
     return;
   }
 
-  const [{ jsPDF }, autoTableModule] = await Promise.all([
-    import("jspdf"),
-    import("jspdf-autotable"),
-  ]);
+  const [{ jsPDF }, autoTableModule] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
   const autoTable = autoTableModule.default;
   const maxColumns = Math.max(...sections.map((section) => section.columns.length));
   const doc = new jsPDF({
@@ -526,10 +493,7 @@ export const exportListingComparison = async <
   doc.save(`${sanitizeFileName(fileName)}.pdf`);
 };
 
-export const buildFilterOptionsFromRows = <T extends Record<string, unknown>>(
-  rows: T[],
-  column: ListingColumn<T>,
-) => {
+export const buildFilterOptionsFromRows = <T extends Record<string, unknown>>(rows: T[], column: ListingColumn<T>) => {
   const values = Array.from(
     new Set(
       rows

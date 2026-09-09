@@ -1,8 +1,7 @@
-import React from "react";
 import type { TableColumn } from "./export-types";
 import { getStatusText, getStatusValue, getTableCellText, isStatusColumn } from "./export-utils";
-import type { TableRow } from "./table-types";
 import { toRecord } from "./table-record";
+import type { TableRow } from "./table-types";
 
 export const renderStatusBadge = (status: unknown) => {
   const baseStatusText = getStatusText(status);

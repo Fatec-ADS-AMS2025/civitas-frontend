@@ -4,9 +4,7 @@ type ConfiguracoesFeedbackProps = {
   feedback: FeedbackState;
 };
 
-export default function ConfiguracoesFeedback({
-  feedback,
-}: ConfiguracoesFeedbackProps) {
+export default function ConfiguracoesFeedback({ feedback }: ConfiguracoesFeedbackProps) {
   if (!feedback) return null;
 
   const classes =
@@ -15,10 +13,7 @@ export default function ConfiguracoesFeedback({
       : "civitas-card-soft civitas-card-soft--danger text-[var(--tone-danger-text)]";
 
   return (
-    <div
-      className={`rounded-sm px-4 py-3 text-sm ${classes}`}
-      role={feedback.type === "success" ? "status" : "alert"}
-    >
+    <div className={`rounded-sm px-4 py-3 text-sm ${classes}`} role={feedback.type === "success" ? "status" : "alert"}>
       {feedback.message}
     </div>
   );

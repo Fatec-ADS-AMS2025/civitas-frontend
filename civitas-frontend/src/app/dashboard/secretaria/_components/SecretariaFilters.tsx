@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import type React from "react";
+import { useMemo, useState } from "react";
 import Form from "@/components/Form/form";
 import Input from "@/components/Input";
 import Modal from "@/components/modal";
-import { showToast } from "@/hooks/useToast";
 import {
   INITIAL_SECRETARIA_TEXT_FILTERS,
   type Secretaria,
   type SecretariaRow,
   type SecretariaTextFilters,
 } from "@/hooks/useSecretariaPage";
+import { showToast } from "@/hooks/useToast";
 import { novaSecretaria, secretariaFormFields } from "./secretariaConfig";
 
 type SecretariaFiltersProps = {
@@ -33,17 +34,11 @@ const normalizeSearch = (value: unknown): string => {
     .trim();
 };
 
-const getOptionLabel = (
-  options: Array<{ value: string | number; label: string }>,
-  value: string
-): string => {
+const getOptionLabel = (options: Array<{ value: string | number; label: string }>, value: string): string => {
   return options.find((option) => String(option.value) === value)?.label ?? value;
 };
 
-const matchesFilters = (
-  secretaria: SecretariaRow,
-  filters: SecretariaTextFilters
-): boolean => {
+const matchesFilters = (secretaria: SecretariaRow, filters: SecretariaTextFilters): boolean => {
   const query = normalizeSearch(filters.search);
   const cityQuery = normalizeSearch(filters.cidade);
   const searchTarget = normalizeSearch(
@@ -57,7 +52,7 @@ const matchesFilters = (
       secretaria.cidade,
       secretaria.estado,
       secretaria.situacaoLabel,
-    ].join(" ")
+    ].join(" "),
   );
 
   if (query && !searchTarget.includes(query)) return false;
@@ -74,18 +69,10 @@ const matchesFilters = (
   return true;
 };
 
-export default function SecretariaFilters({
-  data,
-  filters,
-  setFilters,
-  onCadastrar,
-}: SecretariaFiltersProps) {
+export default function SecretariaFilters({ data, filters, setFilters, onCadastrar }: SecretariaFiltersProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
-  const filteredRows = useMemo(
-    () => data.filter((secretaria) => matchesFilters(secretaria, filters)),
-    [data, filters]
-  );
+  const filteredRows = useMemo(() => data.filter((secretaria) => matchesFilters(secretaria, filters)), [data, filters]);
 
   const activeFilters = useMemo(() => {
     const active: Array<{ key: keyof SecretariaTextFilters; label: string; value: string }> = [];
@@ -122,17 +109,15 @@ export default function SecretariaFilters({
       <div className="flex flex-col gap-4 border-b border-[var(--divider)] pb-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="inline-flex items-center gap-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-soft)]">
-            <span className="material-symbols-outlined !text-[16px] text-[var(--secundary-1)]">
-              manage_search
-            </span>
+            <span className="material-symbols-outlined !text-[16px] text-[var(--secundary-1)]">manage_search</span>
             Filtro de secretarias
           </p>
           <h2 className="mt-3 text-2xl font-bold text-[var(--secundary-1)]">
             Busque e refine sem abrir filtro avancado
           </h2>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
-            Pesquise por nome, descricao, CNPJ, telefone, cidade ou e-mail. Os
-            resultados abaixo acompanham tambem o card de relacionamento selecionado.
+            Pesquise por nome, descricao, CNPJ, telefone, cidade ou e-mail. Os resultados abaixo acompanham tambem o
+            card de relacionamento selecionado.
           </p>
         </div>
 
@@ -140,11 +125,7 @@ export default function SecretariaFilters({
           <span className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] px-3 py-2 text-sm font-semibold text-[var(--foreground)]">
             {filteredRows.length} de {data.length} secretarias
           </span>
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="civitas-action civitas-action--primary"
-          >
+          <button type="button" onClick={() => setModalOpen(true)} className="civitas-action civitas-action--primary">
             <span className="material-symbols-outlined !text-[18px]">add</span>
             Cadastrar secretaria
           </button>
@@ -160,10 +141,14 @@ export default function SecretariaFilters({
         />
 
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-[var(--foreground-muted)]">
+          <label
+            htmlFor="secretaria-vinculo-filter"
+            className="block text-sm font-semibold text-[var(--foreground-muted)]"
+          >
             Instituicoes
           </label>
           <select
+            id="secretaria-vinculo-filter"
             value={filters.vinculo}
             onChange={(event) => updateFilter("vinculo", event.target.value)}
             className="civitas-control"
@@ -184,11 +169,7 @@ export default function SecretariaFilters({
           placeholder="Filtrar cidade"
         />
 
-        <button
-          type="button"
-          onClick={clearFilters}
-          className="civitas-action civitas-action--ghost self-end"
-        >
+        <button type="button" onClick={clearFilters} className="civitas-action civitas-action--ghost self-end">
           <span className="material-symbols-outlined !text-[18px]">ink_eraser</span>
           Limpar
         </button>
@@ -216,8 +197,7 @@ export default function SecretariaFilters({
           </div>
         ) : (
           <p className="text-sm text-[var(--foreground-soft)]">
-            Nenhum filtro textual ativo. Use os cards acima para recortes rapidos
-            por relacionamento.
+            Nenhum filtro textual ativo. Use os cards acima para recortes rapidos por relacionamento.
           </p>
         )}
       </div>
@@ -237,9 +217,7 @@ export default function SecretariaFilters({
               } catch (error) {
                 console.error("Erro ao cadastrar secretaria:", error);
                 const message =
-                  error instanceof Error
-                    ? error.message
-                    : "Erro ao cadastrar secretaria. Tente novamente.";
+                  error instanceof Error ? error.message : "Erro ao cadastrar secretaria. Tente novamente.";
                 showToast(message, "error");
               }
             }}

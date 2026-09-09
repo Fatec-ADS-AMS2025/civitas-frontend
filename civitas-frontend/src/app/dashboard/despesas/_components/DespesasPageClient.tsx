@@ -1,30 +1,14 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import type { TableExportOptions } from "@/components/Table/export-types";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Button from "@/components/button";
-import { exportTableData, getSelectedColumns } from "@/components/Table/export-utils";
-import Modal from "@/components/modal";
 import { useDashboardHeader } from "@/components/dashboard/dashboard-header";
-import {
-  type DashboardData,
-  type DespesaDashboardRow,
-  useDespesasDashboard,
-} from "@/hooks/useDespesasDashboard";
-import { showToast } from "@/hooks/useToast";
+import Modal from "@/components/modal";
+import type { TableExportOptions } from "@/components/Table/export-types";
+import { exportTableData, getSelectedColumns } from "@/components/Table/export-utils";
 import { normalizeDateInput } from "@/global/formPayload";
-import type {
-  DespesaResponsavelOption,
-  DespesaUcOption,
-} from "./DespesaForm";
-import {
-  DespesaCrudModals,
-  DespesaPagamentoModal,
-  DespesasExportModal,
-  DespesasFiltros,
-  DespesasLoadingState,
-  DespesasTabela,
-} from ".";
+import { type DashboardData, type DespesaDashboardRow, useDespesasDashboard } from "@/hooks/useDespesasDashboard";
+import { showToast } from "@/hooks/useToast";
 import {
   DESPESAS_EXPORT_COLUMNS,
   DESPESAS_EXPORT_FILE_NAME,
@@ -34,16 +18,22 @@ import {
 import { formatCurrency } from "../despesas.utils";
 import { useDespesaFormFields } from "../useDespesaFormFields";
 import { useDespesasViewModel } from "../useDespesasViewModel";
+import {
+  DespesaCrudModals,
+  DespesaPagamentoModal,
+  DespesasExportModal,
+  DespesasFiltros,
+  DespesasLoadingState,
+  DespesasTabela,
+} from ".";
+import type { DespesaResponsavelOption, DespesaUcOption } from "./DespesaForm";
 
 type DespesasPageClientProps = {
   initialData?: DashboardData;
   initialError?: string | null;
 };
 
-export default function DespesasPageClient({
-  initialData,
-  initialError = null,
-}: DespesasPageClientProps) {
+export default function DespesasPageClient({ initialData, initialError = null }: DespesasPageClientProps) {
   const listSectionRef = useRef<HTMLElement | null>(null);
 
   const [filterForm, setFilterForm] = useState(INITIAL_FILTER_FORM);
@@ -87,31 +77,19 @@ export default function DespesasPageClient({
   });
 
   const unidadeConsumidoraOptions = useMemo<DespesaUcOption[]>(() => {
-    const tipoDespesaMap = new Map(
-      dashboard.tiposDespesa.map((item) => [item.id, item] as const)
-    );
-    const unidadeMedidaMap = new Map(
-      dashboard.unidadesMedida.map((item) => [item.id, item] as const)
-    );
-    const tipoCodigoMap = new Map(
-      dashboard.tipoCodigos.map((item) => [item.id, item.nome] as const)
-    );
-    const instituicaoMap = new Map(
-      dashboard.instituicoes.map((item) => [item.id, item.nome] as const)
-    );
-    const secretariaMap = new Map(
-      dashboard.secretarias.map((item) => [item.idSecretaria, item.nome] as const)
-    );
+    const tipoDespesaMap = new Map(dashboard.tiposDespesa.map((item) => [item.id, item] as const));
+    const unidadeMedidaMap = new Map(dashboard.unidadesMedida.map((item) => [item.id, item] as const));
+    const tipoCodigoMap = new Map(dashboard.tipoCodigos.map((item) => [item.id, item.nome] as const));
+    const instituicaoMap = new Map(dashboard.instituicoes.map((item) => [item.id, item.nome] as const));
+    const secretariaMap = new Map(dashboard.secretarias.map((item) => [item.idSecretaria, item.nome] as const));
     const fornecedorMap = new Map(
-      dashboard.fornecedores.map(
-        (item) => [item.idFornecedor, item.nomeFantasia || item.nome] as const
-      )
+      dashboard.fornecedores.map((item) => [item.idFornecedor, item.nomeFantasia || item.nome] as const),
     );
     const orcamentoMap = new Map(
       dashboard.orcamentos.map((item) => {
         const ano = item.anoOrcamento ?? item.ano;
         return [item.idOrcamento, `#${String(item.idOrcamento).padStart(3, "0")} - ${ano}`] as const;
-      })
+      }),
     );
 
     return dashboard.unidadesConsumidoras.map((item) => {
@@ -122,30 +100,19 @@ export default function DespesasPageClient({
         id: item.id,
         identificador: item.identificador,
         idInstituicao: item.idInstituicao,
-        instituicaoNome:
-          instituicaoMap.get(item.idInstituicao) ?? `Instituicao #${item.idInstituicao}`,
+        instituicaoNome: instituicaoMap.get(item.idInstituicao) ?? `Instituicao #${item.idInstituicao}`,
         idSecretaria: item.idSecretaria,
-        secretariaNome:
-          secretariaMap.get(item.idSecretaria) ?? `Secretaria #${item.idSecretaria}`,
+        secretariaNome: secretariaMap.get(item.idSecretaria) ?? `Secretaria #${item.idSecretaria}`,
         idTipoCodigo: tipoDespesa?.idTipoCodigo ?? null,
-        tipoCodigoNome:
-          tipoCodigoMap.get(tipoDespesa?.idTipoCodigo ?? 0) ??
-          "Tipo nao informado",
+        tipoCodigoNome: tipoCodigoMap.get(tipoDespesa?.idTipoCodigo ?? 0) ?? "Tipo nao informado",
         idTipoDespesa: item.idTipoDespesa,
-        tipoDespesaNome:
-          tipoDespesa?.descricao ?? `Tipo #${item.idTipoDespesa}`,
+        tipoDespesaNome: tipoDespesa?.descricao ?? `Tipo #${item.idTipoDespesa}`,
         idUnidadeMedida: tipoDespesa?.idUnidadeMedida ?? null,
-        unidadeMedidaNome:
-          unidadeMedida?.abreviatura?.trim() ||
-          unidadeMedida?.descricao?.trim() ||
-          "unidade",
+        unidadeMedidaNome: unidadeMedida?.abreviatura?.trim() || unidadeMedida?.descricao?.trim() || "unidade",
         idFornecedor: item.idFornecedor,
-        fornecedorNome:
-          fornecedorMap.get(item.idFornecedor) ?? `Fornecedor #${item.idFornecedor}`,
+        fornecedorNome: fornecedorMap.get(item.idFornecedor) ?? `Fornecedor #${item.idFornecedor}`,
         idOrcamento: item.idOrcamento,
-        orcamentoLabel:
-          orcamentoMap.get(item.idOrcamento) ??
-          `#${String(item.idOrcamento).padStart(3, "0")}`,
+        orcamentoLabel: orcamentoMap.get(item.idOrcamento) ?? `#${String(item.idOrcamento).padStart(3, "0")}`,
       };
     });
   }, [
@@ -162,9 +129,8 @@ export default function DespesasPageClient({
   const paymentUnidadeMedidaNome = useMemo(() => {
     if (!paymentDespesa?.raw.idUnidadeConsumidora) return undefined;
 
-    return unidadeConsumidoraOptions.find(
-      (item) => item.id === paymentDespesa.raw.idUnidadeConsumidora
-    )?.unidadeMedidaNome;
+    return unidadeConsumidoraOptions.find((item) => item.id === paymentDespesa.raw.idUnidadeConsumidora)
+      ?.unidadeMedidaNome;
   }, [paymentDespesa, unidadeConsumidoraOptions]);
 
   const usuarioOptions = useMemo<DespesaResponsavelOption[]>(
@@ -173,15 +139,14 @@ export default function DespesasPageClient({
         value: usuario.id,
         label: usuario.nome,
       })),
-    [dashboard.usuarios]
+    [dashboard.usuarios],
   );
 
   const headerConfig = useMemo(
     () => ({
       title: "Despesas",
       eyebrow: "Operacao",
-      subtitle:
-        "Tela operacional para filtrar, cadastrar, editar e exportar despesas sem paineis paralelos.",
+      subtitle: "Tela operacional para filtrar, cadastrar, editar e exportar despesas sem paineis paralelos.",
       breadcrumbs: [
         { label: "Home", href: "/dashboard" },
         { label: "Cadastros", href: "/dashboard/despesas" },
@@ -204,7 +169,7 @@ export default function DespesasPageClient({
         },
       ],
     }),
-    [dashboard]
+    [dashboard],
   );
 
   useDashboardHeader(headerConfig);
@@ -341,13 +306,10 @@ export default function DespesasPageClient({
     }
   };
 
-  const overdueDespesas = useMemo(
-    () => dashboard.despesas.filter(isDespesaOverdueForWarning),
-    [dashboard.despesas]
-  );
+  const overdueDespesas = useMemo(() => dashboard.despesas.filter(isDespesaOverdueForWarning), [dashboard.despesas]);
   const overdueTotal = useMemo(
     () => overdueDespesas.reduce((total, despesa) => total + despesa.valor, 0),
-    [overdueDespesas]
+    [overdueDespesas],
   );
   const hasOverdue = overdueDespesas.length > 0;
 
@@ -448,9 +410,7 @@ export default function DespesasPageClient({
             <div className="rounded-sm border border-[var(--tone-danger-border)] bg-[var(--tone-danger-bg)] p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--surface-elevated)] text-[var(--tone-danger-text)]">
-                  <span className="material-symbols-outlined !text-[28px]">
-                    delete
-                  </span>
+                  <span className="material-symbols-outlined !text-[28px]">delete</span>
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--tone-danger-text)]">
@@ -461,10 +421,7 @@ export default function DespesasPageClient({
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
                     Esta acao remove a despesa da listagem ativa. Confirme apenas se deseja remover{" "}
-                    <strong className="font-semibold text-[var(--foreground)]">
-                      {deletingDespesa.descricao}
-                    </strong>
-                    .
+                    <strong className="font-semibold text-[var(--foreground)]">{deletingDespesa.descricao}</strong>.
                   </p>
                 </div>
               </div>
@@ -493,21 +450,16 @@ export default function DespesasPageClient({
             <div className="rounded-sm border border-[var(--tone-danger-border)] bg-[var(--tone-danger-bg)] p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-sm bg-[var(--surface-elevated)] text-[var(--tone-danger-text)]">
-                  <span className="material-symbols-outlined !text-[28px]">
-                    notification_important
-                  </span>
+                  <span className="material-symbols-outlined !text-[28px]">notification_important</span>
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--tone-danger-text)]">
                     Aviso automatico
                   </p>
-                  <h3 className="mt-1.5 text-2xl font-semibold text-[var(--foreground)]">
-                    Existem despesas vencidas
-                  </h3>
+                  <h3 className="mt-1.5 text-2xl font-semibold text-[var(--foreground)]">Existem despesas vencidas</h3>
                   <p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">
-                    Revise os lancamentos pendentes antes de continuar a rotina de
-                    pagamento. O filtro de vencidas usa status atrasado e tambem
-                    datas vencidas que ainda estao como a pagar.
+                    Revise os lancamentos pendentes antes de continuar a rotina de pagamento. O filtro de vencidas usa
+                    status atrasado e tambem datas vencidas que ainda estao como a pagar.
                   </p>
                 </div>
               </div>
@@ -518,9 +470,7 @@ export default function DespesasPageClient({
                 <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
                   Quantidade
                 </span>
-                <strong className="mt-2 block text-3xl text-[var(--secundary-1)]">
-                  {overdueDespesas.length}
-                </strong>
+                <strong className="mt-2 block text-3xl text-[var(--secundary-1)]">{overdueDespesas.length}</strong>
               </div>
               <div className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-4">
                 <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--foreground-soft)]">
@@ -534,9 +484,7 @@ export default function DespesasPageClient({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <h4 className="text-sm font-semibold text-[var(--foreground)]">
-                  Primeiras despesas vencidas
-                </h4>
+                <h4 className="text-sm font-semibold text-[var(--foreground)]">Primeiras despesas vencidas</h4>
                 <span className="text-xs text-[var(--foreground-soft)]">
                   {Math.min(overdueDespesas.length, 4)} exibida
                   {Math.min(overdueDespesas.length, 4) === 1 ? "" : "s"}
@@ -570,11 +518,7 @@ export default function DespesasPageClient({
             </div>
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setIsOverdueWarningOpen(false)}
-              >
+              <Button variant="secondary" type="button" onClick={() => setIsOverdueWarningOpen(false)}>
                 Fechar
               </Button>
               <Button type="button" onClick={handleShowOverdueDespesas}>
@@ -597,8 +541,7 @@ export default function DespesasPageClient({
   );
 }
 
-const getSubmitErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof Error ? error.message : fallback;
+const getSubmitErrorMessage = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
 
 const getDateTimestamp = (value?: string | null): number | null => {
   const normalizedDate = normalizeDateInput(value ?? undefined);

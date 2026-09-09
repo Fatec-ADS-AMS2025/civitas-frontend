@@ -1,7 +1,7 @@
 "use client";
 
-import Table from "@/components/Table/table";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
+import Table from "@/components/Table/table";
 import { CONFIG_FORM_HIDDEN_FIELDS } from "./configuracoes.constants";
 import type { ConfigDefinition, ConfigRow } from "./configuracoes.types";
 

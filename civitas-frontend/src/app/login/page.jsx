@@ -1,5 +1,5 @@
-import CardLogin from './_components/card-login'
-import Login from './_components/login'
+import CardLogin from "./_components/card-login";
+import Login from "./_components/login";
 
 export default function LoginPage() {
   return (
@@ -9,7 +9,6 @@ export default function LoginPage() {
         <Login />
         <div className="absolute bottom-0 hidden h-2 w-full bg-[var(--secundary-1)] lg:block" />
       </div>
-
     </div>
-  )
+  );
 }

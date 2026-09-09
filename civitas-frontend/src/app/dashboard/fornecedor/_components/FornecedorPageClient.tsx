@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
+import { type FieldConfig, SearchBar } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import {
   composeValidators,
@@ -11,24 +11,18 @@ import {
   validateMaxLength,
   validateUfCode,
 } from "@/global/formPayload";
-import {
-  getSituacaoLabel,
-  SITUACAO_ATIVO,
-  SITUACAO_OPTIONS,
-} from "@/global/situacao";
+import { getSituacaoLabel, SITUACAO_ATIVO, SITUACAO_OPTIONS } from "@/global/situacao";
 import { fornecedorService } from "@/hooks/fornecedor";
 import type { ListQuery, PaginatedResult } from "@/hooks/generic";
-import FornecedorDTO from "@/models/fornecedor";
-import FornecedorDetailsView from "./FornecedorDetailsView";
+import type FornecedorDTO from "@/models/fornecedor";
 import FornecedorSkeleton from "../skeleton";
+import FornecedorDetailsView from "./FornecedorDetailsView";
+
 // Usando o tipo do service
 
 type Fornecedor = FornecedorDTO;
 export type FornecedorRow = Fornecedor & { situacaoLabel: string };
-type PaginationState = Pick<
-  PaginatedResult<FornecedorRow>,
-  "currentPage" | "pageSize" | "totalPages" | "totalRecords"
->;
+type PaginationState = Pick<PaginatedResult<FornecedorRow>, "currentPage" | "pageSize" | "totalPages" | "totalRecords">;
 
 const DEFAULT_PAGE_QUERY: Required<Pick<ListQuery, "page" | "size">> = {
   page: 1,
@@ -132,10 +126,7 @@ const fornecedorFormFields: ModalFieldConfig[] = [
     label: "Estado",
     placeholder: "UF",
     required: true,
-    validate: composeValidators(
-      validateUfCode(),
-      validateMaxLength("Estado", 2)
-    ),
+    validate: composeValidators(validateUfCode(), validateMaxLength("Estado", 2)),
     section: "Endereco",
   },
   {
@@ -171,9 +162,7 @@ const mapFornecedorRows = (items: Fornecedor[]): FornecedorRow[] => {
   }));
 };
 
-const toFornecedorPageResult = (
-  pageResult: PaginatedResult<Fornecedor>
-): PaginatedResult<FornecedorRow> => {
+const toFornecedorPageResult = (pageResult: PaginatedResult<Fornecedor>): PaginatedResult<FornecedorRow> => {
   return {
     ...pageResult,
     items: mapFornecedorRows(pageResult.items),
@@ -201,10 +190,7 @@ type FornecedorPageClientProps = {
   initialError?: string | null;
 };
 
-export default function FornecedorPageClient({
-  initialPage,
-  initialError = null,
-}: FornecedorPageClientProps) {
+export default function FornecedorPageClient({ initialPage, initialError = null }: FornecedorPageClientProps) {
   const initialRowsPage = toFornecedorPageResult(initialPage);
   const [fornecedores, setFornecedores] = useState<FornecedorRow[]>(initialRowsPage.items);
   const [filteredData, setFilteredData] = useState<FornecedorRow[]>(initialRowsPage.items);
@@ -233,9 +219,7 @@ export default function FornecedorPageClient({
     setPageSize(pageResult.pageSize);
   };
 
-  const loadFornecedorPage = async (
-    query: ListQuery = { page: currentPage, size: pageSize }
-  ) => {
+  const loadFornecedorPage = async (query: ListQuery = { page: currentPage, size: pageSize }) => {
     try {
       setLoading(true);
 
@@ -246,7 +230,7 @@ export default function FornecedorPageClient({
               ...query,
               page: initialPage.totalPages,
               size: initialPage.pageSize,
-            })
+            }),
           )
         : initialPage;
 
@@ -258,9 +242,7 @@ export default function FornecedorPageClient({
       setFornecedores([]);
       setFilteredData([]);
       setPaginationState(emptyPaginationState);
-      setError(
-        "Nao foi possivel carregar os fornecedores. Verifique o backend e tente novamente."
-      );
+      setError("Nao foi possivel carregar os fornecedores. Verifique o backend e tente novamente.");
       return null;
     } finally {
       setLoading(false);
@@ -273,10 +255,7 @@ export default function FornecedorPageClient({
   };
 
   const handleUpdate = async (id: number, dadosAtualizados: Partial<Fornecedor>) => {
-    await fornecedorService.update(
-      id,
-      normalizeFornecedorPayload(dadosAtualizados)
-    );
+    await fornecedorService.update(id, normalizeFornecedorPayload(dadosAtualizados));
     await loadFornecedorPage({ page: currentPage, size: pageSize });
   };
 
@@ -329,9 +308,7 @@ export default function FornecedorPageClient({
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={fornecedorFormFields}
-        renderModalExtra={(row, mode) =>
-          mode === "view" ? <FornecedorDetailsView fornecedor={row} /> : null
-        }
+        renderModalExtra={(row, mode) => (mode === "view" ? <FornecedorDetailsView fornecedor={row} /> : null)}
         exportConfig={{
           enabled: true,
           title: "Fornecedores",

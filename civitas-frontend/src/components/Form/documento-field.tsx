@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useId, useMemo, useRef, useState } from "react";
+import type React from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import type { FormFieldConfig } from "./form";
 import { getFieldErrorId } from "./form-utils";
 import {
@@ -149,9 +150,7 @@ export default function DocumentoField({
       });
     } catch (conversionError) {
       const message =
-        conversionError instanceof Error
-          ? conversionError.message
-          : "Nao foi possivel converter o arquivo.";
+        conversionError instanceof Error ? conversionError.message : "Nao foi possivel converter o arquivo.";
 
       onChange(field, {
         ...baseValue,
@@ -212,7 +211,6 @@ export default function DocumentoField({
           accept={field.accept ?? ".pdf,application/pdf"}
           disabled={isDisabled}
           required={false}
-          aria-required={required}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : `${inputId}-status`}
           onChange={handleFileChange}
@@ -221,9 +219,7 @@ export default function DocumentoField({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="font-semibold text-[var(--foreground)]">
-              {documento?.fileName ?? "Selecione um documento"}
-            </p>
+            <p className="font-semibold text-[var(--foreground)]">{documento?.fileName ?? "Selecione um documento"}</p>
             <p id={`${inputId}-status`} className="mt-1 text-xs text-[var(--foreground-soft)]" aria-live="polite">
               {statusMessage}
             </p>
@@ -289,8 +285,7 @@ export default function DocumentoField({
         {documento ? (
           <div className="civitas-documento-field__summary mt-3 grid gap-2 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3 text-xs text-[var(--foreground-muted)] sm:grid-cols-2">
             <span className="min-w-0 truncate">
-              <strong className="font-semibold text-[var(--foreground)]">Nome:</strong>{" "}
-              {documento.fileName ?? "-"}
+              <strong className="font-semibold text-[var(--foreground)]">Nome:</strong> {documento.fileName ?? "-"}
             </span>
             <span>
               <strong className="font-semibold text-[var(--foreground)]">Tipo:</strong>{" "}
@@ -301,8 +296,7 @@ export default function DocumentoField({
               {formatDocumentFileSize(documento.fileSize)}
             </span>
             <span>
-              <strong className="font-semibold text-[var(--foreground)]">Status:</strong>{" "}
-              {statusMessage}
+              <strong className="font-semibold text-[var(--foreground)]">Status:</strong> {statusMessage}
             </span>
           </div>
         ) : null}

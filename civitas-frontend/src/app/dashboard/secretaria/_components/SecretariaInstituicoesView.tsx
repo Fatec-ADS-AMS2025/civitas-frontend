@@ -39,17 +39,12 @@ const getSecretariaEndereco = (secretaria: SecretariaRow): string => {
   return partes.length > 0 ? partes.join(", ") : "Endereco nao informado";
 };
 
-export default function SecretariaInstituicoesView({
-  secretaria,
-}: SecretariaInstituicoesViewProps) {
+export default function SecretariaInstituicoesView({ secretaria }: SecretariaInstituicoesViewProps) {
   const instituicoes = secretaria.instituicoesRelacionadas;
 
   return (
     <div className="space-y-5">
-      <DetailSection
-        title="Resumo da secretaria"
-        description="Dados principais agrupados para leitura rapida."
-      >
+      <DetailSection title="Resumo da secretaria" description="Dados principais agrupados para leitura rapida.">
         <DetailCardGrid>
           <DetailCard
             title="Status"
@@ -77,9 +72,7 @@ export default function SecretariaInstituicoesView({
             value={secretaria.totalGastosFormatado}
             description={`${secretaria.quantidadeDespesas} lancamento${
               secretaria.quantidadeDespesas === 1 ? "" : "s"
-            } em ${secretaria.quantidadeCodigos} codigo${
-              secretaria.quantidadeCodigos === 1 ? "" : "s"
-            }`}
+            } em ${secretaria.quantidadeCodigos} codigo${secretaria.quantidadeCodigos === 1 ? "" : "s"}`}
             icon="receipt_long"
           />
         </DetailCardGrid>
@@ -100,9 +93,7 @@ export default function SecretariaInstituicoesView({
 
       <DetailSection
         title="Instituicoes vinculadas"
-        description={`${instituicoes.length} instituicao${
-          instituicoes.length === 1 ? "" : "es"
-        } nesta secretaria.`}
+        description={`${instituicoes.length} instituicao${instituicoes.length === 1 ? "" : "es"} nesta secretaria.`}
       >
         <DetailList
           items={instituicoes}
@@ -119,8 +110,7 @@ export default function SecretariaInstituicoesView({
                   {instituicao.nome || "Instituicao sem nome"}
                 </h4>
                 <p className="mt-1 text-xs text-[var(--foreground-soft)]">
-                  {getSituacaoLabel(instituicao.situacao)} | CNPJ:{" "}
-                  {instituicao.cnpj || "Nao informado"}
+                  {getSituacaoLabel(instituicao.situacao)} | CNPJ: {instituicao.cnpj || "Nao informado"}
                 </p>
               </div>
 

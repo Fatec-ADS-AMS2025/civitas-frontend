@@ -25,11 +25,6 @@ export default async function Page() {
   } catch (error) {
     console.error("Erro ao carregar usuarios no servidor:", error);
 
-    return (
-      <UsuariosPageClient
-        initialPage={emptyPage}
-        initialError="Nao foi possivel carregar usuarios."
-      />
-    );
+    return <UsuariosPageClient initialPage={emptyPage} initialError="Nao foi possivel carregar usuarios." />;
   }
 }

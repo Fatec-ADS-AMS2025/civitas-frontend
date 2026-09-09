@@ -1,10 +1,6 @@
 "use client";
 
-import type {
-  SecretariaCardFilter,
-  SecretariaMetrics,
-  SecretariaRow,
-} from "@/hooks/useSecretariaPage";
+import type { SecretariaCardFilter, SecretariaMetrics, SecretariaRow } from "@/hooks/useSecretariaPage";
 
 type SecretariaRelationshipCardsProps = {
   secretarias: SecretariaRow[];
@@ -21,10 +17,7 @@ type SummaryCardProps = {
   onClick: () => void;
 };
 
-const isFilterActive = (
-  selectedFilter: SecretariaCardFilter,
-  candidate: SecretariaCardFilter
-) => {
+const isFilterActive = (selectedFilter: SecretariaCardFilter, candidate: SecretariaCardFilter) => {
   if (selectedFilter.type !== candidate.type) return false;
   if (candidate.type === "secretaria" && selectedFilter.type === "secretaria") {
     return selectedFilter.idSecretaria === candidate.idSecretaria;
@@ -39,9 +32,7 @@ function SummaryCard({ title, value, description, active = false, onClick }: Sum
       type="button"
       onClick={onClick}
       className={`civitas-surface civitas-enter flex min-h-[124px] flex-col items-start justify-between rounded-sm border p-4 text-left transition hover:border-[var(--primary-1)] hover:bg-[var(--surface-subtle)] ${
-        active
-          ? "border-[var(--primary-1)] ring-4 ring-[var(--focus-ring)]"
-          : "border-[var(--divider)]"
+        active ? "border-[var(--primary-1)] ring-4 ring-[var(--focus-ring)]" : "border-[var(--divider)]"
       }`}
     >
       <span className="text-sm font-semibold text-[var(--foreground-soft)]">{title}</span>
@@ -92,12 +83,8 @@ export default function SecretariaRelationshipCards({
       {secretarias.length > 0 ? (
         <div className="civitas-surface rounded-sm border border-[var(--divider)] p-4">
           <div className="mb-3 flex flex-col gap-1">
-            <h2 className="text-base font-semibold text-[var(--foreground)]">
-              Instituicoes por secretaria
-            </h2>
-            <p className="text-sm text-[var(--foreground-soft)]">
-              Selecione uma secretaria para filtrar a listagem.
-            </p>
+            <h2 className="text-base font-semibold text-[var(--foreground)]">Instituicoes por secretaria</h2>
+            <p className="text-sm text-[var(--foreground-soft)]">Selecione uma secretaria para filtrar a listagem.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -124,9 +111,7 @@ export default function SecretariaRelationshipCards({
                   <span className="mt-2 block text-2xl font-semibold text-[var(--foreground)]">
                     {secretaria.totalInstituicoes}
                   </span>
-                  <span className="text-xs text-[var(--foreground-soft)]">
-                    instituicoes vinculadas
-                  </span>
+                  <span className="text-xs text-[var(--foreground-soft)]">instituicoes vinculadas</span>
                 </button>
               );
             })}

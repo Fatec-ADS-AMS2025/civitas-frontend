@@ -30,11 +30,7 @@ type CrudRouteSkeletonProps = {
   rows?: number;
 };
 
-export default function CrudRouteSkeleton({
-  columns = 5,
-  filters = 4,
-  rows = 6,
-}: CrudRouteSkeletonProps) {
+export default function CrudRouteSkeleton({ columns = 5, filters = 4, rows = 6 }: CrudRouteSkeletonProps) {
   const tableColumns = `repeat(${columns}, minmax(0, 1fr)) minmax(96px, 120px)`;
 
   return (
@@ -53,10 +49,7 @@ export default function CrudRouteSkeleton({
 
         <div className="flex flex-wrap gap-3 border-t border-[var(--divider)] pt-4">
           {Array.from({ length: filters }).map((_, index) => (
-            <SkeletonBlock
-              key={`crud-filter-${index}`}
-              className="h-11 min-w-[160px] flex-1 rounded-sm"
-            />
+            <SkeletonBlock key={`crud-filter-${index}`} className="h-11 min-w-[160px] flex-1 rounded-sm" />
           ))}
           <SkeletonBlock className="h-11 w-full rounded-sm sm:w-32" />
         </div>
@@ -69,10 +62,7 @@ export default function CrudRouteSkeleton({
         </div>
 
         <div className="space-y-3 px-4 py-5 sm:px-5 lg:px-6">
-          <div
-            className="hidden gap-3 md:grid"
-            style={{ gridTemplateColumns: tableColumns }}
-          >
+          <div className="hidden gap-3 md:grid" style={{ gridTemplateColumns: tableColumns }}>
             {Array.from({ length: columns + 1 }).map((_, index) => (
               <SkeletonBlock key={`crud-head-${index}`} className="h-4 rounded-sm" />
             ))}
@@ -85,10 +75,7 @@ export default function CrudRouteSkeleton({
               style={{ gridTemplateColumns: tableColumns }}
             >
               {Array.from({ length: columns }).map((__, columnIndex) => (
-                <SkeletonBlock
-                  key={`crud-cell-${rowIndex}-${columnIndex}`}
-                  className="h-5 rounded-sm"
-                />
+                <SkeletonBlock key={`crud-cell-${rowIndex}-${columnIndex}`} className="h-5 rounded-sm" />
               ))}
 
               <div className="flex items-center justify-end gap-2">

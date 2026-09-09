@@ -10,8 +10,7 @@ import type { ConfigKind, ConfigRow, FeedbackState } from "./configuracoes.types
 import { asErrorMessage } from "./configuracoes.utils";
 
 export const useConfiguracoes = () => {
-  const [tipoSelecionado, setTipoSelecionado] =
-    useState<ConfigKind>("tipoInstituicao");
+  const [tipoSelecionado, setTipoSelecionado] = useState<ConfigKind>("tipoInstituicao");
   const [dadosOriginais, setDadosOriginais] = useState<ConfigRow[]>([]);
   const [dadosFiltrados, setDadosFiltrados] = useState<ConfigRow[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<UnidadeMedidaDTO[]>([]);
@@ -19,20 +18,14 @@ export const useConfiguracoes = () => {
   const [feedback, setFeedback] = useState<FeedbackState>(null);
   const [loading, setLoading] = useState(true);
 
-  const definition = useMemo(
-    () => CONFIG_DEFINITIONS[tipoSelecionado],
-    [tipoSelecionado]
-  );
+  const definition = useMemo(() => CONFIG_DEFINITIONS[tipoSelecionado], [tipoSelecionado]);
 
   const formFields = useMemo(
     () => definition.buildFields(unidadesMedida, tipoCodigos),
-    [definition, tipoCodigos, unidadesMedida]
+    [definition, tipoCodigos, unidadesMedida],
   );
 
-  const campos = useMemo<FieldConfig[]>(
-    () => definition.buildSearchFields(),
-    [definition]
-  );
+  const campos = useMemo<FieldConfig[]>(() => definition.buildSearchFields(), [definition]);
 
   const refreshData = useCallback(async (selectedKind: ConfigKind) => {
     setLoading(true);
@@ -63,10 +56,7 @@ export const useConfiguracoes = () => {
         setDadosFiltrados([]);
         setFeedback({
           type: "error",
-          message: asErrorMessage(
-            error,
-            "Nao foi possivel carregar os dados de configuracoes."
-          ),
+          message: asErrorMessage(error, "Nao foi possivel carregar os dados de configuracoes."),
         });
       }
     };
@@ -90,7 +80,7 @@ export const useConfiguracoes = () => {
         throw error;
       }
     },
-    [refreshData, tipoSelecionado]
+    [refreshData, tipoSelecionado],
   );
 
   const handleUpdate = useCallback(
@@ -98,11 +88,7 @@ export const useConfiguracoes = () => {
       setFeedback(null);
 
       try {
-        const message = await configuracoesService.update(
-          tipoSelecionado,
-          id,
-          formData
-        );
+        const message = await configuracoesService.update(tipoSelecionado, id, formData);
         setFeedback({ type: "success", message });
         await refreshData(tipoSelecionado);
       } catch (error) {
@@ -113,7 +99,7 @@ export const useConfiguracoes = () => {
         throw error;
       }
     },
-    [refreshData, tipoSelecionado]
+    [refreshData, tipoSelecionado],
   );
 
   const handleToggleSituacao = useCallback(
@@ -121,24 +107,18 @@ export const useConfiguracoes = () => {
       setFeedback(null);
 
       try {
-        const message = await configuracoesService.toggleSituacao(
-          tipoSelecionado,
-          id
-        );
+        const message = await configuracoesService.toggleSituacao(tipoSelecionado, id);
         setFeedback({ type: "success", message });
         await refreshData(tipoSelecionado);
       } catch (error) {
         setFeedback({
           type: "error",
-          message: asErrorMessage(
-            error,
-            "Nao foi possivel alterar a situacao. Verifique se existe vinculo ativo."
-          ),
+          message: asErrorMessage(error, "Nao foi possivel alterar a situacao. Verifique se existe vinculo ativo."),
         });
         throw error;
       }
     },
-    [refreshData, tipoSelecionado]
+    [refreshData, tipoSelecionado],
   );
 
   return {

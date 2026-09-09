@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FieldConfig as ModalFieldConfig } from "@/components/Form/form";
-import { SearchBar, FieldConfig } from "@/components/Table/searchbar";
+import { type FieldConfig, SearchBar } from "@/components/Table/searchbar";
 import Table from "@/components/Table/table";
 import { normalizeOrcamentoPayload } from "@/global/formPayload";
-import { filterActiveRecords } from "@/global/softDelete";
 import { getSituacaoLabel, SITUACAO_INATIVO } from "@/global/situacao";
+import { filterActiveRecords } from "@/global/softDelete";
 import { despesaService } from "@/hooks/despesa";
 import { instituicaoService } from "@/hooks/instituicao";
 import { orcamentoService } from "@/hooks/orcamento";
 import { tipoDespesaService } from "@/hooks/tipoDespesa";
-import DespesaDTO from "@/models/despesa";
-import InstituicaoDTO from "@/models/instituicao";
-import OrcamentoDTO from "@/models/orcamento";
-import TipoDespesaDTO from "@/models/tipoDespesa";
+import type DespesaDTO from "@/models/despesa";
+import type InstituicaoDTO from "@/models/instituicao";
+import type OrcamentoDTO from "@/models/orcamento";
+import type TipoDespesaDTO from "@/models/tipoDespesa";
 import OrcamentoDetailsView from "./_components/OrcamentoDetailsView";
 import OrcamentoSuggestionPanel from "./_components/OrcamentoSuggestionPanel";
 import OrcamentosSkeleton from "./skeleton";
@@ -90,7 +90,7 @@ const columns = [
 
 const buildOrcamentoCampos = (
   instituicaoOptions: FieldConfig["options"],
-  tipoDespesaOptions: FieldConfig["options"]
+  tipoDespesaOptions: FieldConfig["options"],
 ): FieldConfig[] => {
   return [
     { key: "anoOrcamento", placeholder: "Ano", local: "principal" },
@@ -214,9 +214,7 @@ const getOrcamentoValorPrevisto = (orcamento: Orcamento): number => {
 };
 
 const getDespesaValorRealizado = (despesa: Despesa): number => {
-  const value = Number(
-    despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0
-  );
+  const value = Number(despesa.valorPago ?? despesa.valor ?? despesa.valorPrevisto ?? despesa.consumoPrevisto ?? 0);
   return Number.isFinite(value) ? value : 0;
 };
 
@@ -224,28 +222,22 @@ const mapOrcamentoRows = (
   orcamentos: Orcamento[],
   despesas: Despesa[],
   instituicoes: Instituicao[],
-  tiposDespesa: TipoDespesa[]
+  tiposDespesa: TipoDespesa[],
 ): OrcamentoRow[] => {
   const activeOrcamentos = filterActiveRecords(orcamentos);
   const activeDespesas = filterActiveRecords(despesas);
-  const instituicaoMap = new Map(
-    instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const)
-  );
-  const tipoDespesaMap = new Map(
-    tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa.descricao] as const)
-  );
+  const instituicaoMap = new Map(instituicoes.map((instituicao) => [instituicao.id, instituicao.nome] as const));
+  const tipoDespesaMap = new Map(tiposDespesa.map((tipoDespesa) => [tipoDespesa.id, tipoDespesa.descricao] as const));
 
   return activeOrcamentos.map((orcamento) => {
     const orcamentoId = getOrcamentoId(orcamento);
     const instituicaoId = orcamento.idInstituicao;
     const tipoDespesaId = orcamento.idTipoDespesa;
-    const despesasRelacionadas = activeDespesas.filter(
-      (despesa) => Number(despesa.idOrcamento ?? 0) === orcamentoId
-    );
+    const despesasRelacionadas = activeDespesas.filter((despesa) => Number(despesa.idOrcamento ?? 0) === orcamentoId);
     const valorPrevisto = getOrcamentoValorPrevisto(orcamento);
     const valorRealizado = despesasRelacionadas.reduce(
       (total, despesa) => total + getDespesaValorRealizado(despesa),
-      0
+      0,
     );
     const saldo = valorPrevisto - valorRealizado;
 
@@ -261,11 +253,11 @@ const mapOrcamentoRows = (
       quantidadeDespesasRelacionadas: despesasRelacionadas.length,
       instituicaoLabel:
         instituicaoId !== undefined
-          ? instituicaoMap.get(instituicaoId) ?? `Instituicao #${instituicaoId}`
+          ? (instituicaoMap.get(instituicaoId) ?? `Instituicao #${instituicaoId}`)
           : "Instituicao nao informada",
       tipoDespesaLabel:
         tipoDespesaId !== undefined
-          ? tipoDespesaMap.get(tipoDespesaId) ?? `Tipo #${tipoDespesaId}`
+          ? (tipoDespesaMap.get(tipoDespesaId) ?? `Tipo #${tipoDespesaId}`)
           : "Tipo nao informado",
     };
   });
@@ -374,12 +366,7 @@ export default function Page() {
 
   const refreshOrcamentos = async () => {
     const pageData = await fetchOrcamentoPageData();
-    const rows = mapOrcamentoRows(
-      pageData.orcamentos,
-      pageData.despesas,
-      pageData.instituicoes,
-      pageData.tiposDespesa
-    );
+    const rows = mapOrcamentoRows(pageData.orcamentos, pageData.despesas, pageData.instituicoes, pageData.tiposDespesa);
     setInstituicoes(pageData.instituicoes);
     setTiposDespesa(pageData.tiposDespesa);
     setOrcamentos(rows);
@@ -396,7 +383,7 @@ export default function Page() {
           pageData.orcamentos,
           pageData.despesas,
           pageData.instituicoes,
-          pageData.tiposDespesa
+          pageData.tiposDespesa,
         );
 
         setInstituicoes(pageData.instituicoes);
@@ -410,9 +397,7 @@ export default function Page() {
         setFilteredData([]);
         setInstituicoes([]);
         setTiposDespesa([]);
-        setError(
-          "Nao foi possivel carregar os orcamentos. Verifique o backend e tente novamente."
-        );
+        setError("Nao foi possivel carregar os orcamentos. Verifique o backend e tente novamente.");
       } finally {
         setLoading(false);
       }
@@ -466,9 +451,7 @@ export default function Page() {
         onEdit={handleUpdate}
         onDelete={handleDelete}
         formFields={orcamentoFormFields}
-        renderModalExtra={(row, mode) =>
-          mode === "view" ? <OrcamentoDetailsView orcamento={row} /> : null
-        }
+        renderModalExtra={(row, mode) => (mode === "view" ? <OrcamentoDetailsView orcamento={row} /> : null)}
         exportConfig={{
           enabled: true,
           title: "Orcamentos",
