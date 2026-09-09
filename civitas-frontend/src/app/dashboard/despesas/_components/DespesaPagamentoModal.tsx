@@ -76,7 +76,7 @@ export default function DespesaPagamentoModal({
       key: "documento",
       label: "Comprovante",
       type: "documento",
-      accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
+      accept: ".pdf,application/pdf",
     }),
     []
   );

@@ -91,7 +91,7 @@ export function useDespesaFormFields({
         type: "documento",
         hidden: hideDocumento,
         requiredInModes: ["create"],
-        accept: ".pdf,.png,.jpg,.jpeg,image/*,application/pdf",
+        accept: ".pdf,application/pdf",
         validate: (value, formData, mode) => {
           const documento = resolveDocumento(value);
           const hasDocumentInput = value !== "" && value !== undefined && value !== null;
