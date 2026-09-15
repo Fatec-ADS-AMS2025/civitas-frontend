@@ -5,25 +5,10 @@ import { useState } from "react";
 import Button from "@/components/button";
 import { Input } from "@/components/Input";
 import useForgotPassword from "@/hooks/useForgotPassword";
+import { validateEmail } from "@/lib/account-access-validation";
 
 type FormErrors = {
   email: string;
-};
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const validateEmail = (email: string) => {
-  const normalizedEmail = email.trim();
-
-  if (!normalizedEmail) {
-    return "Informe o e-mail";
-  }
-
-  if (!EMAIL_PATTERN.test(normalizedEmail)) {
-    return "Informe um e-mail valido";
-  }
-
-  return "";
 };
 
 export default function ForgotPasswordForm() {
@@ -82,6 +67,9 @@ export default function ForgotPasswordForm() {
               </h2>
               <p className="text-sm text-[var(--foreground-muted)]">
                 Envie a solicitacao para o e-mail vinculado ao seu cadastro.
+              </p>
+              <p className="mt-3 rounded-sm border border-[var(--tone-amber-border)] bg-[var(--tone-amber-bg)] px-3 py-2.5 text-sm text-[var(--tone-amber-text)]">
+                O envio depende de uma rota publica de recuperacao que ainda nao foi disponibilizada pela API.
               </p>
             </div>
 
