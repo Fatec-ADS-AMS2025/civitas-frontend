@@ -3,11 +3,6 @@ import type DespesaDTO from "@/models/despesa";
 import type DocumentoDTO from "@/models/documento";
 import type { ListQuery } from "./generic";
 import { GenericService } from "./generic";
-import { GenericService } from './generic';
-import DespesaDTO from '@/models/despesa';
-import type DocumentoDTO from '@/models/documento';
-import type { ListQuery } from './generic';
-import { filterActiveRecords } from '@/global/softDelete';
 import { base64ToDocumentBlob, getDocumentFileName, getDocumentMimeType } from '@/lib/documento-utils';
 
 const mergeUniqueById = (despesas: DespesaDTO[]): DespesaDTO[] => {

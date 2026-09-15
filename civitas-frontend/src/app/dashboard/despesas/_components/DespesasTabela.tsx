@@ -8,7 +8,6 @@ import { despesaService } from "@/hooks/despesa";
 import { documentoService } from "@/hooks/documento";
 import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { showToast } from "@/hooks/useToast";
-import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import DespesaDocumentoActions from "./DespesaDocumentoActions";
 import { ICON_BUTTON_CLASS_NAME } from "../despesas.constants";
 import type { DespesasListSearchState, DespesasTableData } from "../despesas.types";
