@@ -2,8 +2,6 @@
 
 import type React from "react";
 import { useId, useMemo, useRef, useState } from "react";
-import type { FormFieldConfig } from "./form";
-import { getFieldErrorId } from "./form-utils";
 import {
   base64ToDocumentBlob,
   buildDocumentPreviewUrl,
@@ -14,6 +12,8 @@ import {
   readDocumentFileAsBase64,
   validateDocumentFile,
 } from "@/lib/documento-utils";
+import type { FormFieldConfig } from "./form";
+import { getFieldErrorId } from "./form-utils";
 
 export type DocumentoUploadStatus = "idle" | "loading" | "ready" | "error";
 
@@ -94,10 +94,8 @@ export default function DocumentoField({
   const fileType = getDocumentMimeType(documento?.fileName, documento?.fileType);
   const previewUrl = useMemo(
     () =>
-      documento?.digitalizacao
-        ? buildDocumentPreviewUrl(documento.digitalizacao, fileType, documento.fileName)
-        : "",
-    [documento?.digitalizacao, documento?.fileName, fileType]
+      documento?.digitalizacao ? buildDocumentPreviewUrl(documento.digitalizacao, fileType, documento.fileName) : "",
+    [documento?.digitalizacao, documento?.fileName, fileType],
   );
   const canPreview = hasDocumentContent && canPreviewDocument(fileType, documento?.fileName);
   const isPdfPreview = fileType === "application/pdf";
@@ -177,13 +175,11 @@ export default function DocumentoField({
     try {
       downloadDocumentBlob(
         base64ToDocumentBlob(documento.digitalizacao, fileType, documento.fileName),
-        documento.fileName
+        documento.fileName,
       );
     } catch (downloadError) {
       const message =
-        downloadError instanceof Error
-          ? downloadError.message
-          : "Nao foi possivel preparar o documento para download.";
+        downloadError instanceof Error ? downloadError.message : "Nao foi possivel preparar o documento para download.";
 
       onChange(field, {
         ...documento,
@@ -312,7 +308,6 @@ export default function DocumentoField({
             ) : null}
           </div>
         ) : null}
-
       </div>
 
       {error && (
