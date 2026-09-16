@@ -3,7 +3,11 @@
 import { useCallback, useRef, useState } from "react";
 import { showToast } from "@/hooks/useToast";
 
-const GENERIC_ERROR_MESSAGE = "Nao foi possivel concluir a solicitacao agora. Tente novamente em instantes.";
+const GENERIC_ERROR_MESSAGE = "Não foi possível concluir a solicitação agora. Tente novamente em instantes.";
+
+type ExecuteOptions = {
+  suppressError?: (error: unknown) => boolean;
+};
 
 export function useAccountAccessAction() {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,33 +15,38 @@ export function useAccountAccessAction() {
   const [successMessage, setSuccessMessage] = useState("");
   const isSubmittingRef = useRef(false);
 
-  const execute = useCallback(async (action: () => Promise<void>, messageOnSuccess: string) => {
-    if (isSubmittingRef.current) return false;
+  const execute = useCallback(
+    async (action: () => Promise<void>, messageOnSuccess: string, options?: ExecuteOptions) => {
+      if (isSubmittingRef.current) return false;
 
-    isSubmittingRef.current = true;
-    setError("");
-    setSuccessMessage("");
-    setIsLoading(true);
+      isSubmittingRef.current = true;
+      setError("");
+      setSuccessMessage("");
+      setIsLoading(true);
 
-    try {
-      await action();
-      setSuccessMessage(messageOnSuccess);
-      showToast(messageOnSuccess, "success");
-      return true;
-    } catch (requestError) {
-      const message =
-        requestError instanceof Error && requestError.message.trim() !== ""
-          ? requestError.message
-          : GENERIC_ERROR_MESSAGE;
+      try {
+        await action();
+        setSuccessMessage(messageOnSuccess);
+        showToast(messageOnSuccess, "success");
+        return true;
+      } catch (requestError) {
+        if (options?.suppressError?.(requestError)) return false;
 
-      setError(message);
-      showToast(message, "error");
-      return false;
-    } finally {
-      isSubmittingRef.current = false;
-      setIsLoading(false);
-    }
-  }, []);
+        const message =
+          requestError instanceof Error && requestError.message.trim() !== ""
+            ? requestError.message
+            : GENERIC_ERROR_MESSAGE;
+
+        setError(message);
+        showToast(message, "error");
+        return false;
+      } finally {
+        isSubmittingRef.current = false;
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
 
   const clearMessages = useCallback(() => {
     setError("");

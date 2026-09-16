@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import Button from "@/components/button";
 import { Input } from "@/components/Input";
-import { accountAccessService } from "@/hooks/accountAccessService";
+import { accountAccessService, type RegistrationInput } from "@/hooks/accountAccessService";
 import { useAccountAccessAction } from "@/hooks/useAccountAccessAction";
 import {
   validateEmail,
@@ -13,38 +13,101 @@ import {
   validatePasswordConfirmation,
 } from "@/lib/account-access-validation";
 
-type SignupFormState = {
-  name: string;
-  email: string;
-  password: string;
-  passwordConfirmation: string;
-};
-
-type SignupFormErrors = Record<keyof SignupFormState, string>;
-
-const INITIAL_FORM: SignupFormState = {
-  name: "",
+type FormState = RegistrationInput & { passwordConfirmation: string };
+type FormErrors = Record<keyof FormState, string>;
+const UFS = new Set([
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
+]);
+const INITIAL_FORM: FormState = {
+  nome: "",
+  cpf: "",
+  rg: "",
+  logradouro: "",
+  numero: "",
+  bairro: "",
+  cidade: "",
+  estado: "",
+  cep: "",
   email: "",
-  password: "",
+  senha: "",
+  matricula: "",
   passwordConfirmation: "",
 };
+const EMPTY_ERRORS: FormErrors = Object.fromEntries(Object.keys(INITIAL_FORM).map((key) => [key, ""])) as FormErrors;
+const onlyDigits = (value: string) => value.replace(/\D/g, "");
+const required = (value: string, label: string) => (value.trim() ? "" : `Informe ${label}`);
 
-const EMPTY_ERRORS: SignupFormErrors = {
-  name: "",
-  email: "",
-  password: "",
-  passwordConfirmation: "",
+const isValidCpf = (cpf: string): boolean => {
+  if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+
+  const calculateDigit = (length: number): number => {
+    const sum = cpf
+      .slice(0, length)
+      .split("")
+      .reduce((total, digit, index) => total + Number(digit) * (length + 1 - index), 0);
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+
+  return Number(cpf[9]) === calculateDigit(9) && Number(cpf[10]) === calculateDigit(10);
 };
 
-const SUCCESS_MESSAGE = "Cadastro realizado com sucesso. Voce ja pode entrar no sistema.";
+function validate(form: FormState): FormErrors {
+  const cpf = onlyDigits(form.cpf);
+  const rg = onlyDigits(form.rg);
+  const cep = onlyDigits(form.cep);
+  return {
+    nome: validateName(form.nome),
+    cpf: isValidCpf(cpf) ? "" : "Informe um CPF válido com 11 dígitos",
+    rg: rg && rg.length <= 20 ? "" : "Informe o RG somente com números",
+    logradouro:
+      required(form.logradouro, "o logradouro") ||
+      (form.logradouro.trim().length > 200 ? "Máximo de 200 caracteres" : ""),
+    numero: required(form.numero, "o número") || (form.numero.trim().length > 10 ? "Máximo de 10 caracteres" : ""),
+    bairro: required(form.bairro, "o bairro") || (form.bairro.trim().length > 100 ? "Máximo de 100 caracteres" : ""),
+    cidade: required(form.cidade, "a cidade") || (form.cidade.trim().length > 100 ? "Máximo de 100 caracteres" : ""),
+    estado: UFS.has(form.estado.trim().toUpperCase()) ? "" : "Informe uma UF válida",
+    cep: cep.length === 8 ? "" : "Informe o CEP com 8 dígitos",
+    email: validateEmail(form.email),
+    senha: validatePassword(form.senha),
+    matricula:
+      required(form.matricula, "a matrícula") || (form.matricula.trim().length > 100 ? "Máximo de 100 caracteres" : ""),
+    passwordConfirmation: validatePasswordConfirmation(form.senha, form.passwordConfirmation),
+  };
+}
 
 export default function SignupForm() {
-  const [form, setForm] = useState<SignupFormState>(INITIAL_FORM);
-  const [errors, setErrors] = useState<SignupFormErrors>(EMPTY_ERRORS);
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [errors, setErrors] = useState<FormErrors>(EMPTY_ERRORS);
   const { isLoading, error, successMessage, execute, clearMessages } = useAccountAccessAction();
-
-  const updateField = useCallback(
-    (field: keyof SignupFormState, value: string) => {
+  const update = useCallback(
+    (field: keyof FormState, value: string) => {
       setForm((current) => ({ ...current, [field]: value }));
       if (errors[field]) setErrors((current) => ({ ...current, [field]: "" }));
       if (error || successMessage) clearMessages();
@@ -52,155 +115,100 @@ export default function SignupForm() {
     [clearMessages, error, errors, successMessage],
   );
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isLoading) return;
-
-    const nextErrors: SignupFormErrors = {
-      name: validateName(form.name),
-      email: validateEmail(form.email),
-      password: validatePassword(form.password),
-      passwordConfirmation: validatePasswordConfirmation(form.password, form.passwordConfirmation),
-    };
-
+    const nextErrors = validate(form);
     setErrors(nextErrors);
     clearMessages();
-
     if (Object.values(nextErrors).some(Boolean)) return;
-
+    const { passwordConfirmation: _passwordConfirmation, ...registration } = form;
     await execute(
       () =>
         accountAccessService.register({
-          name: form.name.trim(),
-          email: form.email.trim().toLowerCase(),
-          password: form.password,
+          ...registration,
+          cpf: onlyDigits(registration.cpf),
+          rg: onlyDigits(registration.rg),
+          cep: onlyDigits(registration.cep),
+          nome: registration.nome.trim(),
+          logradouro: registration.logradouro.trim(),
+          numero: registration.numero.trim(),
+          bairro: registration.bairro.trim(),
+          cidade: registration.cidade.trim(),
+          estado: registration.estado.trim().toUpperCase(),
+          email: registration.email.trim().toLowerCase(),
+          matricula: registration.matricula.trim(),
         }),
-      SUCCESS_MESSAGE,
+      "Cadastro realizado com sucesso. Você já pode entrar no sistema.",
     );
   };
 
+  const fields: Array<{ key: keyof FormState; label: string; type?: string; autoComplete?: string }> = [
+    { key: "nome", label: "Nome completo", autoComplete: "name" },
+    { key: "cpf", label: "CPF", autoComplete: "off" },
+    { key: "rg", label: "RG", autoComplete: "off" },
+    { key: "matricula", label: "Matrícula", autoComplete: "off" },
+    { key: "email", label: "E-mail", type: "email", autoComplete: "email" },
+    { key: "logradouro", label: "Logradouro", autoComplete: "street-address" },
+    { key: "numero", label: "Número", autoComplete: "address-line2" },
+    { key: "bairro", label: "Bairro", autoComplete: "address-line3" },
+    { key: "cidade", label: "Cidade", autoComplete: "address-level2" },
+    { key: "estado", label: "Estado (UF)", autoComplete: "address-level1" },
+    { key: "cep", label: "CEP", autoComplete: "postal-code" },
+    { key: "senha", label: "Senha", type: "password", autoComplete: "new-password" },
+    { key: "passwordConfirmation", label: "Confirmar senha", type: "password", autoComplete: "new-password" },
+  ];
+
   return (
-    <div className="min-h-screen w-full bg-[var(--surface-page)]">
-      <div className="relative mx-auto flex min-h-screen w-full overflow-x-hidden">
-        <div className="m-0 hidden w-1/2 items-center justify-center border-r border-[var(--border-soft)] bg-[var(--surface-subtle)] p-8 lg:flex">
-          <div className="flex w-full flex-col items-center">
-            <div className="mb-8 text-center">
-              <p className="text-sm font-medium uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                Novo acesso
-              </p>
-              <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">
-                Crie sua conta no <span className="text-[var(--secundary-1)]">Civitas</span>
-              </h1>
-              <p className="mt-3 text-sm text-[var(--foreground-muted)]">
-                Informe seus dados de acesso para iniciar o cadastro.
-              </p>
-            </div>
-            <div className="flex w-full justify-center">
-              <img src="/mnote.png" alt="Pessoa usando notebook" className="h-auto w-full max-w-md opacity-95" />
-            </div>
-          </div>
+    <main className="min-h-screen bg-[var(--surface-page)] px-4 py-8 sm:px-8">
+      <div className="mx-auto w-full max-w-3xl rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[var(--shadow-sm)] sm:p-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-semibold text-[var(--foreground)]">Criar conta</h1>
+          <p className="mt-2 text-sm text-[var(--foreground-muted)]">
+            Preencha seus dados para criar um acesso de visitante.
+          </p>
         </div>
-
-        <div className="flex min-h-screen w-full items-start justify-center overflow-x-hidden bg-[var(--secundary-1)] px-4 py-8 sm:px-5 sm:py-10 lg:w-1/2 lg:items-center lg:px-8 lg:py-12">
-          <div className="w-full max-w-[min(28rem,calc(100vw-2rem))] rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-6 shadow-[var(--shadow-sm)] sm:max-w-md sm:p-8">
-            <div className="mb-8">
-              <div className="mb-6 flex items-center gap-3">
-                <img src="/logo1.png" alt="Civitas Logo" className="h-10 w-10 object-contain" />
-                <span className="font-semibold text-[var(--secundary-1)]">Civitas</span>
-              </div>
-              <h2 className="mb-3 text-[28px] font-semibold text-[var(--foreground)] sm:text-[34px]">Criar conta</h2>
-              <p className="text-sm text-[var(--foreground-muted)]">Preencha os dados abaixo para criar seu acesso.</p>
-              <p className="mt-3 rounded-sm border border-[var(--tone-amber-border)] bg-[var(--tone-amber-bg)] px-3 py-2.5 text-sm text-[var(--tone-amber-text)]">
-                O cadastro publico depende de uma rota especifica que ainda nao foi disponibilizada pela API.
-              </p>
+        <form onSubmit={submit} noValidate aria-busy={isLoading} className="space-y-5">
+          {error && (
+            <div className="civitas-error-banner px-3 py-2.5 text-sm" role="alert">
+              {error}
             </div>
-
-            <form onSubmit={handleSubmit} noValidate aria-busy={isLoading} className="space-y-5">
-              {error && (
-                <div className="civitas-error-banner px-3 py-2.5 text-sm" role="alert" aria-live="assertive">
-                  {error}
-                </div>
-              )}
-              {successMessage && (
-                <div
-                  className="rounded-sm border border-[var(--tone-success-border)] bg-[var(--tone-success-bg)] px-3 py-2.5 text-sm font-medium text-[var(--tone-success-text)]"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {successMessage}
-                </div>
-              )}
-
-              <Input
-                id="signup-name"
-                label="Nome completo"
-                placeholder="Informe seu nome"
-                value={form.name}
-                onChange={(event) => updateField("name", event.target.value)}
-                disabled={isLoading}
-                autoComplete="name"
-                required
-                aria-invalid={Boolean(errors.name)}
-                error={errors.name}
-              />
-              <Input
-                id="signup-email"
-                type="email"
-                label="E-mail"
-                placeholder="Informe o e-mail"
-                value={form.email}
-                onChange={(event) => updateField("email", event.target.value)}
-                disabled={isLoading}
-                autoComplete="email"
-                required
-                aria-invalid={Boolean(errors.email)}
-                error={errors.email}
-              />
-              <Input
-                id="signup-password"
-                type="password"
-                label="Senha"
-                placeholder="Minimo de 8 caracteres"
-                value={form.password}
-                onChange={(event) => updateField("password", event.target.value)}
-                disabled={isLoading}
-                autoComplete="new-password"
-                required
-                aria-invalid={Boolean(errors.password)}
-                error={errors.password}
-              />
-              <Input
-                id="signup-password-confirmation"
-                type="password"
-                label="Confirmar senha"
-                placeholder="Repita a senha"
-                value={form.passwordConfirmation}
-                onChange={(event) => updateField("passwordConfirmation", event.target.value)}
-                disabled={isLoading}
-                autoComplete="new-password"
-                required
-                aria-invalid={Boolean(errors.passwordConfirmation)}
-                error={errors.passwordConfirmation}
-              />
-
-              <Button type="submit" variant="login" disabled={isLoading} className="mt-6 max-w-none">
-                {isLoading ? "Cadastrando..." : "Criar conta"}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <Link
-                href="/login"
-                className="text-sm font-semibold text-[var(--secundary-1)] underline underline-offset-2 hover:brightness-110"
-              >
-                Ja tem conta? Entrar
-              </Link>
+          )}
+          {successMessage && (
+            <div
+              className="rounded-sm border border-[var(--tone-success-border)] bg-[var(--tone-success-bg)] px-3 py-2.5 text-sm text-[var(--tone-success-text)]"
+              role="status"
+            >
+              {successMessage}
             </div>
+          )}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {fields.map(({ key, label, type, autoComplete }) => (
+              <Input
+                key={key}
+                id={`signup-${key}`}
+                type={type}
+                label={label}
+                value={form[key]}
+                onChange={(event) => update(key, event.target.value)}
+                disabled={isLoading}
+                autoComplete={autoComplete}
+                required
+                aria-invalid={Boolean(errors[key])}
+                error={errors[key]}
+              />
+            ))}
           </div>
-        </div>
-
-        <div className="absolute bottom-0 hidden h-2 w-full bg-[var(--secundary-1)] lg:block" />
+          <Button type="submit" variant="login" disabled={isLoading} className="max-w-none">
+            {isLoading ? "Cadastrando..." : "Criar conta"}
+          </Button>
+        </form>
+        <p className="mt-6 text-center">
+          <Link href="/login" className="text-sm font-semibold text-[var(--secundary-1)] underline underline-offset-2">
+            Já tem conta? Entrar
+          </Link>
+        </p>
       </div>
-    </div>
+    </main>
   );
 }

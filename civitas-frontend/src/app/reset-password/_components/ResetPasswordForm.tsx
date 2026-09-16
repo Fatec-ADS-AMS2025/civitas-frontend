@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import Button from "@/components/button";
 import { Input } from "@/components/Input";
-import { accountAccessService } from "@/hooks/accountAccessService";
+import { accountAccessService, InvalidPasswordResetTokenError } from "@/hooks/accountAccessService";
 import { useAccountAccessAction } from "@/hooks/useAccountAccessAction";
 import { validatePassword, validatePasswordConfirmation } from "@/lib/account-access-validation";
 
@@ -14,7 +14,7 @@ type ResetPasswordErrors = {
   passwordConfirmation: string;
 };
 
-const SUCCESS_MESSAGE = "Senha alterada com sucesso. Voce ja pode entrar no sistema.";
+const SUCCESS_MESSAGE = "Senha alterada com sucesso. Você já pode entrar no sistema.";
 
 export default function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -22,8 +22,10 @@ export default function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [errors, setErrors] = useState<ResetPasswordErrors>({ password: "", passwordConfirmation: "" });
+  const [isResetLinkInvalid, setIsResetLinkInvalid] = useState(false);
   const { isLoading, error, successMessage, execute, clearMessages } = useAccountAccessAction();
   const hasToken = token.trim() !== "";
+  const isFormAvailable = hasToken && !isResetLinkInvalid;
 
   const updatePassword = useCallback(
     (field: keyof ResetPasswordErrors, value: string) => {
@@ -38,7 +40,7 @@ export default function ResetPasswordForm() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isLoading || !hasToken) return;
+    if (isLoading || !isFormAvailable) return;
 
     const nextErrors = {
       password: validatePassword(password),
@@ -50,7 +52,14 @@ export default function ResetPasswordForm() {
 
     if (Object.values(nextErrors).some(Boolean)) return;
 
-    await execute(() => accountAccessService.resetPassword({ token, password }), SUCCESS_MESSAGE);
+    await execute(() => accountAccessService.resetPassword({ token, password }), SUCCESS_MESSAGE, {
+      suppressError: (requestError) => {
+        if (!(requestError instanceof InvalidPasswordResetTokenError)) return false;
+
+        setIsResetLinkInvalid(true);
+        return true;
+      },
+    });
   };
 
   return (
@@ -86,68 +95,80 @@ export default function ResetPasswordForm() {
                 Redefinir senha
               </h2>
               <p className="text-sm text-[var(--foreground-muted)]">
-                Sua senha deve ter ao menos 8 caracteres, uma letra e um numero.
+                Sua senha deve ter ao menos 8 caracteres, uma letra e um número.
               </p>
               {!hasToken && (
                 <div className="civitas-error-banner mt-3 px-3 py-2.5 text-sm" role="alert">
-                  O link de redefinicao esta invalido ou incompleto. Solicite um novo link de recuperacao.
+                  O link de redefinição está inválido ou incompleto. Solicite um novo link de recuperação.
                 </div>
               )}
-              {hasToken && (
-                <p className="mt-3 rounded-sm border border-[var(--tone-amber-border)] bg-[var(--tone-amber-bg)] px-3 py-2.5 text-sm text-[var(--tone-amber-text)]">
-                  A validacao do link e a alteracao da senha dependem de uma rota publica que ainda nao foi
-                  disponibilizada pela API.
-                </p>
+              {isResetLinkInvalid && (
+                <div className="civitas-error-banner mt-3 px-3 py-2.5 text-sm" role="alert">
+                  <p>Link de redefinição inválido ou expirado.</p>
+                  <Link
+                    href="/forgot-password"
+                    className="mt-2 inline-block font-semibold underline underline-offset-2"
+                  >
+                    Solicitar novo link de recuperação
+                  </Link>
+                </div>
               )}
             </div>
 
-            <form onSubmit={handleSubmit} noValidate aria-busy={isLoading} className="space-y-5">
-              {error && (
-                <div className="civitas-error-banner px-3 py-2.5 text-sm" role="alert" aria-live="assertive">
-                  {error}
-                </div>
-              )}
-              {successMessage && (
-                <div
-                  className="rounded-sm border border-[var(--tone-success-border)] bg-[var(--tone-success-bg)] px-3 py-2.5 text-sm font-medium text-[var(--tone-success-text)]"
-                  role="status"
-                  aria-live="polite"
+            {isFormAvailable && (
+              <form onSubmit={handleSubmit} noValidate aria-busy={isLoading} className="space-y-5">
+                {error && (
+                  <div className="civitas-error-banner px-3 py-2.5 text-sm" role="alert" aria-live="assertive">
+                    {error}
+                  </div>
+                )}
+                {successMessage && (
+                  <div
+                    className="rounded-sm border border-[var(--tone-success-border)] bg-[var(--tone-success-bg)] px-3 py-2.5 text-sm font-medium text-[var(--tone-success-text)]"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {successMessage}
+                  </div>
+                )}
+
+                <Input
+                  id="reset-password"
+                  type="password"
+                  label="Nova senha"
+                  placeholder="Mínimo de 8 caracteres"
+                  value={password}
+                  onChange={(event) => updatePassword("password", event.target.value)}
+                  disabled={isLoading || !isFormAvailable}
+                  autoComplete="new-password"
+                  required
+                  aria-invalid={Boolean(errors.password)}
+                  error={errors.password}
+                />
+                <Input
+                  id="reset-password-confirmation"
+                  type="password"
+                  label="Confirmar nova senha"
+                  placeholder="Repita a nova senha"
+                  value={passwordConfirmation}
+                  onChange={(event) => updatePassword("passwordConfirmation", event.target.value)}
+                  disabled={isLoading || !isFormAvailable}
+                  autoComplete="new-password"
+                  required
+                  aria-invalid={Boolean(errors.passwordConfirmation)}
+                  error={errors.passwordConfirmation}
+                />
+
+                <Button
+                  type="submit"
+                  variant="login"
+                  disabled={isLoading || !isFormAvailable}
+                  className="mt-6 max-w-none"
                 >
-                  {successMessage}
-                </div>
-              )}
-
-              <Input
-                id="reset-password"
-                type="password"
-                label="Nova senha"
-                placeholder="Minimo de 8 caracteres"
-                value={password}
-                onChange={(event) => updatePassword("password", event.target.value)}
-                disabled={isLoading || !hasToken}
-                autoComplete="new-password"
-                required
-                aria-invalid={Boolean(errors.password)}
-                error={errors.password}
-              />
-              <Input
-                id="reset-password-confirmation"
-                type="password"
-                label="Confirmar nova senha"
-                placeholder="Repita a nova senha"
-                value={passwordConfirmation}
-                onChange={(event) => updatePassword("passwordConfirmation", event.target.value)}
-                disabled={isLoading || !hasToken}
-                autoComplete="new-password"
-                required
-                aria-invalid={Boolean(errors.passwordConfirmation)}
-                error={errors.passwordConfirmation}
-              />
-
-              <Button type="submit" variant="login" disabled={isLoading || !hasToken} className="mt-6 max-w-none">
-                {isLoading ? "Alterando..." : "Alterar senha"}
-              </Button>
-            </form>
+                  {isLoading ? "Alterando..." : "Alterar senha"}
+                </Button>
+              </form>
+            )}
 
             <div className="mt-6 text-center">
               <Link

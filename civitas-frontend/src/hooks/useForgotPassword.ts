@@ -8,7 +8,7 @@ type ForgotPasswordInput = {
   email: string;
 };
 
-const SUCCESS_MESSAGE = "Se este e-mail estiver cadastrado, as instrucoes de recuperacao serao enviadas.";
+const SUCCESS_MESSAGE = "Se este e-mail estiver cadastrado, as instruções de recuperação serão enviadas.";
 
 export function useForgotPassword() {
   const { isLoading, error, successMessage, execute, clearMessages } = useAccountAccessAction();
