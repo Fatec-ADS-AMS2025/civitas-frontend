@@ -10,6 +10,18 @@ const MIME_BY_EXTENSION: Record<string, string> = {
 
 const SUPPORTED_DOCUMENT_MIME_TYPES = new Set(Object.values(MIME_BY_EXTENSION));
 
+const removeControlCharacters = (value: string): string => {
+  let sanitizedValue = "";
+
+  for (let index = 0; index < value.length; index += 1) {
+    if (value.charCodeAt(index) > 0x1f) {
+      sanitizedValue += value[index];
+    }
+  }
+
+  return sanitizedValue;
+};
+
 const getExtension = (fileName?: string): string => {
   const normalizedName = fileName?.trim().toLowerCase() ?? "";
   const separatorIndex = normalizedName.lastIndexOf(".");
@@ -26,12 +38,8 @@ export const getDocumentMimeType = (fileName?: string, mimeType?: string): strin
 };
 
 export const getDocumentFileName = (fileName?: string, fallback = "documento"): string => {
-  const normalizedName = fileName
-    ?.trim()
-    .split(/[\\/]/)
-    .pop()
-    ?.replace(/[\u0000-\u001F]/g, "")
-    .trim();
+  const baseName = fileName?.trim().split(/[\\/]/).pop();
+  const normalizedName = baseName ? removeControlCharacters(baseName).trim() : "";
   if (normalizedName) return normalizedName;
 
   return `${fallback}.pdf`;
@@ -124,11 +132,7 @@ export const canPreviewDocument = (mimeType?: string, fileName?: string): boolea
   return resolvedMimeType === "application/pdf";
 };
 
-export const buildDocumentPreviewUrl = (
-  base64: string,
-  mimeType?: string,
-  fileName?: string
-): string => {
+export const buildDocumentPreviewUrl = (base64: string, mimeType?: string, fileName?: string): string => {
   const resolvedMimeType = getDocumentMimeType(fileName, mimeType);
   const normalizedBase64 = normalizeBase64(base64);
 
@@ -154,12 +158,7 @@ export const downloadDocumentBlob = (blob: Blob, fileName?: string): void => {
 
 export const openDocumentBlob = (blob: Blob, target?: Window | null): boolean => {
   const url = window.URL.createObjectURL(blob);
-  const documentWindow =
-    target === undefined
-      ? openDocumentWindow()
-      : target && !target.closed
-        ? target
-        : null;
+  const documentWindow = target === undefined ? openDocumentWindow() : target && !target.closed ? target : null;
 
   if (!documentWindow) {
     window.URL.revokeObjectURL(url);

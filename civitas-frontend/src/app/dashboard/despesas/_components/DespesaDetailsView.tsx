@@ -56,10 +56,7 @@ export default function DespesaDetailsView({ despesa }: DespesaDetailsViewProps)
       </DetailSection>
 
       {despesa.documentoConfiavel ? (
-        <DetailSection
-          title="Anexo"
-          description="Abra ou baixe o documento vinculado a esta despesa."
-        >
+        <DetailSection title="Anexo" description="Abra ou baixe o documento vinculado a esta despesa.">
           <DespesaDocumentoActions despesa={despesa} />
         </DetailSection>
       ) : null}

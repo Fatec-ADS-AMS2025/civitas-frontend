@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  DOCUMENT_SIZE_LIMIT_BYTES,
   base64ToDocumentBlob,
   buildDocumentPreviewUrl,
   canPreviewDocument,
+  DOCUMENT_SIZE_LIMIT_BYTES,
   getDocumentFileName,
   getDocumentMimeType,
   validateDocumentFile,
@@ -26,8 +26,12 @@ test("resolve MIME ausente pelo nome e limita preview ao PDF recuperavel", () =>
   assert.equal(canPreviewDocument("image/png", "imagem.png"), false);
   assert.equal(
     buildDocumentPreviewUrl("aGVsbG8=", "application/pdf", "fatura.pdf"),
-    "data:application/pdf;base64,aGVsbG8="
+    "data:application/pdf;base64,aGVsbG8=",
   );
+});
+
+test("remove controles do nome, preserva caracteres normais e normaliza o resultado", () => {
+  assert.equal(getDocumentFileName(" C:\\temp\\fatura\u0000 \u001Ffinal.pdf "), "fatura final.pdf");
 });
 
 test("converte Base64 valido e rejeita conteudo corrompido", async () => {
@@ -43,7 +47,7 @@ test("converte Base64 valido e rejeita conteudo corrompido", async () => {
     assert.equal(await blob.text(), "hello");
     assert.throws(
       () => base64ToDocumentBlob("base64-invalido!", "application/pdf", "fatura.pdf"),
-      /invalido ou corrompido/
+      /invalido ou corrompido/,
     );
   } finally {
     Object.defineProperty(globalThis, "window", {

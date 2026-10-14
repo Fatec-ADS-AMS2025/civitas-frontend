@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { despesaService } from "@/hooks/despesa";
 import { documentoService } from "@/hooks/documento";
+import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 import { showToast } from "@/hooks/useToast";
 import {
   base64ToDocumentBlob,
@@ -11,17 +12,13 @@ import {
   openDocumentBlob,
   openDocumentWindow,
 } from "@/lib/documento-utils";
-import type { DespesaDashboardRow } from "@/hooks/useDespesasDashboard";
 
 type DespesaDocumentoActionsProps = {
   despesa: DespesaDashboardRow;
   showEmptyState?: boolean;
 };
 
-export default function DespesaDocumentoActions({
-  despesa,
-  showEmptyState = false,
-}: DespesaDocumentoActionsProps) {
+export default function DespesaDocumentoActions({ despesa, showEmptyState = false }: DespesaDocumentoActionsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const documento = despesa.documento;
 
@@ -34,18 +31,17 @@ export default function DespesaDocumentoActions({
   }
 
   const getDocumentoBlob = async (): Promise<Blob | null> => {
-    const resolvedDocumento =
-      documento?.digitalizacao
-        ? documento
-        : despesa.idDocumento
-          ? await documentoService.getDocumentoDataById(despesa.idDocumento)
-          : null;
+    const resolvedDocumento = documento?.digitalizacao
+      ? documento
+      : despesa.idDocumento
+        ? await documentoService.getDocumentoDataById(despesa.idDocumento)
+        : null;
 
     if (resolvedDocumento?.digitalizacao) {
       return base64ToDocumentBlob(
         resolvedDocumento.digitalizacao,
         resolvedDocumento.fileType,
-        resolvedDocumento.fileName
+        resolvedDocumento.fileName,
       );
     }
 
@@ -57,10 +53,7 @@ export default function DespesaDocumentoActions({
   };
 
   const getFileName = (): string =>
-    getDocumentFileName(
-      documento?.fileName ?? despesa.raw.nomeDocumento,
-      `documento-${despesa.id}`
-    );
+    getDocumentFileName(documento?.fileName ?? despesa.raw.nomeDocumento, `documento-${despesa.id}`);
 
   const handleOpen = async () => {
     // Abrir a janela ainda no gesto do usuario evita que o navegador bloqueie o resultado do fetch.

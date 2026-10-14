@@ -5,25 +5,10 @@ import { useState } from "react";
 import Button from "@/components/button";
 import { Input } from "@/components/Input";
 import useForgotPassword from "@/hooks/useForgotPassword";
+import { validateEmail } from "@/lib/account-access-validation";
 
 type FormErrors = {
   email: string;
-};
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const validateEmail = (email: string) => {
-  const normalizedEmail = email.trim();
-
-  if (!normalizedEmail) {
-    return "Informe o e-mail";
-  }
-
-  if (!EMAIL_PATTERN.test(normalizedEmail)) {
-    return "Informe um e-mail valido";
-  }
-
-  return "";
 };
 
 export default function ForgotPasswordForm() {
@@ -55,13 +40,13 @@ export default function ForgotPasswordForm() {
           <div className="flex w-full flex-col items-center">
             <div className="mb-8 text-center">
               <p className="text-sm font-medium uppercase tracking-[0.12em] text-[var(--foreground-soft)]">
-                Recuperacao de acesso
+                Recuperação de acesso
               </p>
               <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">
                 Retome o acesso ao <span className="text-[var(--secundary-1)]">Civitas</span>
               </h1>
               <p className="mt-3 text-sm text-[var(--foreground-muted)]">
-                Informe seu e-mail cadastrado para receber as instrucoes de recuperacao.
+                Informe seu e-mail cadastrado para receber as instruções de recuperação.
               </p>
             </div>
             <div className="flex w-full justify-center">
@@ -81,7 +66,7 @@ export default function ForgotPasswordForm() {
                 Esqueci minha senha
               </h2>
               <p className="text-sm text-[var(--foreground-muted)]">
-                Envie a solicitacao para o e-mail vinculado ao seu cadastro.
+                Envie a solicitação para o e-mail vinculado ao seu cadastro.
               </p>
             </div>
 
@@ -127,7 +112,7 @@ export default function ForgotPasswordForm() {
                     aria-hidden="true"
                   />
                 )}
-                {isLoading ? "Enviando..." : "Enviar instrucoes"}
+                {isLoading ? "Enviando..." : "Enviar instruções"}
               </Button>
             </form>
 
