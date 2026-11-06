@@ -472,7 +472,7 @@ export default function DespesaForm({
             </div>
 
             {errors.idUnidadeConsumidora && (
-              <p className="flex-shrink-0 border-t border-[var(--border-soft)] px-4 py-2.5 text-sm font-medium text-[#C23D3D]">
+              <p className="flex-shrink-0 border-t border-[var(--border-soft)] px-4 py-2.5 text-sm font-medium text-[var(--tone-danger-text)]">
                 {errors.idUnidadeConsumidora}
               </p>
             )}

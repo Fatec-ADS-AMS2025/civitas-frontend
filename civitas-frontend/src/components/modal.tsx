@@ -33,7 +33,7 @@ export default function Modal({ value, setValue, children }: ModalProps) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[9998] bg-[rgba(10,31,36,0.52)] backdrop-blur-[3px]">
+    <div className="fixed inset-0 z-[9998] bg-[var(--overlay-backdrop)] backdrop-blur-[3px]">
       <div className="flex min-h-full items-end justify-center p-3 sm:items-center sm:p-6">
         <div className="civitas-enter civitas-surface relative flex min-w-0 w-full max-w-5xl flex-col overflow-hidden rounded-sm p-3 text-[var(--foreground)] shadow-[var(--shadow-lg)] max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-3rem)] sm:p-5 md:p-7">
           <button
