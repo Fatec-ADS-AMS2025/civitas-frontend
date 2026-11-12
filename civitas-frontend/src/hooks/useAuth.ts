@@ -2,6 +2,7 @@
 
 import { useCallback, useContext, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
+import { API_BASE_URL as BASE_URL } from "@/global/apiUrl";
 import { showToast } from "@/hooks/useToast";
 import type { AuthStorageUser } from "@/lib/auth-storage";
 
@@ -23,7 +24,6 @@ type LoginResponse = {
 
 const INVALID_CREDENTIALS_MESSAGE = "E-mail ou senha invalidos. Verifique os dados e tente novamente.";
 const GENERIC_LOGIN_ERROR_MESSAGE = "Nao foi possivel entrar agora. Tente novamente em instantes.";
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
 
 const normalizeText = (value: string) => value.trim();
 const normalizeEmail = (value: string) => normalizeText(value).toLowerCase();

@@ -25,7 +25,7 @@ A prioridade e:
 Arquivo: `src/hooks/generic.ts`
 
 ### 3.1 Contratos
-- `BASE_URL = NEXT_PUBLIC_API_URL || http://localhost:5210/api`
+- `BASE_URL` vem de `src/global/apiUrl.ts`: `NEXT_PUBLIC_API_URL || http://localhost:8080/api` (backend do docker compose; com `dotnet run` use `http://localhost:5210/api` no `.env.local`)
 - Envelope padrao esperado: `{ code?, message?, data? }`.
 - Pode receber:
   - lista direta

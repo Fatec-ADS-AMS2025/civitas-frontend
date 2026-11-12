@@ -157,7 +157,7 @@ export default function UcCombobox({ ucs, selectedUc, disabled, error, onSelect,
           UC selecionada: {String(selectedUc.id).padStart(3, "0")} - {selectedUc.identificador}
         </p>
       ) : null}
-      {error ? <p className="text-sm font-medium text-[#C23D3D]">{error}</p> : null}
+      {error ? <p className="text-sm font-medium text-[var(--tone-danger-text)]">{error}</p> : null}
     </div>
   );
 }

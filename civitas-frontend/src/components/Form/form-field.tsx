@@ -74,7 +74,7 @@ function FormField({ field, value, error, onChange, mode, isReadOnlyMode, isSubm
           onChange={(e) => onChange(field, e.target.value)}
           aria-invalid={Boolean(commonProps.error)}
           aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-          className="w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]"
+          className="w-full rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[var(--border-disabled)] disabled:bg-[var(--surface-disabled)] disabled:text-[var(--foreground-disabled)]"
         >
           <option value="" disabled>
             {field.placeholder ?? commonProps.label}
@@ -114,7 +114,7 @@ function FormField({ field, value, error, onChange, mode, isReadOnlyMode, isSubm
           onChange={(e) => onChange(field, e.target.value)}
           aria-invalid={Boolean(commonProps.error)}
           aria-describedby={commonProps.error ? commonProps.errorId : undefined}
-          className="min-h-[120px] w-full resize-none rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[#E3E7EA] disabled:bg-[#F4F6F8] disabled:text-[#9AA5AD]"
+          className="min-h-[120px] w-full resize-none rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3.5 py-2.5 text-sm text-[var(--foreground)] transition-all duration-[var(--motion-duration-fast)] focus:border-[var(--primary-1)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:border-[var(--border-disabled)] disabled:bg-[var(--surface-disabled)] disabled:text-[var(--foreground-disabled)]"
         />
         {commonProps.error && (
           <p id={commonProps.errorId} className="mt-1.5 text-sm font-medium text-red-600">
