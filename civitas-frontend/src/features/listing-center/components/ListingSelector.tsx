@@ -37,7 +37,7 @@ export function ListingSelector({ configs, activeListingId, onSelect, compact = 
                 <h3 className="mt-2 text-base font-semibold text-[var(--foreground)]">{config.label}</h3>
               </div>
               {isActive ? (
-                <span className="rounded-sm bg-[var(--primary-1)] px-2 py-1 text-xs font-semibold text-white">
+                <span className="rounded-sm bg-[var(--primary-1)] px-2 py-1 text-xs font-semibold text-[var(--foreground-on-brand)]">
                   Ativa
                 </span>
               ) : null}

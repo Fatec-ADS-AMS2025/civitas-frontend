@@ -1,4 +1,4 @@
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api").replace(/\/+$/, "");
+import { API_BASE_URL as API_URL } from "@/global/apiUrl";
 
 export type PasswordRecoveryInput = { email: string };
 export type PasswordResetInput = { token: string; password: string };

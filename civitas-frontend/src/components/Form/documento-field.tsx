@@ -267,7 +267,7 @@ export default function DocumentoField({
                 type="button"
                 disabled={disabled || isConverting}
                 onClick={handleClear}
-                className="civitas-action civitas-action--ghost min-h-10 rounded-sm px-3 text-xs font-semibold text-[#B42318]"
+                className="civitas-action civitas-action--ghost min-h-10 rounded-sm px-3 text-xs font-semibold text-[var(--tone-danger-text)]"
               >
                 <span className="material-symbols-outlined !text-[18px]" aria-hidden="true">
                   close

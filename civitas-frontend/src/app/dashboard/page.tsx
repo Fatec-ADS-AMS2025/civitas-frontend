@@ -214,7 +214,7 @@ export default function Dashboard() {
                 key={link.href}
                 type="button"
                 onClick={() => router.push(link.href)}
-                className="rounded-sm border border-[var(--border-default)] bg-white px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] focus:outline-none focus:ring-4 focus:ring-black/5"
+                className="rounded-sm border border-[var(--border-default)] bg-[var(--surface-elevated)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:bg-[var(--surface-subtle)] focus:outline-none focus:ring-4 focus:ring-[var(--focus-ring)]"
               >
                 {link.label}
               </button>
@@ -253,7 +253,7 @@ export default function Dashboard() {
         <article className="civitas-surface p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <span className="inline-flex rounded-sm bg-[#F4F8F9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7A8B94]">
+              <span className="inline-flex rounded-sm bg-[var(--tone-slate-bg)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tone-slate-text)]">
                 Registros
               </span>
               <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">Despesas recentes</h2>
@@ -304,7 +304,7 @@ export default function Dashboard() {
         </article>
 
         <article className="civitas-surface p-5">
-          <span className="inline-flex rounded-sm bg-[#FFF0DD] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9B5B00]">
+          <span className="inline-flex rounded-sm bg-[var(--tone-amber-bg)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--tone-amber-text)]">
             Prioridades
           </span>
           <h2 className="mt-3 text-[20px] font-semibold text-[var(--foreground)]">Vencimentos proximos</h2>
@@ -318,7 +318,10 @@ export default function Dashboard() {
               />
             ) : (
               dueSoonExpenses.map((item) => (
-                <div key={`due-${item.id}`} className="rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5">
+                <div
+                  key={`due-${item.id}`}
+                  className="rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-4 py-3.5"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-[var(--foreground)]">{item.descricao}</p>
@@ -326,7 +329,7 @@ export default function Dashboard() {
                         {item.categoria}
                       </p>
                     </div>
-                    <span className="rounded-sm bg-[#FFF1DB] px-3 py-1 text-xs font-semibold text-[#9B5B00]">
+                    <span className="rounded-sm bg-[var(--tone-amber-bg)] px-3 py-1 text-xs font-semibold text-[var(--tone-amber-text)]">
                       {getDueSoonLabel(item.daysUntilDue)}
                     </span>
                   </div>
@@ -351,7 +354,7 @@ export default function Dashboard() {
 
 function RecentExpenseCard({ item, showMoneyValues }: { item: DespesaDashboardRow; showMoneyValues: boolean }) {
   return (
-    <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-sm border border-[#E7EFF1] bg-[#FCFEFE] px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
+    <div className="grid w-full grid-cols-[1fr_auto] gap-3 rounded-sm border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-4 py-3.5 sm:grid-cols-[1fr_auto_auto]">
       <div>
         <p className="text-[15px] font-semibold text-[var(--foreground)]">
           {showMoneyValues ? formatCurrency(item.valor) : "* * * * * *"}
@@ -368,7 +371,7 @@ function RecentExpenseCard({ item, showMoneyValues }: { item: DespesaDashboardRo
       </div>
 
       <div className="hidden self-center sm:flex sm:flex-col sm:items-end sm:gap-2">
-        <span className="rounded-sm bg-[#FFF1DB] px-4 py-2 text-xs font-semibold text-[#9B5B00]">
+        <span className="rounded-sm bg-[var(--tone-amber-bg)] px-4 py-2 text-xs font-semibold text-[var(--tone-amber-text)]">
           Documento {item.numeroDocumento || "-"}
         </span>
       </div>

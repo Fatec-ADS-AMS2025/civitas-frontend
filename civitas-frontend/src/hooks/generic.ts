@@ -1,8 +1,7 @@
+import { API_BASE_URL as BASE_URL } from "@/global/apiUrl";
 import { filterActiveRecords } from "@/global/softDelete";
 import { showToast } from "@/hooks/useToast";
 import { authStorage } from "@/lib/auth-storage";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5210/api";
 
 export interface ResponseEnvelope<T> {
   code?: string | number;

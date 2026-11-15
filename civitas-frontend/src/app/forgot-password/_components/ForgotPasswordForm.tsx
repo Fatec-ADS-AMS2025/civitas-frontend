@@ -108,7 +108,7 @@ export default function ForgotPasswordForm() {
               <Button type="submit" variant="login" disabled={isLoading} className="mt-6 max-w-none">
                 {isLoading && (
                   <span
-                    className="h-4 w-4 animate-spin rounded-full border-2 border-[rgba(255,255,255,0.45)] border-t-white"
+                    className="h-4 w-4 animate-spin rounded-full border-2 border-[color-mix(in_srgb,var(--foreground-on-brand)_45%,transparent)] border-t-[var(--foreground-on-brand)]"
                     aria-hidden="true"
                   />
                 )}
